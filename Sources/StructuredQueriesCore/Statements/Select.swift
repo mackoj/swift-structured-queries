@@ -415,15 +415,6 @@ extension JoinClause: QueryExpression {
   var bindings: [QueryBinding] { condition.bindings }
 }
 
-private struct WhereClause {
-  var predicate: any QueryExpression<Bool>
-}
-extension WhereClause: QueryExpression {
-  typealias Value = Void
-  var sql: String { "WHERE \(predicate.sql)" }
-  var bindings: [QueryBinding] { predicate.bindings }
-}
-
 private struct GroupClause {
   var terms: [any QueryExpression]
   init(terms: [any QueryExpression]) {
