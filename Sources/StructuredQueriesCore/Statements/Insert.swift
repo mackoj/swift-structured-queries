@@ -1,6 +1,22 @@
+// TODO: Should 'insert' really be a builder?
+//       Pros:
+//         - Can chain them together to build up a query:
+//           ```
+//           SyncUp
+//             .insert { ($0.title, $0.isActive ) }
+//             .values { ("Engineering", true) }
+//             .values { ("Product", false) }
+//
+//       Cons:
+//         - Can generate invalid queries:
+//           ```
+//           SyncUp
+//             .insert()                            // DEFAULT VALUES
+//             .onConflict { $0.title += " Copy" }  // Upsert not supported for DEFAULT VALUES
+
 extension Table {
   public static func insert<each C: ColumnExpression>(
-    or strategy: InsertionStrategy? = nil,
+    or conflictResolution: ConflictResolution? = nil,
     _ columns: (Columns) -> (repeat each C)
   ) -> Insert<Self, (repeat each C), Void> {
     let input = columns(Self.columns)
@@ -8,19 +24,19 @@ extension Table {
     for column in repeat each input {
       columns.append(column)
     }
-    return Insert(input: input, strategy: strategy, columns: columns)
+    return Insert(input: input, conflictResolution: conflictResolution, columns: columns)
   }
 
   public static func insert(
-    or strategy: InsertionStrategy? = nil
+    or conflictResolution: ConflictResolution? = nil
   ) -> Insert<Self, Void, Void> {
-    Insert(input: (), strategy: strategy)
+    Insert(input: (), conflictResolution: conflictResolution)
   }
 }
 
 public struct Insert<Base: Table, Input: Sendable, Output> {
   fileprivate var input: Input
-  fileprivate var strategy: InsertionStrategy?
+  fileprivate var conflictResolution: ConflictResolution?
   fileprivate var columns: [any ColumnExpression] = []
   fileprivate var form: InsertionForm = .defaultValues
   fileprivate var record: Record<Base>?
@@ -45,7 +61,7 @@ public struct Insert<Base: Table, Input: Sendable, Output> {
     )
     return Self(
       input: input,
-      strategy: strategy,
+      conflictResolution: conflictResolution,
       columns: columns,
       form: .values(rows),
       record: record
@@ -75,7 +91,7 @@ public struct Insert<Base: Table, Input: Sendable, Output> {
   where repeat (each O).Value: QueryDecodable {
     Insert<Base, Input, (repeat (each O).Value)>(
       input: input,
-      strategy: strategy,
+      conflictResolution: conflictResolution,
       columns: columns,
       form: form,
       record: record,
@@ -88,8 +104,8 @@ extension Insert: Statement {
   public typealias Value = [Output]
   public var sql: String {
     var sql = "INSERT"
-    if let strategy {
-      sql.append(" OR \(strategy.rawValue)")
+    if let conflictResolution {
+      sql.append(" OR \(conflictResolution.sql)")
     }
     sql.append(" INTO \(Base.name.quoted())")
     if !columns.isEmpty {
@@ -114,24 +130,6 @@ extension Insert: Statement {
       bindings.append(contentsOf: returning.bindings)
     }
     return bindings
-  }
-}
-
-public enum InsertionStrategy: Sendable {
-  case abort
-  case fail
-  case ignore
-  case replace
-  case rollback
-
-  fileprivate var rawValue: String {
-    switch self {
-    case .abort: return "ABORT"
-    case .fail: return "FAIL"
-    case .ignore: return "IGNORE"
-    case .replace: return "REPLACE"
-    case .rollback: return "ROLLBACK"
-    }
   }
 }
 

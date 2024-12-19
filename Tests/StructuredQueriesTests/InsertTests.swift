@@ -30,7 +30,7 @@ struct InsertTests {
     )
   }
 
-  @Test func strategies() {
+  @Test func conflictResolution() {
     #expect(
       SyncUp
         .insert(or: .abort) {
@@ -115,6 +115,22 @@ struct InsertTests {
           INSERT INTO "attendees" \
           ("name", "syncUpID") \
           SELECT ("syncUps"."title" || ?), "syncUps"."id" FROM "syncUps"
+          """
+    )
+  }
+
+  @Test func onConflict() {
+    #expect(
+      SyncUp
+        .insert { ($0.isActive, $0.title) }
+        .values { (true, "Engineering") }
+        .onConflict { $0.title += " Copy" }
+        .sql == """
+          INSERT INTO "syncUps" \
+          ("isActive", "title") \
+          VALUES \
+          (?, ?) \
+          ON CONFLICT DO UPDATE SET "title" = ("syncUps"."title" || ?)
           """
     )
   }

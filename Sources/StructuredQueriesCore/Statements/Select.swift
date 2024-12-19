@@ -6,6 +6,7 @@ extension Table {
 
 public struct Select<Input: Sendable, Output> {
   fileprivate var input: Input
+  fileprivate var isDistinct = false
   fileprivate var select: [any QueryExpression] = []
   fileprivate var from: any Table.Type
   fileprivate var joins: [JoinClause] = []
@@ -15,7 +16,11 @@ public struct Select<Input: Sendable, Output> {
   fileprivate var order: OrderClause?
   fileprivate var limit: LimitClause?
 
+  // TODO: Should 'distinct()' be a separate method?
+  //       'SyncUp.all().distinct()' vs. 'SyncUp.all().select(distinct: true, \.self)'
+
   public func select<each O: QueryExpression>(
+    distinct isDistinct: Bool = false,
     _ selection: (Input) -> (repeat each O)
   ) -> Select<Input, (repeat (each O).Value)>
   where repeat (each O).Value: QueryDecodable {
@@ -25,6 +30,7 @@ public struct Select<Input: Sendable, Output> {
     }
     return Select<Input, (repeat (each O).Value)>(
       input: input,
+      isDistinct: isDistinct,
       select: select,
       from: from,
       joins: joins,
@@ -156,11 +162,14 @@ public struct Select<Input: Sendable, Output> {
 extension Select: Statement {
   public typealias Value = [Output]
   public var sql: String {
-    var sql = "SELECT "
+    var sql = "SELECT"
+    if isDistinct {
+      sql.append(" DISTINCT")
+    }
     let columns = select.isEmpty
       ? ([from] + joins.map(\.right)).map { $0.columns.sql }
       : select.map(\.sql)
-    sql.append(columns.joined(separator: ", "))
+    sql.append(" \(columns.joined(separator: ", "))")
     sql.append(" FROM \(from.name.quoted())")
     for join in joins {
       sql.append(" \(join.sql)")
@@ -263,7 +272,7 @@ private func _leftJoin<each I1, each I2, each O1, each O2>(
   on predicate: ((repeat each I1, repeat each I2)) -> some QueryExpression<Bool>
 ) -> Select<(repeat each I1, repeat each I2), (repeat each O1, repeat (each O2)?)> {
   let join = JoinClause(
-    operator: nil,
+    operator: .left,
     right: rhs.from,
     condition: predicate((repeat each lhs.input, repeat each rhs.input))
   )
@@ -311,7 +320,7 @@ private func _rightJoin<each I1, each I2, each O1, each O2>(
   on predicate: ((repeat each I1, repeat each I2)) -> some QueryExpression<Bool>
 ) -> Select<(repeat each I1, repeat each I2), (repeat (each O1)?, repeat each O2)> {
   let join = JoinClause(
-    operator: nil,
+    operator: .right,
     right: rhs.from,
     condition: predicate((repeat each lhs.input, repeat each rhs.input))
   )
@@ -359,7 +368,7 @@ private func _fullJoin<each I1, each I2, each O1, each O2>(
   on predicate: ((repeat each I1, repeat each I2)) -> some QueryExpression<Bool>
 ) -> Select<(repeat each I1, repeat each I2), (repeat (each O1)?, repeat (each O2)?)> {
   let join = JoinClause(
-    operator: nil,
+    operator: .full,
     right: rhs.from,
     condition: predicate((repeat each lhs.input, repeat each rhs.input))
   )

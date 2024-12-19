@@ -1,15 +1,17 @@
 extension Table {
   public static func update(
+    or conflictResolution: ConflictResolution? = nil,
     set updates: (inout Record<Self>) -> Void
   ) -> Update<Self, Void> {
     var record = Record<Self>()
     updates(&record)
-    return Update(record: record)
+    return Update(conflictResolution: conflictResolution, record: record)
   }
 }
 
 public struct Update<Base: Table, Output> {
-  let record: Record<Base>
+  var conflictResolution: ConflictResolution?
+  var record: Record<Base>
   var `where`: WhereClause?
   var returning: ReturningClause?
 
@@ -31,6 +33,7 @@ public struct Update<Base: Table, Output> {
   ) -> Update<Base, (repeat (each O).Value)>
   where repeat (each O).Value: QueryDecodable {
     Update<Base, (repeat (each O).Value)>(
+      conflictResolution: conflictResolution,
       record: record,
       where: `where`,
       returning: ReturningClause(repeat each selection(Base.columns))
@@ -43,12 +46,13 @@ extension Update: Statement {
 
   public var sql: String {
     guard !record.updates.isEmpty else {
-      // TODO: reportIssue()
-      return "SELECT NULL"
+      return ""
     }
-    var sql = """
-      UPDATE \(Base.name.quoted()) \(record.sql)
-      """
+    var sql = "UPDATE"
+    if let conflictResolution {
+      sql.append(" OR \(conflictResolution.sql)")
+    }
+    sql.append(" \(Base.name.quoted()) \(record.sql)")
     if let `where` {
       sql.append(" \(`where`.sql)")
     }
@@ -59,6 +63,9 @@ extension Update: Statement {
   }
 
   public var bindings: [QueryBinding] {
+    guard !record.updates.isEmpty else {
+      return []
+    }
     var bindings = record.bindings
     if let `where` {
       bindings.append(contentsOf: `where`.bindings)

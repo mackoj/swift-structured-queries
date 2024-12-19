@@ -22,6 +22,44 @@ struct UpdateTests {
     )
   }
 
+  @Test func conflictResolution() {
+    #expect(
+      SyncUp
+        .update(or: .abort) { $0.isActive = true }
+        .sql == """
+          UPDATE OR ABORT "syncUps" SET "isActive" = ?
+          """
+    )
+    #expect(
+      SyncUp
+        .update(or: .fail) { $0.isActive = true }
+        .sql == """
+          UPDATE OR FAIL "syncUps" SET "isActive" = ?
+          """
+    )
+    #expect(
+      SyncUp
+        .update(or: .ignore) { $0.isActive = true }
+        .sql == """
+          UPDATE OR IGNORE "syncUps" SET "isActive" = ?
+          """
+    )
+    #expect(
+      SyncUp
+        .update(or: .replace) { $0.isActive = true }
+        .sql == """
+          UPDATE OR REPLACE "syncUps" SET "isActive" = ?
+          """
+    )
+    #expect(
+      SyncUp
+        .update(or: .rollback) { $0.isActive = true }
+        .sql == """
+          UPDATE OR ROLLBACK "syncUps" SET "isActive" = ?
+          """
+    )
+  }
+
   @Test func `where`() {
     // TODO: Support chaining from SELECT or WHERE builders?
     //       - 'SyncUp.all().where(\.isActive).update { $0.isActive.toggle() }'
