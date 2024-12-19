@@ -1,5 +1,6 @@
 extension Table {
   public static func insert<each C: ColumnExpression>(
+    or strategy: InsertionStrategy? = nil,
     _ columns: (Columns) -> (repeat each C)
   ) -> Insert<Self, (repeat each C), Void> {
     let input = columns(Self.columns)
@@ -7,16 +8,19 @@ extension Table {
     for column in repeat each input {
       columns.append(column)
     }
-    return Insert(input: input, columns: columns)
+    return Insert(input: input, strategy: strategy, columns: columns)
   }
 
-  public static func insert() -> Insert<Self, Void, Void> {
-    Insert(input: ())
+  public static func insert(
+    or strategy: InsertionStrategy? = nil
+  ) -> Insert<Self, Void, Void> {
+    Insert(input: (), strategy: strategy)
   }
 }
 
 public struct Insert<Base: Table, Input: Sendable, Output> {
   fileprivate var input: Input
+  fileprivate var strategy: InsertionStrategy?
   fileprivate var columns: [any ColumnExpression] = []
   fileprivate var form: InsertionForm = .defaultValues
   fileprivate var record: Record<Base>?
@@ -41,6 +45,7 @@ public struct Insert<Base: Table, Input: Sendable, Output> {
     )
     return Self(
       input: input,
+      strategy: strategy,
       columns: columns,
       form: .values(rows),
       record: record
@@ -70,6 +75,7 @@ public struct Insert<Base: Table, Input: Sendable, Output> {
   where repeat (each O).Value: QueryDecodable {
     Insert<Base, Input, (repeat (each O).Value)>(
       input: input,
+      strategy: strategy,
       columns: columns,
       form: form,
       record: record,
@@ -81,7 +87,11 @@ public struct Insert<Base: Table, Input: Sendable, Output> {
 extension Insert: Statement {
   public typealias Value = [Output]
   public var sql: String {
-    var sql = "INSERT INTO \(Base.name.quoted())"
+    var sql = "INSERT"
+    if let strategy {
+      sql.append(" OR \(strategy.rawValue)")
+    }
+    sql.append(" INTO \(Base.name.quoted())")
     if !columns.isEmpty {
       sql.append(" (\(columns.map { $0.name.quoted() }.joined(separator: ", ")))")
     }
@@ -104,6 +114,24 @@ extension Insert: Statement {
       bindings.append(contentsOf: returning.bindings)
     }
     return bindings
+  }
+}
+
+public enum InsertionStrategy: Sendable {
+  case abort
+  case fail
+  case ignore
+  case replace
+  case rollback
+
+  fileprivate var rawValue: String {
+    switch self {
+    case .abort: return "ABORT"
+    case .fail: return "FAIL"
+    case .ignore: return "IGNORE"
+    case .replace: return "REPLACE"
+    case .rollback: return "ROLLBACK"
+    }
   }
 }
 

@@ -30,6 +30,60 @@ struct InsertTests {
     )
   }
 
+  @Test func strategies() {
+    #expect(
+      SyncUp
+        .insert(or: .abort) {
+          ($0.isActive, $0.title)
+        }
+        .sql == """
+          INSERT OR ABORT INTO "syncUps" \
+          ("isActive", "title") \
+          DEFAULT VALUES
+          """
+    )
+    #expect(
+      SyncUp
+        .insert(or: .abort)
+        .sql == """
+          INSERT OR ABORT INTO "syncUps" \
+          DEFAULT VALUES
+          """
+    )
+    #expect(
+      SyncUp
+        .insert(or: .fail)
+        .sql == """
+          INSERT OR FAIL INTO "syncUps" \
+          DEFAULT VALUES
+          """
+    )
+    #expect(
+      SyncUp
+        .insert(or: .ignore)
+        .sql == """
+          INSERT OR IGNORE INTO "syncUps" \
+          DEFAULT VALUES
+          """
+    )
+    #expect(
+      SyncUp
+        .insert(or: .replace)
+        .sql == """
+          INSERT OR REPLACE INTO "syncUps" \
+          DEFAULT VALUES
+          """
+    )
+    #expect(
+      SyncUp
+        .insert(or: .rollback)
+        .sql == """
+          INSERT OR ROLLBACK INTO "syncUps" \
+          DEFAULT VALUES
+          """
+    )
+  }
+
   @Test func values() {
     #expect(
       SyncUp

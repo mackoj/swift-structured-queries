@@ -56,7 +56,7 @@ extension TableMacro: ExtensionMacro {
         let typeName = type.trimmedDescription
         columnsProperties.append(
           """
-          public let \(name) = Column<Value, \(typeName)>("\(name)")
+          public let \(name) = \(moduleName).Column<Value, \(typeName)>("\(name)")
           """
         )
         allColumns.append(name)

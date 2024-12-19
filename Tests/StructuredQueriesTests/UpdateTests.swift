@@ -23,6 +23,10 @@ struct UpdateTests {
   }
 
   @Test func `where`() {
+    // TODO: Support chaining from SELECT or WHERE builders?
+    //       - 'SyncUp.all().where(\.isActive).update { $0.isActive.toggle() }'
+    //         (Runtime warn when 'Select" contains irrelevant clauses?)
+    //       - 'SyncUp.where(\.isActive).update { $0.isActive.toggle() }'`
     #expect(
       SyncUp
         .update {

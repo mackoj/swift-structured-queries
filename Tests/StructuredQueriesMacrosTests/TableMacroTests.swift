@@ -26,8 +26,8 @@ func basics() {
       extension User: StructuredQueries.Table {
         public struct Columns: StructuredQueries.TableExpression {
           public typealias Value = User
-          public let id = Column<Value, Int>("id")
-          public let name = Column<Value, String>("name")
+          public let id = StructuredQueries.Column<Value, Int>("id")
+          public let name = StructuredQueries.Column<Value, String>("name")
           public var allColumns: [any StructuredQueries.ColumnExpression<Value>] {
             [id, name]
           }
