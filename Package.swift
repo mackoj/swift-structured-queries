@@ -20,10 +20,6 @@ let package = Package(
       name: "StructuredQueriesCore",
       targets: ["StructuredQueriesCore"]
     ),
-    .library(
-      name: "StructuredQueriesSQLite",
-      targets: ["StructuredQueriesSQLite"]
-    ),
   ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.1.0"),
@@ -57,6 +53,13 @@ let package = Package(
       name: "StructuredQueriesTests",
       dependencies: [
         "StructuredQueries",
+      ]
+    ),
+    .testTarget(
+      name: "StructuredQueriesIntegrationTests",
+      dependencies: [
+        "StructuredQueries",
+        "StructuredQueriesSQLite",
       ]
     ),
     .testTarget(

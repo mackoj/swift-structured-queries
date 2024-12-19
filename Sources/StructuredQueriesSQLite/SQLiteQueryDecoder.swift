@@ -9,6 +9,10 @@ final class SQLiteQueryDecoder: QueryDecoder {
     self.statement = statement
   }
 
+  func next() {
+    currentIndex = 0
+  }
+
   func decodeNil() throws -> Bool {
     guard currentIndex < sqlite3_column_count(statement) else { throw SQLiteError() }
     let isNil = sqlite3_column_type(statement, currentIndex) == SQLITE_NULL
@@ -41,4 +45,4 @@ final class SQLiteQueryDecoder: QueryDecoder {
   }
 }
 
-private struct SQLiteError: Error {}
+struct SQLiteError: Error {}
