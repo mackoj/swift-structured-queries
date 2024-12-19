@@ -153,7 +153,7 @@ public struct Select<Input, Output> {
   }
 }
 
-extension Select: QueryExpression {
+extension Select: Statement {
   public typealias Value = [Output]
   public var sql: String {
     var sql = "SELECT "
