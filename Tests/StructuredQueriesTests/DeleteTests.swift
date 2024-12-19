@@ -27,6 +27,10 @@ struct DeleteTests {
           WHERE "syncUps"."isActive"
           """
     )
+    #expect(
+      SyncUp.delete().where { $0.id == 1 && $0.isActive }.sql
+        == SyncUp.delete().where { $0.id == 1 }.where(\.isActive).sql
+    )
   }
 
   @Test func returning() {
