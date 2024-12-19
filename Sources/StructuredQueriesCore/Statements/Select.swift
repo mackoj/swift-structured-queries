@@ -4,7 +4,7 @@ extension Table {
   }
 }
 
-public struct Select<Input, Output> {
+public struct Select<Input: Sendable, Output> {
   fileprivate var input: Input
   fileprivate var select: [any QueryExpression] = []
   fileprivate var from: any Table.Type

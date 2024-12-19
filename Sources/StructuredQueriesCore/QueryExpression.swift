@@ -1,4 +1,4 @@
-public protocol QueryExpression<Value> {
+public protocol QueryExpression<Value>: Sendable, Hashable {
   associatedtype Value
 
   var sql: String { get }

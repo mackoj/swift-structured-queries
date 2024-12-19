@@ -28,7 +28,7 @@ extension QueryExpression where Value: Numeric {
   }
 }
 
-private struct AggregateFunction<Argument, Value> {
+private struct AggregateFunction<Argument: QueryExpression, Value>: QueryExpression {
   var name: String
   var isDistinct: Bool
   var argument: Argument
@@ -42,9 +42,7 @@ private struct AggregateFunction<Argument, Value> {
     self.isDistinct = isDistinct
     self.argument = argument
   }
-}
 
-extension AggregateFunction: QueryExpression where Argument: QueryExpression {
   var sql: String {
     var sql = "\(name)("
     if isDistinct {

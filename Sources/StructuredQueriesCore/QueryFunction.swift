@@ -1,13 +1,11 @@
-struct QueryFunction<each Argument, Value> {
+struct QueryFunction<each Argument: QueryExpression, Value>: QueryExpression {
   let name: String
   let arguments: (repeat each Argument)
   init(_ name: String, _ arguments: repeat each Argument) {
     self.name = name
     self.arguments = (repeat each arguments)
   }
-}
 
-extension QueryFunction: QueryExpression where repeat (each Argument): QueryExpression {
   var sql: String {
     var argumentsSQL: [String] = []
     for argument in repeat each arguments {
