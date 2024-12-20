@@ -5,6 +5,7 @@ import Testing
 private struct SyncUp: Equatable {
   var id: Int
   var isActive: Bool
+  var seconds: Double
   var title: String
 }
 
@@ -143,7 +144,7 @@ struct InsertTests {
         .queryString == """
           INSERT INTO "syncUps" \
           DEFAULT VALUES \
-          RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."title"
+          RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."seconds", "syncUps"."title"
           """
     )
   }
@@ -175,4 +176,33 @@ struct InsertTests {
           """
     )
   }
+
+  @Test func inference() {
+    #expect(
+      SyncUp
+        .insert(\.seconds)
+        .values { 60 }
+        .queryString == """
+          INSERT INTO "syncUps" \
+          ("seconds") \
+          VALUES \
+          (?)
+          """
+    )
+    #expect(
+      SyncUp
+        .insert { ($0.title, $0.seconds) }
+        .values { (.untitled, 60) }
+        .queryString == """
+          INSERT INTO "syncUps" \
+          ("title", "seconds") \
+          VALUES \
+          (?, ?)
+          """
+    )
+  }
+}
+
+extension String {
+  fileprivate static let untitled: Self = "Untitled"
 }

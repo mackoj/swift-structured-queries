@@ -52,7 +52,7 @@ public struct Insert<Base: Table, Input: Sendable, Output> {
   fileprivate var returning: ReturningClause?
 
   public func values<each C: ColumnExpression>(
-    @InsertValuesBuilder _ values: () -> [(repeat (each C).Value)] = { [] }
+    @InsertValuesBuilder<(repeat (each C).Value)> _ values: () -> [(repeat (each C).Value)] = { [] }
   ) -> Self
   where Input == (repeat each C), repeat (each C).Value: QueryExpression {
     var rows: [[any QueryExpression]] = []
@@ -79,7 +79,7 @@ public struct Insert<Base: Table, Input: Sendable, Output> {
 
   // NB: Overload required to work around bug with parameter packs and result builders.
   public func values(
-    @InsertValuesBuilder _ values: () -> [Input.Value] = { [] }
+    @InsertValuesBuilder<Input.Value> _ values: () -> [Input.Value] = { [] }
   ) -> Self
   where Input: ColumnExpression, Input.Value: QueryExpression {
     var rows: [[any QueryExpression]] = []
@@ -208,28 +208,39 @@ private enum InsertionForm: QueryExpression {
 }
 
 @resultBuilder
-public enum InsertValuesBuilder {
-  public static func buildArray<Value>(_ components: [[Value]]) -> [Value] {
+public enum InsertValuesBuilder<Value> {
+  public static func buildArray(_ components: [[Value]]) -> [Value] {
     components.flatMap(\.self)
   }
-
-  public static func buildBlock<Value>(_ components: Value...) -> [Value] {
-    components
+  public static func buildBlock(_ component: Value) -> [Value] {
+    [component]
   }
 
-  public static func buildEither<Value>(first component: [Value]) -> [Value] {
+  public static func buildEither(first component: [Value]) -> [Value] {
     component
   }
 
-  public static func buildEither<Value>(second component: [Value]) -> [Value] {
+  public static func buildEither(second component: [Value]) -> [Value] {
     component
   }
 
-  public static func buildLimitedAvailability<Value>(_ component: [Value]) -> [Value] {
+  public static func buildExpression(_ expression: Value) -> Value {
+    expression
+  }
+
+  public static func buildLimitedAvailability(_ component: [Value]) -> [Value] {
     component
   }
 
-  public static func buildOptional<Value>(_ component: [Value]?) -> [Value] {
+  public static func buildOptional(_ component: [Value]?) -> [Value] {
     component ?? []
+  }
+
+  public static func buildPartialBlock(first: Value) -> [Value] {
+    [first]
+  }
+
+  public static func buildPartialBlock(accumulated: [Value], next: Value) -> [Value] {
+    accumulated + [next]
   }
 }
