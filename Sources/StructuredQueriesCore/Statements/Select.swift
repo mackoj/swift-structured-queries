@@ -151,12 +151,12 @@ public struct Select<Input: Sendable, Output> {
     return copy
   }
 
-  public func limit(_ maxLength: Int, offset: Int? = nil) -> Self {
-    limit(
-      { _ in maxLength },
-      offset: offset.map { offset in { _ in offset } }
-    )
-  }
+//  public func limit(_ maxLength: Int, offset: Int? = nil) -> Self {
+//    limit(
+//      { _ in maxLength },
+//      offset: offset.map { offset in { _ in offset } }
+//    )
+//  }
 }
 
 extension Select: Statement {

@@ -4,14 +4,14 @@ public struct Record<Base: Table>: Sendable {
 
   public subscript<Value>(
     dynamicMember keyPath: KeyPath<Base.Columns, Column<Base, Value>>
-  ) -> some QueryExpression<Value> {
+  ) -> some QueryExpression<Value.Value> {
     Base.columns[keyPath: keyPath]
   }
 
   @_disfavoredOverload
   public subscript<Value>(
     dynamicMember keyPath: KeyPath<Base.Columns, Column<Base, Value>>
-  ) -> any QueryExpression<Value> {
+  ) -> any QueryExpression<Value.Value> {
     get { Base.columns[keyPath: keyPath] }
     set { updates.append((Base.columns[keyPath: keyPath], newValue)) }
   }
@@ -19,7 +19,7 @@ public struct Record<Base: Table>: Sendable {
   @_disfavoredOverload
   public subscript<Value>(
     dynamicMember keyPath: KeyPath<Base.Columns, Column<Base, Value>>
-  ) -> AnyQueryExpression<Value> {
+  ) -> AnyQueryExpression<Value.Value> {
     get { AnyQueryExpression(Base.columns[keyPath: keyPath]) }
     set { updates.append((Base.columns[keyPath: keyPath], newValue)) }
   }

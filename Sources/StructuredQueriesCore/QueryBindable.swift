@@ -1,46 +1,63 @@
-public protocol QueryBindable: QueryDecodable, QueryExpression where Value == Self {
-  var binding: QueryBinding { get }
+public protocol QueryBindable<Value>: QueryDecodable, QueryExpression where Value: QueryBindable {
+  associatedtype Value = Self
+  var queryValue: Value { get }
+  var queryBinding: QueryBinding { get }
 }
 
 extension QueryBindable {
   public var sql: String { "?" }
-  public var bindings: [QueryBinding] { [binding] }
+  public var bindings: [QueryBinding] { [queryBinding] }
+}
+
+extension QueryBindable {
+  public var queryBinding: QueryBinding { queryValue.queryBinding }
+}
+
+extension QueryBindable where Value == Self {
+  public var queryValue: Self { self }
+}
+
+extension QueryBindable where Self: RawRepresentable, RawValue: QueryBindable {
+  public var queryValue: RawValue.Value {
+    rawValue.queryValue
+  }
 }
 
 extension Bool: QueryBindable {
-  public var binding: QueryBinding { (self ? 1 : 0).binding }
+  public var queryBinding: QueryBinding { .int(self ? 1 : 0) }
 }
 
 extension Double: QueryBindable {
-  public var binding: QueryBinding { .double(self) }
+  public var queryBinding: QueryBinding { .double(self) }
 }
 
 extension Float: QueryBindable {
-  public var binding: QueryBinding { .double(Double(self)) }
+  public var queryValue: Double { Double(self) }
 }
 
 extension Int: QueryBindable {
-  public var binding: QueryBinding { Int64(self).binding }
+  public var queryBinding: QueryBinding { .int(Int64(self)) }
 }
 
 extension Int8: QueryBindable {
-  public var binding: QueryBinding { Int64(self).binding }
+  public var queryValue: Int { Int(self) }
 }
 
 extension Int16: QueryBindable {
-  public var binding: QueryBinding { Int64(self).binding }
+  public var queryValue: Int { Int(self) }
 }
 
 extension Int32: QueryBindable {
-  public var binding: QueryBinding { Int64(self).binding }
+  public var queryValue: Int { Int(self) }
 }
 
 extension Int64: QueryBindable {
-  public var binding: QueryBinding { .int(self) }
+  public var queryValue: Int { Int(self) }
+  public var queryBinding: QueryBinding { .int(self) }
 }
 
 extension String: QueryBindable {
-  public var binding: QueryBinding { .text(self) }
+  public var queryBinding: QueryBinding { .text(self) }
 }
 
 extension DefaultStringInterpolation {
@@ -71,10 +88,10 @@ extension DefaultStringInterpolation {
 }
 
 extension Optional: QueryBindable where Wrapped: QueryBindable {
-  public var binding: QueryBinding {
+  public var queryBinding: QueryBinding {
     switch self {
     case let .some(wrapped):
-      return wrapped.binding
+      return wrapped.queryBinding
     case .none:
       return .null
     }

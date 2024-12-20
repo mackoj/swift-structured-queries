@@ -17,3 +17,7 @@ extension QueryDecoder {
     try T(decoder: self)
   }
 }
+
+public enum QueryDecodingError: Error {
+  case failure  // TODO: Design
+}

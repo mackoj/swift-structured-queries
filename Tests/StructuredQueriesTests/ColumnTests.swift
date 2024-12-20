@@ -3,7 +3,8 @@ import Testing
 
 @Table
 private struct User {
-  var id: Int
+  struct ID: RawRepresentable, QueryBindable { var rawValue: Int }
+  var id: ID
   var name: String
 }
 
@@ -16,11 +17,12 @@ struct ColumnTests {
     )
   }
 
-  @Test func literals() {
-    let id = Column<User, Int64>("id")
+  @Test func rawRepresentable() {
     #expect(
-      (id == Int64(42)).sql == "(id = ?)"
+      (User.columns.id == 42).sql == #"("users"."id" = ?)"#
     )
-    // (id == 24).sql == "(id = ?)"
+    #expect(
+      (User.columns.id == User.ID(rawValue: 42)).sql == #"("users"."id" = ?)"#
+    )
   }
 }

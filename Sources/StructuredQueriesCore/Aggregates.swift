@@ -1,4 +1,4 @@
-extension QueryExpression where Value: QueryColumnDecodable {
+extension QueryExpression where Value: QueryBindable {
   public func count(distinct isDistinct: Bool = false) -> some QueryExpression<Int> {
     AggregateFunction("count", isDistinct: isDistinct, self)
   }

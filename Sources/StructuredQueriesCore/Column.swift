@@ -1,4 +1,4 @@
-public struct Column<Root: Table, Value: QueryDecodable> {
+public struct Column<Root: Table, Value: QueryBindable> {
   public let name: String
 
   public init(_ name: String) {
@@ -7,6 +7,7 @@ public struct Column<Root: Table, Value: QueryDecodable> {
 }
 
 extension Column: ColumnExpression {
+  public typealias Value = Value.Value
   public var sql: String { "\(Root.name.quoted()).\(name.quoted())" }
   public var bindings: [QueryBinding] { [] }
 }
