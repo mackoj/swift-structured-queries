@@ -7,7 +7,7 @@ public struct Column<Root: Table, Value: QueryBindable> {
 }
 
 extension Column: ColumnExpression {
-  public typealias Value = Value.Value
+//  public typealias Value = Value
   public var queryString: String { "\(Root.name.quoted()).\(name.quoted())" }
   public var queryBindings: [QueryBinding] { [] }
 }

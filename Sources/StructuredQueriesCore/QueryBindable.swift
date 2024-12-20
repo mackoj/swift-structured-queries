@@ -18,9 +18,7 @@ extension QueryBindable where Value == Self {
 }
 
 extension QueryBindable where Self: RawRepresentable, RawValue: QueryBindable {
-  public var queryValue: RawValue.Value {
-    rawValue.queryValue
-  }
+  public var queryBinding: QueryBinding { rawValue.queryBinding }
 }
 
 extension Bool: QueryBindable {
@@ -32,7 +30,7 @@ extension Double: QueryBindable {
 }
 
 extension Float: QueryBindable {
-  public var queryValue: Double { Double(self) }
+  public var queryBinding: QueryBinding { .double(Double(self)) }
 }
 
 extension Int: QueryBindable {
@@ -40,20 +38,31 @@ extension Int: QueryBindable {
 }
 
 extension Int8: QueryBindable {
-  public var queryValue: Int { Int(self) }
+  public var queryBinding: QueryBinding { .int(Int64(self)) }
 }
 
 extension Int16: QueryBindable {
-  public var queryValue: Int { Int(self) }
+  public var queryBinding: QueryBinding { .int(Int64(self)) }
 }
 
 extension Int32: QueryBindable {
-  public var queryValue: Int { Int(self) }
+  public var queryBinding: QueryBinding { .int(Int64(self)) }
 }
 
 extension Int64: QueryBindable {
-  public var queryValue: Int { Int(self) }
   public var queryBinding: QueryBinding { .int(self) }
+}
+
+extension UInt8: QueryBindable {
+  public var queryBinding: QueryBinding { .int(Int64(self)) }
+}
+
+extension UInt16: QueryBindable {
+  public var queryBinding: QueryBinding { .int(Int64(self)) }
+}
+
+extension UInt32: QueryBindable {
+  public var queryBinding: QueryBinding { .int(Int64(self)) }
 }
 
 extension String: QueryBindable {

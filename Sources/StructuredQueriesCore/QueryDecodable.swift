@@ -6,7 +6,7 @@ extension QueryDecodable where Self: RawRepresentable, RawValue: QueryDecodable 
   public init(decoder: any StructuredQueriesCore.QueryDecoder) throws {
     guard let rawRepresentable = try Self(rawValue: decoder.decode(RawValue.self))
     else {
-      throw QueryDecodingError.failure
+      throw QueryDecodingError.dataCorrupted
     }
     self = rawRepresentable
   }

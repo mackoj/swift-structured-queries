@@ -1,4 +1,4 @@
-extension QueryExpression where Value: Equatable {
+extension QueryExpression /*where Value: Equatable*/ {
   public static func == (
     lhs: Self, rhs: some QueryExpression<Value>
   ) -> some QueryExpression<Bool> {

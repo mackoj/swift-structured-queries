@@ -19,5 +19,5 @@ extension QueryDecoder {
 }
 
 public enum QueryDecodingError: Error {
-  case failure  // TODO: Design
+  case dataCorrupted  // TODO: Design
 }
