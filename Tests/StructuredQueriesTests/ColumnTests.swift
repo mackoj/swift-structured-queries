@@ -15,4 +15,12 @@ struct ColumnTests {
         """
     )
   }
+
+  @Test func literals() {
+    let id = Column<User, Int64>("id")
+    #expect(
+      (id == Int64(42)).sql == "(id = ?)"
+    )
+    // (id == 24).sql == "(id = ?)"
+  }
 }
