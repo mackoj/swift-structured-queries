@@ -10,3 +10,4 @@ public macro Table() =
   #externalMacro(
     module: "StructuredQueriesMacros", type: "TableMacro"
   )
+

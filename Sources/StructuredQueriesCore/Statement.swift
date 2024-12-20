@@ -1,4 +1,5 @@
 // TODO: Rename to avoid conflicts (with GRDB, other generic types)?
+// TODO: `map` operation for bundling up data?
 
 public protocol Statement<Value>: QueryExpression, Hashable {}
 
