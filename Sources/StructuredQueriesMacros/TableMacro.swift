@@ -45,7 +45,8 @@ extension TableMacro: ExtensionMacro {
     for member in declaration.memberBlock.members {
       guard
         let property = member.decl.as(VariableDeclSyntax.self),
-        !property.isStatic
+        !property.isStatic,
+        !property.isComputed
       else { continue }
       for binding in property.bindings {
         guard

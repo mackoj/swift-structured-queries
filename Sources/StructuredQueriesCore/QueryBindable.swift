@@ -5,12 +5,9 @@ public protocol QueryBindable<Value>: QueryDecodable, QueryExpression where Valu
 }
 
 extension QueryBindable {
-  public var queryString: String { "?" }
-  public var queryBindings: [QueryBinding] { [queryBinding] }
-}
-
-extension QueryBindable {
   public var queryBinding: QueryBinding { queryValue.queryBinding }
+  public var queryBindings: [QueryBinding] { [queryBinding] }
+  public var queryString: String { "?" }
 }
 
 extension QueryBindable where Value == Self {
