@@ -1,3 +1,5 @@
+// TODO: Rename to avoid conflicts (with GRDB, other generic types)?
+
 public protocol Statement<Value>: QueryExpression, Hashable {}
 
 extension Statement {
