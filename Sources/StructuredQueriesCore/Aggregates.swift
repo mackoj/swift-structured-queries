@@ -43,13 +43,13 @@ private struct AggregateFunction<Argument: QueryExpression, Value>: QueryExpress
     self.argument = argument
   }
 
-  var sql: String {
+  var queryString: String {
     var sql = "\(name)("
     if isDistinct {
       sql.append("DISTINCT ")
     }
-    sql.append("\(argument.sql))")
+    sql.append("\(argument.queryString))")
     return sql
   }
-  var bindings: [QueryBinding] { argument.bindings }
+  var queryBindings: [QueryBinding] { argument.queryBindings }
 }

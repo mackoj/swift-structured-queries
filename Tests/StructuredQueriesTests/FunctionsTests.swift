@@ -13,34 +13,34 @@ private struct User {
 struct FunctionsTests {
   @Test func arithmetic() {
     #expect(
-      User.columns.id.signum().sql == """
+      User.columns.id.signum().queryString == """
         sign("users"."id")
         """
     )
     #expect(
-      User.columns.salary.sign.sql == """
+      User.columns.salary.sign.queryString == """
         sign("users"."salary")
         """
     )
   }
   @Test func strings() {
     #expect(
-      User.columns.name.lowercased().sql == """
+      User.columns.name.lowercased().queryString == """
         lower("users"."name")
         """
     )
     #expect(
-      User.columns.name.uppercased().sql == """
+      User.columns.name.uppercased().queryString == """
         upper("users"."name")
         """
     )
     #expect(
-      User.columns.name.count.sql == """
+      User.columns.name.count.queryString == """
         length("users"."name")
         """
     )
     #expect(
-      User.columns.name.length.sql == """
+      User.columns.name.length.queryString == """
         length("users"."name")
         """
     )

@@ -13,11 +13,12 @@ public struct Delete<Base: Table, Output> {
       WhereClause(predicate: `where` && predicate(Base.columns))
     }
     var copy = self
-    copy.`where` = if let `where` {
-      open(`where`.predicate)
-    } else {
-      WhereClause(predicate: predicate(Base.columns))
-    }
+    copy.`where` =
+      if let `where` {
+        open(`where`.predicate)
+      } else {
+        WhereClause(predicate: predicate(Base.columns))
+      }
     return copy
   }
 
@@ -35,24 +36,24 @@ public struct Delete<Base: Table, Output> {
 extension Delete: Statement {
   public typealias Value = [Output]
 
-  public var sql: String {
+  public var queryString: String {
     var sql = "DELETE FROM \(Base.name.quoted())"
     if let `where` {
-      sql.append(" \(`where`.sql)")
+      sql.append(" \(`where`.queryString)")
     }
     if let returning {
-      sql.append(" \(returning.sql)")
+      sql.append(" \(returning.queryString)")
     }
     return sql
   }
 
-  public var bindings: [QueryBinding] {
+  public var queryBindings: [QueryBinding] {
     var bindings: [QueryBinding] = []
     if let `where` {
-      bindings.append(contentsOf: `where`.bindings)
+      bindings.append(contentsOf: `where`.queryBindings)
     }
     if let returning {
-      bindings.append(contentsOf: returning.bindings)
+      bindings.append(contentsOf: returning.queryBindings)
     }
     return bindings
   }

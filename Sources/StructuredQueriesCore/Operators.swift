@@ -91,8 +91,8 @@ extension QueryExpression {
 
 public struct _Null<Wrapped>: QueryExpression {
   public typealias Value = Wrapped?
-  public var sql: String { "NULL" }
-  public var bindings: [QueryBinding] { [] }
+  public var queryString: String { "NULL" }
+  public var queryBindings: [QueryBinding] { [] }
 }
 
 extension _Null: ExpressibleByNilLiteral {
@@ -108,11 +108,13 @@ extension QueryExpression where Value: Comparable {
     BinaryOperator(lhs: lhs, operator: ">", rhs: rhs)
   }
 
-  public static func <= (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Bool> {
+  public static func <= (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Bool>
+  {
     BinaryOperator(lhs: lhs, operator: "<=", rhs: rhs)
   }
 
-  public static func >= (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Bool> {
+  public static func >= (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Bool>
+  {
     BinaryOperator(lhs: lhs, operator: ">=", rhs: rhs)
   }
 }
@@ -142,19 +144,23 @@ extension AnyQueryExpression<Bool> {
 }
 
 extension QueryExpression where Value: Numeric {
-  public static func + (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Value> {
+  public static func + (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Value>
+  {
     BinaryOperator(lhs: lhs, operator: "+", rhs: rhs)
   }
 
-  public static func - (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Value> {
+  public static func - (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Value>
+  {
     BinaryOperator(lhs: lhs, operator: "-", rhs: rhs)
   }
 
-  public static func * (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Value> {
+  public static func * (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Value>
+  {
     BinaryOperator(lhs: lhs, operator: "*", rhs: rhs)
   }
 
-  public static func / (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Value> {
+  public static func / (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Value>
+  {
     BinaryOperator(lhs: lhs, operator: "/", rhs: rhs)
   }
 
@@ -190,23 +196,28 @@ extension AnyQueryExpression where Value: Numeric {
 }
 
 extension QueryExpression where Value == Int {
-  public static func % (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Value> {
+  public static func % (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Value>
+  {
     BinaryOperator(lhs: lhs, operator: "%", rhs: rhs)
   }
 
-  public static func & (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Value> {
+  public static func & (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Value>
+  {
     BinaryOperator(lhs: lhs, operator: "&", rhs: rhs)
   }
 
-  public static func | (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Value> {
+  public static func | (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Value>
+  {
     BinaryOperator(lhs: lhs, operator: "|", rhs: rhs)
   }
 
-  public static func << (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Value> {
+  public static func << (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Value>
+  {
     BinaryOperator(lhs: lhs, operator: "<<", rhs: rhs)
   }
 
-  public static func >> (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Value> {
+  public static func >> (lhs: Self, rhs: some QueryExpression<Value>) -> some QueryExpression<Value>
+  {
     BinaryOperator(lhs: lhs, operator: ">>", rhs: rhs)
   }
 
@@ -245,14 +256,14 @@ public enum Collation {
 
 extension Collation: QueryExpression {
   public typealias Value = Void
-  public var sql: String {
+  public var queryString: String {
     switch self {
     case .binary: return "BINARY"
     case .nocase: return "NOCASE"
     case .rtrim: return "RTRIM"
     }
   }
-  public var bindings: [QueryBinding] { [] }
+  public var queryBindings: [QueryBinding] { [] }
 }
 
 extension QueryExpression where Value == String {
@@ -302,7 +313,9 @@ extension AnyQueryExpression<String> {
 }
 
 extension QueryExpression {
-  public func contains<Element>(_ element: some QueryExpression<Element>) -> some QueryExpression<Bool>
+  public func contains<Element>(_ element: some QueryExpression<Element>) -> some QueryExpression<
+    Bool
+  >
   where Value == [Element] {
     BinaryOperator(lhs: element, operator: "IN", rhs: self)
   }
@@ -318,8 +331,8 @@ private struct UnaryOperator<Value, Base: QueryExpression>: QueryExpression {
   let base: Base
   var separator = " "
 
-  var sql: String { "\(`operator`)\(separator)(\(base.sql))" }
-  var bindings: [QueryBinding] { base.bindings }
+  var queryString: String { "\(`operator`)\(separator)(\(base.queryString))" }
+  var queryBindings: [QueryBinding] { base.queryBindings }
 }
 
 private struct BinaryOperator<Value, LHS: QueryExpression, RHS: QueryExpression>: QueryExpression {
@@ -327,8 +340,8 @@ private struct BinaryOperator<Value, LHS: QueryExpression, RHS: QueryExpression>
   let `operator`: String
   let rhs: RHS
 
-  var sql: String { "(\(lhs.sql) \(`operator`) \(rhs.sql))" }
-  var bindings: [QueryBinding] { lhs.bindings + rhs.bindings }
+  var queryString: String { "(\(lhs.queryString) \(`operator`) \(rhs.queryString))" }
+  var queryBindings: [QueryBinding] { lhs.queryBindings + rhs.queryBindings }
 }
 
 private struct Parenthesize<Base: QueryExpression>: QueryExpression {
@@ -337,6 +350,6 @@ private struct Parenthesize<Base: QueryExpression>: QueryExpression {
 
   init(_ base: Base) { self.base = base }
 
-  var sql: String { "(\(base.sql))" }
-  var bindings: [QueryBinding] { base.bindings }
+  var queryString: String { "(\(base.queryString))" }
+  var queryBindings: [QueryBinding] { base.queryBindings }
 }

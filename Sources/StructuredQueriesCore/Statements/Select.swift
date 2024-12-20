@@ -108,11 +108,12 @@ public struct Select<Input: Sendable, Output> {
       WhereClause(predicate: `where` && predicate(input))
     }
     var copy = self
-    copy.`where` = if let `where` {
-      open(`where`.predicate)
-    } else {
-      WhereClause(predicate: predicate(input))
-    }
+    copy.`where` =
+      if let `where` {
+        open(`where`.predicate)
+      } else {
+        WhereClause(predicate: predicate(input))
+      }
     return copy
   }
 
@@ -127,11 +128,12 @@ public struct Select<Input: Sendable, Output> {
       HavingClause(predicate: having && predicate(input))
     }
     var copy = self
-    copy.having = if let having {
-      open(having.predicate)
-    } else {
-      HavingClause(predicate: predicate(input))
-    }
+    copy.having =
+      if let having {
+        open(having.predicate)
+      } else {
+        HavingClause(predicate: predicate(input))
+      }
     return copy
   }
 
@@ -151,68 +153,69 @@ public struct Select<Input: Sendable, Output> {
     return copy
   }
 
-//  public func limit(_ maxLength: Int, offset: Int? = nil) -> Self {
-//    limit(
-//      { _ in maxLength },
-//      offset: offset.map { offset in { _ in offset } }
-//    )
-//  }
+  //  public func limit(_ maxLength: Int, offset: Int? = nil) -> Self {
+  //    limit(
+  //      { _ in maxLength },
+  //      offset: offset.map { offset in { _ in offset } }
+  //    )
+  //  }
 }
 
 extension Select: Statement {
   public typealias Value = [Output]
-  public var sql: String {
+  public var queryString: String {
     var sql = "SELECT"
     if isDistinct {
       sql.append(" DISTINCT")
     }
-    let columns = select.isEmpty
-      ? ([from] + joins.map(\.right)).map { $0.columns.sql }
-      : select.map(\.sql)
+    let columns =
+      select.isEmpty
+      ? ([from] + joins.map(\.right)).map { $0.columns.queryString }
+      : select.map(\.queryString)
     sql.append(" \(columns.joined(separator: ", "))")
     sql.append(" FROM \(from.name.quoted())")
     for join in joins {
-      sql.append(" \(join.sql)")
+      sql.append(" \(join.queryString)")
     }
     if let `where` {
-      sql.append(" \(`where`.sql)")
+      sql.append(" \(`where`.queryString)")
     }
     if let group {
-      sql.append(" \(group.sql)")
+      sql.append(" \(group.queryString)")
     }
     if let having {
-      sql.append(" \(having.sql)")
+      sql.append(" \(having.queryString)")
     }
     if let order {
-      sql.append(" \(order.sql)")
+      sql.append(" \(order.queryString)")
     }
     if let limit {
-      sql.append(" \(limit.sql)")
+      sql.append(" \(limit.queryString)")
     }
     return sql
   }
-  public var bindings: [QueryBinding] {
+  public var queryBindings: [QueryBinding] {
     var bindings: [QueryBinding] = []
     for column in select {
-      bindings.append(contentsOf: column.bindings)
+      bindings.append(contentsOf: column.queryBindings)
     }
     for join in joins {
-      bindings.append(contentsOf: join.bindings)
+      bindings.append(contentsOf: join.queryBindings)
     }
     if let `where` {
-      bindings.append(contentsOf: `where`.bindings)
+      bindings.append(contentsOf: `where`.queryBindings)
     }
     if let group {
-      bindings.append(contentsOf: group.bindings)
+      bindings.append(contentsOf: group.queryBindings)
     }
     if let having {
-      bindings.append(contentsOf: having.bindings)
+      bindings.append(contentsOf: having.queryBindings)
     }
     if let order {
-      bindings.append(contentsOf: order.bindings)
+      bindings.append(contentsOf: order.queryBindings)
     }
     if let limit {
-      bindings.append(contentsOf: limit.bindings)
+      bindings.append(contentsOf: limit.queryBindings)
     }
     return bindings
   }
@@ -233,26 +236,30 @@ private func _join<each I1, each I2, each O1, each O2>(
   ) -> some QueryExpression<Bool> {
     lhs && rhs
   }
-  let `where` = if let lhsWhere = lhs.where, let rhsWhere = rhs.where {
-    WhereClause(predicate: open(lhsWhere.predicate, rhsWhere.predicate))
-  } else {
-    lhs.where ?? rhs.where
-  }
-  let group = if let lhsGroup = lhs.group, let rhsGroup = rhs.group {
-    GroupClause(terms: lhsGroup.terms + rhsGroup.terms)
-  } else {
-    lhs.group ?? rhs.group
-  }
-  let having = if let lhsHaving = lhs.having, let rhsHaving = rhs.having {
-    HavingClause(predicate: open(lhsHaving.predicate, rhsHaving.predicate))
-  } else {
-    lhs.having ?? rhs.having
-  }
-  let order = if let lhsOrder = lhs.order, let rhsOrder = rhs.order {
-    OrderClause(terms: lhsOrder.terms + rhsOrder.terms)
-  } else {
-    lhs.order ?? rhs.order
-  }
+  let `where` =
+    if let lhsWhere = lhs.where, let rhsWhere = rhs.where {
+      WhereClause(predicate: open(lhsWhere.predicate, rhsWhere.predicate))
+    } else {
+      lhs.where ?? rhs.where
+    }
+  let group =
+    if let lhsGroup = lhs.group, let rhsGroup = rhs.group {
+      GroupClause(terms: lhsGroup.terms + rhsGroup.terms)
+    } else {
+      lhs.group ?? rhs.group
+    }
+  let having =
+    if let lhsHaving = lhs.having, let rhsHaving = rhs.having {
+      HavingClause(predicate: open(lhsHaving.predicate, rhsHaving.predicate))
+    } else {
+      lhs.having ?? rhs.having
+    }
+  let order =
+    if let lhsOrder = lhs.order, let rhsOrder = rhs.order {
+      OrderClause(terms: lhsOrder.terms + rhsOrder.terms)
+    } else {
+      lhs.order ?? rhs.order
+    }
   return Select(
     input: (repeat each lhs.input, repeat each rhs.input),
     select: lhs.select + rhs.select,
@@ -281,26 +288,30 @@ private func _leftJoin<each I1, each I2, each O1, each O2>(
   ) -> some QueryExpression<Bool> {
     lhs && rhs
   }
-  let `where` = if let lhsWhere = lhs.where, let rhsWhere = rhs.where {
-    WhereClause(predicate: open(lhsWhere.predicate, rhsWhere.predicate))
-  } else {
-    lhs.where ?? rhs.where
-  }
-  let group = if let lhsGroup = lhs.group, let rhsGroup = rhs.group {
-    GroupClause(terms: lhsGroup.terms + rhsGroup.terms)
-  } else {
-    lhs.group ?? rhs.group
-  }
-  let having = if let lhsHaving = lhs.having, let rhsHaving = rhs.having {
-    HavingClause(predicate: open(lhsHaving.predicate, rhsHaving.predicate))
-  } else {
-    lhs.having ?? rhs.having
-  }
-  let order = if let lhsOrder = lhs.order, let rhsOrder = rhs.order {
-    OrderClause(terms: lhsOrder.terms + rhsOrder.terms)
-  } else {
-    lhs.order ?? rhs.order
-  }
+  let `where` =
+    if let lhsWhere = lhs.where, let rhsWhere = rhs.where {
+      WhereClause(predicate: open(lhsWhere.predicate, rhsWhere.predicate))
+    } else {
+      lhs.where ?? rhs.where
+    }
+  let group =
+    if let lhsGroup = lhs.group, let rhsGroup = rhs.group {
+      GroupClause(terms: lhsGroup.terms + rhsGroup.terms)
+    } else {
+      lhs.group ?? rhs.group
+    }
+  let having =
+    if let lhsHaving = lhs.having, let rhsHaving = rhs.having {
+      HavingClause(predicate: open(lhsHaving.predicate, rhsHaving.predicate))
+    } else {
+      lhs.having ?? rhs.having
+    }
+  let order =
+    if let lhsOrder = lhs.order, let rhsOrder = rhs.order {
+      OrderClause(terms: lhsOrder.terms + rhsOrder.terms)
+    } else {
+      lhs.order ?? rhs.order
+    }
   return Select(
     input: (repeat each lhs.input, repeat each rhs.input),
     select: lhs.select + rhs.select,
@@ -329,26 +340,30 @@ private func _rightJoin<each I1, each I2, each O1, each O2>(
   ) -> some QueryExpression<Bool> {
     lhs && rhs
   }
-  let `where` = if let lhsWhere = lhs.where, let rhsWhere = rhs.where {
-    WhereClause(predicate: open(lhsWhere.predicate, rhsWhere.predicate))
-  } else {
-    lhs.where ?? rhs.where
-  }
-  let group = if let lhsGroup = lhs.group, let rhsGroup = rhs.group {
-    GroupClause(terms: lhsGroup.terms + rhsGroup.terms)
-  } else {
-    lhs.group ?? rhs.group
-  }
-  let having = if let lhsHaving = lhs.having, let rhsHaving = rhs.having {
-    HavingClause(predicate: open(lhsHaving.predicate, rhsHaving.predicate))
-  } else {
-    lhs.having ?? rhs.having
-  }
-  let order = if let lhsOrder = lhs.order, let rhsOrder = rhs.order {
-    OrderClause(terms: lhsOrder.terms + rhsOrder.terms)
-  } else {
-    lhs.order ?? rhs.order
-  }
+  let `where` =
+    if let lhsWhere = lhs.where, let rhsWhere = rhs.where {
+      WhereClause(predicate: open(lhsWhere.predicate, rhsWhere.predicate))
+    } else {
+      lhs.where ?? rhs.where
+    }
+  let group =
+    if let lhsGroup = lhs.group, let rhsGroup = rhs.group {
+      GroupClause(terms: lhsGroup.terms + rhsGroup.terms)
+    } else {
+      lhs.group ?? rhs.group
+    }
+  let having =
+    if let lhsHaving = lhs.having, let rhsHaving = rhs.having {
+      HavingClause(predicate: open(lhsHaving.predicate, rhsHaving.predicate))
+    } else {
+      lhs.having ?? rhs.having
+    }
+  let order =
+    if let lhsOrder = lhs.order, let rhsOrder = rhs.order {
+      OrderClause(terms: lhsOrder.terms + rhsOrder.terms)
+    } else {
+      lhs.order ?? rhs.order
+    }
   return Select(
     input: (repeat each lhs.input, repeat each rhs.input),
     select: lhs.select + rhs.select,
@@ -377,26 +392,30 @@ private func _fullJoin<each I1, each I2, each O1, each O2>(
   ) -> some QueryExpression<Bool> {
     lhs && rhs
   }
-  let `where` = if let lhsWhere = lhs.where, let rhsWhere = rhs.where {
-    WhereClause(predicate: open(lhsWhere.predicate, rhsWhere.predicate))
-  } else {
-    lhs.where ?? rhs.where
-  }
-  let group = if let lhsGroup = lhs.group, let rhsGroup = rhs.group {
-    GroupClause(terms: lhsGroup.terms + rhsGroup.terms)
-  } else {
-    lhs.group ?? rhs.group
-  }
-  let having = if let lhsHaving = lhs.having, let rhsHaving = rhs.having {
-    HavingClause(predicate: open(lhsHaving.predicate, rhsHaving.predicate))
-  } else {
-    lhs.having ?? rhs.having
-  }
-  let order = if let lhsOrder = lhs.order, let rhsOrder = rhs.order {
-    OrderClause(terms: lhsOrder.terms + rhsOrder.terms)
-  } else {
-    lhs.order ?? rhs.order
-  }
+  let `where` =
+    if let lhsWhere = lhs.where, let rhsWhere = rhs.where {
+      WhereClause(predicate: open(lhsWhere.predicate, rhsWhere.predicate))
+    } else {
+      lhs.where ?? rhs.where
+    }
+  let group =
+    if let lhsGroup = lhs.group, let rhsGroup = rhs.group {
+      GroupClause(terms: lhsGroup.terms + rhsGroup.terms)
+    } else {
+      lhs.group ?? rhs.group
+    }
+  let having =
+    if let lhsHaving = lhs.having, let rhsHaving = rhs.having {
+      HavingClause(predicate: open(lhsHaving.predicate, rhsHaving.predicate))
+    } else {
+      lhs.having ?? rhs.having
+    }
+  let order =
+    if let lhsOrder = lhs.order, let rhsOrder = rhs.order {
+      OrderClause(terms: lhsOrder.terms + rhsOrder.terms)
+    } else {
+      lhs.order ?? rhs.order
+    }
   return Select(
     input: (repeat each lhs.input, repeat each rhs.input),
     select: lhs.select + rhs.select,
@@ -411,17 +430,22 @@ private func _fullJoin<each I1, each I2, each O1, each O2>(
 }
 
 private struct JoinClause {
-  enum Operator: String { case full = "FULL", inner = "INNER", left = "LEFT", right = "RIGHT" }
+  enum Operator: String {
+    case full = "FULL"
+    case inner = "INNER"
+    case left = "LEFT"
+    case right = "RIGHT"
+  }
   let `operator`: Operator?
   let right: any Table.Type
   let condition: any QueryExpression<Bool>
 }
 extension JoinClause: QueryExpression {
   typealias Value = Void
-  var sql: String {
-    "\(`operator`.map { "\($0.rawValue) " } ?? "")JOIN \(right.name.quoted()) ON \(condition.sql)"
+  var queryString: String {
+    "\(`operator`.map { "\($0.rawValue) " } ?? "")JOIN \(right.name.quoted()) ON \(condition.queryString)"
   }
-  var bindings: [QueryBinding] { condition.bindings }
+  var queryBindings: [QueryBinding] { condition.queryBindings }
 }
 
 private struct GroupClause {
@@ -440,8 +464,8 @@ private struct GroupClause {
 }
 extension GroupClause: QueryExpression {
   typealias Value = Void
-  var sql: String { "GROUP BY \(terms.map(\.sql).joined(separator: ", "))" }
-  var bindings: [QueryBinding] { terms.flatMap(\.bindings) }
+  var queryString: String { "GROUP BY \(terms.map(\.queryString).joined(separator: ", "))" }
+  var queryBindings: [QueryBinding] { terms.flatMap(\.queryBindings) }
 }
 
 private struct HavingClause {
@@ -449,8 +473,8 @@ private struct HavingClause {
 }
 extension HavingClause: QueryExpression {
   typealias Value = Void
-  var sql: String { "HAVING \(predicate.sql)" }
-  var bindings: [QueryBinding] { predicate.bindings }
+  var queryString: String { "HAVING \(predicate.queryString)" }
+  var queryBindings: [QueryBinding] { predicate.queryBindings }
 }
 
 private struct OrderClause {
@@ -469,8 +493,8 @@ private struct OrderClause {
 }
 extension OrderClause: QueryExpression {
   typealias Value = Void
-  var sql: String { "ORDER BY \(terms.map(\.sql).joined(separator: ", "))" }
-  var bindings: [QueryBinding] { terms.flatMap(\.bindings) }
+  var queryString: String { "ORDER BY \(terms.map(\.queryString).joined(separator: ", "))" }
+  var queryBindings: [QueryBinding] { terms.flatMap(\.queryBindings) }
 }
 
 private struct LimitClause {
@@ -479,6 +503,8 @@ private struct LimitClause {
 }
 extension LimitClause: QueryExpression {
   typealias Value = Void
-  var sql: String { "LIMIT \(maxLength.sql)\(offset.map { " OFFSET \($0.sql)" } ?? "")" }
-  var bindings: [QueryBinding] { maxLength.bindings + (offset?.bindings ?? []) }
+  var queryString: String {
+    "LIMIT \(maxLength.queryString)\(offset.map { " OFFSET \($0.queryString)" } ?? "")"
+  }
+  var queryBindings: [QueryBinding] { maxLength.queryBindings + (offset?.queryBindings ?? []) }
 }

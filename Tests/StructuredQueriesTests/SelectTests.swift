@@ -18,7 +18,7 @@ private struct Attendee: Equatable {
 struct SelectTests {
   @Test func basics() {
     #expect(
-      SyncUp.all().sql == """
+      SyncUp.all().queryString == """
         SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."title" \
         FROM "syncUps"
         """
@@ -27,7 +27,7 @@ struct SelectTests {
 
   @Test func select() {
     #expect(
-      SyncUp.all().select(\.id).sql == """
+      SyncUp.all().select(\.id).queryString == """
         SELECT "syncUps"."id" \
         FROM "syncUps"
         """
@@ -36,7 +36,7 @@ struct SelectTests {
 
   @Test func distinct() {
     #expect(
-      SyncUp.all().select(distinct: true, \.self).sql == """
+      SyncUp.all().select(distinct: true, \.self).queryString == """
         SELECT DISTINCT "syncUps"."id", "syncUps"."isActive", "syncUps"."title" \
         FROM "syncUps"
         """
@@ -46,7 +46,7 @@ struct SelectTests {
   @Test func join() {
     #expect(
       SyncUp.all().join(Attendee.all()) { $0.id == $1.syncUpID }
-        .sql == """
+        .queryString == """
           SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."title", \
           "attendees"."id", "attendees"."name", "attendees"."syncUpID" \
           FROM "syncUps" \
@@ -55,7 +55,7 @@ struct SelectTests {
     )
     #expect(
       SyncUp.all().join(left: Attendee.all()) { $0.id == $1.syncUpID }
-        .sql == """
+        .queryString == """
           SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."title", \
           "attendees"."id", "attendees"."name", "attendees"."syncUpID" \
           FROM "syncUps" \
@@ -64,7 +64,7 @@ struct SelectTests {
     )
     #expect(
       SyncUp.all().join(right: Attendee.all()) { $0.id == $1.syncUpID }
-        .sql == """
+        .queryString == """
           SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."title", \
           "attendees"."id", "attendees"."name", "attendees"."syncUpID" \
           FROM "syncUps" \
@@ -73,7 +73,7 @@ struct SelectTests {
     )
     #expect(
       SyncUp.all().join(full: Attendee.all()) { $0.id == $1.syncUpID }
-        .sql == """
+        .queryString == """
           SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."title", \
           "attendees"."id", "attendees"."name", "attendees"."syncUpID" \
           FROM "syncUps" \
@@ -85,15 +85,15 @@ struct SelectTests {
   @Test func `where`() {
     #expect(
       SyncUp.all().where(\.isActive)
-        .sql == """
+        .queryString == """
           SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."title" \
           FROM "syncUps" \
           WHERE "syncUps"."isActive"
           """
     )
     #expect(
-      SyncUp.all().where { $0.id == 1 && $0.isActive }.sql
-        == SyncUp.all().where { $0.id == 1 }.where(\.isActive).sql
+      SyncUp.all().where { $0.id == 1 && $0.isActive }.queryString
+        == SyncUp.all().where { $0.id == 1 }.where(\.isActive).queryString
     )
   }
 }

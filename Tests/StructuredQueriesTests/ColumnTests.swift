@@ -11,7 +11,7 @@ private struct User {
 struct ColumnTests {
   @Test func expression() {
     #expect(
-      User.columns.id.sql == """
+      User.columns.id.queryString == """
         "users"."id"
         """
     )
@@ -19,10 +19,10 @@ struct ColumnTests {
 
   @Test func rawRepresentable() {
     #expect(
-      (User.columns.id == 42).sql == #"("users"."id" = ?)"#
+      (User.columns.id == 42).queryString == #"("users"."id" = ?)"#
     )
     #expect(
-      (User.columns.id == User.ID(rawValue: 42)).sql == #"("users"."id" = ?)"#
+      (User.columns.id == User.ID(rawValue: 42)).queryString == #"("users"."id" = ?)"#
     )
   }
 }

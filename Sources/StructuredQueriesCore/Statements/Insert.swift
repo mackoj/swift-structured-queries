@@ -102,32 +102,33 @@ public struct Insert<Base: Table, Input: Sendable, Output> {
 
 extension Insert: Statement {
   public typealias Value = [Output]
-  public var sql: String {
+  public var queryString: String {
     var sql = "INSERT"
     if let conflictResolution {
-      sql.append(" OR \(conflictResolution.sql)")
+      sql.append(" OR \(conflictResolution.queryString)")
     }
     sql.append(" INTO \(Base.name.quoted())")
     if !columns.isEmpty {
       sql.append(" (\(columns.map { $0.name.quoted() }.joined(separator: ", ")))")
     }
-    sql.append(" \(form.sql)")
+    sql.append(" \(form.queryString)")
     if let record {
-      sql.append(" ON CONFLICT DO \(record.updates.isEmpty ? "NOTHING" : "UPDATE \(record.sql)")")
+      sql.append(
+        " ON CONFLICT DO \(record.updates.isEmpty ? "NOTHING" : "UPDATE \(record.queryString)")")
     }
     if let returning {
-      sql.append(" \(returning.sql)")
+      sql.append(" \(returning.queryString)")
     }
     return sql
   }
-  public var bindings: [QueryBinding] {
-    var bindings = columns.flatMap(\.bindings)
-    bindings.append(contentsOf: form.bindings)
+  public var queryBindings: [QueryBinding] {
+    var bindings = columns.flatMap(\.queryBindings)
+    bindings.append(contentsOf: form.queryBindings)
     if let record {
-      bindings.append(contentsOf: record.bindings)
+      bindings.append(contentsOf: record.queryBindings)
     }
     if let returning {
-      bindings.append(contentsOf: returning.bindings)
+      bindings.append(contentsOf: returning.queryBindings)
     }
     return bindings
   }
@@ -139,26 +140,26 @@ private enum InsertionForm: QueryExpression {
   case select(any Statement)
 
   typealias Value = Void
-  var sql: String {
+  var queryString: String {
     switch self {
     case .defaultValues:
       return "DEFAULT VALUES"
     case let .values(rows):
       return """
-        VALUES \(rows.map { "(\($0.map(\.sql).joined(separator: ", ")))" }.joined(separator: ", "))
+        VALUES \(rows.map { "(\($0.map(\.queryString).joined(separator: ", ")))" }.joined(separator: ", "))
         """
     case let .select(statement):
-      return statement.sql
+      return statement.queryString
     }
   }
-  var bindings: [QueryBinding] {
+  var queryBindings: [QueryBinding] {
     switch self {
     case .defaultValues:
       return []
     case let .values(rows):
-      return rows.flatMap { $0.flatMap(\.bindings) }
+      return rows.flatMap { $0.flatMap(\.queryBindings) }
     case let .select(statement):
-      return statement.bindings
+      return statement.queryBindings
     }
   }
 }

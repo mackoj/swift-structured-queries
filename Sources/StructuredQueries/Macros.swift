@@ -11,7 +11,6 @@ public macro Table() =
     module: "StructuredQueriesMacros", type: "TableMacro"
   )
 
-
 @Table
 private struct SyncUp: Equatable {
   var id: Int

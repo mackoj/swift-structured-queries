@@ -51,7 +51,7 @@ extension TableMacro: ExtensionMacro {
         guard
           let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier,
           let type = binding.typeAnnotation?.type ?? binding.initializer?.value.literalType
-        else { continue}
+        else { continue }
         let name = identifier.trimmedDescription
         let typeName = type.trimmedDescription
         columnsProperties.append(
@@ -90,22 +90,22 @@ extension TableMacro: ExtensionMacro {
 
 private let moduleName: TokenSyntax = "StructuredQueries"
 
-private extension String {
-  func qualified() -> String {
+extension String {
+  fileprivate func qualified() -> String {
     "\(moduleName).\(self)"
   }
 
-  func tableName() -> String {
+  fileprivate func tableName() -> String {
     lowerCamelCased().pluralized()
   }
 
-  func lowerCamelCased() -> String {
+  fileprivate func lowerCamelCased() -> String {
     var prefix = prefix(while: \.isUppercase)
     if prefix.count > 1 { prefix = prefix.dropLast() }
     return prefix.lowercased() + dropFirst(prefix.count)
   }
 
-  func pluralized() -> String {
+  fileprivate func pluralized() -> String {
     let suffix = hasSuffix("s") ? "es" : "s"
     return self + suffix
   }

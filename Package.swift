@@ -46,13 +46,13 @@ let package = Package(
     .target(
       name: "StructuredQueriesSQLite",
       dependencies: [
-        "StructuredQueries",
+        "StructuredQueries"
       ]
     ),
     .testTarget(
       name: "StructuredQueriesTests",
       dependencies: [
-        "StructuredQueries",
+        "StructuredQueries"
       ]
     ),
     .testTarget(

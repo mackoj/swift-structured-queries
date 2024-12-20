@@ -11,12 +11,12 @@ private struct User {
 struct AggregatesTests {
   @Test func average() {
     #expect(
-      User.columns.id.average().sql == """
+      User.columns.id.average().queryString == """
         avg("users"."id")
         """
     )
     #expect(
-      User.columns.id.average(distinct: true).sql == """
+      User.columns.id.average(distinct: true).queryString == """
         avg(DISTINCT "users"."id")
         """
     )
@@ -24,12 +24,12 @@ struct AggregatesTests {
 
   @Test func count() {
     #expect(
-      User.columns.id.count().sql == """
+      User.columns.id.count().queryString == """
         count("users"."id")
         """
     )
     #expect(
-      User.columns.id.count(distinct: true).sql == """
+      User.columns.id.count(distinct: true).queryString == """
         count(DISTINCT "users"."id")
         """
     )
@@ -37,7 +37,7 @@ struct AggregatesTests {
 
   @Test func maximum() {
     #expect(
-      User.columns.id.maximum().sql == """
+      User.columns.id.maximum().queryString == """
         max("users"."id")
         """
     )
@@ -45,7 +45,7 @@ struct AggregatesTests {
 
   @Test func minimum() {
     #expect(
-      User.columns.id.minimum().sql == """
+      User.columns.id.minimum().queryString == """
         min("users"."id")
         """
     )
@@ -53,12 +53,12 @@ struct AggregatesTests {
 
   @Test func sum() {
     #expect(
-      User.columns.id.sum().sql == """
+      User.columns.id.sum().queryString == """
         sum("users"."id")
         """
     )
     #expect(
-      User.columns.id.sum(distinct: true).sql == """
+      User.columns.id.sum(distinct: true).queryString == """
         sum(DISTINCT "users"."id")
         """
     )
@@ -66,12 +66,12 @@ struct AggregatesTests {
 
   @Test func total() {
     #expect(
-      User.columns.id.total().sql == """
+      User.columns.id.total().queryString == """
         total("users"."id")
         """
     )
     #expect(
-      User.columns.id.total(distinct: true).sql == """
+      User.columns.id.total(distinct: true).queryString == """
         total(DISTINCT "users"."id")
         """
     )
@@ -80,7 +80,7 @@ struct AggregatesTests {
   @Test func invalid() {
     #warning("TODO: Can we get these to not compile?")
     #expect(
-      User.columns.id.count().count().sql == """
+      User.columns.id.count().count().queryString == """
         count(count("users"."id"))
         """
     )

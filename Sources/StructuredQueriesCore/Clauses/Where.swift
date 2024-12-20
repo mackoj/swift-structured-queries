@@ -3,6 +3,6 @@ struct WhereClause {
 }
 extension WhereClause: QueryExpression {
   typealias Value = Void
-  var sql: String { "WHERE \(predicate.sql)" }
-  var bindings: [QueryBinding] { predicate.bindings }
+  var queryString: String { "WHERE \(predicate.queryString)" }
+  var queryBindings: [QueryBinding] { predicate.queryBindings }
 }

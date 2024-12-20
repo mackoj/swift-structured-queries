@@ -10,22 +10,22 @@ private struct User {
 struct OrderingTests {
   @Test func basics() {
     #expect(
-      User.columns.id.ascending().sql == """
+      User.columns.id.ascending().queryString == """
         "users"."id" ASC
         """
     )
     #expect(
-      User.columns.id.descending().sql == """
+      User.columns.id.descending().queryString == """
         "users"."id" DESC
         """
     )
     #expect(
-      User.columns.id.ascending().descending().sql == """
+      User.columns.id.ascending().descending().queryString == """
         "users"."id" DESC
         """
     )
     #expect(
-      User.columns.id.descending().ascending().sql == """
+      User.columns.id.descending().ascending().queryString == """
         "users"."id" ASC
         """
     )

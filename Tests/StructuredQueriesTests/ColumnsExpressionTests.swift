@@ -10,7 +10,7 @@ private struct User {
 struct ColumnsExpressionTests {
   @Test func expression() {
     #expect(
-      User.columns.sql == """
+      User.columns.queryString == """
         "users"."id", "users"."name"
         """
     )

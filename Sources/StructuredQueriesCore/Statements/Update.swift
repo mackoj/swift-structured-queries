@@ -20,11 +20,12 @@ public struct Update<Base: Table, Output> {
       WhereClause(predicate: `where` && predicate(Base.columns))
     }
     var copy = self
-    copy.`where` = if let `where` {
-      open(`where`.predicate)
-    } else {
-      WhereClause(predicate: predicate(Base.columns))
-    }
+    copy.`where` =
+      if let `where` {
+        open(`where`.predicate)
+      } else {
+        WhereClause(predicate: predicate(Base.columns))
+      }
     return copy
   }
 
@@ -44,34 +45,34 @@ public struct Update<Base: Table, Output> {
 extension Update: Statement {
   public typealias Value = [Output]
 
-  public var sql: String {
+  public var queryString: String {
     guard !record.updates.isEmpty else {
       return ""
     }
     var sql = "UPDATE"
     if let conflictResolution {
-      sql.append(" OR \(conflictResolution.sql)")
+      sql.append(" OR \(conflictResolution.queryString)")
     }
-    sql.append(" \(Base.name.quoted()) \(record.sql)")
+    sql.append(" \(Base.name.quoted()) \(record.queryString)")
     if let `where` {
-      sql.append(" \(`where`.sql)")
+      sql.append(" \(`where`.queryString)")
     }
     if let returning {
-      sql.append(" \(returning.sql)")
+      sql.append(" \(returning.queryString)")
     }
     return sql
   }
 
-  public var bindings: [QueryBinding] {
+  public var queryBindings: [QueryBinding] {
     guard !record.updates.isEmpty else {
       return []
     }
-    var bindings = record.bindings
+    var bindings = record.queryBindings
     if let `where` {
-      bindings.append(contentsOf: `where`.bindings)
+      bindings.append(contentsOf: `where`.queryBindings)
     }
     if let returning {
-      bindings.append(contentsOf: returning.bindings)
+      bindings.append(contentsOf: returning.queryBindings)
     }
     return bindings
   }

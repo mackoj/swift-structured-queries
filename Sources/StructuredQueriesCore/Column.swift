@@ -8,6 +8,6 @@ public struct Column<Root: Table, Value: QueryBindable> {
 
 extension Column: ColumnExpression {
   public typealias Value = Value.Value
-  public var sql: String { "\(Root.name.quoted()).\(name.quoted())" }
-  public var bindings: [QueryBinding] { [] }
+  public var queryString: String { "\(Root.name.quoted()).\(name.quoted())" }
+  public var queryBindings: [QueryBinding] { [] }
 }

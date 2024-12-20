@@ -2,11 +2,11 @@ public protocol Statement<Value>: QueryExpression, Hashable {}
 
 extension Statement {
   public static func == (lhs: Self, rhs: Self) -> Bool {
-    lhs.sql == rhs.sql && lhs.bindings == rhs.bindings
+    lhs.queryString == rhs.queryString && lhs.queryBindings == rhs.queryBindings
   }
 
   public func hash(into hasher: inout Hasher) {
-    hasher.combine(sql)
-    hasher.combine(bindings)
+    hasher.combine(queryString)
+    hasher.combine(queryBindings)
   }
 }

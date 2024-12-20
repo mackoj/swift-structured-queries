@@ -5,6 +5,6 @@ public struct AnyQueryExpression<Value>: QueryExpression {
     self.base = base
   }
 
-  public var sql: String { base.sql }
-  public var bindings: [QueryBinding] { base.bindings }
+  public var queryString: String { base.queryString }
+  public var queryBindings: [QueryBinding] { base.queryBindings }
 }

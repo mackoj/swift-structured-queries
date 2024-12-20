@@ -11,7 +11,7 @@ private struct SyncUp: Equatable {
 struct DeleteTests {
   @Test func basics() {
     #expect(
-      SyncUp.delete().sql == """
+      SyncUp.delete().queryString == """
         DELETE FROM "syncUps"
         """
     )
@@ -22,14 +22,14 @@ struct DeleteTests {
       SyncUp
         .delete()
         .where(\.isActive)
-        .sql == """
+        .queryString == """
           DELETE FROM "syncUps" \
           WHERE "syncUps"."isActive"
           """
     )
     #expect(
-      SyncUp.delete().where { $0.id == 1 && $0.isActive }.sql
-        == SyncUp.delete().where { $0.id == 1 }.where(\.isActive).sql
+      SyncUp.delete().where { $0.id == 1 && $0.isActive }.queryString
+        == SyncUp.delete().where { $0.id == 1 }.where(\.isActive).queryString
     )
   }
 
@@ -38,7 +38,7 @@ struct DeleteTests {
       SyncUp
         .delete()
         .returning(\.self)
-        .sql == """
+        .queryString == """
           DELETE FROM "syncUps" \
           RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."title"
           """

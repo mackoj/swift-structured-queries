@@ -1,6 +1,6 @@
 import Foundation
-import StructuredQueries
 import SQLite3
+import StructuredQueries
 
 public final class Database {
   private var db: OpaquePointer?
@@ -36,25 +36,26 @@ public final class Database {
   ) throws -> [(repeat each Value)] {
     var statement: OpaquePointer?
     guard
-      sqlite3_prepare_v2(db, query.sql, -1, &statement, nil) == SQLITE_OK,
+      sqlite3_prepare_v2(db, query.queryString, -1, &statement, nil) == SQLITE_OK,
       let statement
     else {
       throw SQLiteError()
     }
     defer { sqlite3_finalize(statement) }
-    for (index, binding) in zip(Int32(1)..., query.bindings) {
-      let result = switch binding {
-      case let .blob(blob):
-        sqlite3_bind_blob(statement, index, blob, -1, SQLITE_TRANSIENT)
-      case let .double(double):
-        sqlite3_bind_double(statement, index, double)
-      case let .int(int):
-        sqlite3_bind_int64(statement, index, Int64(int))
-      case .null:
-        sqlite3_bind_null(statement, index)
-      case let .text(text):
-        sqlite3_bind_text(statement, index, text, -1, SQLITE_TRANSIENT)
-      }
+    for (index, binding) in zip(Int32(1)..., query.queryBindings) {
+      let result =
+        switch binding {
+        case let .blob(blob):
+          sqlite3_bind_blob(statement, index, blob, -1, SQLITE_TRANSIENT)
+        case let .double(double):
+          sqlite3_bind_double(statement, index, double)
+        case let .int(int):
+          sqlite3_bind_int64(statement, index, Int64(int))
+        case .null:
+          sqlite3_bind_null(statement, index)
+        case let .text(text):
+          sqlite3_bind_text(statement, index, text, -1, SQLITE_TRANSIENT)
+        }
       guard result == SQLITE_OK else { throw SQLiteError() }
     }
     var results: [(repeat each Value)] = []

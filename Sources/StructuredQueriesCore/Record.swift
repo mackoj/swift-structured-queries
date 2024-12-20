@@ -27,8 +27,10 @@ public struct Record<Base: Table>: Sendable {
 
 extension Record: QueryExpression {
   public typealias Value = Void
-  public var sql: String {
-    "SET \(updates.map { "\($0.name.quoted()) = \($1.sql)" }.joined(separator: ", "))"
+  public var queryString: String {
+    "SET \(updates.map { "\($0.name.quoted()) = \($1.queryString)" }.joined(separator: ", "))"
   }
-  public var bindings: [QueryBinding] { updates.flatMap { $0.bindings + $1.bindings } }
+  public var queryBindings: [QueryBinding] {
+    updates.flatMap { $0.queryBindings + $1.queryBindings }
+  }
 }

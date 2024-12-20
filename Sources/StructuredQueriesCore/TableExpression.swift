@@ -3,6 +3,6 @@ public protocol TableExpression<Value>: QueryExpression where Value: Table {
 }
 
 extension TableExpression {
-  public var sql: String { allColumns.map(\.sql).joined(separator: ", ") }
-  public var bindings: [QueryBinding] { [] }
+  public var queryString: String { allColumns.map(\.queryString).joined(separator: ", ") }
+  public var queryBindings: [QueryBinding] { [] }
 }

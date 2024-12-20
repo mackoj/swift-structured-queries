@@ -6,17 +6,17 @@ struct QueryFunction<each Argument: QueryExpression, Value>: QueryExpression {
     self.arguments = (repeat each arguments)
   }
 
-  var sql: String {
+  var queryString: String {
     var argumentsSQL: [String] = []
     for argument in repeat each arguments {
-      argumentsSQL.append(argument.sql)
+      argumentsSQL.append(argument.queryString)
     }
     return "\(name)(\(argumentsSQL.joined(separator: ", ")))"
   }
-  var bindings: [QueryBinding] {
+  var queryBindings: [QueryBinding] {
     var argumentsBindings: [QueryBinding] = []
     for argument in repeat each arguments {
-      argumentsBindings.append(contentsOf: argument.bindings)
+      argumentsBindings.append(contentsOf: argument.queryBindings)
     }
     return argumentsBindings
   }

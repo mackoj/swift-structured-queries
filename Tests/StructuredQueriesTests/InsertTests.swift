@@ -22,7 +22,7 @@ struct InsertTests {
         .insert {
           ($0.isActive, $0.title)
         }
-        .sql == """
+        .queryString == """
           INSERT INTO "syncUps" \
           ("isActive", "title") \
           DEFAULT VALUES
@@ -36,7 +36,7 @@ struct InsertTests {
         .insert(or: .abort) {
           ($0.isActive, $0.title)
         }
-        .sql == """
+        .queryString == """
           INSERT OR ABORT INTO "syncUps" \
           ("isActive", "title") \
           DEFAULT VALUES
@@ -45,7 +45,7 @@ struct InsertTests {
     #expect(
       SyncUp
         .insert(or: .abort)
-        .sql == """
+        .queryString == """
           INSERT OR ABORT INTO "syncUps" \
           DEFAULT VALUES
           """
@@ -53,7 +53,7 @@ struct InsertTests {
     #expect(
       SyncUp
         .insert(or: .fail)
-        .sql == """
+        .queryString == """
           INSERT OR FAIL INTO "syncUps" \
           DEFAULT VALUES
           """
@@ -61,7 +61,7 @@ struct InsertTests {
     #expect(
       SyncUp
         .insert(or: .ignore)
-        .sql == """
+        .queryString == """
           INSERT OR IGNORE INTO "syncUps" \
           DEFAULT VALUES
           """
@@ -69,7 +69,7 @@ struct InsertTests {
     #expect(
       SyncUp
         .insert(or: .replace)
-        .sql == """
+        .queryString == """
           INSERT OR REPLACE INTO "syncUps" \
           DEFAULT VALUES
           """
@@ -77,7 +77,7 @@ struct InsertTests {
     #expect(
       SyncUp
         .insert(or: .rollback)
-        .sql == """
+        .queryString == """
           INSERT OR ROLLBACK INTO "syncUps" \
           DEFAULT VALUES
           """
@@ -94,7 +94,7 @@ struct InsertTests {
           (true, "Engineering")
           (false, "Design")
         }
-        .sql == """
+        .queryString == """
           INSERT INTO "syncUps" \
           ("isActive", "title") \
           VALUES \
@@ -111,7 +111,7 @@ struct InsertTests {
         .select(
           SyncUp.all().select { ($0.title + " Lead", $0.id) }
         )
-        .sql == """
+        .queryString == """
           INSERT INTO "attendees" \
           ("name", "syncUpID") \
           SELECT ("syncUps"."title" || ?), "syncUps"."id" FROM "syncUps"
@@ -125,7 +125,7 @@ struct InsertTests {
         .insert { ($0.isActive, $0.title) }
         .values { (true, "Engineering") }
         .onConflict { $0.title += " Copy" }
-        .sql == """
+        .queryString == """
           INSERT INTO "syncUps" \
           ("isActive", "title") \
           VALUES \
@@ -140,7 +140,7 @@ struct InsertTests {
       SyncUp
         .insert()
         .returning(\.self)
-        .sql == """
+        .queryString == """
           INSERT INTO "syncUps" \
           DEFAULT VALUES \
           RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."title"

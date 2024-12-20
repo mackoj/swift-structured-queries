@@ -16,7 +16,7 @@ struct UpdateTests {
           $0.isActive = true
           $0.title = "Engineering"
         }
-        .sql == """
+        .queryString == """
           UPDATE "syncUps" SET "isActive" = ?, "title" = ?
           """
     )
@@ -26,35 +26,35 @@ struct UpdateTests {
     #expect(
       SyncUp
         .update(or: .abort) { $0.isActive = true }
-        .sql == """
+        .queryString == """
           UPDATE OR ABORT "syncUps" SET "isActive" = ?
           """
     )
     #expect(
       SyncUp
         .update(or: .fail) { $0.isActive = true }
-        .sql == """
+        .queryString == """
           UPDATE OR FAIL "syncUps" SET "isActive" = ?
           """
     )
     #expect(
       SyncUp
         .update(or: .ignore) { $0.isActive = true }
-        .sql == """
+        .queryString == """
           UPDATE OR IGNORE "syncUps" SET "isActive" = ?
           """
     )
     #expect(
       SyncUp
         .update(or: .replace) { $0.isActive = true }
-        .sql == """
+        .queryString == """
           UPDATE OR REPLACE "syncUps" SET "isActive" = ?
           """
     )
     #expect(
       SyncUp
         .update(or: .rollback) { $0.isActive = true }
-        .sql == """
+        .queryString == """
           UPDATE OR ROLLBACK "syncUps" SET "isActive" = ?
           """
     )
@@ -72,7 +72,7 @@ struct UpdateTests {
           $0.title = "Engineering"
         }
         .where(\.isActive)
-        .sql == """
+        .queryString == """
           UPDATE "syncUps" SET "isActive" = ?, "title" = ? \
           WHERE "syncUps"."isActive"
           """
@@ -87,7 +87,7 @@ struct UpdateTests {
           $0.title = "Engineering"
         }
         .returning(\.self)
-        .sql == """
+        .queryString == """
           UPDATE "syncUps" SET "isActive" = ?, "title" = ? \
           RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."title"
           """

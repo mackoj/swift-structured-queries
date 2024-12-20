@@ -5,8 +5,8 @@ public protocol QueryBindable<Value>: QueryDecodable, QueryExpression where Valu
 }
 
 extension QueryBindable {
-  public var sql: String { "?" }
-  public var bindings: [QueryBinding] { [queryBinding] }
+  public var queryString: String { "?" }
+  public var queryBindings: [QueryBinding] { [queryBinding] }
 }
 
 extension QueryBindable {
@@ -64,8 +64,8 @@ extension DefaultStringInterpolation {
   @_disfavoredOverload
   @available(
     *,
-     deprecated,
-     message: """
+    deprecated,
+    message: """
       String interpolation produces a debug description for a SQL expression. \
       Use '+' to concatenate SQL expressions, instead."
       """
@@ -76,8 +76,8 @@ extension DefaultStringInterpolation {
 
   @available(
     *,
-     deprecated,
-     message: """
+    deprecated,
+    message: """
       String interpolation produces a debug description for a SQL expression. \
       Use '+' to concatenate SQL expressions, instead."
       """

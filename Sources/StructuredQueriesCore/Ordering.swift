@@ -9,7 +9,10 @@ extension QueryExpression where Value: Comparable {
 }
 
 private struct OrderingTerm<Value: Comparable> {
-  enum Direction: String { case ascending = "ASC", descending = "DESC" }
+  enum Direction: String {
+    case ascending = "ASC"
+    case descending = "DESC"
+  }
 
   let base: any QueryExpression<Value>
 
@@ -27,6 +30,6 @@ private struct OrderingTerm<Value: Comparable> {
 }
 
 extension OrderingTerm: QueryExpression {
-  var sql: String { "\(base.sql) \(direction.rawValue)" }
-  var bindings: [QueryBinding] { base.bindings }
+  var queryString: String { "\(base.queryString) \(direction.rawValue)" }
+  var queryBindings: [QueryBinding] { base.queryBindings }
 }

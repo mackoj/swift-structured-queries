@@ -1,18 +1,18 @@
 public protocol QueryExpression<Value>: Sendable {
   associatedtype Value
 
-  var sql: String { get }
+  var queryString: String { get }
 
-  var bindings: [QueryBinding] { get }
+  var queryBindings: [QueryBinding] { get }
 }
 
 extension Optional: QueryExpression where Wrapped: QueryExpression {
   public typealias Value = Self
-  public var sql: String { self?.sql ?? "?" }
-  public var bindings: [QueryBinding] {
+  public var queryString: String { self?.queryString ?? "?" }
+  public var queryBindings: [QueryBinding] {
     switch self {
     case let wrapped?:
-      return wrapped.bindings
+      return wrapped.queryBindings
     case nil:
       return [.null]
     }
@@ -21,12 +21,12 @@ extension Optional: QueryExpression where Wrapped: QueryExpression {
 
 extension Array: QueryExpression where Element: QueryExpression {
   public typealias Value = Self
-  public var sql: String { "(\(map(\.sql).joined(separator: ", ")))" }
-  public var bindings: [QueryBinding] { flatMap(\.bindings) }
+  public var queryString: String { "(\(map(\.queryString).joined(separator: ", ")))" }
+  public var queryBindings: [QueryBinding] { flatMap(\.queryBindings) }
 }
 
 extension ClosedRange: QueryExpression where Bound: QueryExpression {
   public typealias Value = Self
-  public var sql: String { "\(lowerBound.sql) AND \(upperBound.sql)" }
-  public var bindings: [QueryBinding] { lowerBound.bindings + upperBound.bindings }
+  public var queryString: String { "\(lowerBound.queryString) AND \(upperBound.queryString)" }
+  public var queryBindings: [QueryBinding] { lowerBound.queryBindings + upperBound.queryBindings }
 }
