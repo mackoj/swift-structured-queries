@@ -27,6 +27,15 @@ extension Table {
     return Insert(input: input, conflictResolution: conflictResolution, columns: columns)
   }
 
+  // NB: Overload required to work around bug with parameter packs and result builders.
+  public static func insert<C: ColumnExpression>(
+    or conflictResolution: ConflictResolution? = nil,
+    _ columns: (Columns) -> C
+  ) -> Insert<Self, C, Void> {
+    let input = columns(Self.columns)
+    return Insert(input: input, conflictResolution: conflictResolution, columns: [input])
+  }
+
   public static func insert(
     or conflictResolution: ConflictResolution? = nil
   ) -> Insert<Self, Void, Void> {
@@ -68,10 +77,44 @@ public struct Insert<Base: Table, Input: Sendable, Output> {
     )
   }
 
+  // NB: Overload required to work around bug with parameter packs and result builders.
+  public func values(
+    @InsertValuesBuilder _ values: () -> [Input.Value] = { [] }
+  ) -> Self
+  where Input: ColumnExpression, Input.Value: QueryExpression {
+    var rows: [[any QueryExpression]] = []
+    if case let .values(values) = form {
+      rows = values
+    }
+    rows.append(
+      contentsOf: values().map {
+        var row: [any QueryExpression] = []
+        row.append($0)
+        return row
+      }
+    )
+    return Self(
+      input: input,
+      conflictResolution: conflictResolution,
+      columns: columns,
+      form: .values(rows),
+      record: record
+    )
+  }
+
   public func select<I, each C: ColumnExpression>(
     _ selection: Select<I, (repeat (each C).Value)>
   ) -> Self
   where Input == (repeat each C) {
+    var copy = self
+    copy.form = .select(selection)
+    return copy
+  }
+
+  // NB: Overload required to work around bug with parameter packs and result builders.
+  public func select<I>(
+    _ selection: Select<I, Input.Value>
+  ) -> Self where Input: ColumnExpression {
     var copy = self
     copy.form = .select(selection)
     return copy

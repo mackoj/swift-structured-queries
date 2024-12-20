@@ -147,4 +147,32 @@ struct InsertTests {
           """
     )
   }
+
+  @Test func singleColumn() {
+    #expect(
+      SyncUp
+        .insert(\.title)
+        .values {
+          "Engineering"
+          "Product"
+        }
+        .queryString == """
+          INSERT INTO "syncUps" \
+          ("title") \
+          VALUES \
+          (?), \
+          (?)
+          """
+    )
+    #expect(
+      SyncUp
+        .insert(\.title)
+        .select(Attendee.all().select(\.name))
+        .queryString == """
+          INSERT INTO "syncUps" \
+          ("title") \
+          SELECT "attendees"."name" FROM "attendees"
+          """
+    )
+  }
 }
