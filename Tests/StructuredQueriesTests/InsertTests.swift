@@ -217,18 +217,29 @@ struct InsertTests {
     )
   }
 
-  @Test func arrayBuilder() {
+  @Test func builder() {
     let titles = ["Design", "Engineering", "Product"]
+    let random = true
     #expect(
       SyncUp.insert(\.title)  {
         for title in titles {
           title
+        }
+        if random {
+          "Random"
+        }
+        if random {
+          "Truth"
+        } else {
+          "Fallacy"
         }
       }
       .queryString == """
         INSERT INTO "syncUps" \
         ("title") \
         VALUES \
+        (?), \
+        (?), \
         (?), \
         (?), \
         (?)
