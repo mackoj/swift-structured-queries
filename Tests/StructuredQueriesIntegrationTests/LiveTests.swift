@@ -40,24 +40,26 @@ struct Attendee: Equatable {
   let syncUp = try #require(
     try db
       .execute(
-        SyncUp
-          .insert { ($0.isActive, $0.title) }
-          .values { (true, "Engineering") }
-          .returning(\.self)
+        SyncUp.insert {
+          ($0.isActive, $0.title)
+        } values: {
+          (true, "Engineering")
+        }
+        .returning(\.self)
       )
       .first
   )
   #expect(syncUp == SyncUp(id: 1, isActive: true, title: "Engineering"))
 
   let attendees = try db.execute(
-    Attendee
-      .insert { ($0.name, $0.syncUpID) }
-      .values {
-        ("Blob", syncUp.id)
-        ("Blob Jr", syncUp.id)
-        ("Blob Sr", syncUp.id)
-      }
-      .returning(\.self)
+    Attendee.insert {
+      ($0.name, $0.syncUpID)
+    } values: {
+      ("Blob", syncUp.id)
+      ("Blob Jr", syncUp.id)
+      ("Blob Sr", syncUp.id)
+    }
+    .returning(\.self)
   )
   #expect(
     attendees == [
@@ -72,10 +74,12 @@ struct Attendee: Equatable {
 
   let leadAttendee = try #require(
     try db.execute(
-      Attendee
-        .insert { ($0.name, $0.syncUpID) }
-        .select(SyncUp.all().select { ($0.title + " Lead", $0.id) })
-        .returning(\.self)
+      Attendee.insert {
+        ($0.name, $0.syncUpID)
+      } select: {
+        SyncUp.all().select { ($0.title + " Lead", $0.id) }
+      }
+      .returning(\.self)
     )
     .first
   )

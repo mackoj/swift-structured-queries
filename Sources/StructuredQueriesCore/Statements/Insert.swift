@@ -1,39 +1,108 @@
-// TODO: Should 'insert' really be a builder?
-//       Pros:
-//         - Can chain them together to build up a query:
-//           ```
-//           SyncUp
-//             .insert { ($0.title, $0.isActive ) }
-//             .values { ("Engineering", true) }
-//             .values { ("Product", false) }
-//
-//       Cons:
-//         - Can generate invalid queries:
-//           ```
-//           SyncUp
-//             .insert()                            // DEFAULT VALUES
-//             .onConflict { $0.title += " Copy" }  // Upsert not supported for DEFAULT VALUES
-
 extension Table {
   public static func insert<each C: ColumnExpression>(
     or conflictResolution: ConflictResolution? = nil,
-    _ columns: (Columns) -> (repeat each C)
-  ) -> Insert<Self, (repeat each C), Void> {
+    _ columns: (Columns) -> (repeat each C),
+    @InsertValuesBuilder<(repeat (each C).Value)> values: () -> [(repeat (each C).Value)],
+    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+  ) -> Insert<Self, (repeat each C), Void>
+  where repeat (each C).Value: QueryExpression {
     let input = columns(Self.columns)
     var columns: [any ColumnExpression] = []
     for column in repeat each input {
       columns.append(column)
     }
-    return Insert(input: input, conflictResolution: conflictResolution, columns: columns)
+    let values: [[any QueryExpression]] = values().map {
+      var row: [any QueryExpression] = []
+      for value in repeat each $0 {
+        row.append(value)
+      }
+      return row
+    }
+    let record = updates.map { updates in
+      var record = Record<Self>()
+      updates(&record)
+      return record
+    }
+    return Insert(
+      input: input,
+      conflictResolution: conflictResolution,
+      columns: columns,
+      form: .values(values),
+      record: record
+    )
   }
 
   // NB: Overload required to work around bug with parameter packs and result builders.
   public static func insert<C: ColumnExpression>(
     or conflictResolution: ConflictResolution? = nil,
-    _ columns: (Columns) -> C
-  ) -> Insert<Self, C, Void> {
+    _ columns: (Columns) -> C,
+    @InsertValuesBuilder<C.Value> values: () -> [C.Value],
+    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+  ) -> Insert<Self, C, Void>
+  where C.Value: QueryExpression {
     let input = columns(Self.columns)
-    return Insert(input: input, conflictResolution: conflictResolution, columns: [input])
+    let values: [[any QueryExpression]] = values().map { [$0] }
+    let record = updates.map { updates in
+      var record = Record<Self>()
+      updates(&record)
+      return record
+    }
+    return Insert(
+      input: input,
+      conflictResolution: conflictResolution,
+      columns: [input],
+      form: .values(values),
+      record: record
+    )
+  }
+
+  public static func insert<I, each C: ColumnExpression>(
+    or conflictResolution: ConflictResolution? = nil,
+    _ columns: (Columns) -> (repeat each C),
+    select selection: () -> Select<I, (repeat (each C).Value)>,
+    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+  ) -> Insert<Self, (repeat each C), Void>
+  where repeat (each C).Value: QueryExpression {
+    let input = columns(Self.columns)
+    var columns: [any ColumnExpression] = []
+    for column in repeat each input {
+      columns.append(column)
+    }
+    let record = updates.map { updates in
+      var record = Record<Self>()
+      updates(&record)
+      return record
+    }
+    return Insert(
+      input: input,
+      conflictResolution: conflictResolution,
+      columns: columns,
+      form: .select(selection()),
+      record: record
+    )
+  }
+
+  // NB: Overload required to work around bug with parameter packs and result builders.
+  public static func insert<I, C: ColumnExpression>(
+    or conflictResolution: ConflictResolution? = nil,
+    _ columns: (Columns) -> C,
+    select selection: () -> Select<I, C.Value>,
+    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+  ) -> Insert<Self, C, Void>
+  where C.Value: QueryExpression {
+    let input = columns(Self.columns)
+    let record = updates.map { updates in
+      var record = Record<Self>()
+      updates(&record)
+      return record
+    }
+    return Insert(
+      input: input,
+      conflictResolution: conflictResolution,
+      columns: [input],
+      form: .select(selection()),
+      record: record
+    )
   }
 
   public static func insert(
@@ -50,83 +119,6 @@ public struct Insert<Base: Table, Input: Sendable, Output> {
   fileprivate var form: InsertionForm = .defaultValues
   fileprivate var record: Record<Base>?
   fileprivate var returning: ReturningClause?
-
-  public func values<each C: ColumnExpression>(
-    @InsertValuesBuilder<(repeat (each C).Value)> _ values: () -> [(repeat (each C).Value)] = { [] }
-  ) -> Self
-  where Input == (repeat each C), repeat (each C).Value: QueryExpression {
-    var rows: [[any QueryExpression]] = []
-    if case let .values(values) = form {
-      rows = values
-    }
-    rows.append(
-      contentsOf: values().map {
-        var row: [any QueryExpression] = []
-        for column in repeat each $0 {
-          row.append(column)
-        }
-        return row
-      }
-    )
-    return Self(
-      input: input,
-      conflictResolution: conflictResolution,
-      columns: columns,
-      form: .values(rows),
-      record: record
-    )
-  }
-
-  // NB: Overload required to work around bug with parameter packs and result builders.
-  public func values(
-    @InsertValuesBuilder<Input.Value> _ values: () -> [Input.Value] = { [] }
-  ) -> Self
-  where Input: ColumnExpression, Input.Value: QueryExpression {
-    var rows: [[any QueryExpression]] = []
-    if case let .values(values) = form {
-      rows = values
-    }
-    rows.append(
-      contentsOf: values().map {
-        var row: [any QueryExpression] = []
-        row.append($0)
-        return row
-      }
-    )
-    return Self(
-      input: input,
-      conflictResolution: conflictResolution,
-      columns: columns,
-      form: .values(rows),
-      record: record
-    )
-  }
-
-  public func select<I, each C: ColumnExpression>(
-    _ selection: Select<I, (repeat (each C).Value)>
-  ) -> Self
-  where Input == (repeat each C) {
-    var copy = self
-    copy.form = .select(selection)
-    return copy
-  }
-
-  // NB: Overload required to work around bug with parameter packs and result builders.
-  public func select<I>(
-    _ selection: Select<I, Input.Value>
-  ) -> Self where Input: ColumnExpression {
-    var copy = self
-    copy.form = .select(selection)
-    return copy
-  }
-
-  public func onConflict(do updates: (inout Record<Base>) -> Void) -> Self {
-    var record = Record<Base>()
-    updates(&record)
-    var copy = self
-    copy.record = record
-    return copy
-  }
 
   public func returning<each O: QueryExpression>(
     _ selection: (Base.Columns) -> (repeat each O)
