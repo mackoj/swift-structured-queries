@@ -214,7 +214,7 @@ public enum InsertValuesBuilder<Value> {
   }
 
   public static func buildBlock(_ components: [Value]) -> [Value] {
-    components.flatMap(\.self)
+    components
   }
 
   public static func buildEither(first component: [Value]) -> [Value] {
