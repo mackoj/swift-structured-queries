@@ -1,7 +1,5 @@
 # Swift Structured Queries
 
-  - [ ] How low can we make the supported platforms?
-
   - [ ] Add support for custom binding logic per property:
 
     ```swift
