@@ -6,10 +6,10 @@ import PackageDescription
 let package = Package(
   name: "swift-structured-queries",
   platforms: [
-    .iOS(.v16),
-    .macOS(.v13),
-    .tvOS(.v16),
-    .watchOS(.v9),
+    .iOS(.v15),
+    .macOS(.v12),
+    .tvOS(.v15),
+    .watchOS(.v8),
   ],
   products: [
     .library(

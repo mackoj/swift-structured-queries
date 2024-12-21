@@ -498,8 +498,8 @@ extension OrderClause: QueryExpression {
 }
 
 private struct LimitClause {
-  let maxLength: any QueryExpression<Int>
-  let offset: (any QueryExpression<Int>)?
+  let maxLength: any QueryExpression
+  let offset: (any QueryExpression)?
 }
 extension LimitClause: QueryExpression {
   typealias Value = Void
