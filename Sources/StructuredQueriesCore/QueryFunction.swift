@@ -1,23 +1,19 @@
-struct QueryFunction<each Argument: QueryExpression, Value>: QueryExpression {
+struct QueryFunction<Value>: QueryExpression {
   let name: String
-  let arguments: (repeat each Argument)
-  init(_ name: String, _ arguments: repeat each Argument) {
+  let arguments: [any QueryExpression]
+  init<each Argument: QueryExpression>(_ name: String, _ arguments: repeat each Argument) {
     self.name = name
-    self.arguments = (repeat each arguments)
+    var expressions: [any QueryExpression] = []
+    for argument in repeat each arguments {
+      expressions.append(argument)
+    }
+    self.arguments = expressions
   }
 
   var queryString: String {
-    var argumentsSQL: [String] = []
-    for argument in repeat each arguments {
-      argumentsSQL.append(argument.queryString)
-    }
-    return "\(name)(\(argumentsSQL.joined(separator: ", ")))"
+    "\(name)(\(arguments.map(\.queryString).joined(separator: ", ")))"
   }
   var queryBindings: [QueryBinding] {
-    var argumentsBindings: [QueryBinding] = []
-    for argument in repeat each arguments {
-      argumentsBindings.append(contentsOf: argument.queryBindings)
-    }
-    return argumentsBindings
+    arguments.flatMap(\.queryBindings)
   }
 }
