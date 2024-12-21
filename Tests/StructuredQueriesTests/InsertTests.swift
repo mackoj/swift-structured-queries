@@ -201,8 +201,38 @@ struct InsertTests {
           """
     )
   }
+
+  @Test func arrayBuilder() {
+    let titles = ["Design", "Engineering", "Product"]
+    #expect(
+      SyncUp
+        .insert(\.title)
+        .values {
+          for title in titles {
+            title
+          }
+        }
+        .queryString == """
+          INSERT INTO "syncUps" \
+          ("title") \
+          VALUES \
+          (?), \
+          (?), \
+          (?)
+          """
+    )
+  }
 }
 
 extension String {
   fileprivate static let untitled: Self = "Untitled"
+}
+
+public extension InsertValuesBuilder {
+  static func buildArray(_ components: [[Value]]) -> [Value] {
+    components.flatMap(\.self)
+  }
+  static func buildBlock(_ components: [Value]) -> [Value] {
+    components
+  }
 }

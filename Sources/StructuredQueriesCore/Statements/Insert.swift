@@ -212,8 +212,9 @@ public enum InsertValuesBuilder<Value> {
   public static func buildArray(_ components: [[Value]]) -> [Value] {
     components.flatMap(\.self)
   }
-  public static func buildBlock(_ component: Value) -> [Value] {
-    [component]
+
+  public static func buildBlock(_ components: [Value]) -> [Value] {
+    components.flatMap(\.self)
   }
 
   public static func buildEither(first component: [Value]) -> [Value] {
@@ -224,8 +225,8 @@ public enum InsertValuesBuilder<Value> {
     component
   }
 
-  public static func buildExpression(_ expression: Value) -> Value {
-    expression
+  public static func buildExpression(_ expression: Value) -> [Value] {
+    [expression]
   }
 
   public static func buildLimitedAvailability(_ component: [Value]) -> [Value] {
@@ -236,11 +237,11 @@ public enum InsertValuesBuilder<Value> {
     component ?? []
   }
 
-  public static func buildPartialBlock(first: Value) -> [Value] {
-    [first]
+  public static func buildPartialBlock(first: [Value]) -> [Value] {
+    first
   }
 
-  public static func buildPartialBlock(accumulated: [Value], next: Value) -> [Value] {
-    accumulated + [next]
+  public static func buildPartialBlock(accumulated: [Value], next: [Value]) -> [Value] {
+    accumulated + next
   }
 }
