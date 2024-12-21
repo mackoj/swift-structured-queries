@@ -188,7 +188,8 @@ private enum InsertionForm: QueryExpression {
     case .defaultValues:
       return "DEFAULT VALUES"
     case let .values(rows):
-      let values = rows
+      let values =
+        rows
         .map { "(\($0.map(\.queryString).joined(separator: ", ")))" }
         .joined(separator: ", ")
       return """

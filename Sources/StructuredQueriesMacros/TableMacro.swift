@@ -84,9 +84,10 @@ extension TableMacro: ExtensionMacro {
           columnNameArgument = expression.trimmedDescription
           break
         }
-        let columnName = columnNameArgument ?? """
-          "\(name)"
-          """
+        let columnName =
+          columnNameArgument ?? """
+            "\(name)"
+            """
         let typeName = type.trimmedDescription
         columnsProperties.append(
           """
@@ -98,8 +99,7 @@ extension TableMacro: ExtensionMacro {
       }
     }
     let tableName: String
-    if
-      case let .argumentList(arguments) = node.arguments,
+    if case let .argumentList(arguments) = node.arguments,
       let expression = arguments.first?.expression
     {
       tableName = expression.trimmedDescription

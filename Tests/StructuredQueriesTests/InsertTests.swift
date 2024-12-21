@@ -227,12 +227,3 @@ struct InsertTests {
 extension String {
   fileprivate static let untitled: Self = "Untitled"
 }
-
-public extension InsertValuesBuilder {
-  static func buildArray(_ components: [[Value]]) -> [Value] {
-    components.flatMap(\.self)
-  }
-  static func buildBlock(_ components: [Value]) -> [Value] {
-    components
-  }
-}

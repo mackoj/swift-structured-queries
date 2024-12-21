@@ -215,4 +215,5 @@ struct TableMacroTests {
         """
       }
     }
-  }}
+  }
+}

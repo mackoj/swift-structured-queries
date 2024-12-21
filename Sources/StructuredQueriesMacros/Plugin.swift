@@ -5,6 +5,6 @@ import SwiftSyntaxMacros
 struct StructuredQueriesPlugin: CompilerPlugin {
   let providingMacros: [Macro.Type] = [
     ColumnMacro.self,
-    TableMacro.self
+    TableMacro.self,
   ]
 }
