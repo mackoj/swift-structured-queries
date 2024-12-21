@@ -225,6 +225,10 @@ public enum InsertValuesBuilder<Value> {
     [expression]
   }
 
+  public static func buildExpression(_ expression: [Value]) -> [Value] {
+    expression
+  }
+
   public static func buildLimitedAvailability(_ component: [Value]) -> [Value] {
     component
   }
