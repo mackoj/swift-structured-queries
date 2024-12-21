@@ -3,11 +3,29 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-public struct TableMacro {}
+public struct TableMacro {
+  static let protocolName = "Table"
+}
+
+extension TableMacro: MemberAttributeMacro {
+  public static func expansion<D: DeclGroupSyntax, T: DeclSyntaxProtocol, C: MacroExpansionContext>(
+    of node: AttributeSyntax,
+    attachedTo declaration: D,
+    providingAttributesFor member: T,
+    in context: C
+  ) throws -> [AttributeSyntax] {
+    guard
+      declaration.is(StructDeclSyntax.self),
+      let property = member.as(VariableDeclSyntax.self),
+      !property.isStatic,
+      !property.isComputed,
+      !property.hasMacroApplication("Column")
+    else { return [] }
+    return ["@Column"]
+  }
+}
 
 extension TableMacro: ExtensionMacro {
-  static let protocolName = "Table"
-
   public static func expansion<D: DeclGroupSyntax, T: TypeSyntaxProtocol, C: MacroExpansionContext>(
     of node: AttributeSyntax,
     attachedTo declaration: D,
@@ -54,15 +72,41 @@ extension TableMacro: ExtensionMacro {
           let type = binding.typeAnnotation?.type ?? binding.initializer?.value.literalType
         else { continue }
         let name = identifier.trimmedDescription
+        var columnNameArgument: String?
+        for attribute in property.attributes {
+          guard
+            let attribute = attribute.as(AttributeSyntax.self),
+            let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
+            attributeName == "Column",
+            case let .argumentList(arguments) = attribute.arguments,
+            let expression = arguments.first?.expression
+          else { continue }
+          columnNameArgument = expression.trimmedDescription
+          break
+        }
+        let columnName = columnNameArgument ?? """
+          "\(name)"
+          """
         let typeName = type.trimmedDescription
         columnsProperties.append(
           """
-          public let \(name) = \(moduleName).Column<Value, \(typeName)>("\(name)")
+          public let \(name) = \(moduleName).Column<Value, \(typeName)>(\(columnName))
           """
         )
         allColumns.append(name)
         decodings.append("\(name) = try decoder.decode(\(typeName).self)")
       }
+    }
+    let tableName: String
+    if
+      case let .argumentList(arguments) = node.arguments,
+      let expression = arguments.first?.expression
+    {
+      tableName = expression.trimmedDescription
+    } else {
+      tableName = """
+        "\(declaration.name.trimmed.text.tableName())"
+        """
     }
     return [
       DeclSyntax(
@@ -77,7 +121,7 @@ extension TableMacro: ExtensionMacro {
         }
         }
         public static var columns: Columns { Columns() }
-        public static let name = "\(raw: declaration.name.trimmed.text.tableName())"
+        public static let name = \(raw: tableName)
         public init(decoder: any \(moduleName).QueryDecoder) throws {
         \(raw: decodings.joined(separator: "\n"))
         }
