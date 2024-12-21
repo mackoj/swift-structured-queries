@@ -216,4 +216,45 @@ struct TableMacroTests {
       }
     }
   }
+
+  @Test
+  func capitalSelf() {
+    withMacroTesting(
+      record: .failed,
+      macros: [TableMacro.self]
+    ) {
+      assertMacro {
+        """
+        @Table
+        struct User {
+          var id: Tagged<Self, Int>
+        }
+        """
+      } expansion: {
+        """
+        struct User {
+          @Column
+          var id: Tagged<Self, Int>
+        }
+
+        extension User: StructuredQueries.Table {
+          public struct Columns: StructuredQueries.TableExpression {
+            public typealias Value = User
+            public let id = StructuredQueries.Column<Value, Tagged<Value, Int>>("id")
+            public var allColumns: [any StructuredQueries.ColumnExpression] {
+              [id]
+            }
+          }
+          public static var columns: Columns {
+            Columns()
+          }
+          public static let name = "users"
+          public init(decoder: any StructuredQueries.QueryDecoder) throws {
+            id = try decoder.decode(Tagged<Value, Int>.self)
+          }
+        }
+        """
+      }
+    }
+  }
 }

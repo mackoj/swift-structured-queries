@@ -60,7 +60,9 @@ extension TableMacro: ExtensionMacro {
     var columnsProperties: [String] = []
     var allColumns: [String] = []
     var decodings: [String] = []
-    for member in declaration.memberBlock.members {
+    let selfRewriter = SelfRewriter(selfEquivalent: "Value")
+    let memberBlock = selfRewriter.rewrite(declaration.memberBlock).cast(MemberBlockSyntax.self)
+    for member in memberBlock.members {
       guard
         let property = member.decl.as(VariableDeclSyntax.self),
         !property.isStatic,
@@ -153,29 +155,5 @@ extension String {
   fileprivate func pluralized() -> String {
     let suffix = hasSuffix("s") ? "es" : "s"
     return self + suffix
-  }
-}
-
-extension VariableDeclSyntax {
-  fileprivate var isStatic: Bool {
-    self.modifiers.contains { modifier in
-      modifier.name.tokenKind == .keyword(.static)
-    }
-  }
-}
-
-extension ExprSyntax {
-  fileprivate var literalType: TypeSyntax? {
-    if self.is(BooleanLiteralExprSyntax.self) {
-      return "Swift.Bool"
-    } else if self.is(FloatLiteralExprSyntax.self) {
-      return "Swift.Double"
-    } else if self.is(IntegerLiteralExprSyntax.self) {
-      return "Swift.Int"
-    } else if self.is(StringLiteralExprSyntax.self) {
-      return "Swift.String"
-    } else {
-      return nil
-    }
   }
 }

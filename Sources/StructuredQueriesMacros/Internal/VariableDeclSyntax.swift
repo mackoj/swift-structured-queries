@@ -9,7 +9,8 @@ extension VariableDeclSyntax {
       default:
         return nil
       }
-    }.flatMap { $0 }
+    }
+    .flatMap { $0 }
     return accessors.compactMap { accessor in
       predicate(accessor.accessorSpecifier.tokenKind) ? accessor : nil
     }
@@ -40,6 +41,12 @@ extension VariableDeclSyntax {
           return false
         }
       }
+    }
+  }
+
+  var isStatic: Bool {
+    self.modifiers.contains { modifier in
+      modifier.name.tokenKind == .keyword(.static)
     }
   }
 }
