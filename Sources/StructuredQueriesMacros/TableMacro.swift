@@ -60,7 +60,7 @@ extension TableMacro: ExtensionMacro {
     var columnsProperties: [String] = []
     var allColumns: [String] = []
     var decodings: [String] = []
-    let selfRewriter = SelfRewriter(selfEquivalent: "Value")
+    let selfRewriter = SelfRewriter(selfEquivalent: declaration.name.trimmed)
     let memberBlock = selfRewriter.rewrite(declaration.memberBlock).cast(MemberBlockSyntax.self)
     for member in memberBlock.members {
       guard
