@@ -1,7 +1,7 @@
 # Swift Structured Queries
 
   - [ ] Add support for inserting full records:
-  
+
     ```swift
     SyncUp.insert([SyncUp(id: 1, isActive: true, title: "Engineering"])
     ```
@@ -10,24 +10,29 @@
 
     ```diff
      @Column(.strategy(.iso8601))
-     var date: Date
+     var isoDate: Date
     +struct Columns: TableExpression {
-    +  let date = Column<Meeting, Date>("date", strategy: .iso8601)
+    +  let isoDate = Column<Meeting, Date>("isoDate", strategy: .iso8601)
     +}
 
      @Column(.strategy(.timeIntervalSince1970))
-     var date: Date
+     var epochDate: Date
     +struct Columns: TableExpression {
-    +  let date = Column<Meeting, Date>("date", strategy: .timeIntervalSince1970)
+    +  let epochDate = Column<Meeting, Date>("epochDate", strategy: .timeIntervalSince1970)
     +}
     
      typealias Column<T: Table, C: QueryBindable> = BindableColumn<T, C, C>
     ```
-    
-    Seems like there isn't a way to make this type-safe, though. Just a bad macro compiler error.
+
+      - [ ] How does it work though?
+
+        ```swift
+        $0.isoDate == Date()    // ("isoDate" = ?), .text("2025-01-01T12:00:00Z")
+        $0.epochDate == Date()  // ("epochDate" = ?), .double(1234567890.0)
+        ```
 
   - [ ] Add support for draft types where primary key exists:
-  
+
     ```diff
      @Table
      struct SyncUp {
@@ -48,16 +53,16 @@
     +  }
     +}
     ```
-    
+
       - [ ] Add support for inserting draft types:
-      
+
         ```swift
         let draft = SyncUp.Draft(title: "Engineering")
         SyncUp.insert([draft])
         ```
-        
+
       - [ ] Add other primary key-friendly functionality:
-      
+
         ```swift
         SyncUp.find(id)
         ```
@@ -74,7 +79,7 @@
         +  Attendee.all().where { $0.syncUpID == primaryKey }
         +}
         ```
-        
+
         Might not be possible in an ergonomic way. No type inference at this level in macros.
 
   - [ ] Dirty tracking for minimal updates?

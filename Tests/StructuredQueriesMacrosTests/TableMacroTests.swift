@@ -240,7 +240,7 @@ struct TableMacroTests {
         extension User: StructuredQueries.Table {
           public struct Columns: StructuredQueries.TableExpression {
             public typealias Value = User
-            public let id = StructuredQueries.Column<Value, Tagged<Value, Int>>("id")
+            public let id = StructuredQueries.Column<Value, Tagged<User, Int>>("id")
             public var allColumns: [any StructuredQueries.ColumnExpression] {
               [id]
             }
@@ -250,7 +250,7 @@ struct TableMacroTests {
           }
           public static let name = "users"
           public init(decoder: any StructuredQueries.QueryDecoder) throws {
-            id = try decoder.decode(Tagged<Value, Int>.self)
+            id = try decoder.decode(Tagged<User, Int>.self)
           }
         }
         """
