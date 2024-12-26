@@ -58,19 +58,19 @@ public enum OrderingBuilder {
     return terms
   }
 
-  public static func buildBlock<Value>(_ component: Value) -> Value {
+  public static func buildBlock(_ component: [OrderingTerm]) -> [OrderingTerm] {
     component
   }
 
-  public static func buildEither<Value>(first component: Value) -> Value {
+  public static func buildEither(first component: [OrderingTerm]) -> [OrderingTerm] {
     component
   }
 
-  public static func buildEither<Value>(second component: Value) -> Value {
+  public static func buildEither(second component: [OrderingTerm]) -> [OrderingTerm] {
     component
   }
 
-  public static func buildOptional<Value>(_ component: Value?) -> Value? {
-    component
+  public static func buildOptional(_ component: [OrderingTerm]?) -> [OrderingTerm] {
+    component ?? []
   }
 }

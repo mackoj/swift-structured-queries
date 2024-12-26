@@ -114,19 +114,30 @@ struct SelectTests {
           ORDER BY "syncUps"."title" DESC, "syncUps"."id"
           """
     )
-    let multipleFields = true
+    let condition = false
     #expect(
       SyncUp.all().order {
-        if multipleFields {
+        if condition {
           ($0.title.descending(), $0.id)
         } else {
-          ($0.title)
+          $0.title
         }
       }
       .queryString == """
         SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."title" \
         FROM "syncUps" \
-        ORDER BY "syncUps"."title" DESC, "syncUps"."id"
+        ORDER BY "syncUps"."title"
+        """
+    )
+    #expect(
+      SyncUp.all().order {
+        if condition {
+          $0.title
+        }
+      }
+      .queryString == """
+        SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."title" \
+        FROM "syncUps"
         """
     )
   }

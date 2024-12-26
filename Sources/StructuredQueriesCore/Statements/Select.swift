@@ -486,7 +486,8 @@ extension HavingClause: QueryExpression {
 
 private struct OrderClause {
   let terms: [OrderingTerm]
-  init(terms: [OrderingTerm]) {
+  init?(terms: [OrderingTerm]) {
+    guard !terms.isEmpty else { return nil }
     self.terms = terms
   }
   init?<each O: _OrderingTerm>(_ terms: repeat each O) {
@@ -494,8 +495,7 @@ private struct OrderClause {
     for term in repeat each terms {
       expressions.append(term._orderingTerm)
     }
-    guard !expressions.isEmpty else { return nil }
-    self.terms = expressions
+    self.init(terms: expressions)
   }
 }
 extension OrderClause: QueryExpression {
