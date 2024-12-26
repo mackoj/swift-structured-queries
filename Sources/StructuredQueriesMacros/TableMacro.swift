@@ -72,7 +72,9 @@ extension TableMacro: ExtensionMacro {
         guard
           let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier,
           let type = binding.typeAnnotation?.type ?? binding.initializer?.value.literalType
-        else { continue }
+        else {
+          continue
+        }
         let name = identifier.trimmedDescription
         var columnNameArgument: String?
         var columnStrategyArgument: String?

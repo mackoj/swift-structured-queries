@@ -299,4 +299,45 @@ struct TableMacroTests {
       }
     }
   }
+
+  @Test
+  func noTypeAnnotation() {
+    withMacroTesting(
+      record: .failed,
+      macros: [TableMacro.self]
+    ) {
+      assertMacro {
+        """
+        @Table
+        struct User {
+          var id = Int(0)
+        }
+        """
+      } expansion: {
+        """
+        struct User {
+          @Column
+          var id = Int(0)
+        }
+
+        extension User: StructuredQueries.Table {
+          public struct Columns: StructuredQueries.TableExpression {
+            public typealias Value = User
+
+            public var allColumns: [any StructuredQueries.ColumnExpression<Value>] {
+              [id]
+            }
+          }
+          public static var columns: Columns {
+            Columns()
+          }
+          public static let name = "users"
+          public init(decoder: any StructuredQueries.QueryDecoder) throws {
+
+          }
+        }
+        """
+      }
+    }
+  }
 }

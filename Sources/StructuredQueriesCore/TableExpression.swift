@@ -1,3 +1,5 @@
+//import IssueReporting
+
 public protocol TableExpression<Value>: QueryExpression where Value: Table {
   var allColumns: [any ColumnExpression<Value>] { get }
 }
@@ -26,32 +28,63 @@ extension TableExpression {
     ) -> some QueryExpression<Bool> {
       for column in allColumns {
         if column.keyPath == keyPathComparator.keyPath {
-          return _KeyPathComparatorExpression(column: column, order: keyPathComparator.order)
+          return _KeyPathComparatorExpression(columnAndOrders: [(column, keyPathComparator.order)])
         }
       }
+//      reportIssue(
+//        """
+//        Could not find column for key path '\(keyPathComparator.keyPath)'. This is only supported \
+//        for  key paths of stored properties.
+//        """
+//      )
       fatalError(
         """
-        Could not find column for key path. This is only supported for key paths of stored properties.
-        """)
+        Could not find column for key path '\(keyPathComparator.keyPath)'. This is only supported \
+        for  key paths of stored properties.
+        """
+      )
     }
 
-    @available(*, unavailable)
     public func sort(
-      by keyPathComparator: [KeyPathComparator<Value>]
-    ) -> any/*some*/ QueryExpression<Bool> {
-      fatalError("Unimplemented")
+      by keyPathComparators: [KeyPathComparator<Value>]
+    ) -> some QueryExpression<Bool> {
+      let columnAndOrders = keyPathComparators.compactMap { keyPathComparator in
+        for column in allColumns {
+          if column.keyPath == keyPathComparator.keyPath {
+            return (column, keyPathComparator.order)
+          }
+        }
+//        reportIssue(
+//          """
+//          Could not find column for key path '\(keyPathComparator.keyPath)'. This is only supported \
+//          for  key paths of stored properties.
+//          """
+//        )
+        fatalError(
+          """
+          Could not find column for key path '\(keyPathComparator.keyPath)'. This is only \
+          supported for  key paths of stored properties.
+          """
+        )
+      }
+      return _KeyPathComparatorExpression(columnAndOrders: columnAndOrders)
     }
   }
 
   private struct _KeyPathComparatorExpression<Table>: QueryExpression {
     typealias Value = Bool
-    let column: any ColumnExpression<Table>
-    let order: SortOrder
+    let columnAndOrders: [(any ColumnExpression<Table>, SortOrder)]
 
     var queryString: String {
-      """
-      \(column.queryString) \(order == .forward ? "ASC" : "DESC")
-      """
+      var query = ""
+      for (index, (column, order)) in columnAndOrders.enumerated() {
+        query += """
+          \(column.queryString) \
+          \(order == .forward ? "ASC" : "DESC")\
+          \(index < columnAndOrders.count - 1 ? ", " : "")
+          """
+      }
+      return query
     }
 
     var queryBindings: [QueryBinding] { [] }
