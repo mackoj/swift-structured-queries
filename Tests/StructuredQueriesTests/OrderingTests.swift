@@ -19,15 +19,5 @@ struct OrderingTests {
         "users"."id" DESC
         """
     )
-    #expect(
-      User.columns.id.ascending().descending().queryString == """
-        "users"."id" DESC
-        """
-    )
-    #expect(
-      User.columns.id.descending().ascending().queryString == """
-        "users"."id" ASC
-        """
-    )
   }
 }

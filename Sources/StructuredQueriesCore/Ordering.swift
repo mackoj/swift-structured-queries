@@ -1,35 +1,76 @@
 extension QueryExpression where Value: Comparable {
-  public func ascending() -> some QueryExpression<Value> {
+  public func ascending() -> OrderingTerm {
     OrderingTerm(base: self, direction: .ascending)
   }
 
-  public func descending() -> some QueryExpression<Value> {
+  public func descending() -> OrderingTerm {
     OrderingTerm(base: self, direction: .descending)
   }
 }
 
-private struct OrderingTerm<Value: Comparable> {
+public protocol _OrderingTerm {
+  var _orderingTerm: OrderingTerm { get }
+}
+
+public struct OrderingTerm {
   enum Direction: String {
     case ascending = "ASC"
     case descending = "DESC"
   }
 
-  let base: any QueryExpression<Value>
+  let base: any QueryExpression
 
-  let direction: Direction
+  let direction: Direction?
 
-  init(base: any QueryExpression<Value>, direction: Direction) {
-    if let base = base as? Self {
-      self.base = base.base
-      self.direction = direction
-    } else {
-      self.base = base
-      self.direction = direction
-    }
+  init(base: any QueryExpression, direction: Direction? = nil) {
+    self.base = base
+    self.direction = direction
   }
 }
 
 extension OrderingTerm: QueryExpression {
-  var queryString: String { "\(base.queryString) \(direction.rawValue)" }
-  var queryBindings: [QueryBinding] { base.queryBindings }
+  public typealias Value = Void
+  public var queryString: String {
+    "\(base.queryString)\(direction.map { " \($0.rawValue)" } ?? "")"
+  }
+  public var queryBindings: [QueryBinding] {
+    base.queryBindings
+  }
+}
+
+extension OrderingTerm: _OrderingTerm {
+  public var _orderingTerm: Self { self }
+}
+
+extension Column: _OrderingTerm where Value: Comparable {
+  public var _orderingTerm: OrderingTerm { OrderingTerm(base: self) }
+}
+
+@resultBuilder
+public enum OrderingBuilder {
+  public static func buildExpression<each Value: _OrderingTerm>(
+    _ expression: (repeat each Value)
+  ) -> [OrderingTerm] {
+    var terms: [OrderingTerm] = []
+    for term in repeat each expression {
+      terms.append(term._orderingTerm)
+    }
+    return terms
+  }
+
+  public static func buildBlock<Value>(_ component: Value) -> Value {
+    component
+  }
+
+  public static func buildEither<Value>(first component: Value) -> Value {
+    component
+  }
+
+  public static func buildEither<Value>(second component: Value) -> Value {
+    component
+  }
+
+  public static func buildOptional<Value>(_ component: Value?) -> Value? {
+    component
+  }
 }

@@ -96,4 +96,38 @@ struct SelectTests {
       == SyncUp.all().where { $0.id == 1 }.where(\.isActive).queryString
     )
   }
+
+  @Test func order() {
+    #expect(
+      SyncUp.all().order(\.title)
+        .queryString == """
+          SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."title" \
+          FROM "syncUps" \
+          ORDER BY "syncUps"."title"
+          """
+    )
+    #expect(
+      SyncUp.all().order { ($0.title.descending(), $0.id) }
+        .queryString == """
+          SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."title" \
+          FROM "syncUps" \
+          ORDER BY "syncUps"."title" DESC, "syncUps"."id"
+          """
+    )
+    let multipleFields = true
+    #expect(
+      SyncUp.all().order {
+        if multipleFields {
+          ($0.title.descending(), $0.id)
+        } else {
+          ($0.title)
+        }
+      }
+      .queryString == """
+        SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."title" \
+        FROM "syncUps" \
+        ORDER BY "syncUps"."title" DESC, "syncUps"."id"
+        """
+    )
+  }
 }

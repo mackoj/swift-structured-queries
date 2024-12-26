@@ -137,10 +137,17 @@ public struct Select<Input: Sendable, Output> {
     return copy
   }
 
-  public func order<each O: QueryExpression>(_ ordering: (Input) -> (repeat each O)) -> Self
-  where repeat (each O).Value: Comparable {
+  public func order<each O: _OrderingTerm>(_ ordering: (Input) -> (repeat each O)) -> Self {
     var copy = self
     copy.order = OrderClause(repeat each ordering(input))
+    return copy
+  }
+
+  public func order(
+    @OrderingBuilder _ ordering: (Input) -> [OrderingTerm]
+  ) -> Self {
+    var copy = self
+    copy.order = OrderClause(terms: ordering(input))
     return copy
   }
 
@@ -478,14 +485,14 @@ extension HavingClause: QueryExpression {
 }
 
 private struct OrderClause {
-  let terms: [any QueryExpression]
-  init(terms: [any QueryExpression]) {
+  let terms: [OrderingTerm]
+  init(terms: [OrderingTerm]) {
     self.terms = terms
   }
-  init?<each O: QueryExpression>(_ terms: repeat each O) where repeat (each O).Value: Comparable {
-    var expressions: [any QueryExpression] = []
+  init?<each O: _OrderingTerm>(_ terms: repeat each O) {
+    var expressions: [OrderingTerm] = []
     for term in repeat each terms {
-      expressions.append(term)
+      expressions.append(term._orderingTerm)
     }
     guard !expressions.isEmpty else { return nil }
     self.terms = expressions
