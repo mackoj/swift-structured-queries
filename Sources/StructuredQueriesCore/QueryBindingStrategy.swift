@@ -13,8 +13,7 @@ extension Column {
     as strategy: Strategy
   )
   where Value == Bind<Strategy> {
-    self.keyPath = keyPath
-    self.name = name
+    self.init(name, keyPath: keyPath)
   }
 
   public func decode<Strategy: QueryBindingStrategy>(

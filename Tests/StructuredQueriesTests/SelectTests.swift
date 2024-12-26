@@ -93,7 +93,7 @@ struct SelectTests {
     )
     #expect(
       SyncUp.all().where { $0.id == 1 && $0.isActive }.queryString
-        == SyncUp.all().where { $0.id == 1 }.where(\.isActive).queryString
+      == SyncUp.all().where { $0.id == 1 }.where(\.isActive).queryString
     )
   }
 }

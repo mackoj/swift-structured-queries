@@ -1,11 +1,13 @@
 public struct Column<Root: Table, Value: QueryBindable> {
-  public let keyPath: PartialKeyPath<Root> & Sendable
+  public let _keyPath: PartialKeyPath<Root> & Sendable
   public let name: String
 
   public init(_ name: String, keyPath: PartialKeyPath<Root> & Sendable) {
-    self.keyPath = keyPath
+    self._keyPath = keyPath
     self.name = name
   }
+
+  public var keyPath: PartialKeyPath<Root> { _keyPath }
 }
 
 extension Column: ColumnExpression {
