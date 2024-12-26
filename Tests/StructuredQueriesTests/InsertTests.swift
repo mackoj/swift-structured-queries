@@ -1,22 +1,22 @@
 import StructuredQueries
 import Testing
 
-@Table
-private struct SyncUp: Equatable {
-  var id: Int
-  var isActive: Bool
-  var seconds: Double
-  var title: String
-}
-
-@Table
-private struct Attendee: Equatable {
-  var id: Int
-  var name: String
-  var syncUpID: Int
-}
-
 struct InsertTests {
+  @Table
+  struct SyncUp: Equatable {
+    var id: Int
+    var isActive: Bool
+    var seconds: Double
+    var title: String
+  }
+
+  @Table
+  struct Attendee: Equatable {
+    var id: Int
+    var name: String
+    var syncUpID: Int
+  }
+
   @Test func basics() {
     #expect(
       SyncUp.insert {

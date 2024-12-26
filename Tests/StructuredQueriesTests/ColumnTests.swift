@@ -2,22 +2,22 @@ import Foundation
 import StructuredQueries
 import Testing
 
-@Table
-private struct Author {
-  struct ID: RawRepresentable, QueryBindable { var rawValue: Int }
-  var id: ID
-  var name: String
-}
-
-@Table
-private struct Book {
-  var id: Int64
-  var name: String
-  @Column(as: .iso8601)
-  var published: Date
-}
-
 struct ColumnTests {
+  @Table
+  struct Author {
+    struct ID: RawRepresentable, QueryBindable { var rawValue: Int }
+    var id: ID
+    var name: String
+  }
+
+  @Table
+  struct Book {
+    var id: Int64
+    var name: String
+    @Column(as: .iso8601)
+    var published: Date
+  }
+
   @Test func expression() {
     #expect(
       Author.columns.id.queryString == """

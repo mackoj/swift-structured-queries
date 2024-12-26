@@ -1,16 +1,16 @@
 import StructuredQueries
 import Testing
 
-@Table
-private struct User {
-  var id: Int
-  var name: String
-  var isAdmin: Bool
-  var salary: Double
-  var referrerID: Int?
-}
-
 struct OperatorsTests {
+  @Table
+  struct User {
+    var id: Int
+    var name: String
+    var isAdmin: Bool
+    var salary: Double
+    var referrerID: Int?
+  }
+
   @Test func equatable() {
     #expect(
       (User.columns.id == 1).queryString == """

@@ -130,13 +130,14 @@ extension TableMacro: ExtensionMacro {
         "\(declaration.name.trimmed.text.tableName())"
         """
     }
+    let typeName = type.trimmed
     return [
       DeclSyntax(
         """
-        \(declaration.attributes.availability)extension \(type.trimmed)\
+        \(declaration.attributes.availability)extension \(typeName)\
         \(conformances.isEmpty ? "" : ": \(raw: conformances.joined(separator: ", "))") {
         public struct Columns: \(moduleName).TableExpression {
-        public typealias Value = \(declaration.name.trimmed)
+        public typealias Value = \(typeName)
         \(raw: columnsProperties.joined(separator: "\n"))
         public var allColumns: [any \(moduleName).ColumnExpression<Value>] {\
         [\(raw: allColumns.joined(separator: ", "))] \

@@ -340,4 +340,54 @@ struct TableMacroTests {
       }
     }
   }
+
+  @Test
+  func nested() {
+    withMacroTesting(
+      record: .failed,
+      macros: [TableMacro.self]
+    ) {
+      assertMacro {
+        """
+        struct Outer {
+          @Table
+          struct User {
+            var id: Int
+            var name: String
+          }
+        }
+        """
+      } expansion: {
+        """
+        struct Outer {
+          struct User {
+            @Column
+            var id: Int
+            @Column
+            var name: String
+          }
+        }
+
+        extension Outer.User: StructuredQueries.Table {
+          public struct Columns: StructuredQueries.TableExpression {
+            public typealias Value = Outer.User
+            public let id = StructuredQueries.Column<Value, Int>("id")
+            public let name = StructuredQueries.Column<Value, String>("name")
+            public var allColumns: [any StructuredQueries.ColumnExpression<Value>] {
+              [id, name]
+            }
+          }
+          public static var columns: Columns {
+            Columns()
+          }
+          public static let name = "users"
+          public init(decoder: any StructuredQueries.QueryDecoder) throws {
+            id = try Self.columns.id.decode(decoder: decoder)
+            name = try Self.columns.name.decode(decoder: decoder)
+          }
+        }
+        """
+      }
+    }
+  }
 }

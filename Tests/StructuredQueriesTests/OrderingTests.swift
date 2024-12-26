@@ -1,13 +1,13 @@
 import StructuredQueries
 import Testing
 
-@Table
-private struct User {
-  var id: Int
-  var name: String
-}
-
 struct OrderingTests {
+  @Table
+  struct User {
+    var id: Int
+    var name: String
+  }
+
   @Test func basics() {
     #expect(
       User.columns.id.ascending().queryString == """

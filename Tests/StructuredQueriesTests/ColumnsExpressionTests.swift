@@ -1,13 +1,13 @@
 import StructuredQueries
 import Testing
 
-@Table
-private struct User {
-  var id: Int
-  var name: String
-}
-
 struct ColumnsExpressionTests {
+  @Table
+  struct User {
+    var id: Int
+    var name: String
+  }
+
   @Test func expression() {
     #expect(
       User.columns.queryString == """

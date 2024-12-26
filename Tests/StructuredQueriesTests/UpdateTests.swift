@@ -1,14 +1,14 @@
 import StructuredQueries
 import Testing
 
-@Table
-private struct SyncUp: Equatable {
-  var id: Int
-  var isActive: Bool
-  var title: String
-}
-
 struct UpdateTests {
+  @Table
+  struct SyncUp: Equatable {
+    var id: Int
+    var isActive: Bool
+    var title: String
+  }
+
   @Test func basics() {
     #expect(
       SyncUp

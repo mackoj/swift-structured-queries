@@ -1,14 +1,14 @@
 import StructuredQueries
 import Testing
 
-@Table
-private struct User {
-  var id: Int
-  var name: String
-  var isAdmin: Bool
-}
-
 struct AggregatesTests {
+  @Table
+  struct User {
+    var id: Int
+    var name: String
+    var isAdmin: Bool
+  }
+
   @Test func average() {
     #expect(
       User.columns.id.average().queryString == """
