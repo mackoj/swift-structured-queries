@@ -10,10 +10,11 @@ extension Column {
   public init<Strategy: QueryBindingStrategy>(
     _ name: String,
     keyPath: PartialKeyPath<Root> & Sendable,
-    as strategy: Strategy
+    as strategy: Strategy,
+    default: Value? = nil
   )
   where Value == Bind<Strategy> {
-    self.init(name, keyPath: keyPath)
+    self.init(name, keyPath: keyPath, default: `default`)
   }
 
   public func decode<Strategy: QueryBindingStrategy>(

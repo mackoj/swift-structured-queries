@@ -70,8 +70,7 @@ extension TableMacro: ExtensionMacro {
       else { continue }
       for binding in property.bindings {
         guard
-          let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier,
-          let type = binding.typeAnnotation?.type ?? binding.initializer?.value.literalType
+          let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier
         else {
           continue
         }
@@ -103,17 +102,23 @@ extension TableMacro: ExtensionMacro {
           columnNameArgument ?? """
             "\(name)"
             """
-        let strategy: String
+        var arguments = ""
         if let columnStrategyArgument {
           typeGeneric = "_"
-          strategy = ", as: \(columnStrategyArgument)"
+          arguments.append(", as: \(columnStrategyArgument)")
         } else {
-          typeGeneric = type.trimmedDescription
-          strategy = ""
+          typeGeneric = (binding.typeAnnotation?.type ?? binding.initializer?.value.literalType)?
+            .trimmedDescription
+            ?? "_"
+        }
+        if let value = binding.initializer?.value {
+          arguments.append(", default: \(value.trimmedDescription)")
         }
         columnsProperties.append(
           """
-          public let \(name) = \(moduleName).Column<Value, \(typeGeneric)>(\(columnName), keyPath: \\.\(name)\(strategy))
+          public let \(name) = \(moduleName).Column<Value, \(typeGeneric)>(\
+          \(columnName), keyPath: \\.\(name)\(arguments)\
+          )
           """
         )
         allColumns.append(name)

@@ -314,7 +314,7 @@ struct TableMacroTests {
         }
         """
       } expansion: {
-        """
+        #"""
         struct User {
           @Column
           var id = Int(0)
@@ -323,7 +323,7 @@ struct TableMacroTests {
         extension User: StructuredQueries.Table {
           public struct Columns: StructuredQueries.TableExpression {
             public typealias Value = User
-
+            public let id = StructuredQueries.Column<Value, _>("id", keyPath: \.id, default: Int(0))
             public var allColumns: [any StructuredQueries.ColumnExpression<Value>] {
               [id]
             }
@@ -333,10 +333,10 @@ struct TableMacroTests {
           }
           public static let name = "users"
           public init(decoder: any StructuredQueries.QueryDecoder) throws {
-
+            id = try Self.columns.id.decode(decoder: decoder)
           }
         }
-        """
+        """#
       }
     }
   }
@@ -358,7 +358,7 @@ struct TableMacroTests {
         }
         """
       } expansion: {
-        """
+        #"""
         struct Outer {
           struct User {
             @Column
@@ -371,8 +371,8 @@ struct TableMacroTests {
         extension Outer.User: StructuredQueries.Table {
           public struct Columns: StructuredQueries.TableExpression {
             public typealias Value = Outer.User
-            public let id = StructuredQueries.Column<Value, Int>("id")
-            public let name = StructuredQueries.Column<Value, String>("name")
+            public let id = StructuredQueries.Column<Value, Int>("id", keyPath: \.id)
+            public let name = StructuredQueries.Column<Value, String>("name", keyPath: \.name)
             public var allColumns: [any StructuredQueries.ColumnExpression<Value>] {
               [id, name]
             }
@@ -386,7 +386,7 @@ struct TableMacroTests {
             name = try Self.columns.name.decode(decoder: decoder)
           }
         }
-        """
+        """#
       }
     }
   }

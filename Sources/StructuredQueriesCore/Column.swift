@@ -1,9 +1,11 @@
 public struct Column<Root: Table, Value: QueryBindable> {
   public let _keyPath: PartialKeyPath<Root> & Sendable
   public let name: String
+  public let `default`: Value?
 
-  public init(_ name: String, keyPath: PartialKeyPath<Root> & Sendable) {
+  public init(_ name: String, keyPath: PartialKeyPath<Root> & Sendable, default: Value? = nil) {
     self._keyPath = keyPath
+    self.default = `default`
     self.name = name
   }
 
