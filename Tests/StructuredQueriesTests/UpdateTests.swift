@@ -93,4 +93,19 @@ struct UpdateTests {
           """
     )
   }
+
+  @Test func record() {
+    let query = SyncUp.update(SyncUp(id: 42, isActive: true, title: "Engineering"))
+    #expect(
+      query.queryString == """
+        UPDATE "syncUps" SET "isActive" = ?, "title" = ? \
+        WHERE ("syncUps"."id" = ?)
+        """
+    )
+    #expect(query.queryBindings == [.int(1), .text("Engineering"), .int(42)])
+  }
+}
+
+extension UpdateTests.SyncUp.Columns: PrimaryKeyed {
+  var primaryKey: Column<Value, Int> { id }
 }

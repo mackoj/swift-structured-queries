@@ -7,6 +7,21 @@ extension Table {
     updates(&record)
     return Update(conflictResolution: conflictResolution, record: record)
   }
+
+  public static func update(
+    or conflictResolution: ConflictResolution? = nil,
+    _ record: Self
+  ) -> Update<Self, Void>
+  where Columns: PrimaryKeyed {
+    update(or: conflictResolution) {
+      for column in columns.allColumns where column.name != columns.primaryKey.name {
+        $0.updates.append((column, record[keyPath: column.keyPath] as! any QueryExpression))
+      }
+    }
+    .where {
+      $0.primaryKey == record[keyPath: $0.primaryKey.keyPath] as! Columns.ID
+    }
+  }
 }
 
 public struct Update<Base: Table, Output> {

@@ -9,12 +9,14 @@ public protocol QueryBindingStrategy<Representable>: Sendable {
 extension Column {
   public init<Strategy: QueryBindingStrategy>(
     _ name: String,
-    keyPath: PartialKeyPath<Root> & Sendable,
+    keyPath: KeyPath<Root, Strategy.Representable> & Sendable,
     as strategy: Strategy,
     default: Value? = nil
   )
   where Value == Bind<Strategy> {
-    self.init(name, keyPath: keyPath, default: `default`)
+    self._keyPath = keyPath
+    self.default = `default`
+    self.name = name
   }
 
   public func decode<Strategy: QueryBindingStrategy>(
