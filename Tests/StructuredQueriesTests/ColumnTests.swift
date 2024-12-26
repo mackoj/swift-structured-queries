@@ -1,3 +1,4 @@
+import Foundation
 import StructuredQueries
 import Testing
 
@@ -12,6 +13,8 @@ private struct Author {
 private struct Book {
   var id: Int64
   var name: String
+  @Column(as: .iso8601)
+  var published: Date
 }
 
 struct ColumnTests {
@@ -32,6 +35,18 @@ struct ColumnTests {
   @Test func exoticInteger() {
     #expect(
       (Book.columns.id == 42 as Int64).queryString == #"("books"."id" = ?)"#
+    )
+  }
+
+  @Test func strategy() {
+    let query = Book.columns.published > .bind(Date(timeIntervalSince1970: 0), as: .iso8601)
+    #expect(
+      query.queryString == """
+        ("books"."published" > ?)
+        """
+    )
+    #expect(
+      query.queryBindings == [.text("1970-01-01T00:00:00Z")]
     )
   }
 }

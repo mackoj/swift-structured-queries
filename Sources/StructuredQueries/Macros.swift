@@ -19,3 +19,9 @@ public macro Column(_ name: String? = nil) =
   #externalMacro(
     module: "StructuredQueriesMacros", type: "ColumnMacro"
   )
+
+@attached(accessor, names: named(willSet))
+public macro Column<Strategy: QueryBindingStrategy>(_ name: String? = nil, as strategy: Strategy) =
+  #externalMacro(
+    module: "StructuredQueriesMacros", type: "ColumnMacro"
+  )

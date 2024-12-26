@@ -6,7 +6,6 @@ public protocol QueryBindable<Value>: QueryDecodable, QueryExpression where Valu
 
 extension QueryBindable {
   public var queryString: String { "?" }
-  public var queryBinding: QueryBinding { queryValue.queryBinding }
   public var queryBindings: [QueryBinding] { [queryBinding] }
 }
 
@@ -50,6 +49,10 @@ extension Int64: QueryBindable {
   public var queryBinding: QueryBinding { .int(self) }
 }
 
+extension String: QueryBindable {
+  public var queryBinding: QueryBinding { .text(self) }
+}
+
 extension UInt8: QueryBindable {
   public var queryBinding: QueryBinding { .int(Int64(self)) }
 }
@@ -62,8 +65,8 @@ extension UInt32: QueryBindable {
   public var queryBinding: QueryBinding { .int(Int64(self)) }
 }
 
-extension String: QueryBindable {
-  public var queryBinding: QueryBinding { .text(self) }
+extension [UInt8]: QueryBindable {
+  public var queryBinding: QueryBinding { .blob(self) }
 }
 
 extension DefaultStringInterpolation {

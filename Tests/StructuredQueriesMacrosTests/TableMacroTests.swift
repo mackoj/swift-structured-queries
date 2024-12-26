@@ -40,8 +40,8 @@ struct TableMacroTests {
           }
           public static let name = "users"
           public init(decoder: any StructuredQueries.QueryDecoder) throws {
-            id = try decoder.decode(Int.self)
-            name = try decoder.decode(String.self)
+            id = try Self.columns.id.decode(decoder: decoder)
+            name = try Self.columns.name.decode(decoder: decoder)
           }
         }
         """
@@ -84,7 +84,7 @@ struct TableMacroTests {
           }
           public static let name = "users"
           public init(decoder: any StructuredQueries.QueryDecoder) throws {
-            id = try decoder.decode(Int.self)
+            id = try Self.columns.id.decode(decoder: decoder)
           }
         }
         """#
@@ -126,7 +126,7 @@ struct TableMacroTests {
           }
           public static let name = "users"
           public init(decoder: any StructuredQueries.QueryDecoder) throws {
-            id = try decoder.decode(Int.self)
+            id = try Self.columns.id.decode(decoder: decoder)
           }
         }
         """
@@ -167,7 +167,7 @@ struct TableMacroTests {
           }
           public static let name = "user"
           public init(decoder: any StructuredQueries.QueryDecoder) throws {
-            id = try decoder.decode(Int.self)
+            id = try Self.columns.id.decode(decoder: decoder)
           }
         }
         """
@@ -209,7 +209,49 @@ struct TableMacroTests {
           }
           public static let name = "users"
           public init(decoder: any StructuredQueries.QueryDecoder) throws {
-            id = try decoder.decode(Int.self)
+            id = try Self.columns.id.decode(decoder: decoder)
+          }
+        }
+        """
+      }
+    }
+  }
+
+  @Test
+  func customBindingStrategy() {
+    withMacroTesting(
+      record: .failed,
+      macros: [TableMacro.self]
+    ) {
+      assertMacro {
+        #"""
+        @Table
+        struct User {
+          @Column(as: .iso8601)
+          var joined: Date
+        }
+        """#
+      } expansion: {
+        """
+        struct User {
+          @Column(as: .iso8601)
+          var joined: Date
+        }
+
+        extension User: StructuredQueries.Table {
+          public struct Columns: StructuredQueries.TableExpression {
+            public typealias Value = User
+            public let joined = StructuredQueries.Column<Value, _>("joined", as: .iso8601)
+            public var allColumns: [any StructuredQueries.ColumnExpression] {
+              [joined]
+            }
+          }
+          public static var columns: Columns {
+            Columns()
+          }
+          public static let name = "users"
+          public init(decoder: any StructuredQueries.QueryDecoder) throws {
+            joined = try Self.columns.joined.decode(decoder: decoder)
           }
         }
         """
@@ -250,7 +292,7 @@ struct TableMacroTests {
           }
           public static let name = "users"
           public init(decoder: any StructuredQueries.QueryDecoder) throws {
-            id = try decoder.decode(Tagged<User, Int>.self)
+            id = try Self.columns.id.decode(decoder: decoder)
           }
         }
         """

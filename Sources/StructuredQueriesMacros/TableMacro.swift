@@ -75,29 +75,47 @@ extension TableMacro: ExtensionMacro {
         else { continue }
         let name = identifier.trimmedDescription
         var columnNameArgument: String?
+        var columnStrategyArgument: String?
         for attribute in property.attributes {
           guard
             let attribute = attribute.as(AttributeSyntax.self),
             let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
             attributeName == "Column",
-            case let .argumentList(arguments) = attribute.arguments,
-            let expression = arguments.first?.expression
+            case let .argumentList(arguments) = attribute.arguments
           else { continue }
-          columnNameArgument = expression.trimmedDescription
+          for argument in arguments {
+            switch argument.label?.text {
+            case nil:
+              // TODO: Require string literal?
+              columnNameArgument = argument.trimmedDescription
+            case "as":
+              columnStrategyArgument = argument.expression.trimmedDescription
+            case let argument?:
+              fatalError("Unexpected argument: \(argument)")
+            }
+          }
           break
         }
+        let typeGeneric: String
         let columnName =
           columnNameArgument ?? """
             "\(name)"
             """
-        let typeName = type.trimmedDescription
+        let strategy: String
+        if let columnStrategyArgument {
+          typeGeneric = "_"
+          strategy = ", as: \(columnStrategyArgument)"
+        } else {
+          typeGeneric = type.trimmedDescription
+          strategy = ""
+        }
         columnsProperties.append(
           """
-          public let \(name) = \(moduleName).Column<Value, \(typeName)>(\(columnName))
+          public let \(name) = \(moduleName).Column<Value, \(typeGeneric)>(\(columnName)\(strategy))
           """
         )
         allColumns.append(name)
-        decodings.append("\(name) = try decoder.decode(\(typeName).self)")
+        decodings.append("\(name) = try Self.columns.\(name).decode(decoder: decoder)")
       }
     }
     let tableName: String
