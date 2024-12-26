@@ -111,7 +111,7 @@ extension TableMacro: ExtensionMacro {
         }
         columnsProperties.append(
           """
-          public let \(name) = \(moduleName).Column<Value, \(typeGeneric)>(\(columnName)\(strategy))
+          public let \(name) = \(moduleName).Column<Value, \(typeGeneric)>(\(columnName), keyPath: \\.\(name)\(strategy))
           """
         )
         allColumns.append(name)

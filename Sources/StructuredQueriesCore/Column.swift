@@ -1,7 +1,9 @@
 public struct Column<Root: Table, Value: QueryBindable> {
+  public let keyPath: PartialKeyPath<Root> & Sendable
   public let name: String
 
-  public init(_ name: String) {
+  public init(_ name: String, keyPath: PartialKeyPath<Root> & Sendable) {
+    self.keyPath = keyPath
     self.name = name
   }
 }

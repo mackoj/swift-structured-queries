@@ -7,8 +7,13 @@ public protocol QueryBindingStrategy<Representable>: Sendable {
 }
 
 extension Column {
-  public init<Strategy: QueryBindingStrategy>(_ name: String, as strategy: Strategy)
+  public init<Strategy: QueryBindingStrategy>(
+    _ name: String,
+    keyPath: PartialKeyPath<Root> & Sendable,
+    as strategy: Strategy
+  )
   where Value == Bind<Strategy> {
+    self.keyPath = keyPath
     self.name = name
   }
 
