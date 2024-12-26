@@ -136,7 +136,7 @@ extension TableMacro: ExtensionMacro {
         public struct Columns: \(moduleName).TableExpression {
         public typealias Value = \(declaration.name.trimmed)
         \(raw: columnsProperties.joined(separator: "\n"))
-        public var allColumns: [any \(moduleName).ColumnExpression] {\
+        public var allColumns: [any \(moduleName).ColumnExpression<Value>] {\
         [\(raw: allColumns.joined(separator: ", "))] \
         }
         }

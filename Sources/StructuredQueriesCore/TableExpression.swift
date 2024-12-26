@@ -1,5 +1,5 @@
 public protocol TableExpression<Value>: QueryExpression where Value: Table {
-  var allColumns: [any ColumnExpression] { get }
+  var allColumns: [any ColumnExpression<Value>] { get }
 }
 
 extension TableExpression {

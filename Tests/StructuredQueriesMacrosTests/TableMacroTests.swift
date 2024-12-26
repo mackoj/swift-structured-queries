@@ -31,7 +31,7 @@ struct TableMacroTests {
             public typealias Value = User
             public let id = StructuredQueries.Column<Value, Int>("id")
             public let name = StructuredQueries.Column<Value, String>("name")
-            public var allColumns: [any StructuredQueries.ColumnExpression] {
+            public var allColumns: [any StructuredQueries.ColumnExpression<Value>] {
               [id, name]
             }
           }
@@ -75,7 +75,7 @@ struct TableMacroTests {
           public struct Columns: StructuredQueries.TableExpression {
             public typealias Value = User
             public let id = StructuredQueries.Column<Value, Int>("id")
-            public var allColumns: [any StructuredQueries.ColumnExpression] {
+            public var allColumns: [any StructuredQueries.ColumnExpression<Value>] {
               [id]
             }
           }
@@ -117,7 +117,7 @@ struct TableMacroTests {
           public struct Columns: StructuredQueries.TableExpression {
             public typealias Value = User
             public let id = StructuredQueries.Column<Value, Int>("id")
-            public var allColumns: [any StructuredQueries.ColumnExpression] {
+            public var allColumns: [any StructuredQueries.ColumnExpression<Value>] {
               [id]
             }
           }
@@ -158,7 +158,7 @@ struct TableMacroTests {
           public struct Columns: StructuredQueries.TableExpression {
             public typealias Value = User
             public let id = StructuredQueries.Column<Value, Int>("id")
-            public var allColumns: [any StructuredQueries.ColumnExpression] {
+            public var allColumns: [any StructuredQueries.ColumnExpression<Value>] {
               [id]
             }
           }
@@ -200,7 +200,7 @@ struct TableMacroTests {
           public struct Columns: StructuredQueries.TableExpression {
             public typealias Value = User
             public let id = StructuredQueries.Column<Value, Int>("user_id")
-            public var allColumns: [any StructuredQueries.ColumnExpression] {
+            public var allColumns: [any StructuredQueries.ColumnExpression<Value>] {
               [id]
             }
           }
@@ -242,7 +242,7 @@ struct TableMacroTests {
           public struct Columns: StructuredQueries.TableExpression {
             public typealias Value = User
             public let joined = StructuredQueries.Column<Value, _>("joined", as: .iso8601)
-            public var allColumns: [any StructuredQueries.ColumnExpression] {
+            public var allColumns: [any StructuredQueries.ColumnExpression<Value>] {
               [joined]
             }
           }
@@ -283,7 +283,7 @@ struct TableMacroTests {
           public struct Columns: StructuredQueries.TableExpression {
             public typealias Value = User
             public let id = StructuredQueries.Column<Value, Tagged<User, Int>>("id")
-            public var allColumns: [any StructuredQueries.ColumnExpression] {
+            public var allColumns: [any StructuredQueries.ColumnExpression<Value>] {
               [id]
             }
           }
