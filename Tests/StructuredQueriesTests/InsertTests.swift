@@ -246,6 +246,23 @@ struct InsertTests {
         """
     )
   }
+
+  @Test func records() {
+    #expect(
+      SyncUp.insert([
+        SyncUp(id: 1, isActive: true, seconds: 60, title: "Engineering"),
+        SyncUp(id: 2, isActive: false, seconds: 15 * 60, title: "Product"),
+      ])
+      .queryString == """
+        INSERT INTO "syncUps" \
+        ("id", "isActive", "seconds", "title") \
+        VALUES \
+        (?, ?, ?, ?), \
+        (?, ?, ?, ?)
+        """
+    )
+    #expect(SyncUp.insert([]).queryString.isEmpty)
+  }
 }
 
 extension String {

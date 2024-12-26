@@ -106,6 +106,18 @@ extension Table {
   }
 
   public static func insert(
+    or conflictResolution: ConflictResolution? = nil,
+    _ records: [Self]
+  ) -> Insert<Self, Void, Void> {
+    Insert(
+      input: (),
+      conflictResolution: conflictResolution,
+      columns: columns.allColumns,
+      form: .records(records)
+    )
+  }
+
+  public static func insert(
     or conflictResolution: ConflictResolution? = nil
   ) -> Insert<Self, Void, Void> {
     Insert(input: (), conflictResolution: conflictResolution)
@@ -116,7 +128,7 @@ public struct Insert<Base: Table, Input: Sendable, Output> {
   fileprivate var input: Input
   fileprivate var conflictResolution: ConflictResolution?
   fileprivate var columns: [any ColumnExpression] = []
-  fileprivate var form: InsertionForm = .defaultValues
+  fileprivate var form: InsertionForm<Base> = .defaultValues
   fileprivate var record: Record<Base>?
   fileprivate var returning: ReturningClause?
 
@@ -138,6 +150,8 @@ public struct Insert<Base: Table, Input: Sendable, Output> {
 extension Insert: Statement {
   public typealias Value = [Output]
   public var queryString: String {
+    let form = form.queryString
+    guard !form.isEmpty else { return "" }
     var sql = "INSERT"
     if let conflictResolution {
       sql.append(" OR \(conflictResolution.queryString)")
@@ -146,7 +160,7 @@ extension Insert: Statement {
     if !columns.isEmpty {
       sql.append(" (\(columns.map { $0.name.quoted() }.joined(separator: ", ")))")
     }
-    sql.append(" \(form.queryString)")
+    sql.append(" \(form)")
     if let record {
       sql.append(
         " ON CONFLICT DO \(record.updates.isEmpty ? "NOTHING" : "UPDATE \(record.queryString)")")
@@ -169,10 +183,11 @@ extension Insert: Statement {
   }
 }
 
-private enum InsertionForm: QueryExpression {
+private enum InsertionForm<Base: Table>: QueryExpression {
   case defaultValues
   case values([[any QueryExpression]])
   case select(any Statement)
+  case records([Base])
 
   typealias Value = Void
   var queryString: String {
@@ -189,6 +204,15 @@ private enum InsertionForm: QueryExpression {
         """
     case let .select(statement):
       return statement.queryString
+    case let .records(records):
+      guard !records.isEmpty else { return "" }
+      let row = """
+        (\(Array(repeating: "?", count: Base.columns.allColumns.count).joined(separator: ", ")))
+        """
+      let values = Array(repeating: row, count: records.count).joined(separator: ", ")
+      return """
+        VALUES \(values)
+        """
     }
   }
   var queryBindings: [QueryBinding] {
@@ -199,6 +223,12 @@ private enum InsertionForm: QueryExpression {
       return rows.flatMap { $0.flatMap(\.queryBindings) }
     case let .select(statement):
       return statement.queryBindings
+    case let .records(records):
+      return records.flatMap { record in
+        Base.columns.allColumns.map { column in
+          (record[keyPath: column.keyPath] as! any QueryBindable).queryBinding
+        }
+      }
     }
   }
 }
