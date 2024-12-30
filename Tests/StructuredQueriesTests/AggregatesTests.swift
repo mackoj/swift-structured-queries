@@ -33,6 +33,16 @@ struct AggregatesTests {
         count(DISTINCT "users"."id")
         """
     )
+    #expect(
+      User.columns.count().queryString == """
+        count("users".*)
+        """
+    )
+    #expect(
+      User.columns.count(distinct: true).queryString == """
+        count(DISTINCT "users".*)
+        """
+    )
   }
 
   @Test func maximum() {

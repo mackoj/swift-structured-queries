@@ -4,6 +4,12 @@ extension QueryExpression where Value: QueryBindable {
   }
 }
 
+extension TableExpression {
+  public func count(distinct isDistinct: Bool = false) -> some QueryExpression<Int> {
+    AggregateFunction("count", isDistinct: isDistinct, Star(base: self))
+  }
+}
+
 extension QueryExpression where Value: Comparable {
   public func maximum(distinct isDistinct: Bool = false) -> some QueryExpression<Int?> {
     AggregateFunction("max", self)
@@ -52,4 +58,11 @@ private struct AggregateFunction<Argument: QueryExpression, Value>: QueryExpress
     return sql
   }
   var queryBindings: [QueryBinding] { argument.queryBindings }
+}
+
+private struct Star<Base: TableExpression>: QueryExpression {
+  let base: Base
+  typealias Value = Void
+  var queryString: String { "\(Base.Value.name.quoted()).*" }
+  var queryBindings: [QueryBinding] { base.queryBindings }
 }

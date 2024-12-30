@@ -9,7 +9,7 @@ extension TableExpression {
   public var queryBindings: [QueryBinding] { [] }
 
   // TODO: Make this more efficient with an OrderedDictionary?
-  // TODO: Shuold we force unwrap this or can a builder handle it for us (+ a reportIssue)
+  // TODO: Should we force unwrap this or can a builder handle it for us (+ a reportIssue)
   public func column<Member>(for keyPath: KeyPath<Value, Member>) -> Column<Value, Member>? {
     for column in allColumns {
       if column.keyPath == keyPath {
