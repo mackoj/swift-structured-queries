@@ -325,7 +325,7 @@ struct TableMacroTests {
             public typealias Value = User
             public let id = StructuredQueries.Column<Value, _>("id", keyPath: \.id, default: Int(0))
             public var allColumns: [any StructuredQueries.ColumnExpression<Value>] {
-              []
+              [id]
             }
           }
           public static var columns: Columns {
