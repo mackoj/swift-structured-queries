@@ -42,7 +42,7 @@ extension OrderingTerm: _OrderingTerm {
   public var _orderingTerm: Self { self }
 }
 
-extension Column: _OrderingTerm where Value: Comparable {
+extension Column: _OrderingTerm {
   public var _orderingTerm: OrderingTerm { OrderingTerm(base: self) }
 }
 

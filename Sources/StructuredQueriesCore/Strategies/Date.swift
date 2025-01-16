@@ -16,8 +16,10 @@ public struct ISO8601Strategy: QueryBindingStrategy {
   }
 }
 
+// TODO: Should this be called "secondsSince1970" since it's an integer?
 public struct TimeIntervalSince1970Strategy: QueryBindingStrategy {
   public init() {}
+  // TODO: Should RawValue be Int?
   public func fromQueryBindable(_ rawValue: Double) throws -> Date {
     Date(timeIntervalSince1970: rawValue)
   }

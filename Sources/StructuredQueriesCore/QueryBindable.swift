@@ -1,3 +1,4 @@
+// TODO: Should we underscore these requirements in order to somewhat hide them from stdlib types?
 public protocol QueryBindable<Value>: QueryDecodable, QueryExpression where Value: QueryBindable {
   associatedtype Value = Self
   var queryValue: Value { get }

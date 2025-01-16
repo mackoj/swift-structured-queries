@@ -4,12 +4,6 @@ extension QueryExpression where Value: QueryBindable {
   }
 }
 
-extension TableExpression {
-  public func count(distinct isDistinct: Bool = false) -> some QueryExpression<Int> {
-    AggregateFunction("count", isDistinct: isDistinct, Star(base: self))
-  }
-}
-
 extension QueryExpression where Value: Comparable {
   public func maximum(distinct isDistinct: Bool = false) -> some QueryExpression<Int?> {
     AggregateFunction("max", self)
@@ -32,6 +26,16 @@ extension QueryExpression where Value: Numeric {
   public func total(distinct isDistinct: Bool = false) -> some QueryExpression<Value> {
     AggregateFunction("total", isDistinct: isDistinct, self)
   }
+}
+
+extension QueryExpression where Self == CountExpression {
+  public static func count() -> CountExpression { CountExpression() }
+}
+
+public struct CountExpression: QueryExpression {
+  public typealias Value = Int
+  public var queryString: String { "count(*)" }
+  public var queryBindings: [QueryBinding] { [] }
 }
 
 private struct AggregateFunction<Argument: QueryExpression, Value>: QueryExpression {
@@ -58,11 +62,4 @@ private struct AggregateFunction<Argument: QueryExpression, Value>: QueryExpress
     return sql
   }
   var queryBindings: [QueryBinding] { argument.queryBindings }
-}
-
-private struct Star<Base: TableExpression>: QueryExpression {
-  let base: Base
-  typealias Value = Void
-  var queryString: String { "\(Base.Value.name.quoted()).*" }
-  var queryBindings: [QueryBinding] { base.queryBindings }
 }

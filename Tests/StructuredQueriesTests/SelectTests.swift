@@ -135,9 +135,27 @@ struct SelectTests {
           $0.title
         }
       }
-      .queryString == """
+        .queryString == """
         SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."title" \
         FROM "syncUps"
+        """
+    )
+    #expect(
+      SyncUp.all()
+        .where { $0.isActive }
+        .order {
+        switch condition {
+        case true:
+          $0.title
+        case false:
+          $0.isActive
+        }
+      }
+        .queryString == """
+        SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."title" \
+        FROM "syncUps" \
+        WHERE "syncUps"."isActive" \
+        ORDER BY "syncUps"."isActive"
         """
     )
   }

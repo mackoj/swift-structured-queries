@@ -42,6 +42,26 @@ public struct Select<Input: Sendable, Output> {
     )
   }
 
+  public func select<O: QueryExpression>(
+    distinct isDistinct: Bool = false,
+    _ selection: (Input) -> O
+  ) -> Select<Input, O.Value>
+  where repeat O.Value: QueryDecodable {
+    Select<Input, O.Value>(
+      input: input,
+      isDistinct: isDistinct,
+      select: [selection(input)],
+      from: from,
+      joins: joins,
+      where: `where`,
+      group: group,
+      having: having,
+      order: order,
+      limit: limit
+    )
+  }
+
+
   // https://github.com/swiftlang/swift/issues/78191
   // public func join<each I1, each I2, each O1, each O2>(
   //   _ other: Select<(repeat each I2), (repeat each O2)>,
@@ -151,6 +171,7 @@ public struct Select<Input: Sendable, Output> {
     return copy
   }
 
+  // TODO: write tests
   public func limit(
     _ maxLength: (Input) -> some QueryExpression<Int>,
     offset: ((Input) -> some QueryExpression<Int>)? = nil
@@ -160,12 +181,17 @@ public struct Select<Input: Sendable, Output> {
     return copy
   }
 
-  //  public func limit(_ maxLength: Int, offset: Int? = nil) -> Self {
-  //    limit(
-  //      { _ in maxLength },
-  //      offset: offset.map { offset in { _ in offset } }
-  //    )
-  //  }
+  // TODO: write tests
+  public func limit(_ maxLength: Int, offset: Int? = nil) -> Self {
+    limit(
+      { _ in maxLength },
+      offset: offset.map { offset in { _ in offset } }
+    )
+  }
+
+  public func count() -> Select<Input, Int> {
+    self.select { _ in .count() }
+  }
 }
 
 extension Select: Statement {

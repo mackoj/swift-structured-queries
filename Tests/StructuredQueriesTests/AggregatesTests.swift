@@ -33,15 +33,16 @@ struct AggregatesTests {
         count(DISTINCT "users"."id")
         """
     )
+  }
+
+  @Test func unqualifiedCount() {
     #expect(
-      User.columns.count().queryString == """
-        count("users".*)
-        """
+      User.all().select { _ in .count() }.queryString
+      == #"SELECT count(*) FROM "users""#
     )
     #expect(
-      User.columns.count(distinct: true).queryString == """
-        count(DISTINCT "users".*)
-        """
+      User.all().where(\.isAdmin).count().queryString
+      == #"SELECT count(*) FROM "users" WHERE "users"."isAdmin""#
     )
   }
 
