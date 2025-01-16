@@ -1,6 +1,12 @@
 extension Table {
-  public static func all() -> Select<Columns, Self> {
+  public static func all() -> SelectOf<Self> {
     Select(input: Self.columns, from: Self.self)
+  }
+}
+
+extension Select {
+  public init(from table: Output.Type = Output.self) where Output: Table, Input == Output.Columns {
+    self.init(input: Output.columns, from: Output.self)
   }
 }
 
@@ -60,7 +66,6 @@ public struct Select<Input: Sendable, Output> {
       limit: limit
     )
   }
-
 
   // https://github.com/swiftlang/swift/issues/78191
   // public func join<each I1, each I2, each O1, each O2>(
@@ -193,6 +198,8 @@ public struct Select<Input: Sendable, Output> {
     self.select { _ in .count() }
   }
 }
+
+public typealias SelectOf<each T: Table> = Select<(repeat (each T).Columns), (repeat each T)>
 
 extension Select: Statement {
   public typealias Value = [Output]

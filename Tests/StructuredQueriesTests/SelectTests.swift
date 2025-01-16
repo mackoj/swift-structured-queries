@@ -7,6 +7,18 @@ struct SelectTests {
     var id: Int
     var isActive: Bool
     var title: String
+    var isDeleted = false
+
+    // TODO: Should we move `all()` to a protocol requirement and have macro generate this so that people can override it with special conditions
+//    public static func all() -> SelectOf<Self> {
+//      Select().where { !$0.isDeleted }
+//    }
+
+    static let withAttendees: SelectOf<SyncUp, Attendee> = SyncUp
+      .notDeleted
+      .join(Attendee.notDeleted) { $0.id == $1.syncUpID }
+
+    static let notDeleted = all().where { !$0.isDeleted }
   }
 
   @Table
@@ -14,6 +26,14 @@ struct SelectTests {
     var id: Int
     var name: String
     var syncUpID: Int
+    var isDeleted = false
+
+    static let notDeleted = all().where { !$0.isDeleted }
+
+    // TODO: Can we have a SelectOneOf to force that a single row will be returned
+    var syncUpQuery: SelectOf<SyncUp> {
+      SyncUp.notDeleted.where { $0.id == syncUpID }.limit(1)
+    }
   }
 
   @Test func basics() {
