@@ -1,6 +1,10 @@
-public protocol ColumnExpression<Root>: QueryExpression where Value: QueryDecodable {
+public protocol ColumnExpression<Root>: QueryExpression, _OrderingTerm where Value: QueryDecodable {
   associatedtype Root: Table
 
   var keyPath: PartialKeyPath<Root> { get }
   var name: String { get }
+}
+
+extension ColumnExpression {
+  public var _orderingTerm: OrderingTerm { OrderingTerm(base: self) }
 }

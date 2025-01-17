@@ -42,10 +42,6 @@ extension OrderingTerm: _OrderingTerm {
   public var _orderingTerm: Self { self }
 }
 
-extension Column: _OrderingTerm {
-  public var _orderingTerm: OrderingTerm { OrderingTerm(base: self) }
-}
-
 @resultBuilder
 public enum OrderingBuilder {
   public static func buildExpression<each Value: _OrderingTerm>(

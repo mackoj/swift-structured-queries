@@ -1,4 +1,4 @@
-extension Column {
+extension ColumnExpression {
   public func `in`<SubExpression: QueryExpression>(
     _ operation: () -> SubExpression
   ) -> some QueryExpression<Bool>
@@ -10,14 +10,14 @@ extension Column {
 
 public struct InSubquery<
   Root: Table,
-  ColumnValue: QueryBindable,
+  Column: ColumnExpression<Root>,
   SubExpression: QueryExpression
 >: QueryExpression
 where
-SubExpression.Value == [ColumnValue]
+SubExpression.Value == [Column.Value]
 {
   public typealias Value = Bool
-  let column: Column<Root, ColumnValue>
+  let column: Column
   let subquery: SubExpression
   public var queryString: String {
     column.queryString + " IN (" + subquery.queryString + ")"

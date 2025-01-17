@@ -23,6 +23,7 @@ let package = Package(
   ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.1.0"),
+    .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.0.0"),
     .package(url: "https://github.com/swiftlang/swift-syntax", "600.0.0"..<"601.0.0"),
   ],
   targets: [
@@ -52,7 +53,8 @@ let package = Package(
     .testTarget(
       name: "StructuredQueriesTests",
       dependencies: [
-        "StructuredQueries"
+        "StructuredQueries",
+        .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing")
       ]
     ),
     .testTarget(

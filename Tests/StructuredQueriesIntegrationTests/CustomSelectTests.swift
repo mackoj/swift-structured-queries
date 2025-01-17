@@ -118,9 +118,9 @@ private struct PlayerAndTeam: Equatable {
 extension PlayerNameAndTeamIsActive: QueryDecodable {
   fileprivate struct Select: QueryExpression {
     typealias Value = PlayerNameAndTeamIsActive
-    let playerName: Column<Player, String>
-    let teamIsActive: Column<Team, Bool>
-    init(playerName: Column<Player, String>, teamIsActive: Column<Team, Bool>) {
+    let playerName: any QueryExpression<String>
+    let teamIsActive: any QueryExpression<Bool>
+    init(playerName: some QueryExpression<String>, teamIsActive: some QueryExpression<Bool>) {
       self.playerName = playerName
       self.teamIsActive = teamIsActive
     }

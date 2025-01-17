@@ -13,7 +13,9 @@ public struct Column<Root: Table, Value: QueryBindable> {
 }
 
 extension Column: ColumnExpression {
-  public var queryString: String { "\(Root.name.quoted()).\(name.quoted())" }
+  public var queryString: String {
+    "\(Root.name.quoted()).\(name.quoted())"
+  }
   public var queryBindings: [QueryBinding] { [] }
 
 //  public func decode(decoder: any QueryDecoder) throws -> Value {

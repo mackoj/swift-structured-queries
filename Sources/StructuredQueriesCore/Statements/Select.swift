@@ -1,20 +1,77 @@
 extension Table {
-  public static func all() -> SelectOf<Self> {
-    Select(input: Self.columns, from: Self.self)
+  public static func all(as alias: String? = nil) -> SelectOf<Self> {
+    Select(from: Self.self, as: alias)
   }
 }
 
 extension Select {
-  public init(from table: Output.Type = Output.self) where Output: Table, Input == Output.Columns {
-    self.init(input: Output.columns, from: Output.self)
+  public init(
+    from table: Output.Type = Output.self,
+    as alias: String? = nil
+  ) where Output: Table, Input == AliasedColumns<Output.Columns> {
+    self.init(
+      input: AliasedColumns(alias: alias, columns: Output.columns),
+      from: TableAlias(alias: alias, table: Output.self)
+    )
   }
+}
+
+@dynamicMemberLookup
+public struct AliasedColumns<Columns: TableExpression>: TableExpression {
+  public typealias Value = Columns.Value
+  let alias: String?
+  let columns: Columns
+  public subscript<Column>(dynamicMember keyPath: KeyPath<Columns, Column>) -> AliasedColumn<Column> {
+    AliasedColumn(alias: alias, column: columns[keyPath: keyPath])
+  }
+  public var allColumns: [any ColumnExpression<Columns.Value>] {
+    columns.allColumns.map { column in
+      func open(_ column: some ColumnExpression<Columns.Value>) -> any ColumnExpression<Columns.Value> {
+        AliasedColumn(alias: alias, column: column)
+      }
+      return open(column)
+    }
+  }
+}
+public struct AliasedColumn<Column: ColumnExpression>: ColumnExpression {
+
+  public typealias Root = Column.Root
+  public typealias Value = Column.Value
+
+  let alias: String?
+  let column: Column
+  public var keyPath: PartialKeyPath<Column.Root> { column.keyPath }
+  public var name: String { column.name }
+  public var queryString: String {
+    if let alias {
+      "\(alias.quoted()).\(column.name.quoted())"
+    } else {
+      column.queryString
+    }
+  }
+  public var queryBindings: [QueryBinding] { [] }
+}
+
+struct TableAlias: QueryExpression {
+  typealias Value = Void
+
+  var alias: String?
+  let table: any Table.Type
+  var queryString: String {
+    if let alias {
+      "\(table.name.quoted()) AS \(alias.quoted())"
+    } else {
+      table.name.quoted()
+    }
+  }
+  var queryBindings: [QueryBinding] { [] }
 }
 
 public struct Select<Input: Sendable, Output> {
   fileprivate var input: Input
   fileprivate var isDistinct = false
   fileprivate var select: [any QueryExpression] = []
-  fileprivate var from: any Table.Type
+  fileprivate var from: TableAlias
   fileprivate var joins: [JoinClause] = []
   fileprivate var `where`: WhereClause?
   fileprivate var group: GroupClause?
@@ -199,7 +256,9 @@ public struct Select<Input: Sendable, Output> {
   }
 }
 
-public typealias SelectOf<each T: Table> = Select<(repeat (each T).Columns), (repeat each T)>
+public typealias SelectOf<each T: Table> = Select<(repeat AliasedColumns<(each T).Columns>), (repeat each T)>
+
+// Player.all().join(Team.self) { $0.teamID == $1.id }
 
 extension Select: Statement {
   public typealias Value = [Output]
@@ -210,10 +269,15 @@ extension Select: Statement {
     }
     let columns =
       select.isEmpty
-      ? ([from] + joins.map(\.right)).map { $0.columns.queryString }
+    ? ([from] + joins.map(\.right)).map { tableAlias in
+      func open(_ columns: some TableExpression) -> String {
+        AliasedColumns(alias: tableAlias.alias, columns: columns).queryString
+      }
+      return open(tableAlias.table.columns)
+    }
       : select.map(\.queryString)
     sql.append(" \(columns.joined(separator: ", "))")
-    sql.append(" FROM \(from.name.quoted())")
+    sql.append(" FROM \(from.queryString)")
     for join in joins {
       sql.append(" \(join.queryString)")
     }
@@ -477,13 +541,13 @@ private struct JoinClause {
     case right = "RIGHT"
   }
   let `operator`: Operator?
-  let right: any Table.Type
+  let right: TableAlias
   let condition: any QueryExpression<Bool>
 }
 extension JoinClause: QueryExpression {
   typealias Value = Void
   var queryString: String {
-    "\(`operator`.map { "\($0.rawValue) " } ?? "")JOIN \(right.name.quoted()) ON \(condition.queryString)"
+    "\(`operator`.map { "\($0.rawValue) " } ?? "")JOIN \(right.queryString) ON \(condition.queryString)"
   }
   var queryBindings: [QueryBinding] { condition.queryBindings }
 }

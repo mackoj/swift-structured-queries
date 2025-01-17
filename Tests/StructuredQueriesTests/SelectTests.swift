@@ -1,3 +1,4 @@
+import InlineSnapshotTesting
 import StructuredQueries
 import Testing
 
@@ -181,16 +182,23 @@ struct SelectTests {
   }
 
   @Test func selfJoin() {
-    #expect(
-    SyncUp.all().join(SyncUp.all()) { $0.id == $1.id }
-      .queryString
-    == """
-      SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."title", \
-      "syncUps"."id", "syncUps"."isActive", "syncUps"."title" \
-      FROM "syncUps" \
-      JOIN "syncUps" ON ("syncUps"."id" = "syncUps"."id")
+    assertInlineSnapshot(
+      of: Person.all(as: "p1").join(Person.all(as: "p2")) { $0.bestFriendID == $1.id }
+        .queryString,
+      as: .lines
+    ) {
       """
-    )
-    Issue.record("The above is not valid SQL.")
+      SELECT "p1"."id", "p1"."name", "p1"."bestFriendID", \
+      "p2"."id", "p2"."name", "p2"."bestFriendID" \
+      FROM "persons" AS "p1" \
+      JOIN "persons" AS "p2" ON ("p1"."bestFriendID" = "p2"."id")
+      """
+    }
   }
+}
+
+@Table fileprivate struct Person {
+  let id: Int
+  let name: String
+  let bestFriendID: Int
 }
