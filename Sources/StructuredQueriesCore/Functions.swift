@@ -8,6 +8,12 @@ extension QueryExpression where Value == Double {
   public var sign: some QueryExpression<Value> {
     QueryFunction("sign", self)
   }
+  public func round(_ k: some QueryExpression<Int>) -> some QueryExpression<Value> {
+    QueryFunction("round", self, k)
+  }
+  public func round() -> some QueryExpression<Value> {
+    QueryFunction("round", self)
+  }
 }
 
 extension QueryExpression where Value == String {
@@ -17,6 +23,14 @@ extension QueryExpression where Value == String {
 
   public func uppercased() -> some QueryExpression<Value> {
     QueryFunction("upper", self)
+  }
+}
+
+extension QueryExpression where Value == Bind<ISO8601Strategy> {
+  public func strftime(
+    _ format: some QueryExpression<String>
+  ) -> some QueryExpression<Value> {
+    QueryFunction("strftime", format, self)
   }
 }
 

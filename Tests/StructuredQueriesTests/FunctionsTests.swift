@@ -1,3 +1,4 @@
+import Foundation
 import StructuredQueries
 import Testing
 
@@ -9,6 +10,8 @@ struct FunctionsTests {
     var isAdmin: Bool
     var salary: Double
     var referrerID: Int?
+    @Column(as: .iso8601)
+    var updatedAt: Date
   }
 
   @Test func arithmetic() {
@@ -23,6 +26,18 @@ struct FunctionsTests {
         """
     )
   }
+  @Test func round() {
+    #expect(User.columns.salary.round(2).queryString == #"round("users"."salary", ?)"#)
+  }
+  @Test func strftime() {
+    #expect(
+      User.columns.updatedAt.strftime("%Y.%m%d").queryString
+        == #"strftime(?, "users"."updatedAt")"#
+    )
+  }
+  // TODO: $0.updatedAt.strftime("%Y.%m%d").cast(as: Double.self)
+  // TODO: "now".as.strftime("%Y.%m%d").cast(as: Double.self) - $0.updatedAt.strftime("%Y.%m%d").cast(as: Double.self)
+  // TODO: $0.bornAt.yearsOld
   @Test func strings() {
     #expect(
       User.columns.name.lowercased().queryString == """
