@@ -16,6 +16,12 @@ extension Column: ColumnExpression {
   public var queryString: String { "\(Root.name.quoted()).\(name.quoted())" }
   public var queryBindings: [QueryBinding] { [] }
 
+//  public func decode(decoder: any QueryDecoder) throws -> Value {
+//    try decoder.decode(Value.self)
+//  }
+}
+
+extension QueryExpression where Value: QueryBindable {
   public func decode(decoder: any QueryDecoder) throws -> Value {
     try decoder.decode(Value.self)
   }
