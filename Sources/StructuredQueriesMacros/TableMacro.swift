@@ -87,7 +87,7 @@ extension TableMacro: ExtensionMacro {
           for argument in arguments {
             switch argument.label?.text {
             case nil:
-              // TODO: Require string literal?
+              // TODO: Require string literal
               columnNameArgument = argument.trimmedDescription
             case "as":
               columnStrategyArgument = argument.expression.trimmedDescription

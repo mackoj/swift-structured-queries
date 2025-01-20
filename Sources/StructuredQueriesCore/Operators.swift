@@ -285,6 +285,7 @@ extension QueryExpression where Value == String {
     like("%\(other)")
   }
 
+  @_disfavoredOverload
   public func contains(_ other: Value) -> some QueryExpression<Bool> {
     like("%\(other)%")
   }
@@ -317,7 +318,7 @@ extension QueryExpression {
     Bool
   >
   where Value == [Element] {
-    BinaryOperator(lhs: element, operator: "IN", rhs: self)
+    BinaryOperator(lhs: element, operator: "IN", rhs: Parenthesize(self))
   }
 
   public func contains<Bound>(_ element: some QueryExpression<Bound>) -> some QueryExpression<Bool>
@@ -335,7 +336,7 @@ private struct UnaryOperator<Value, Base: QueryExpression>: QueryExpression {
   var queryBindings: [QueryBinding] { base.queryBindings }
 }
 
-private struct BinaryOperator<Value, LHS: QueryExpression, RHS: QueryExpression>: QueryExpression {
+struct BinaryOperator<Value, LHS: QueryExpression, RHS: QueryExpression>: QueryExpression {
   let lhs: LHS
   let `operator`: String
   let rhs: RHS
@@ -344,7 +345,7 @@ private struct BinaryOperator<Value, LHS: QueryExpression, RHS: QueryExpression>
   var queryBindings: [QueryBinding] { lhs.queryBindings + rhs.queryBindings }
 }
 
-private struct Parenthesize<Base: QueryExpression>: QueryExpression {
+struct Parenthesize<Base: QueryExpression>: QueryExpression {
   typealias Value = Base.Value
   let base: Base
 

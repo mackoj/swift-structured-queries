@@ -1,6 +1,5 @@
 public protocol QueryExpression<Value>: Sendable {
-  // TODO: Rename to 'QueryValue' or something less general?
-  //       Because we extend standard library types, polluting 'Int' with 'Int.Value' feels wrong.
+  // TODO: Rename to QueryValue
   associatedtype Value
 
   var queryString: String { get }

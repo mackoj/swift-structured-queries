@@ -5,16 +5,3 @@ public enum QueryBinding: Codable, Hashable, Sendable {
   case null
   case text(String)
 }
-
-// TODO: Should we do something like this instead of conforming stdlib types to QueryBindable?
-extension QueryExpression where Self == SQLString {
-  public static func text(_ string: String) -> SQLString {
-    SQLString(value: string)
-  }
-}
-public struct SQLString: QueryExpression {
-  public typealias Value = String
-  var value: String
-  public var queryString: String { "?" }
-  public var queryBindings: [QueryBinding] { [.text(value)] }
-}

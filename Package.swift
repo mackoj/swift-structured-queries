@@ -55,6 +55,7 @@ let package = Package(
       name: "StructuredQueriesTests",
       dependencies: [
         "StructuredQueries",
+        .product(name: "CustomDump", package: "swift-custom-dump"),
         .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing")
       ]
     ),

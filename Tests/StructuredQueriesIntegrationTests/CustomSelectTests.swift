@@ -54,7 +54,9 @@ import Testing
   @Test func teamWithPlayerCount() throws {
     let query = Player.all()
       .join(Team.all()) { $0.teamID == $1.id }
-      .select { PlayerCountAndTeam.Columns(team: $1, playerCount: $0.id.count()) }
+      .select {
+        PlayerCountAndTeam.Columns(team: $1, playerCount: $0.id.count())
+      }
       .group { _, team in team.id }
     assertInlineSnapshot(of: query.queryString, as: .lines) {
       """

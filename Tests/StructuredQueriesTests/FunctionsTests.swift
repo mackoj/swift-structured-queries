@@ -35,6 +35,7 @@ struct FunctionsTests {
         == #"strftime(?, "users"."updatedAt")"#
     )
   }
+  // TODO: Support something like .raw/.sql for SQL fragments too complex to make in the builder?
   // TODO: $0.updatedAt.strftime("%Y.%m%d").cast(as: Double.self)
   // TODO: "now".as.strftime("%Y.%m%d").cast(as: Double.self) - $0.updatedAt.strftime("%Y.%m%d").cast(as: Double.self)
   // TODO: $0.bornAt.yearsOld

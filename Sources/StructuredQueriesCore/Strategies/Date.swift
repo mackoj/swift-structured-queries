@@ -1,5 +1,7 @@
 import Foundation
 
+// TODO: Restruture to .sqlite(.iso8601) (as String), .sqlite(.unixEpoch) (as Int), .sqlite(.julianDays) (as Double)
+
 @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
 extension QueryBindingStrategy where Self == ISO8601Strategy {
   public static var iso8601: Self { Self() }
@@ -16,10 +18,8 @@ public struct ISO8601Strategy: QueryBindingStrategy {
   }
 }
 
-// TODO: Should this be called "secondsSince1970" since it's an integer?
 public struct TimeIntervalSince1970Strategy: QueryBindingStrategy {
   public init() {}
-  // TODO: Should RawValue be Int?
   public func fromQueryBindable(_ rawValue: Double) throws -> Date {
     Date(timeIntervalSince1970: rawValue)
   }
