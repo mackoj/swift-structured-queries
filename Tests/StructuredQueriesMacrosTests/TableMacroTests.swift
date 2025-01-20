@@ -218,6 +218,24 @@ struct TableMacroTests {
   }
 
   @Test
+  func dateFieldDiagnostic() {
+    // TODO: generate diagnostic with fixit when using bare date
+    withMacroTesting(
+      record: .failed,
+      macros: [TableMacro.self]
+    ) {
+      assertMacro {
+        #"""
+        @Table
+        struct User {
+          var joined: Date
+        }
+        """#
+      }
+    }
+  }
+
+  @Test
   func customBindingStrategy() {
     withMacroTesting(
       record: .failed,

@@ -105,6 +105,7 @@ import Testing
 }
 
 
+// TODO: Create @Selection macro
 // @Selection
 private struct PlayerNameAndTeamIsActive: Equatable {
   //@Table(Player.self)
