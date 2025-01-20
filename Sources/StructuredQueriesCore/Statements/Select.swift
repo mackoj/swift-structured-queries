@@ -275,7 +275,10 @@ extension Select: Statement {
       }
       return open(tableAlias.table.columns)
     }
-      : select.map(\.queryString)
+    : select.map {
+      print($0.queryString)
+      return $0.queryString
+    }
     sql.append(" \(columns.joined(separator: ", "))")
     sql.append(" FROM \(from.queryString)")
     for join in joins {

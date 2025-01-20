@@ -1,3 +1,5 @@
+import CustomDump
+import InlineSnapshotTesting
 import StructuredQueries
 import StructuredQueriesSQLite
 import Testing
@@ -37,9 +39,7 @@ import Testing
   @Test func playerNameAndTeamIsActive() throws {
     let query = Player.all()
       .join(Team.all()) { $0.teamID == $1.id }
-      .select { player, team in
-        PlayerNameAndTeamIsActive.Select(playerName: player.name, teamIsActive: team.isActive)
-      }
+      .select { PlayerNameAndTeamIsActive.Columns(playerName: $0.name, teamIsActive: $1.isActive) }
     let results = try db.execute(query)
     #expect(
       results == [
@@ -54,14 +54,20 @@ import Testing
   @Test func teamWithPlayerCount() throws {
     let query = Player.all()
       .join(Team.all()) { $0.teamID == $1.id }
-      .select { TeamWithPlayerCount.Select(playerCount: $0.id.count(), team: $1) }
+      .select { PlayerCountAndTeam.Columns(team: $1, playerCount: $0.id.count()) }
       .group { _, team in team.id }
+    assertInlineSnapshot(of: query.queryString, as: .lines) {
+      """
+      SELECT "teams"."id", "teams"."name", "teams"."isActive", count("players"."id") FROM "players" JOIN "teams" ON ("players"."teamID" = "teams"."id") GROUP BY "teams"."id"
+      """
+    }
     let results = try db.execute(query)
-    #expect(
-      results == [
-        TeamWithPlayerCount(playerCount: 2, team: Team(id: 1, name: "Bluejays", isActive: true)),
-        TeamWithPlayerCount(playerCount: 1, team: Team(id: 2, name: "Tigers", isActive: false)),
-        TeamWithPlayerCount(playerCount: 1, team: Team(id: 3, name: "Panthers", isActive: true)),
+    expectNoDifference(
+      results,
+      [
+        PlayerCountAndTeam(team: Team(id: 1, name: "Bluejays", isActive: true), playerCount: 2),
+        PlayerCountAndTeam(team: Team(id: 2, name: "Tigers", isActive: false), playerCount: 1),
+        PlayerCountAndTeam(team: Team(id: 3, name: "Panthers", isActive: true), playerCount: 1),
       ]
     )
   }
@@ -69,26 +75,27 @@ import Testing
   @Test func playerAndTeam() throws {
     let query = Player.all()
       .join(Team.all()) { $0.teamID == $1.id }
-      .select { player, team in PlayerAndTeam.Select(team: team, player: player) }
+      .select(PlayerAndTeam.Columns.init)
       .order { ($0.id, $1.id) }
     let results = try db.execute(query)
-    #expect(
-      results == [
+    expectNoDifference(
+      results,
+      [
         PlayerAndTeam(
-          team: Team(id: 1, name: "Bluejays", isActive: true),
-          player: Player(id: 1, name: "Blob", teamID: 1)
+          player: Player(id: 1, name: "Blob", teamID: 1),
+          team: Team(id: 1, name: "Bluejays", isActive: true)
         ),
         PlayerAndTeam(
-          team: Team(id: 2, name: "Tigers", isActive: false),
-          player: Player(id: 2, name: "Blob Jr", teamID: 2)
+          player: Player(id: 2, name: "Blob Jr", teamID: 2),
+          team: Team(id: 2, name: "Tigers", isActive: false)
         ),
         PlayerAndTeam(
-          team: Team(id: 3, name: "Panthers", isActive: true),
-          player: Player(id: 3, name: "Blob Sr", teamID: 3)
+          player: Player(id: 3, name: "Blob Sr", teamID: 3),
+          team: Team(id: 3, name: "Panthers", isActive: true)
         ),
         PlayerAndTeam(
-          team: Team(id: 1, name: "Bluejays", isActive: true),
-          player: Player(id: 4, name: "Blob Esq", teamID: 1)
+          player: Player(id: 4, name: "Blob Esq", teamID: 1),
+          team: Team(id: 1, name: "Bluejays", isActive: true)
         ),
       ]
     )
@@ -103,20 +110,22 @@ private struct PlayerNameAndTeamIsActive: Equatable {
   var teamIsActive: Bool
 }
 // @Selection
-private struct TeamWithPlayerCount: Equatable {
-//  @Table(Player.self, aggregates: .count(\.id))
-  var playerCount: Int
+private struct PlayerCountAndTeam: Equatable {
   var team: Team
+  var playerCount: Int
 }
 // @Selection
+// @Computed
+// @View
+// @Columns / @Table
 private struct PlayerAndTeam: Equatable {
-  var team: Team
   var player: Player
+  var team: Team
 }
 
 // Boilerplate to generate with a macro:
 extension PlayerNameAndTeamIsActive: QueryDecodable {
-  fileprivate struct Select: QueryExpression {
+  fileprivate struct Columns: QueryExpression {
     typealias Value = PlayerNameAndTeamIsActive
     let playerName: any QueryExpression<String>
     let teamIsActive: any QueryExpression<Bool>
@@ -136,43 +145,39 @@ extension PlayerNameAndTeamIsActive: QueryDecodable {
 }
 
 // Boilerplate to generate with a macro:
-extension TeamWithPlayerCount: QueryDecodable {
-  fileprivate struct Select: QueryExpression {
-    typealias Value = TeamWithPlayerCount
-    let playerCount: any QueryExpression<Int>
+extension PlayerCountAndTeam: QueryDecodable {
+  fileprivate struct Columns: QueryExpression {
+    typealias Value = PlayerCountAndTeam
     let team: any QueryExpression<Team>
-    init(playerCount: some QueryExpression<Int>, team: some QueryExpression<Team>) {
+    let playerCount: any QueryExpression<Int>
+    init(team: some QueryExpression<Team>, playerCount: some QueryExpression<Int>) {
       self.playerCount = playerCount
       self.team = team
     }
     var queryString: String {
-      "\(playerCount.queryString), \(team.queryString)"
+      "\(team.queryString), \(playerCount.queryString)"
     }
     var queryBindings: [QueryBinding] { [] }
   }
   public init(decoder: any StructuredQueries.QueryDecoder) throws {
-    playerCount = try decoder.decode(Int.self)
     team = try decoder.decode(Team.self)
+    playerCount = try decoder.decode(Int.self)
   }
 }
 
 extension PlayerAndTeam: QueryDecodable {
-  fileprivate struct Select: QueryExpression {
+  fileprivate struct Columns: QueryExpression {
     typealias Value = PlayerAndTeam
-    let team: any QueryExpression<Team>
-    let player: any QueryExpression<Player>
-    init(team: some QueryExpression<Team>, player: some QueryExpression<Player>) {
-      self.team = team
-      self.player = player
+    let queryString: String
+    let queryBindings: [QueryBinding]
+    init(player: some QueryExpression<Player>, team: some QueryExpression<Team>) {
+      queryString = "\(player.queryString), \(team.queryString)"
+      queryBindings = player.queryBindings + team.queryBindings
     }
-    var queryString: String {
-      "\(player.queryString), \(team.queryString)"
-    }
-    var queryBindings: [QueryBinding] { [] }
   }
   public init(decoder: any StructuredQueries.QueryDecoder) throws {
-    team = try decoder.decode(Team.self)
     player = try decoder.decode(Player.self)
+    team = try decoder.decode(Team.self)
   }
 }
 
