@@ -4,7 +4,7 @@ extension Table {
     _ columns: (Columns) -> (repeat each C),
     @InsertValuesBuilder<(repeat (each C).QueryOutput)> values: () -> [(repeat (each C).QueryOutput)],
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
-  ) -> Insert<Self, Self, (repeat each C), Void>
+  ) -> Insert<Self, Never, (repeat each C), Void>
   where repeat (each C).QueryOutput: QueryExpression {
     let input = columns(Self.columns)
     var columns: [any ColumnExpression] = []
@@ -38,7 +38,7 @@ extension Table {
     _ columns: (Columns) -> C,
     @InsertValuesBuilder<C.QueryOutput> values: () -> [C.QueryOutput],
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
-  ) -> Insert<Self, Self, C, Void>
+  ) -> Insert<Self, Never, C, Void>
   where C.QueryOutput: QueryExpression {
     let input = columns(Self.columns)
     let values: [[any QueryExpression]] = values().map { [$0] }
@@ -61,7 +61,7 @@ extension Table {
     _ columns: (Columns) -> (repeat each C),
     select selection: () -> Select<I, (repeat (each C).QueryOutput)>,
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
-  ) -> Insert<Self, Self, (repeat each C), Void>
+  ) -> Insert<Self, Never, (repeat each C), Void>
   where repeat (each C).QueryOutput: QueryExpression {
     let input = columns(Self.columns)
     var columns: [any ColumnExpression] = []
@@ -88,7 +88,7 @@ extension Table {
     _ columns: (Columns) -> C,
     select selection: () -> Select<I, C.QueryOutput>,
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
-  ) -> Insert<Self, Self, C, Void>
+  ) -> Insert<Self, Never, C, Void>
   where C.QueryOutput: QueryExpression {
     let input = columns(Self.columns)
     let record = updates.map { updates in
@@ -108,7 +108,7 @@ extension Table {
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ records: [Self]
-  ) -> Insert<Self, Self, Void, Void> {
+  ) -> Insert<Self, Never, Void, Void> {
     Insert(
       input: (),
       conflictResolution: conflictResolution,
@@ -119,7 +119,7 @@ extension Table {
 
   public static func insert(
     or conflictResolution: ConflictResolution? = nil
-  ) -> Insert<Self, Self, Void, Void> {
+  ) -> Insert<Self, Never, Void, Void> {
     Insert(input: (), conflictResolution: conflictResolution)
   }
 
@@ -131,24 +131,24 @@ extension Table {
       input: (),
       conflictResolution: conflictResolution,
       columns: Self.Draft.columns.allColumns,
-      form: .records(drafts)
+      form: .drafts(drafts)
     )
   }
 }
 
-public struct Insert<Base: Table, RecordType: Table, Input: Sendable, Output> {
+public struct Insert<Base: Table, Draft: StructuredQueriesCore.Draft, Input: Sendable, Output> {
   fileprivate var input: Input
   fileprivate var conflictResolution: ConflictResolution?
   fileprivate var columns: [any _ColumnExpression] = []
-  fileprivate var form: InsertionForm<RecordType> = .defaultValues
+  fileprivate var form: InsertionForm<Base, Draft> = .defaultValues
   fileprivate var record: Record<Base>?
   fileprivate var returning: ReturningClause?
 
   public func returning<each O: QueryExpression>(
     _ selection: (Base.Columns) -> (repeat each O)
-  ) -> Insert<Base, RecordType, Input, (repeat (each O).QueryOutput)>
+  ) -> Insert<Base, Draft, Input, (repeat (each O).QueryOutput)>
   where repeat (each O).QueryOutput: QueryDecodable {
-    Insert<Base, RecordType, Input, (repeat (each O).QueryOutput)>(
+    Insert<Base, Draft, Input, (repeat (each O).QueryOutput)>(
       input: input,
       conflictResolution: conflictResolution,
       columns: columns,
@@ -195,11 +195,12 @@ extension Insert: Statement {
   }
 }
 
-private enum InsertionForm<Base: Table>: QueryExpression {
+private enum InsertionForm<Base: Table, Draft: StructuredQueriesCore.Draft>: QueryExpression {
   case defaultValues
   case values([[any QueryExpression]])
   case select(any Statement)
   case records([Base])
+  case drafts([Draft])
 
   typealias QueryOutput = Void
   var queryString: String {
@@ -225,6 +226,15 @@ private enum InsertionForm<Base: Table>: QueryExpression {
       return """
         VALUES \(values)
         """
+    case let .drafts(records):
+      guard !records.isEmpty else { return "" }
+      let row = """
+        (\(Array(repeating: "?", count: Draft.columns.allColumns.count).joined(separator: ", ")))
+        """
+      let values = Array(repeating: row, count: records.count).joined(separator: ", ")
+      return """
+        VALUES \(values)
+        """
     }
   }
   var queryBindings: [QueryBinding] {
@@ -238,6 +248,12 @@ private enum InsertionForm<Base: Table>: QueryExpression {
     case let .records(records):
       return records.flatMap { record in
         Base.columns.allColumns.map { column in
+          (record[keyPath: column.keyPath] as! any QueryBindable).queryBinding
+        }
+      }
+    case let .drafts(records):
+      return records.flatMap { record in
+        Draft.columns.allColumns.map { column in
           (record[keyPath: column.keyPath] as! any QueryBindable).queryBinding
         }
       }
