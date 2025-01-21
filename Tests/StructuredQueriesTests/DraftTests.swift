@@ -63,6 +63,11 @@ extension DraftTests.SyncUp {
     public var isActive: Bool
     public var seconds: Double
     public var title: String
+    public init(isActive: Bool, seconds: Double, title: String) {
+      self.isActive = isActive
+      self.seconds = seconds
+      self.title = title
+    }
     public struct Columns: StructuredQueries.DraftSchema {
       public typealias QueryOutput = DraftTests.SyncUp.Draft
       public let isActive = StructuredQueries.DraftColumn<QueryOutput, Bool>(
@@ -76,3 +81,4 @@ extension DraftTests.SyncUp {
     }
   }
 }
+
