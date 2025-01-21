@@ -106,6 +106,9 @@ struct UpdateTests {
   }
 }
 
-extension UpdateTests.SyncUp.Columns: PrimaryKeyed {
+extension UpdateTests.SyncUp: PrimaryKeyedTable {
+  typealias Draft = Self
+}
+extension UpdateTests.SyncUp.Columns: PrimaryKeyedSchema {
   var primaryKey: Column<QueryOutput, Int> { id }
 }

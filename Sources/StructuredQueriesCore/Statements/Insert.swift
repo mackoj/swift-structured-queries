@@ -4,7 +4,7 @@ extension Table {
     _ columns: (Columns) -> (repeat each C),
     @InsertValuesBuilder<(repeat (each C).QueryOutput)> values: () -> [(repeat (each C).QueryOutput)],
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
-  ) -> Insert<Self, (repeat each C), Void>
+  ) -> Insert<Self, Self, (repeat each C), Void>
   where repeat (each C).QueryOutput: QueryExpression {
     let input = columns(Self.columns)
     var columns: [any ColumnExpression] = []
@@ -38,7 +38,7 @@ extension Table {
     _ columns: (Columns) -> C,
     @InsertValuesBuilder<C.QueryOutput> values: () -> [C.QueryOutput],
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
-  ) -> Insert<Self, C, Void>
+  ) -> Insert<Self, Self, C, Void>
   where C.QueryOutput: QueryExpression {
     let input = columns(Self.columns)
     let values: [[any QueryExpression]] = values().map { [$0] }
@@ -61,7 +61,7 @@ extension Table {
     _ columns: (Columns) -> (repeat each C),
     select selection: () -> Select<I, (repeat (each C).QueryOutput)>,
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
-  ) -> Insert<Self, (repeat each C), Void>
+  ) -> Insert<Self, Self, (repeat each C), Void>
   where repeat (each C).QueryOutput: QueryExpression {
     let input = columns(Self.columns)
     var columns: [any ColumnExpression] = []
@@ -88,7 +88,7 @@ extension Table {
     _ columns: (Columns) -> C,
     select selection: () -> Select<I, C.QueryOutput>,
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
-  ) -> Insert<Self, C, Void>
+  ) -> Insert<Self, Self, C, Void>
   where C.QueryOutput: QueryExpression {
     let input = columns(Self.columns)
     let record = updates.map { updates in
@@ -108,7 +108,7 @@ extension Table {
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ records: [Self]
-  ) -> Insert<Self, Void, Void> {
+  ) -> Insert<Self, Self, Void, Void> {
     Insert(
       input: (),
       conflictResolution: conflictResolution,
@@ -119,24 +119,36 @@ extension Table {
 
   public static func insert(
     or conflictResolution: ConflictResolution? = nil
-  ) -> Insert<Self, Void, Void> {
+  ) -> Insert<Self, Self, Void, Void> {
     Insert(input: (), conflictResolution: conflictResolution)
+  }
+
+  public static func insert(
+    or conflictResolution: ConflictResolution? = nil,
+    _ drafts: [Self.Draft]
+  ) -> Insert<Self, Self.Draft, Void, Void> where Self: PrimaryKeyedTable {
+    Insert(
+      input: (),
+      conflictResolution: conflictResolution,
+      columns: Self.Draft.columns.allColumns,
+      form: .records(drafts)
+    )
   }
 }
 
-public struct Insert<Base: Table, Input: Sendable, Output> {
+public struct Insert<Base: Table, RecordType: Table, Input: Sendable, Output> {
   fileprivate var input: Input
   fileprivate var conflictResolution: ConflictResolution?
   fileprivate var columns: [any ColumnExpression] = []
-  fileprivate var form: InsertionForm<Base> = .defaultValues
+  fileprivate var form: InsertionForm<RecordType> = .defaultValues
   fileprivate var record: Record<Base>?
   fileprivate var returning: ReturningClause?
 
   public func returning<each O: QueryExpression>(
     _ selection: (Base.Columns) -> (repeat each O)
-  ) -> Insert<Base, Input, (repeat (each O).QueryOutput)>
+  ) -> Insert<Base, RecordType, Input, (repeat (each O).QueryOutput)>
   where repeat (each O).QueryOutput: QueryDecodable {
-    Insert<Base, Input, (repeat (each O).QueryOutput)>(
+    Insert<Base, RecordType, Input, (repeat (each O).QueryOutput)>(
       input: input,
       conflictResolution: conflictResolution,
       columns: columns,
