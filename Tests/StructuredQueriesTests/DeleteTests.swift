@@ -44,4 +44,10 @@ struct DeleteTests {
           """
     )
   }
+
+  // TODO: make this work
+  @Test func primaryKey() {
+    let syncUp = SyncUp(id: 1, isActive: true, title: "Morning Sync")
+    //SyncUp.delete([syncUp])
+  }
 }
