@@ -150,7 +150,7 @@ extension TableMacro: ExtensionMacro {
         }
         public static let columns = Columns()
         public static let name = \(raw: tableName)
-        public init(decoder: any \(moduleName).QueryDecoder) throws {
+        public init(decoder: some \(moduleName).QueryDecoder) throws {
         \(raw: decodings.joined(separator: "\n"))
         }
         }

@@ -22,7 +22,7 @@ extension QueryExpression {
 }
 
 extension Bind: QueryDecodable {
-  public init(decoder: any QueryDecoder) throws {
+  public init(decoder: some QueryDecoder) throws {
     let strategy = Strategy()
     try self.init(
       strategy.fromQueryBindable(decoder.decode(Strategy.RawValue.self)),

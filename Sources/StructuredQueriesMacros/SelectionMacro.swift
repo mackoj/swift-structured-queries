@@ -85,7 +85,7 @@ extension SelectionMacro: ExtensionMacro {
         public let queryBindings: [\(moduleName).QueryBinding]
         \(raw: initializer)
         }
-        public init(decoder: any \(moduleName).QueryDecoder) throws {
+        public init(decoder: some \(moduleName).QueryDecoder) throws {
         \(raw: decodings.joined(separator: "\n"))
         }
         }

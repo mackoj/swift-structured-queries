@@ -32,7 +32,7 @@ import Testing
             self.queryBindings = player.queryBindings + team.queryBindings
           }
         }
-        public init(decoder: any StructuredQueries.QueryDecoder) throws {
+        public init(decoder: some StructuredQueries.QueryDecoder) throws {
           self.player = try decoder.decode(Player.self)
           self.team = try decoder.decode(Team.self)
         }

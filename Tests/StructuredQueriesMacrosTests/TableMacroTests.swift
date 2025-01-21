@@ -37,7 +37,7 @@ struct TableMacroTests {
           }
           public static let columns = Columns()
           public static let name = "users"
-          public init(decoder: any StructuredQueries.QueryDecoder) throws {
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.id = try Self.columns.id.decode(decoder: decoder)
             self.name = try Self.columns.name.decode(decoder: decoder)
           }
@@ -79,7 +79,7 @@ struct TableMacroTests {
           }
           public static let columns = Columns()
           public static let name = "users"
-          public init(decoder: any StructuredQueries.QueryDecoder) throws {
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.id = try Self.columns.id.decode(decoder: decoder)
           }
         }
@@ -119,7 +119,7 @@ struct TableMacroTests {
           }
           public static let columns = Columns()
           public static let name = "users"
-          public init(decoder: any StructuredQueries.QueryDecoder) throws {
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.id = try Self.columns.id.decode(decoder: decoder)
           }
         }
@@ -158,7 +158,7 @@ struct TableMacroTests {
           }
           public static let columns = Columns()
           public static let name = "user"
-          public init(decoder: any StructuredQueries.QueryDecoder) throws {
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.id = try Self.columns.id.decode(decoder: decoder)
           }
         }
@@ -198,7 +198,7 @@ struct TableMacroTests {
           }
           public static let columns = Columns()
           public static let name = "users"
-          public init(decoder: any StructuredQueries.QueryDecoder) throws {
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.id = try Self.columns.id.decode(decoder: decoder)
           }
         }
@@ -238,7 +238,7 @@ struct TableMacroTests {
           }
           public static let columns = Columns()
           public static let name = "users"
-          public init(decoder: any StructuredQueries.QueryDecoder) throws {
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.joined = try Self.columns.joined.decode(decoder: decoder)
           }
         }
@@ -278,7 +278,7 @@ struct TableMacroTests {
           }
           public static let columns = Columns()
           public static let name = "users"
-          public init(decoder: any StructuredQueries.QueryDecoder) throws {
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.joined = try Self.columns.joined.decode(decoder: decoder)
           }
         }
@@ -317,7 +317,7 @@ struct TableMacroTests {
           }
           public static let columns = Columns()
           public static let name = "users"
-          public init(decoder: any StructuredQueries.QueryDecoder) throws {
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.id = try Self.columns.id.decode(decoder: decoder)
           }
         }
@@ -356,7 +356,7 @@ struct TableMacroTests {
           }
           public static let columns = Columns()
           public static let name = "users"
-          public init(decoder: any StructuredQueries.QueryDecoder) throws {
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.id = try Self.columns.id.decode(decoder: decoder)
           }
         }
@@ -403,7 +403,7 @@ struct TableMacroTests {
           }
           public static let columns = Columns()
           public static let name = "users"
-          public init(decoder: any StructuredQueries.QueryDecoder) throws {
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.id = try Self.columns.id.decode(decoder: decoder)
             self.name = try Self.columns.name.decode(decoder: decoder)
           }

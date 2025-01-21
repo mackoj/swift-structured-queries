@@ -37,7 +37,7 @@ import StructuredQueriesSQLite
     Columns()
   }
   public static let name = "numbers"
-  public init(decoder: any StructuredQueries.QueryDecoder) throws {
+  public init(decoder: some StructuredQueries.QueryDecoder) throws {
     number = try Self.columns.number.decode(decoder: decoder)
   }
   init(number: Double) {
