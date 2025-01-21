@@ -139,7 +139,7 @@ extension Table {
 public struct Insert<Base: Table, RecordType: Table, Input: Sendable, Output> {
   fileprivate var input: Input
   fileprivate var conflictResolution: ConflictResolution?
-  fileprivate var columns: [any ColumnExpression] = []
+  fileprivate var columns: [any _ColumnExpression] = []
   fileprivate var form: InsertionForm<RecordType> = .defaultValues
   fileprivate var record: Record<Base>?
   fileprivate var returning: ReturningClause?
@@ -183,7 +183,7 @@ extension Insert: Statement {
     return sql
   }
   public var queryBindings: [QueryBinding] {
-    var bindings = columns.flatMap(\.queryBindings)
+    var bindings: [QueryBinding] = []
     bindings.append(contentsOf: form.queryBindings)
     if let record {
       bindings.append(contentsOf: record.queryBindings)
