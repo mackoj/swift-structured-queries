@@ -185,6 +185,27 @@ public struct Select<Input: Sendable, Output> {
     _fullJoin(self, other, on: constraint)
   }
 
+  public func leftJoin<OtherInput, OtherOutput>(
+    _ other: Select<OtherInput, OtherOutput>,
+    on constraint: ((Input, OtherInput)) -> some QueryExpression<Bool>
+  ) -> Select<(Input, OtherInput), (Output, OtherOutput?)> {
+    _leftJoin(self, other, on: constraint)
+  }
+
+  public func rightJoin<OtherInput, OtherOutput>(
+    _ other: Select<OtherInput, OtherOutput>,
+    on constraint: ((Input, OtherInput)) -> some QueryExpression<Bool>
+  ) -> Select<(Input, OtherInput), (Output?, OtherOutput)> {
+    _rightJoin(self, other, on: constraint)
+  }
+
+  public func fullJoin<OtherInput, OtherOutput>(
+    _ other: Select<OtherInput, OtherOutput>,
+    on constraint: ((Input, OtherInput)) -> some QueryExpression<Bool>
+  ) -> Select<(Input, OtherInput), (Output?, OtherOutput?)> {
+    _fullJoin(self, other, on: constraint)
+  }
+
   public func `where`(_ predicate: (Input) -> some QueryExpression<Bool>) -> Self {
     func open(_ `where`: some QueryExpression<Bool>) -> WhereClause {
       WhereClause(predicate: `where` && predicate(input))

@@ -21,6 +21,10 @@ extension QueryExpression where QueryOutput == Double {
 }
 
 extension QueryExpression where QueryOutput == String {
+  // TODO: Other options:
+  // { $0.name.lower() }
+  // { .count($0.id) }
+
   // TODO: Should this be 'lower()' to more closely match the SQL function?
   public func lowercased() -> some QueryExpression<QueryOutput> {
     QueryFunction("lower", self)
