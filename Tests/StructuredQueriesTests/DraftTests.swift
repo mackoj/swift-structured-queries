@@ -70,7 +70,7 @@ extension DraftTests.SyncUp {
       public let seconds = StructuredQueries.DraftColumn<QueryOutput, Double>(
         "seconds", keyPath: \.seconds)
       public let title = StructuredQueries.DraftColumn<QueryOutput, String>("title", keyPath: \.title)
-      public var allColumns: [any StructuredQueries._ColumnExpression<QueryOutput>] {
+      public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
         [isActive, seconds, title]
       }
     }

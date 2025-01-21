@@ -139,7 +139,7 @@ extension Table {
 public struct Insert<Base: Table, Draft: StructuredQueriesCore.Draft, Input: Sendable, Output> {
   fileprivate var input: Input
   fileprivate var conflictResolution: ConflictResolution?
-  fileprivate var columns: [any _ColumnExpression] = []
+  fileprivate var columns: [any ColumnExpression] = []
   fileprivate var form: InsertionForm<Base, Draft> = .defaultValues
   fileprivate var record: Record<Base>?
   fileprivate var returning: ReturningClause?

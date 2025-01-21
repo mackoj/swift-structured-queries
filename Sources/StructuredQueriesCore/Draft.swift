@@ -5,18 +5,17 @@ public protocol Draft: Sendable {
 
 public protocol DraftSchema<QueryOutput>: Sendable {
   associatedtype QueryOutput
-  var allColumns: [any _ColumnExpression<QueryOutput>] { get }
+  var allColumns: [any ColumnExpression<QueryOutput>] { get }
 }
 
 extension Never: Draft {
   public struct Columns: DraftSchema {
-    public typealias QueryOutput = Never
-    public let allColumns: [any _ColumnExpression<Never>] = []
+    public let allColumns: [any ColumnExpression<Never>] = []
   }
   public static var columns: Columns { Columns() }
 }
 
-public struct DraftColumn<Root: Draft, QueryOutput: Sendable>: _ColumnExpression {
+public struct DraftColumn<Root: Draft, QueryOutput: Sendable>: ColumnExpression {
   public let _keyPath: PartialKeyPath<Root> & Sendable
   public let name: String
   public let `default`: QueryOutput?
@@ -28,4 +27,6 @@ public struct DraftColumn<Root: Draft, QueryOutput: Sendable>: _ColumnExpression
   }
 
   public var keyPath: PartialKeyPath<Root> { _keyPath }
+  public var queryString: String { name.quoted() }
+  public var queryBindings: [QueryBinding] { [] }
 }
