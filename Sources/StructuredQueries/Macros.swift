@@ -25,3 +25,14 @@ public macro Column<Strategy: QueryBindingStrategy>(_ name: String? = nil, as st
   #externalMacro(
     module: "StructuredQueriesMacros", type: "ColumnMacro"
   )
+
+@attached(
+  extension,
+  conformances: QueryDecodable,
+  names: named(Columns),
+  named(init(decoder:))
+)
+public macro Selection() =
+#externalMacro(
+  module: "StructuredQueriesMacros", type: "SelectionMacro"
+)
