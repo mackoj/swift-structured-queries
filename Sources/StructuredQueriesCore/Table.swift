@@ -1,5 +1,5 @@
 public protocol Table: QueryDecodable, Sendable {
-  associatedtype Columns: TableExpression where Columns.Value == Self
+  associatedtype Columns: Schema where Columns.Value == Self
 
   // TODO: Rename tableName
   // TODO: Move to Schema protocol

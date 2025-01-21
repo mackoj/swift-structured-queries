@@ -17,7 +17,7 @@ extension Select {
 }
 
 @dynamicMemberLookup
-public struct AliasedColumns<Columns: TableExpression>: TableExpression {
+public struct AliasedColumns<Columns: Schema>: Schema {
   public typealias Value = Columns.Value
   let alias: String?
   let columns: Columns
@@ -270,7 +270,7 @@ extension Select: Statement {
     let columns =
       select.isEmpty
     ? ([from] + joins.map(\.right)).map { tableAlias in
-      func open(_ columns: some TableExpression) -> String {
+      func open(_ columns: some Schema) -> String {
         AliasedColumns(alias: tableAlias.alias, columns: columns).queryString
       }
       return open(tableAlias.table.columns)

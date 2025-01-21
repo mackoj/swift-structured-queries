@@ -141,7 +141,7 @@ extension TableMacro: ExtensionMacro {
         """
         \(declaration.attributes.availability)extension \(typeName)\
         \(conformances.isEmpty ? "" : ": \(raw: conformances.joined(separator: ", "))") {
-        public struct Columns: \(moduleName).TableExpression {
+        public struct Columns: \(moduleName).Schema {
         public typealias Value = \(typeName)
         \(raw: columnsProperties.joined(separator: "\n"))
         public var allColumns: [any \(moduleName).ColumnExpression<Value>] {\

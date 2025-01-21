@@ -26,7 +26,7 @@ import StructuredQueriesSQLite
 
 /*@Table */fileprivate struct Number: Equatable, Table {
   var number: Double
-  public struct Columns: StructuredQueries.TableExpression {
+  public struct Columns: StructuredQueries.Schema {
     public typealias Value = Number
     public let number = StructuredQueries.Column<Value, Double>("number", keyPath: \.number)
     public var allColumns: [any StructuredQueries.ColumnExpression<Value>] {
