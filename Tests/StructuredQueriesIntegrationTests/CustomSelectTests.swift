@@ -4,12 +4,14 @@ import StructuredQueries
 import StructuredQueriesSQLite
 import Testing
 
-@Table private struct Player: Equatable {
+@Table
+private struct Player: Equatable {
   let id: Int
   var name: String
   var teamID: Int
 }
-@Table private struct Team: Equatable {
+@Table
+private struct Team: Equatable {
   let id: Int
   var name: String
   var isActive: Bool

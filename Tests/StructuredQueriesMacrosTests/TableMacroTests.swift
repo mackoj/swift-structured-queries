@@ -35,13 +35,11 @@ struct TableMacroTests {
               [id, name]
             }
           }
-          public static var columns: Columns {
-            Columns()
-          }
+          public static let columns = Columns()
           public static let name = "users"
           public init(decoder: any StructuredQueries.QueryDecoder) throws {
-            id = try Self.columns.id.decode(decoder: decoder)
-            name = try Self.columns.name.decode(decoder: decoder)
+            self.id = try Self.columns.id.decode(decoder: decoder)
+            self.name = try Self.columns.name.decode(decoder: decoder)
           }
         }
         """#
@@ -79,12 +77,10 @@ struct TableMacroTests {
               [id]
             }
           }
-          public static var columns: Columns {
-            Columns()
-          }
+          public static let columns = Columns()
           public static let name = "users"
           public init(decoder: any StructuredQueries.QueryDecoder) throws {
-            id = try Self.columns.id.decode(decoder: decoder)
+            self.id = try Self.columns.id.decode(decoder: decoder)
           }
         }
         """#
@@ -121,12 +117,10 @@ struct TableMacroTests {
               [id]
             }
           }
-          public static var columns: Columns {
-            Columns()
-          }
+          public static let columns = Columns()
           public static let name = "users"
           public init(decoder: any StructuredQueries.QueryDecoder) throws {
-            id = try Self.columns.id.decode(decoder: decoder)
+            self.id = try Self.columns.id.decode(decoder: decoder)
           }
         }
         """#
@@ -162,12 +156,10 @@ struct TableMacroTests {
               [id]
             }
           }
-          public static var columns: Columns {
-            Columns()
-          }
+          public static let columns = Columns()
           public static let name = "user"
           public init(decoder: any StructuredQueries.QueryDecoder) throws {
-            id = try Self.columns.id.decode(decoder: decoder)
+            self.id = try Self.columns.id.decode(decoder: decoder)
           }
         }
         """#
@@ -204,12 +196,10 @@ struct TableMacroTests {
               [id]
             }
           }
-          public static var columns: Columns {
-            Columns()
-          }
+          public static let columns = Columns()
           public static let name = "users"
           public init(decoder: any StructuredQueries.QueryDecoder) throws {
-            id = try Self.columns.id.decode(decoder: decoder)
+            self.id = try Self.columns.id.decode(decoder: decoder)
           }
         }
         """#
@@ -229,6 +219,28 @@ struct TableMacroTests {
         @Table
         struct User {
           var joined: Date
+        }
+        """#
+      } expansion: {
+        #"""
+        struct User {
+          @Column
+          var joined: Date
+        }
+
+        extension User: StructuredQueries.Table {
+          public struct Columns: StructuredQueries.TableExpression {
+            public typealias Value = User
+            public let joined = StructuredQueries.Column<Value, Date>("joined", keyPath: \.joined)
+            public var allColumns: [any StructuredQueries.ColumnExpression<Value>] {
+              [joined]
+            }
+          }
+          public static let columns = Columns()
+          public static let name = "users"
+          public init(decoder: any StructuredQueries.QueryDecoder) throws {
+            self.joined = try Self.columns.joined.decode(decoder: decoder)
+          }
         }
         """#
       }
@@ -264,12 +276,10 @@ struct TableMacroTests {
               [joined]
             }
           }
-          public static var columns: Columns {
-            Columns()
-          }
+          public static let columns = Columns()
           public static let name = "users"
           public init(decoder: any StructuredQueries.QueryDecoder) throws {
-            joined = try Self.columns.joined.decode(decoder: decoder)
+            self.joined = try Self.columns.joined.decode(decoder: decoder)
           }
         }
         """#
@@ -305,12 +315,10 @@ struct TableMacroTests {
               [id]
             }
           }
-          public static var columns: Columns {
-            Columns()
-          }
+          public static let columns = Columns()
           public static let name = "users"
           public init(decoder: any StructuredQueries.QueryDecoder) throws {
-            id = try Self.columns.id.decode(decoder: decoder)
+            self.id = try Self.columns.id.decode(decoder: decoder)
           }
         }
         """#
@@ -346,12 +354,10 @@ struct TableMacroTests {
               [id]
             }
           }
-          public static var columns: Columns {
-            Columns()
-          }
+          public static let columns = Columns()
           public static let name = "users"
           public init(decoder: any StructuredQueries.QueryDecoder) throws {
-            id = try Self.columns.id.decode(decoder: decoder)
+            self.id = try Self.columns.id.decode(decoder: decoder)
           }
         }
         """#
@@ -395,13 +401,11 @@ struct TableMacroTests {
               [id, name]
             }
           }
-          public static var columns: Columns {
-            Columns()
-          }
+          public static let columns = Columns()
           public static let name = "users"
           public init(decoder: any StructuredQueries.QueryDecoder) throws {
-            id = try Self.columns.id.decode(decoder: decoder)
-            name = try Self.columns.name.decode(decoder: decoder)
+            self.id = try Self.columns.id.decode(decoder: decoder)
+            self.name = try Self.columns.name.decode(decoder: decoder)
           }
         }
         """#

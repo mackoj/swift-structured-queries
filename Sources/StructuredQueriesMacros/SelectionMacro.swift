@@ -18,7 +18,7 @@ extension SelectionMacro: ExtensionMacro {
     else {
       context.diagnose(
         Diagnostic(
-          node: declaration,
+          node: declaration.introducer,
           message: MacroExpansionErrorMessage(
             "'@Selection' can only be applied to struct types"
           )
@@ -62,13 +62,15 @@ extension SelectionMacro: ExtensionMacro {
           .trimmedDescription
           ?? "_"
         namesAndTypes.append((name, typeGeneric))
-        decodings.append("\(name) = try decoder.decode(\(typeGeneric).self)")
+        decodings.append("self.\(name) = try decoder.decode(\(typeGeneric).self)")
       }
     }
     let initializer = """
-      public init(\(namesAndTypes.map { "\($0): some \(moduleName).QueryExpression<\($1)>" }.joined(separator: ", "))) {
-        queryString = \"\(namesAndTypes.map { name, _ in "\\(\(name).queryString)" }.joined(separator: ", "))\"
-        queryBindings = \(namesAndTypes.map { name, _ in "\(name).queryBindings" }.joined(separator: " + "))
+      public init(
+      \(namesAndTypes.map { "\($0): some \(moduleName).QueryExpression<\($1)>" }.joined(separator: ",\n"))
+      ) {
+      self.queryString = "\(namesAndTypes.map { name, _ in "\\(\(name).queryString)" }.joined(separator: ", "))"
+      self.queryBindings = \(namesAndTypes.map { name, _ in "\(name).queryBindings" }.joined(separator: " + "))
       }
       """
     let typeName = type.trimmed

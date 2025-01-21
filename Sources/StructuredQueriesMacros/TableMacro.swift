@@ -37,7 +37,7 @@ extension TableMacro: ExtensionMacro {
     else {
       context.diagnose(
         Diagnostic(
-          node: declaration,
+          node: declaration.introducer,
           message: MacroExpansionErrorMessage(
             "'@Table' can only be applied to struct types"
           )
@@ -122,7 +122,7 @@ extension TableMacro: ExtensionMacro {
           """
         )
         allColumns.append(name)
-        decodings.append("\(name) = try Self.columns.\(name).decode(decoder: decoder)")
+        decodings.append("self.\(name) = try Self.columns.\(name).decode(decoder: decoder)")
       }
     }
     let tableName: String
@@ -148,7 +148,7 @@ extension TableMacro: ExtensionMacro {
         [\(raw: allColumns.joined(separator: ", "))] \
         }
         }
-        public static var columns: Columns { Columns() }
+        public static let columns = Columns()
         public static let name = \(raw: tableName)
         public init(decoder: any \(moduleName).QueryDecoder) throws {
         \(raw: decodings.joined(separator: "\n"))

@@ -408,7 +408,7 @@ struct OperatorsTests {
   @Test func array() {
     #expect(
       ["Blob", "Blob Jr", "Blob Sr"].contains(User.columns.name).queryString == """
-        ("users"."name" IN (?, ?, ?))
+        ("users"."name" IN ((?, ?, ?)))
         """
     )
   }
