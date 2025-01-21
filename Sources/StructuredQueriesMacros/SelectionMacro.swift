@@ -80,7 +80,7 @@ extension SelectionMacro: ExtensionMacro {
         \(declaration.attributes.availability)extension \(typeName)\
         \(conformances.isEmpty ? "" : ": \(raw: conformances.joined(separator: ", "))") {
         public struct Columns: \(moduleName).QueryExpression {
-        public typealias Value = \(typeName)
+        public typealias QueryOutput = \(typeName)
         public let queryString: String 
         public let queryBindings: [\(moduleName).QueryBinding]
         \(raw: initializer)

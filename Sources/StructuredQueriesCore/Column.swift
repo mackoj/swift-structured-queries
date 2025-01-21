@@ -1,9 +1,10 @@
-public struct Column<Root: Table, Value: QueryBindable> {
+// TODO: Rename `Root` to `Base`?
+public struct Column<Root: Table, QueryOutput: QueryBindable> {
   public let _keyPath: PartialKeyPath<Root> & Sendable
   public let name: String
-  public let `default`: Value?
+  public let `default`: QueryOutput?
 
-  public init(_ name: String, keyPath: KeyPath<Root, Value> & Sendable, default: Value? = nil) {
+  public init(_ name: String, keyPath: KeyPath<Root, QueryOutput> & Sendable, default: QueryOutput? = nil) {
     self._keyPath = keyPath
     self.default = `default`
     self.name = name
@@ -19,8 +20,9 @@ extension Column: ColumnExpression {
   public var queryBindings: [QueryBinding] { [] }
 }
 
-extension QueryExpression where Value: QueryBindable {
-  public func decode(decoder: some QueryDecoder) throws -> Value {
-    try decoder.decode(Value.self)
+// TODO: Move to `QueryBindable.swift`
+extension QueryExpression where QueryOutput: QueryBindable {
+  public func decode(decoder: some QueryDecoder) throws -> QueryOutput {
+    try decoder.decode(QueryOutput.self)
   }
 }

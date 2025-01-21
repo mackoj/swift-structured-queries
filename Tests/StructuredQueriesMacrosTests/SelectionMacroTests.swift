@@ -21,7 +21,7 @@ import Testing
 
       extension PlayerAndTeam: StructuredQueries.QueryDecodable {
         public struct Columns: StructuredQueries.QueryExpression {
-          public typealias Value = PlayerAndTeam
+          public typealias QueryOutput = PlayerAndTeam
           public let queryString: String
           public let queryBindings: [StructuredQueries.QueryBinding]
           public init(

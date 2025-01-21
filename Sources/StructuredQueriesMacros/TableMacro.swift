@@ -116,7 +116,7 @@ extension TableMacro: ExtensionMacro {
         }
         columnsProperties.append(
           """
-          public let \(name) = \(moduleName).Column<Value, \(typeGeneric)>(\
+          public let \(name) = \(moduleName).Column<QueryOutput, \(typeGeneric)>(\
           \(columnName), keyPath: \\.\(name)\(arguments)\
           )
           """
@@ -142,9 +142,9 @@ extension TableMacro: ExtensionMacro {
         \(declaration.attributes.availability)extension \(typeName)\
         \(conformances.isEmpty ? "" : ": \(raw: conformances.joined(separator: ", "))") {
         public struct Columns: \(moduleName).Schema {
-        public typealias Value = \(typeName)
+        public typealias QueryOutput = \(typeName)
         \(raw: columnsProperties.joined(separator: "\n"))
-        public var allColumns: [any \(moduleName).ColumnExpression<Value>] {\
+        public var allColumns: [any \(moduleName).ColumnExpression<QueryOutput>] {\
         [\(raw: allColumns.joined(separator: ", "))] \
         }
         }

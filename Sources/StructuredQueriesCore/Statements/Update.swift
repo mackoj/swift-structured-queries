@@ -46,9 +46,9 @@ public struct Update<Base: Table, Output> {
 
   public func returning<each O: QueryExpression>(
     _ selection: (Base.Columns) -> (repeat each O)
-  ) -> Update<Base, (repeat (each O).Value)>
-  where repeat (each O).Value: QueryDecodable {
-    Update<Base, (repeat (each O).Value)>(
+  ) -> Update<Base, (repeat (each O).QueryOutput)>
+  where repeat (each O).QueryOutput: QueryDecodable {
+    Update<Base, (repeat (each O).QueryOutput)>(
       conflictResolution: conflictResolution,
       record: record,
       where: `where`,
@@ -58,7 +58,7 @@ public struct Update<Base: Table, Output> {
 }
 
 extension Update: Statement {
-  public typealias Value = [Output]
+  public typealias QueryOutput = [Output]
 
   public var queryString: String {
     guard !record.updates.isEmpty else {

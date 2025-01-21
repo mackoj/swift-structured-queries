@@ -18,15 +18,15 @@ extension Select {
 
 @dynamicMemberLookup
 public struct AliasedColumns<Columns: Schema>: Schema {
-  public typealias Value = Columns.Value
+  public typealias QueryOutput = Columns.QueryOutput
   let alias: String?
   let columns: Columns
   public subscript<Column>(dynamicMember keyPath: KeyPath<Columns, Column>) -> AliasedColumn<Column> {
     AliasedColumn(alias: alias, column: columns[keyPath: keyPath])
   }
-  public var allColumns: [any ColumnExpression<Columns.Value>] {
+  public var allColumns: [any ColumnExpression<Columns.QueryOutput>] {
     columns.allColumns.map { column in
-      func open(_ column: some ColumnExpression<Columns.Value>) -> any ColumnExpression<Columns.Value> {
+      func open(_ column: some ColumnExpression<Columns.QueryOutput>) -> any ColumnExpression<Columns.QueryOutput> {
         AliasedColumn(alias: alias, column: column)
       }
       return open(column)
@@ -36,7 +36,7 @@ public struct AliasedColumns<Columns: Schema>: Schema {
 public struct AliasedColumn<Column: ColumnExpression>: ColumnExpression {
 
   public typealias Root = Column.Root
-  public typealias Value = Column.Value
+  public typealias QueryOutput = Column.QueryOutput
 
   let alias: String?
   let column: Column
@@ -53,7 +53,7 @@ public struct AliasedColumn<Column: ColumnExpression>: ColumnExpression {
 }
 
 struct TableAlias: QueryExpression {
-  typealias Value = Void
+  typealias QueryOutput = Void
 
   var alias: String?
   let table: any Table.Type
@@ -85,13 +85,13 @@ public struct Select<Input: Sendable, Output> {
   public func select<each O: QueryExpression>(
     distinct isDistinct: Bool = false,
     _ selection: (Input) -> (repeat each O)
-  ) -> Select<Input, (repeat (each O).Value)>
-  where repeat (each O).Value: QueryDecodable {
+  ) -> Select<Input, (repeat (each O).QueryOutput)>
+  where repeat (each O).QueryOutput: QueryDecodable {
     var select: [any QueryExpression] = []
     for o in repeat each selection(input) {
       select.append(o)
     }
-    return Select<Input, (repeat (each O).Value)>(
+    return Select<Input, (repeat (each O).QueryOutput)>(
       input: input,
       isDistinct: isDistinct,
       select: select,
@@ -108,9 +108,9 @@ public struct Select<Input: Sendable, Output> {
   public func select<O: QueryExpression>(
     distinct isDistinct: Bool = false,
     _ selection: (Input) -> O
-  ) -> Select<Input, O.Value>
-  where repeat O.Value: QueryDecodable {
-    Select<Input, O.Value>(
+  ) -> Select<Input, O.QueryOutput>
+  where repeat O.QueryOutput: QueryDecodable {
+    Select<Input, O.QueryOutput>(
       input: input,
       isDistinct: isDistinct,
       select: [selection(input)],
@@ -261,7 +261,7 @@ public typealias SelectOf<each T: Table> = Select<(repeat AliasedColumns<(each T
 // Player.all().join(Team.self) { $0.teamID == $1.id }
 
 extension Select: Statement {
-  public typealias Value = [Output]
+  public typealias QueryOutput = [Output]
   public var queryString: String {
     var sql = "SELECT"
     if isDistinct {
@@ -548,7 +548,7 @@ private struct JoinClause {
   let condition: any QueryExpression<Bool>
 }
 extension JoinClause: QueryExpression {
-  typealias Value = Void
+  typealias QueryOutput = Void
   var queryString: String {
     "\(`operator`.map { "\($0.rawValue) " } ?? "")JOIN \(right.queryString) ON \(condition.queryString)"
   }
@@ -570,7 +570,7 @@ private struct GroupClause {
   }
 }
 extension GroupClause: QueryExpression {
-  typealias Value = Void
+  typealias QueryOutput = Void
   var queryString: String { "GROUP BY \(terms.map(\.queryString).joined(separator: ", "))" }
   var queryBindings: [QueryBinding] { terms.flatMap(\.queryBindings) }
 }
@@ -579,7 +579,7 @@ private struct HavingClause {
   var predicate: any QueryExpression<Bool>
 }
 extension HavingClause: QueryExpression {
-  typealias Value = Void
+  typealias QueryOutput = Void
   var queryString: String { "HAVING \(predicate.queryString)" }
   var queryBindings: [QueryBinding] { predicate.queryBindings }
 }
@@ -599,7 +599,7 @@ private struct OrderClause {
   }
 }
 extension OrderClause: QueryExpression {
-  typealias Value = Void
+  typealias QueryOutput = Void
   var queryString: String { "ORDER BY \(terms.map(\.queryString).joined(separator: ", "))" }
   var queryBindings: [QueryBinding] { terms.flatMap(\.queryBindings) }
 }
@@ -609,7 +609,7 @@ private struct LimitClause {
   let offset: (any QueryExpression)?
 }
 extension LimitClause: QueryExpression {
-  typealias Value = Void
+  typealias QueryOutput = Void
   var queryString: String {
     "LIMIT \(maxLength.queryString)\(offset.map { " OFFSET \($0.queryString)" } ?? "")"
   }

@@ -1,7 +1,7 @@
-public struct AnyQueryExpression<Value>: QueryExpression {
-  public let base: any QueryExpression<Value>
+public struct AnyQueryExpression<QueryOutput>: QueryExpression {
+  public let base: any QueryExpression<QueryOutput>
 
-  public init(_ base: any QueryExpression<Value>) {
+  public init(_ base: any QueryExpression<QueryOutput>) {
     self.base = base
   }
 

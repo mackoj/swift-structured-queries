@@ -1,9 +1,7 @@
 extension ColumnExpression {
-  public func `in`<SubExpression: QueryExpression>(
-    _ operation: SubExpression
-  ) -> some QueryExpression<Bool>
-  where SubExpression.Value == [Value]
-  {
-    BinaryOperator(lhs: self, operator: "IN", rhs: Parenthesize(operation))
+  public func `in`(
+    _ expression: some QueryExpression<[QueryOutput]>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "IN", rhs: Parenthesize(expression))
   }
 }

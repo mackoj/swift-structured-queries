@@ -1,10 +1,10 @@
-extension QueryExpression where Value: QueryBindable {
+extension QueryExpression where QueryOutput: QueryBindable {
   public func count(distinct isDistinct: Bool = false) -> some QueryExpression<Int> {
     AggregateFunction("count", isDistinct: isDistinct, self)
   }
 }
 
-extension QueryExpression where Value: Comparable {
+extension QueryExpression where QueryOutput: Comparable {
   public func maximum(distinct isDistinct: Bool = false) -> some QueryExpression<Int?> {
     AggregateFunction("max", self)
   }
@@ -14,16 +14,16 @@ extension QueryExpression where Value: Comparable {
   }
 }
 
-extension QueryExpression where Value: Numeric {
+extension QueryExpression where QueryOutput: Numeric {
   public func average(distinct isDistinct: Bool = false) -> some QueryExpression<Double?> {
     AggregateFunction("avg", isDistinct: isDistinct, self)
   }
 
-  public func sum(distinct isDistinct: Bool = false) -> some QueryExpression<Value?> {
+  public func sum(distinct isDistinct: Bool = false) -> some QueryExpression<QueryOutput?> {
     AggregateFunction("sum", isDistinct: isDistinct, self)
   }
 
-  public func total(distinct isDistinct: Bool = false) -> some QueryExpression<Value> {
+  public func total(distinct isDistinct: Bool = false) -> some QueryExpression<QueryOutput> {
     AggregateFunction("total", isDistinct: isDistinct, self)
   }
 }
@@ -33,12 +33,12 @@ extension QueryExpression where Self == CountExpression {
 }
 
 public struct CountExpression: QueryExpression {
-  public typealias Value = Int
+  public typealias QueryOutput = Int
   public var queryString: String { "count(*)" }
   public var queryBindings: [QueryBinding] { [] }
 }
 
-private struct AggregateFunction<Argument: QueryExpression, Value>: QueryExpression {
+private struct AggregateFunction<Argument: QueryExpression, QueryOutput>: QueryExpression {
   var name: String
   var isDistinct: Bool
   var argument: Argument

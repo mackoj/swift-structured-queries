@@ -107,5 +107,5 @@ struct UpdateTests {
 }
 
 extension UpdateTests.SyncUp.Columns: PrimaryKeyed {
-  var primaryKey: Column<Value, Int> { id }
+  var primaryKey: Column<QueryOutput, Int> { id }
 }

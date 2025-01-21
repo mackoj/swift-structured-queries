@@ -1,6 +1,5 @@
-public protocol QueryExpression<Value>: Sendable {
-  // TODO: Rename to QueryValue
-  associatedtype Value
+public protocol QueryExpression<QueryOutput>: Sendable {
+  associatedtype QueryOutput
 
   var queryString: String { get }
 
@@ -8,7 +7,7 @@ public protocol QueryExpression<Value>: Sendable {
 }
 
 extension Optional: QueryExpression where Wrapped: QueryExpression {
-  public typealias Value = Self
+  public typealias QueryOutput = Self
   public var queryString: String { self?.queryString ?? "?" }
   public var queryBindings: [QueryBinding] {
     switch self {
@@ -21,13 +20,13 @@ extension Optional: QueryExpression where Wrapped: QueryExpression {
 }
 
 extension Array: QueryExpression where Element: QueryExpression {
-  public typealias Value = Self
+  public typealias QueryOutput = Self
   public var queryString: String { "(\(map(\.queryString).joined(separator: ", ")))" }
   public var queryBindings: [QueryBinding] { flatMap(\.queryBindings) }
 }
 
 extension ClosedRange: QueryExpression where Bound: QueryExpression {
-  public typealias Value = Self
+  public typealias QueryOutput = Self
   public var queryString: String { "\(lowerBound.queryString) AND \(upperBound.queryString)" }
   public var queryBindings: [QueryBinding] { lowerBound.queryBindings + upperBound.queryBindings }
 }

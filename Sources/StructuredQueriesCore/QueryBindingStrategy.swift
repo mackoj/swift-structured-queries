@@ -11,9 +11,9 @@ extension Column {
     _ name: String,
     keyPath: KeyPath<Root, Strategy.Representable> & Sendable,
     as strategy: Strategy,
-    default: Value? = nil
+    default: QueryOutput? = nil
   )
-  where Value == Bind<Strategy> {
+  where QueryOutput == Bind<Strategy> {
     self._keyPath = keyPath
     self.default = `default`
     self.name = name
@@ -22,7 +22,7 @@ extension Column {
   public func decode<Strategy: QueryBindingStrategy>(
     decoder: any QueryDecoder
   ) throws -> Strategy.Representable
-  where Value == Bind<Strategy> {
-    try decoder.decode(Value.self).representable
+  where QueryOutput == Bind<Strategy> {
+    try decoder.decode(QueryOutput.self).representable
   }
 }

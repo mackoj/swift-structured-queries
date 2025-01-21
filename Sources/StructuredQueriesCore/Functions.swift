@@ -1,45 +1,45 @@
-extension QueryExpression where Value == Int {
+extension QueryExpression where QueryOutput == Int {
   // TODO: Should this be 'sign()' to more closely match the SQL function?
-  public func signum() -> some QueryExpression<Value> {
+  public func signum() -> some QueryExpression<QueryOutput> {
     QueryFunction("sign", self)
   }
 }
 
-extension QueryExpression where Value == Double {
+extension QueryExpression where QueryOutput == Double {
   // TODO: Should this be a method?
-  public var sign: some QueryExpression<Value> {
+  public var sign: some QueryExpression<QueryOutput> {
     QueryFunction("sign", self)
   }
   // TODO: Should this be 'rounded(precision:)' to more closely match the Swift function?
-  public func round(_ k: some QueryExpression<Int>) -> some QueryExpression<Value> {
+  public func round(_ k: some QueryExpression<Int>) -> some QueryExpression<QueryOutput> {
     QueryFunction("round", self, k)
   }
   // TODO: Should this be 'rounded' to more closely match the Swift function?
-  public func round() -> some QueryExpression<Value> {
+  public func round() -> some QueryExpression<QueryOutput> {
     QueryFunction("round", self)
   }
 }
 
-extension QueryExpression where Value == String {
+extension QueryExpression where QueryOutput == String {
   // TODO: Should this be 'lower()' to more closely match the SQL function?
-  public func lowercased() -> some QueryExpression<Value> {
+  public func lowercased() -> some QueryExpression<QueryOutput> {
     QueryFunction("lower", self)
   }
   // TODO: Should this be 'upper()' to more closely match the SQL function?
-  public func uppercased() -> some QueryExpression<Value> {
+  public func uppercased() -> some QueryExpression<QueryOutput> {
     QueryFunction("upper", self)
   }
 }
 
-extension QueryExpression where Value == Bind<ISO8601Strategy> {
+extension QueryExpression where QueryOutput == Bind<ISO8601Strategy> {
   public func strftime(
     _ format: some QueryExpression<String>
-  ) -> some QueryExpression<Value> {
+  ) -> some QueryExpression<QueryOutput> {
     QueryFunction("strftime", format, self)
   }
 }
 
-extension QueryExpression where Value: Collection {
+extension QueryExpression where QueryOutput: Collection {
   public var length: some QueryExpression<Int> {
     QueryFunction("length", self)
   }
@@ -52,7 +52,7 @@ extension QueryExpression where Value: Collection {
   }
 }
 
-struct QueryFunction<Value>: QueryExpression {
+struct QueryFunction<QueryOutput>: QueryExpression {
   let name: String
   let arguments: [any QueryExpression]
   init<each Argument: QueryExpression>(_ name: String, _ arguments: repeat each Argument) {

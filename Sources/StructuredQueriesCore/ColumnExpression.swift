@@ -1,4 +1,5 @@
-public protocol ColumnExpression<Root>: QueryExpression, _OrderingTerm where Value: QueryDecodable {
+public protocol ColumnExpression<Root>: QueryExpression, _OrderingTerm
+where QueryOutput: QueryDecodable {
   associatedtype Root: Table
 
   var keyPath: PartialKeyPath<Root> { get }

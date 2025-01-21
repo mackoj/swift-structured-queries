@@ -1,4 +1,4 @@
-extension QueryExpression where Value: Comparable {
+extension QueryExpression where QueryOutput: Comparable {
   public func ascending() -> OrderingTerm {
     OrderingTerm(base: self, direction: .ascending)
   }
@@ -29,7 +29,7 @@ public struct OrderingTerm {
 }
 
 extension OrderingTerm: QueryExpression {
-  public typealias Value = Void
+  public typealias QueryOutput = Void
   public var queryString: String {
     "\(base.queryString)\(direction.map { " \($0.rawValue)" } ?? "")"
   }

@@ -26,7 +26,7 @@ public struct Record<Base: Table>: Sendable {
 }
 
 extension Record: QueryExpression {
-  public typealias Value = Void
+  public typealias QueryOutput = Void
   public var queryString: String {
     "SET \(updates.map { "\($0.name.quoted()) = \($1.queryString)" }.joined(separator: ", "))"
   }

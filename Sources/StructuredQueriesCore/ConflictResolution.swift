@@ -7,7 +7,7 @@ public enum ConflictResolution: Sendable {
 }
 
 extension ConflictResolution: QueryExpression {
-  public typealias Value = Void
+  public typealias QueryOutput = Void
   public var queryString: String {
     switch self {
     case .abort: return "ABORT"

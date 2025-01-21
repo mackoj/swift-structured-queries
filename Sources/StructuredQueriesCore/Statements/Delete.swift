@@ -24,9 +24,9 @@ public struct Delete<Base: Table, Output> {
 
   public func returning<each O: QueryExpression>(
     _ selection: (Base.Columns) -> (repeat each O)
-  ) -> Delete<Base, (repeat (each O).Value)>
-  where repeat (each O).Value: QueryDecodable {
-    Delete<Base, (repeat (each O).Value)>(
+  ) -> Delete<Base, (repeat (each O).QueryOutput)>
+  where repeat (each O).QueryOutput: QueryDecodable {
+    Delete<Base, (repeat (each O).QueryOutput)>(
       where: `where`,
       returning: ReturningClause(repeat each selection(Base.columns))
     )
@@ -34,7 +34,7 @@ public struct Delete<Base: Table, Output> {
 }
 
 extension Delete: Statement {
-  public typealias Value = [Output]
+  public typealias QueryOutput = [Output]
 
   public var queryString: String {
     var sql = "DELETE FROM \(Base.name.quoted())"

@@ -1,8 +1,8 @@
 // TODO: Should we underscore these requirements in order to somewhat hide them from stdlib types?
-public protocol QueryBindable<Value>: QueryDecodable, QueryExpression where Value: QueryBindable {
-  // TODO: Rename to QueryValue
-  associatedtype Value = Self
-  var queryValue: Value { get }
+public protocol QueryBindable<QueryOutput>: QueryDecodable, QueryExpression
+where QueryOutput: QueryBindable {
+  associatedtype QueryOutput = Self
+  var queryValue: QueryOutput { get }
   var queryBinding: QueryBinding { get }
 }
 
@@ -11,7 +11,7 @@ extension QueryBindable {
   public var queryBindings: [QueryBinding] { [queryBinding] }
 }
 
-extension QueryBindable where Value == Self {
+extension QueryBindable where QueryOutput == Self {
   public var queryValue: Self { self }
 }
 

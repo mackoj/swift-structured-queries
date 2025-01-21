@@ -1,6 +1,6 @@
 // TODO: Can we get rid of this?
 
-public protocol Statement<Value>: QueryExpression, Hashable {}
+public protocol Statement<QueryOutput>: QueryExpression, Hashable {}
 
 extension Statement {
   public static func == (lhs: Self, rhs: Self) -> Bool {

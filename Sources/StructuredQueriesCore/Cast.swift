@@ -1,6 +1,6 @@
 extension QueryExpression {
   public func `as`<S: QueryBindingStrategy>(_ strategy: S) -> some QueryExpression<Bind<S>>
-  where S.RawValue == Value {
+  where S.RawValue == QueryOutput {
     Cast(base: self, strategy: strategy)
   }
 }
@@ -11,7 +11,7 @@ private struct Cast<
   let base: Base
   let strategy: Strategy
 
-  typealias Value = Bind<Strategy>
+  typealias QueryOutput = Bind<Strategy>
   var queryString: String { base.queryString }
   var queryBindings: [QueryBinding] { base.queryBindings }
 }

@@ -2,10 +2,10 @@ extension Table {
   public static func insert<each C: ColumnExpression>(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (Columns) -> (repeat each C),
-    @InsertValuesBuilder<(repeat (each C).Value)> values: () -> [(repeat (each C).Value)],
+    @InsertValuesBuilder<(repeat (each C).QueryOutput)> values: () -> [(repeat (each C).QueryOutput)],
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
   ) -> Insert<Self, (repeat each C), Void>
-  where repeat (each C).Value: QueryExpression {
+  where repeat (each C).QueryOutput: QueryExpression {
     let input = columns(Self.columns)
     var columns: [any ColumnExpression] = []
     for column in repeat each input {
@@ -36,10 +36,10 @@ extension Table {
   public static func insert<C: ColumnExpression>(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (Columns) -> C,
-    @InsertValuesBuilder<C.Value> values: () -> [C.Value],
+    @InsertValuesBuilder<C.QueryOutput> values: () -> [C.QueryOutput],
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
   ) -> Insert<Self, C, Void>
-  where C.Value: QueryExpression {
+  where C.QueryOutput: QueryExpression {
     let input = columns(Self.columns)
     let values: [[any QueryExpression]] = values().map { [$0] }
     let record = updates.map { updates in
@@ -59,10 +59,10 @@ extension Table {
   public static func insert<I, each C: ColumnExpression>(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (Columns) -> (repeat each C),
-    select selection: () -> Select<I, (repeat (each C).Value)>,
+    select selection: () -> Select<I, (repeat (each C).QueryOutput)>,
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
   ) -> Insert<Self, (repeat each C), Void>
-  where repeat (each C).Value: QueryExpression {
+  where repeat (each C).QueryOutput: QueryExpression {
     let input = columns(Self.columns)
     var columns: [any ColumnExpression] = []
     for column in repeat each input {
@@ -86,10 +86,10 @@ extension Table {
   public static func insert<I, C: ColumnExpression>(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (Columns) -> C,
-    select selection: () -> Select<I, C.Value>,
+    select selection: () -> Select<I, C.QueryOutput>,
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
   ) -> Insert<Self, C, Void>
-  where C.Value: QueryExpression {
+  where C.QueryOutput: QueryExpression {
     let input = columns(Self.columns)
     let record = updates.map { updates in
       var record = Record<Self>()
@@ -134,9 +134,9 @@ public struct Insert<Base: Table, Input: Sendable, Output> {
 
   public func returning<each O: QueryExpression>(
     _ selection: (Base.Columns) -> (repeat each O)
-  ) -> Insert<Base, Input, (repeat (each O).Value)>
-  where repeat (each O).Value: QueryDecodable {
-    Insert<Base, Input, (repeat (each O).Value)>(
+  ) -> Insert<Base, Input, (repeat (each O).QueryOutput)>
+  where repeat (each O).QueryOutput: QueryDecodable {
+    Insert<Base, Input, (repeat (each O).QueryOutput)>(
       input: input,
       conflictResolution: conflictResolution,
       columns: columns,
@@ -148,7 +148,7 @@ public struct Insert<Base: Table, Input: Sendable, Output> {
 }
 
 extension Insert: Statement {
-  public typealias Value = [Output]
+  public typealias QueryOutput = [Output]
   public var queryString: String {
     let form = form.queryString
     guard !form.isEmpty else { return "" }
@@ -189,7 +189,7 @@ private enum InsertionForm<Base: Table>: QueryExpression {
   case select(any Statement)
   case records([Base])
 
-  typealias Value = Void
+  typealias QueryOutput = Void
   var queryString: String {
     switch self {
     case .defaultValues:
