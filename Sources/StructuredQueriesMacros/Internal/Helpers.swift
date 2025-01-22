@@ -21,4 +21,12 @@ extension String {
     let suffix = hasSuffix("s") ? "es" : "s"
     return self + suffix
   }
+
+  func trimmingBackticks() -> String {
+    var result = self[...]
+    if result.first == "`" && result.dropFirst().last == "`" {
+      result = result.dropFirst().dropLast()
+    }
+    return String(result)
+  }
 }

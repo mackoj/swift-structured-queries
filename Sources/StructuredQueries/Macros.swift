@@ -1,10 +1,7 @@
 @attached(
   extension,
-  conformances: Table,
-  names: named(Columns),
-  named(columns),
-  named(name),
-  named(init(decoder:))
+  conformances: Table, PrimaryKeyedTable,
+  names: named(Columns), named(Draft), named(columns), named(init(decoder:)), named(name)
 )
 @attached(
   memberAttribute
@@ -15,13 +12,17 @@ public macro Table(_ name: String? = nil) =
   )
 
 @attached(accessor, names: named(willSet))
-public macro Column(_ name: String? = nil) =
+public macro Column(_ name: String? = nil, primaryKey: Bool = false) =
   #externalMacro(
     module: "StructuredQueriesMacros", type: "ColumnMacro"
   )
 
 @attached(accessor, names: named(willSet))
-public macro Column<Strategy: QueryBindingStrategy>(_ name: String? = nil, as strategy: Strategy) =
+public macro Column<Strategy: QueryBindingStrategy>(
+  _ name: String? = nil,
+  as strategy: Strategy,
+  primaryKey: Bool = false
+) =
   #externalMacro(
     module: "StructuredQueriesMacros", type: "ColumnMacro"
   )

@@ -3,8 +3,7 @@ import StructuredQueriesMacros
 import Testing
 
 struct TableMacroTests {
-  @Test
-  func basics() {
+  @Test func basics() {
     withMacroTesting(
       record: .failed,
       macros: [TableMacro.self]
@@ -20,12 +19,12 @@ struct TableMacroTests {
       } expansion: {
         #"""
         struct User {
-          @Column
+          @Column("id", primaryKey: true)
           var id: Int
-          @Column
+          @Column("name")
           var name: String
         }
-
+        
         extension User: StructuredQueries.Table {
           public struct Columns: StructuredQueries.Schema {
             public typealias QueryOutput = User
@@ -47,8 +46,45 @@ struct TableMacroTests {
     }
   }
 
-  @Test
-  func computedProperties() {
+  @Test func backticks() {
+    withMacroTesting(
+      record: .failed,
+      macros: [TableMacro.self]
+    ) {
+      assertMacro {
+        """
+        @Table
+        struct Config {
+          var `default` = 0
+        }
+        """
+      } expansion: {
+        #"""
+        struct Config {
+          @Column("default")
+          var `default` = 0
+        }
+        
+        extension Config: StructuredQueries.Table {
+          public struct Columns: StructuredQueries.Schema {
+            public typealias QueryOutput = Config
+            public let `default` = StructuredQueries.Column<QueryOutput, Swift.Int>("default", keyPath: \.default, default: 0)
+            public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
+              [default] 
+            }
+          }
+          public static let columns = Columns()
+          public static let name = "configs"
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
+            self.default = try Self.columns.default.decode(decoder: decoder)
+          }
+        }
+        """#
+      }
+    }
+  }
+
+  @Test func computedProperties() {
     withMacroTesting(
       record: .failed,
       macros: [TableMacro.self]
@@ -64,7 +100,7 @@ struct TableMacroTests {
       } expansion: {
         #"""
         struct User {
-          @Column
+          @Column("id", primaryKey: true)
           var id: Int
           var description: String { "User #\(id)" }
         }
@@ -88,8 +124,7 @@ struct TableMacroTests {
     }
   }
 
-  @Test
-  func columnsApplied() {
+  @Test func columnsApplied() {
     withMacroTesting(
       record: .failed,
       macros: [TableMacro.self]
@@ -128,8 +163,7 @@ struct TableMacroTests {
     }
   }
 
-  @Test
-  func customTableName() {
+  @Test func customTableName() {
     withMacroTesting(
       record: .failed,
       macros: [TableMacro.self]
@@ -144,7 +178,7 @@ struct TableMacroTests {
       } expansion: {
         #"""
         struct User {
-          @Column
+          @Column("id", primaryKey: true)
           var id: Int
         }
 
@@ -167,8 +201,7 @@ struct TableMacroTests {
     }
   }
 
-  @Test
-  func customColumnName() {
+  @Test func customColumnName() {
     withMacroTesting(
       record: .failed,
       macros: [TableMacro.self]
@@ -187,7 +220,7 @@ struct TableMacroTests {
           @Column("user_id")
           var id: Int
         }
-
+        
         extension User: StructuredQueries.Table {
           public struct Columns: StructuredQueries.Schema {
             public typealias QueryOutput = User
@@ -207,8 +240,7 @@ struct TableMacroTests {
     }
   }
 
-  @Test
-  func dateFieldDiagnostic() {
+  @Test func dateFieldDiagnostic() {
     // TODO: generate diagnostic with fixit when using bare date
     withMacroTesting(
       record: .failed,
@@ -224,10 +256,10 @@ struct TableMacroTests {
       } expansion: {
         #"""
         struct User {
-          @Column
+          @Column("joined")
           var joined: Date
         }
-
+        
         extension User: StructuredQueries.Table {
           public struct Columns: StructuredQueries.Schema {
             public typealias QueryOutput = User
@@ -247,8 +279,7 @@ struct TableMacroTests {
     }
   }
 
-  @Test
-  func customBindingStrategy() {
+  @Test func customBindingStrategy() {
     withMacroTesting(
       record: .failed,
       macros: [TableMacro.self]
@@ -267,7 +298,7 @@ struct TableMacroTests {
           @Column(as: .iso8601)
           var joined: Date
         }
-
+        
         extension User: StructuredQueries.Table {
           public struct Columns: StructuredQueries.Schema {
             public typealias QueryOutput = User
@@ -287,8 +318,7 @@ struct TableMacroTests {
     }
   }
 
-  @Test
-  func capitalSelf() {
+  @Test func capitalSelf() {
     withMacroTesting(
       record: .failed,
       macros: [TableMacro.self]
@@ -303,7 +333,7 @@ struct TableMacroTests {
       } expansion: {
         #"""
         struct User {
-          @Column
+          @Column("id", primaryKey: true)
           var id: Tagged<Self, Int>
         }
 
@@ -326,8 +356,7 @@ struct TableMacroTests {
     }
   }
 
-  @Test
-  func noTypeAnnotation() {
+  @Test func noTypeAnnotation() {
     withMacroTesting(
       record: .failed,
       macros: [TableMacro.self]
@@ -342,7 +371,7 @@ struct TableMacroTests {
       } expansion: {
         #"""
         struct User {
-          @Column
+          @Column("id", primaryKey: true)
           var id = Int(0)
         }
 
@@ -385,9 +414,9 @@ struct TableMacroTests {
         #"""
         struct Outer {
           struct User {
-            @Column
+            @Column("id", primaryKey: true)
             var id: Int
-            @Column
+            @Column("name")
             var name: String
           }
         }
@@ -406,6 +435,53 @@ struct TableMacroTests {
           public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.id = try Self.columns.id.decode(decoder: decoder)
             self.name = try Self.columns.name.decode(decoder: decoder)
+          }
+        }
+        """#
+      }
+    }
+  }
+
+  @Test func skipAutomaticPrimaryKeyApplication() {
+    withMacroTesting(
+      record: .failed,
+      macros: [TableMacro.self]
+    ) {
+      assertMacro {
+        """
+        @Table
+        struct User {
+          var id: String
+          @Column("uuid", as: .bytes, primaryKey: true)
+          var uuid: UUID
+        }
+        """
+      } expansion: {
+        #"""
+        struct User {
+          @Column("id")
+          var id: String
+          @Column("uuid", as: .bytes, primaryKey: true)
+          var uuid: UUID
+        }
+
+        extension User: StructuredQueries.Table {
+          public struct Columns: StructuredQueries.PrimaryKeyedSchema {
+            public typealias QueryOutput = User
+            public let id = StructuredQueries.Column<QueryOutput, String>("id", keyPath: \.id)
+            public let uuid = StructuredQueries.Column<QueryOutput, _>("uuid", keyPath: \.uuid, as: .bytes)
+            public var primaryKey: some ColumnExpression<QueryOutput, UUID> {
+              self.uuid
+            }
+            public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
+              [id, uuid]
+            }
+          }
+          public static let columns = Columns()
+          public static let name = "users"
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
+            self.id = try Self.columns.id.decode(decoder: decoder)
+            self.uuid = try Self.columns.uuid.decode(decoder: decoder)
           }
         }
         """#
