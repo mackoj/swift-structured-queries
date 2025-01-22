@@ -105,10 +105,3 @@ struct UpdateTests {
     #expect(query.queryBindings == [.int(1), .text("Engineering"), .int(42)])
   }
 }
-
-extension UpdateTests.SyncUp: PrimaryKeyedTable {
-  typealias Draft = Self
-}
-extension UpdateTests.SyncUp.Columns: PrimaryKeyedSchema {
-  var primaryKey: Column<QueryOutput, Int> { id }
-}

@@ -85,7 +85,10 @@ extension TableMacro: ExtensionMacro {
       return []
     }
     var columnsProperties: [String] = []
+    var draftProperties: [String] = []
+    var draftColumnsProperties: [String] = []
     var allColumns: [String] = []
+    var allDraftColumns: [String] = []
     var primaryKey: (identifier: String, type: String, isImplicit: Bool)?
     var decodings: [String] = []
     let selfRewriter = SelfRewriter(selfEquivalent: declaration.name.trimmed)
@@ -125,7 +128,7 @@ extension TableMacro: ExtensionMacro {
               isPrimaryKey = false
               break
             }
-            guard primaryKey == nil else {
+            guard primaryKey?.isImplicit != false else {
               throw DiagnosticsError(
                 diagnostics: [
                   Diagnostic(
@@ -179,10 +182,20 @@ extension TableMacro: ExtensionMacro {
         )
         """
       )
-      allColumns.append(name)
+      allColumns.append("self.\(name)")
+      if !isPrimaryKey {
+        draftProperties.append("\(property.with(\.attributes, []).trimmed)")
+        draftColumnsProperties.append(
+        """
+        public let \(identifier.trimmed) = \(moduleName).DraftColumn<QueryOutput, \(typeGeneric)>(\
+        \(columnName), keyPath: \\.\(name)\(arguments)\
+        )
+        """
+        )
+        allDraftColumns.append("self.\(name)")
+      }
       decodings.append("self.\(name) = try Self.columns.\(name).decode(decoder: decoder)")
     }
-    let schemaConformance: String
     let tableName: String
     if case let .argumentList(arguments) = node.arguments,
       let expression = arguments.first?.expression
@@ -193,9 +206,10 @@ extension TableMacro: ExtensionMacro {
         "\(declaration.name.trimmed.text.tableName())"
         """
     }
-    let typeName = type.trimmed
+    let draft: String
+    let protocolNames: [String]
+    let schemaConformance: String
     if let primaryKey {
-      schemaConformance = "PrimaryKeyedSchema"
       columnsProperties.append(
         """
         public var primaryKey: some \(moduleName).ColumnExpression<QueryOutput> & \(moduleName).QueryExpression<\(primaryKey.type)> {
@@ -203,14 +217,29 @@ extension TableMacro: ExtensionMacro {
         }
         """
       )
+      draft = """
+
+        public struct Draft: \(moduleName).Draft {
+        \(draftProperties.joined(separator: "\n"))
+        public struct Columns: \(moduleName).DraftSchema {
+        public typealias QueryOutput = Draft
+        \(draftColumnsProperties.joined(separator: "\n"))
+        public var allColumns: [any \(moduleName).ColumnExpression<QueryOutput>] {\
+        [\(allDraftColumns.joined(separator: ", "))] \
+        }
+        }
+        public static let columns = Columns()
+        }
+        """
+      protocolNames = [protocolName(primaryKey: false), protocolName(primaryKey: true)]
+      schemaConformance = "PrimaryKeyedSchema"
     } else {
+      draft = ""
+      protocolNames = [protocolName(primaryKey: false)]
       schemaConformance = "Schema"
     }
+    let typeName = type.trimmed
     var conformances: [String] = []
-    let protocolNames =
-      primaryKey == nil
-      ? [protocolName(primaryKey: false)]
-      : [protocolName(primaryKey: false), protocolName(primaryKey: true)]
     if let inheritanceClause = declaration.inheritanceClause {
       for type in protocolNames {
         if !inheritanceClause.inheritedTypes
@@ -233,10 +262,7 @@ extension TableMacro: ExtensionMacro {
         public var allColumns: [any \(moduleName).ColumnExpression<QueryOutput>] {\
         [\(raw: allColumns.joined(separator: ", "))] \
         }
-        }
-        public struct Draft {
-        // TODO
-        }
+        }\(raw: draft)
         public static let columns = Columns()
         public static let name = \(raw: tableName)
         public init(decoder: some \(moduleName).QueryDecoder) throws {

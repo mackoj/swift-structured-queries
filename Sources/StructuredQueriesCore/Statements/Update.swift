@@ -19,7 +19,7 @@ extension Table {
       }
     }
     .where {
-      $0.primaryKey == record[keyPath: $0.primaryKey.keyPath] as! Columns.PrimaryKey
+      $0.primaryKey == record[keyPath: $0.primaryKey.keyPath] as! Columns.PrimaryKey.QueryOutput
     }
   }
 }

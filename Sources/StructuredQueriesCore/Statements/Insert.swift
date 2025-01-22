@@ -123,6 +123,7 @@ extension Table {
     Insert(input: (), conflictResolution: conflictResolution)
   }
 
+  @_disfavoredOverload
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ drafts: [Self.Draft]

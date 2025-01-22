@@ -26,3 +26,24 @@ extension Column {
     try decoder.decode(QueryOutput.self).representable
   }
 }
+
+extension DraftColumn {
+  public init<Strategy: QueryBindingStrategy>(
+    _ name: String,
+    keyPath: KeyPath<Root, Strategy.Representable> & Sendable,
+    as strategy: Strategy,
+    default: QueryOutput? = nil
+  )
+  where QueryOutput == Bind<Strategy> {
+    self._keyPath = keyPath
+    self.default = `default`
+    self.name = name
+  }
+
+  public func decode<Strategy: QueryBindingStrategy>(
+    decoder: any QueryDecoder
+  ) throws -> Strategy.Representable
+  where QueryOutput == Bind<Strategy> {
+    try decoder.decode(QueryOutput.self).representable
+  }
+}
