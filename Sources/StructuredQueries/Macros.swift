@@ -37,3 +37,13 @@ public macro Selection() =
 #externalMacro(
   module: "StructuredQueriesMacros", type: "SelectionMacro"
 )
+
+@Table
+struct User {
+  let id: Int
+  var updatedAt: Int
+  // TODO: Support `default` optional in @Column to make field optional in draft?
+  //@Column("createdAt", default: true)
+  // TODO: alternative support @DraftIgnored?
+  var createdAt: Int
+}

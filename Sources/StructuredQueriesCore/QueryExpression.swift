@@ -31,3 +31,4 @@ extension ClosedRange: QueryExpression where Bound: QueryExpression {
   public var queryString: String { "\(lowerBound.queryString) AND \(upperBound.queryString)" }
   public var queryBindings: [QueryBinding] { lowerBound.queryBindings + upperBound.queryBindings }
 }
+
