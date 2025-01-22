@@ -11,15 +11,15 @@ struct SelectTests {
     //var isDeleted = false
 
     // TODO: Should we move `all()` to a protocol requirement and have macro generate this so that people can override it with special conditions
-//    public static func all() -> SelectOf<Self> {
-//      Select().where { !$0.isDeleted }
-//    }
+    //    public static func all() -> SelectOf<Self> {
+    //      Select().where { !$0.isDeleted }
+    //    }
 
-//    static let withAttendees: SelectOf<SyncUp, Attendee> = SyncUp
-//      .notDeleted
-//      .join(Attendee.notDeleted) { $0.id == $1.syncUpID }
-//
-//    static let notDeleted = all().where { !$0.isDeleted }
+    //    static let withAttendees: SelectOf<SyncUp, Attendee> = SyncUp
+    //      .notDeleted
+    //      .join(Attendee.notDeleted) { $0.id == $1.syncUpID }
+    //
+    //    static let notDeleted = all().where { !$0.isDeleted }
   }
 
   @Table
@@ -27,14 +27,14 @@ struct SelectTests {
     var id: Int
     var name: String
     var syncUpID: Int
-//    var isDeleted = false
+    //    var isDeleted = false
 
-//    static let notDeleted = all().where { !$0.isDeleted }
-//
-//    // TODO: Can we have a SelectOneOf to force that a single row will be returned
-//    var syncUpQuery: SelectOf<SyncUp> {
-//      SyncUp.notDeleted.where { $0.id == syncUpID }.limit(1)
-//    }
+    //    static let notDeleted = all().where { !$0.isDeleted }
+    //
+    //    // TODO: Can we have a SelectOneOf to force that a single row will be returned
+    //    var syncUpQuery: SelectOf<SyncUp> {
+    //      SyncUp.notDeleted.where { $0.id == syncUpID }.limit(1)
+    //    }
   }
 
   @Test func basics() {
@@ -75,7 +75,7 @@ struct SelectTests {
           """
     )
     #expect(
-      SyncUp.all().join(left: Attendee.all()) { $0.id == $1.syncUpID }
+      SyncUp.all().leftJoin(Attendee.all()) { $0.id == $1.syncUpID }
         .queryString == """
           SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."title", \
           "attendees"."id", "attendees"."name", "attendees"."syncUpID" \
@@ -84,7 +84,7 @@ struct SelectTests {
           """
     )
     #expect(
-      SyncUp.all().join(right: Attendee.all()) { $0.id == $1.syncUpID }
+      SyncUp.all().rightJoin(Attendee.all()) { $0.id == $1.syncUpID }
         .queryString == """
           SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."title", \
           "attendees"."id", "attendees"."name", "attendees"."syncUpID" \
@@ -93,7 +93,7 @@ struct SelectTests {
           """
     )
     #expect(
-      SyncUp.all().join(full: Attendee.all()) { $0.id == $1.syncUpID }
+      SyncUp.all().fullJoin(Attendee.all()) { $0.id == $1.syncUpID }
         .queryString == """
           SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."title", \
           "attendees"."id", "attendees"."name", "attendees"."syncUpID" \
@@ -114,7 +114,7 @@ struct SelectTests {
     )
     #expect(
       SyncUp.all().where { $0.id == 1 && $0.isActive }.queryString
-      == SyncUp.all().where { $0.id == 1 }.where(\.isActive).queryString
+        == SyncUp.all().where { $0.id == 1 }.where(\.isActive).queryString
     )
   }
 
@@ -156,7 +156,7 @@ struct SelectTests {
           $0.title
         }
       }
-        .queryString == """
+      .queryString == """
         SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."title" \
         FROM "syncUps"
         """
@@ -165,40 +165,40 @@ struct SelectTests {
       SyncUp.all()
         .where { $0.isActive }
         .order {
-        switch condition {
-        case true:
-          $0.title
-        case false:
-          $0.isActive
+          switch condition {
+          case true:
+            $0.title
+          case false:
+            $0.isActive
+          }
         }
-      }
         .queryString == """
-        SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."title" \
-        FROM "syncUps" \
-        WHERE "syncUps"."isActive" \
-        ORDER BY "syncUps"."isActive"
-        """
+          SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."title" \
+          FROM "syncUps" \
+          WHERE "syncUps"."isActive" \
+          ORDER BY "syncUps"."isActive"
+          """
     )
   }
 
   @Test func selfJoin() {
     assertInlineSnapshot(
-      of: Person.all(as: "p1").join(Person.all(as: "p2")) { $0.bestFriendID == $1.id }
+      of: Person.all(as: "p1").join(Person.all(as: "p2")) { $0.referrerID == $1.id }
         .queryString,
       as: .lines
     ) {
       """
-      SELECT "p1"."id", "p1"."name", "p1"."bestFriendID", \
-      "p2"."id", "p2"."name", "p2"."bestFriendID" \
+      SELECT "p1"."id", "p1"."name", "p1"."referrerID", \
+      "p2"."id", "p2"."name", "p2"."referrerID" \
       FROM "persons" AS "p1" \
-      JOIN "persons" AS "p2" ON ("p1"."bestFriendID" = "p2"."id")
+      JOIN "persons" AS "p2" ON ("p1"."referrerID" = "p2"."id")
       """
     }
   }
 }
 
-@Table fileprivate struct Person {
+@Table private struct Person {
   let id: Int
   let name: String
-  let bestFriendID: Int
+  let referrerID: Int?
 }

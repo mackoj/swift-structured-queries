@@ -91,7 +91,7 @@ struct Attendee: Equatable {
         SyncUp.all()
           .where(\.isActive)
           .group(by: \.id)
-          .join(left: Attendee.all()) { $0.id == $1.syncUpID }
+          .leftJoin(Attendee.all()) { $0.id == $1.syncUpID }
           .select { ($0, $1.id.count(distinct: true)) }
           .order { $1.id.count(distinct: true).descending() }
       )

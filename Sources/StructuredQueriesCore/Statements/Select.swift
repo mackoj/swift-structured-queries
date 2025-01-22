@@ -1,13 +1,24 @@
 extension Table {
-  public static func all(as alias: String? = nil) -> SelectOf<Self> {
+  public static func all() -> SelectOf<Self> {
+    Select(from: Self.self)
+  }
+
+  public static func all(as alias: String) -> Select<AliasedColumns<Columns>, Self> {
     Select(from: Self.self, as: alias)
   }
 }
 
 extension Select {
+  public init(from table: Output.Type = Output.self) where Output: Table, Input == Output.Columns {
+    self.init(
+      input: Output.columns,
+      from: TableAlias(alias: nil, table: Output.self)
+    )
+  }
+
   public init(
     from table: Output.Type = Output.self,
-    as alias: String? = nil
+    as alias: String
   ) where Output: Table, Input == AliasedColumns<Output.Columns> {
     self.init(
       input: AliasedColumns(alias: alias, columns: Output.columns),
@@ -124,65 +135,11 @@ public struct Select<Input: Sendable, Output> {
     )
   }
 
-  // https://github.com/swiftlang/swift/issues/78191
-  // public func join<each I1, each I2, each O1, each O2>(
-  //   _ other: Select<(repeat each I2), (repeat each O2)>,
-  //   on constraint: ((repeat each I1, repeat each I2)) -> some QueryExpression<Bool>
-  // ) -> Select<(repeat each I1, repeat each I2), (repeat each O1, repeat each O2)>
-  // where Input == (repeat each I1), Output == (repeat each O1) {
-  //   _join(self, other, on: constraint)
-  // }
-  //
-  // public func join<each I1, each I2, each O1, each O2>(
-  //   left other: Select<(repeat each I2), (repeat each O2)>,
-  //   on constraint: ((repeat each I1, repeat each I2)) -> some QueryExpression<Bool>
-  // ) -> Select<(repeat each I1, repeat each I2), (repeat each O1, repeat (each O2)?)>
-  // where Input == (repeat each I1), Output == (repeat each O1) {
-  //   _leftJoin(self, other, on: constraint)
-  // }
-  //
-  // public func join<each I1, each I2, each O1, each O2>(
-  //   right other: Select<(repeat each I2), (repeat each O2)>,
-  //   on constraint: ((repeat each I1, repeat each I2)) -> some QueryExpression<Bool>
-  // ) -> Select<(repeat each I1, repeat each I2), (repeat (each O1)?, repeat each O2)>
-  // where Input == (repeat each I1), Output == (repeat each O1) {
-  //   _rightJoin(self, other, on: constraint)
-  // }
-  //
-  // public func join<each I1, each I2, each O1, each O2>(
-  //   full other: Select<(repeat each I2), (repeat each O2)>,
-  //   on constraint: ((repeat each I1, repeat each I2)) -> some QueryExpression<Bool>
-  // ) -> Select<(repeat each I1, repeat each I2), (repeat (each O1)?, repeat (each O2)?)>
-  // where Input == (repeat each I1), Output == (repeat each O1) {
-  //   _fullJoin(self, other, on: constraint)
-  // }
-
   public func join<OtherInput, OtherOutput>(
     _ other: Select<OtherInput, OtherOutput>,
     on constraint: ((Input, OtherInput)) -> some QueryExpression<Bool>
   ) -> Select<(Input, OtherInput), (Output, OtherOutput)> {
     _join(self, other, on: constraint)
-  }
-
-  public func join<OtherInput, OtherOutput>(
-    left other: Select<OtherInput, OtherOutput>,
-    on constraint: ((Input, OtherInput)) -> some QueryExpression<Bool>
-  ) -> Select<(Input, OtherInput), (Output, OtherOutput?)> {
-    _leftJoin(self, other, on: constraint)
-  }
-
-  public func join<OtherInput, OtherOutput>(
-    right other: Select<OtherInput, OtherOutput>,
-    on constraint: ((Input, OtherInput)) -> some QueryExpression<Bool>
-  ) -> Select<(Input, OtherInput), (Output?, OtherOutput)> {
-    _rightJoin(self, other, on: constraint)
-  }
-
-  public func join<OtherInput, OtherOutput>(
-    full other: Select<OtherInput, OtherOutput>,
-    on constraint: ((Input, OtherInput)) -> some QueryExpression<Bool>
-  ) -> Select<(Input, OtherInput), (Output?, OtherOutput?)> {
-    _fullJoin(self, other, on: constraint)
   }
 
   public func leftJoin<OtherInput, OtherOutput>(
@@ -277,7 +234,7 @@ public struct Select<Input: Sendable, Output> {
   }
 }
 
-public typealias SelectOf<each T: Table> = Select<(repeat AliasedColumns<(each T).Columns>), (repeat each T)>
+public typealias SelectOf<each T: Table> = Select<(repeat (each T).Columns), (repeat each T)>
 
 // Player.all().join(Team.self) { $0.teamID == $1.id }
 
