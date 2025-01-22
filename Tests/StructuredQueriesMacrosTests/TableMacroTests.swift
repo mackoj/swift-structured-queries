@@ -492,8 +492,7 @@ struct TableMacroTests {
     }
   }
 
-  @Test
-  func nested() {
+  @Test func nested() {
     withMacroTesting(
       record: .failed,
       macros: [TableMacro.self]

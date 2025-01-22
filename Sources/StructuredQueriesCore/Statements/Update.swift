@@ -7,7 +7,9 @@ extension Table {
     updates(&record)
     return Update(conflictResolution: conflictResolution, record: record)
   }
+}
 
+extension PrimaryKeyedTable {
   public static func update(
     or conflictResolution: ConflictResolution? = nil,
     _ record: Self
@@ -56,6 +58,8 @@ public struct Update<Base: Table, Output> {
     )
   }
 }
+
+public typealias UpdateOf<T: Table> = Update<T, Void>
 
 extension Update: Statement {
   public typealias QueryOutput = [Output]

@@ -4,9 +4,20 @@ extension Table {
   }
 }
 
+extension PrimaryKeyedTable {
+  // TODO: Should this be 'delete(_ ids: [Columns.PrimaryKey.QueryOutput])' instead?
+  public static func delete(_ records: [Self]) -> Delete<Self, Void> {
+    Delete().where { columns in
+      records
+        .map { $0[keyPath: columns.primaryKey.keyPath] as! Columns.PrimaryKey.QueryOutput }
+        .contains(columns.primaryKey)
+    }
+  }
+}
+
 public struct Delete<Base: Table, Output> {
-  private var `where`: WhereClause?
-  private var returning: ReturningClause?
+  var `where`: WhereClause?
+  var returning: ReturningClause?
 
   public func `where`(_ predicate: (Base.Columns) -> some QueryExpression<Bool>) -> Self {
     func open(_ `where`: some QueryExpression<Bool>) -> WhereClause {
@@ -32,6 +43,8 @@ public struct Delete<Base: Table, Output> {
     )
   }
 }
+
+public typealias DeleteOf<T: Table> = Delete<T, Void>
 
 extension Delete: Statement {
   public typealias QueryOutput = [Output]

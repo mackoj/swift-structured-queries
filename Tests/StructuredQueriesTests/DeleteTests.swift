@@ -1,3 +1,4 @@
+import InlineSnapshotTesting
 import StructuredQueries
 import Testing
 
@@ -45,9 +46,18 @@ struct DeleteTests {
     )
   }
 
-  // TODO: make this work
   @Test func primaryKey() {
     let syncUp = SyncUp(id: 1, isActive: true, title: "Morning Sync")
-    //SyncUp.delete([syncUp])
+    assertInlineSnapshot(
+      of:
+        SyncUp
+        .delete([syncUp])
+        .queryString,
+      as: .lines
+    ) {
+      """
+      DELETE FROM "syncUps" WHERE ("syncUps"."id" IN ((?)))
+      """
+    }
   }
 }
