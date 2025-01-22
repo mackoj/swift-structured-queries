@@ -1,3 +1,4 @@
+// TODO: conform to CustomDebugStringConvertible and pretty print?
 public protocol QueryExpression<QueryOutput>: Sendable {
   associatedtype QueryOutput
 
