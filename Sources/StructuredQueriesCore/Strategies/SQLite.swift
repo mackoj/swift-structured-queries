@@ -1,59 +1,30 @@
 import Foundation
 
-extension QueryBindingStrategy where Self == SQLiteISO8601Strategy {
+extension QueryBindingStrategy where Self == ISO8601Strategy {
   public static var iso8601: Self { Self() }
 }
 
-extension QueryBindingStrategy where Self == SQLiteUnixTimeStrategy {
+extension QueryBindingStrategy where Self == UnixTimeStrategy {
   public static var unixTime: Self { Self() }
 }
 
-extension QueryBindingStrategy where Self == SQLiteJulianDayStrategy {
+extension QueryBindingStrategy where Self == JulianDayStrategy {
   public static var julianDay: Self { Self() }
 }
 
-extension QueryBindingStrategy where Self == SQLiteUUIDBytesStrategy {
+extension QueryBindingStrategy where Self == UUIDBytesStrategy {
   public static var uuidBytes: Self { Self() }
 }
 
-extension QueryBindingStrategy where Self == SQLiteUUIDUppercasedStrategy {
+extension QueryBindingStrategy where Self == UUIDUppercasedStrategy {
   public static var uuidUppercased: Self { Self() }
 }
 
-extension QueryBindingStrategy where Self == SQLiteUUIDLowercasedStrategy {
+extension QueryBindingStrategy where Self == UUIDLowercasedStrategy {
   public static var uuidLowercased: Self { Self() }
 }
 
-extension QueryBindingStrategy {
-  public static func sqlite(_ strategy: Self.Name) -> Self where Self == SQLiteISO8601Strategy {
-    Self()
-  }
-
-  public static func sqlite(_ strategy: Self.Name) -> Self where Self == SQLiteUnixTimeStrategy {
-    Self()
-  }
-
-  public static func sqlite(_ strategy: Self.Name) -> Self where Self == SQLiteJulianDayStrategy {
-    Self()
-  }
-
-  public static func sqlite(_ strategy: Self.Name) -> Self where Self == SQLiteUUIDBytesStrategy {
-    Self()
-  }
-
-  public static func sqlite(_ strategy: Self.Name) -> Self
-  where Self == SQLiteUUIDLowercasedStrategy {
-    Self()
-  }
-
-  public static func sqlite(_ strategy: Self.Name) -> Self
-  where Self == SQLiteUUIDUppercasedStrategy {
-    Self()
-  }
-}
-
-public struct SQLiteISO8601Strategy: QueryBindingStrategy {
-  public struct Name: Sendable { public static let iso8601 = Self() }
+public struct ISO8601Strategy: QueryBindingStrategy {
   public init() {}
   public func fromQueryBindable(_ rawValue: String) throws -> Date {
     try Date(rawValue, strategy: .iso8601)
@@ -63,8 +34,7 @@ public struct SQLiteISO8601Strategy: QueryBindingStrategy {
   }
 }
 
-public struct SQLiteUnixTimeStrategy: QueryBindingStrategy {
-  public struct Name: Sendable { public static let unixTime = Self() }
+public struct UnixTimeStrategy: QueryBindingStrategy {
   public init() {}
   public func fromQueryBindable(_ rawValue: Int) -> Date {
     Date(timeIntervalSince1970: TimeInterval(rawValue))
@@ -74,8 +44,7 @@ public struct SQLiteUnixTimeStrategy: QueryBindingStrategy {
   }
 }
 
-public struct SQLiteJulianDayStrategy: QueryBindingStrategy {
-  public struct Name: Sendable { public static let julianDay = Self() }
+public struct JulianDayStrategy: QueryBindingStrategy {
   public init() {}
   public func fromQueryBindable(_ rawValue: Double) -> Date {
     Date(timeIntervalSince1970: (rawValue - 2440587.5) * 86400)
@@ -85,8 +54,7 @@ public struct SQLiteJulianDayStrategy: QueryBindingStrategy {
   }
 }
 
-public struct SQLiteUUIDBytesStrategy: QueryBindingStrategy {
-  public struct Name: Sendable { public static let uuidBytes = Self() }
+public struct UUIDBytesStrategy: QueryBindingStrategy {
   public init() {}
   public func fromQueryBindable(_ rawValue: [UInt8]) throws -> UUID {
     guard rawValue.count == 16 else {
@@ -102,8 +70,7 @@ public struct SQLiteUUIDBytesStrategy: QueryBindingStrategy {
   }
 }
 
-public struct SQLiteUUIDUppercasedStrategy: QueryBindingStrategy {
-  public struct Name: Sendable { public static let uuidUppercased = Self() }
+public struct UUIDUppercasedStrategy: QueryBindingStrategy {
   public init() {}
   public func fromQueryBindable(_ rawValue: String) throws -> UUID {
     guard let uuid = UUID(uuidString: rawValue) else {
@@ -117,8 +84,7 @@ public struct SQLiteUUIDUppercasedStrategy: QueryBindingStrategy {
   }
 }
 
-public struct SQLiteUUIDLowercasedStrategy: QueryBindingStrategy {
-  public struct Name: Sendable { public static let uuidLowercased = Self() }
+public struct UUIDLowercasedStrategy: QueryBindingStrategy {
   public init() {}
   public func fromQueryBindable(_ rawValue: String) throws -> UUID {
     guard let uuid = UUID(uuidString: rawValue) else {
