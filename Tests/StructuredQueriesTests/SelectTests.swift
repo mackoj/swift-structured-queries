@@ -183,7 +183,8 @@ struct SelectTests {
 
   @Test func selfJoin() {
     assertInlineSnapshot(
-      of: Person.all(as: "p1").join(Person.all(as: "p2")) { $0.referrerID == $1.id }
+      of: Person.all(as: "p1")
+        .join(Person.all(as: "p2")) { $0.referrerID == $1.id }
         .queryString,
       as: .lines
     ) {

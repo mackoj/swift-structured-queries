@@ -88,7 +88,7 @@ struct Attendee: Equatable {
   do {
     let (syncUp, attendeesCount) = try #require(
       try db.execute(
-        SyncUp.all()
+        SyncUp
           .where(\.isActive)
           .group(by: \.id)
           .leftJoin(Attendee.all()) { $0.id == $1.syncUpID }
@@ -110,7 +110,7 @@ struct Attendee: Equatable {
   do {
     let (syncUp, attendeesCount) = try #require(
       try db.execute(
-        SyncUp.all()
+        SyncUp
           .where { !$0.isActive }
           .group(by: \.id)
           .leftJoin(Attendee.all()) { $0.id == $1.syncUpID }

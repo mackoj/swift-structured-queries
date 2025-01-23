@@ -319,6 +319,7 @@ struct TableMacroTests {
         #"""
         @Table
         struct User {
+          /// Join date
           var joined: Date
         }
         """#
@@ -326,11 +327,45 @@ struct TableMacroTests {
         """
         @Table
         struct User {
+          /// Join date
           var joined: Date
                       ┬───
                       ╰─ 🛑 'Date' column requires a bind strategy
+                         ✏️ Insert '@Column(as: .<#strategy#>)'
         }
         """
+      } fixes: {
+        """
+        @Table
+        struct User {
+          /// Join date
+          @Column(as: .<#strategy#>)
+          var joined: Date
+        }
+        """
+      }expansion: {
+        #"""
+        struct User {
+          /// Join date
+          @Column(as: .<#strategy#>)
+          var joined: Date
+        }
+
+        extension User: StructuredQueries.Table {
+          public struct Columns: StructuredQueries.Schema {
+            public typealias QueryOutput = User
+            public let joined = StructuredQueries.Column<QueryOutput, _>("joined", keyPath: \.joined, as: .<#strategy#>)
+            public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
+              [self.joined]
+            }
+          }
+          public static let columns = Columns()
+          public static let name = "users"
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
+            self.joined = try Self.columns.joined.decode(decoder: decoder)
+          }
+        }
+        """#
       }
     }
   }
@@ -621,9 +656,62 @@ struct TableMacroTests {
           @Column(primaryKey: true)
                   ┬─────────
                   ╰─ 🛑 '@Table' only supports a single primary key
+                     ✏️ Remove 'primaryKey: true'
           var attendeeID: Int
         }
         """
+      } fixes: {
+        """
+        @Table
+        struct SyncUpAttendees {
+          @Column(primaryKey: true)
+          var syncUpID: Int
+          @Column()
+          var attendeeID: Int
+        }
+        """
+      } expansion: {
+        #"""
+        struct SyncUpAttendees {
+          @Column(primaryKey: true)
+          var syncUpID: Int
+          @Column()
+          var attendeeID: Int
+        }
+
+        extension SyncUpAttendees: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
+          public struct Columns: StructuredQueries.PrimaryKeyedSchema {
+            public typealias QueryOutput = SyncUpAttendees
+            public let syncUpID = StructuredQueries.Column<QueryOutput, Int>("syncUpID", keyPath: \.syncUpID)
+            public let attendeeID = StructuredQueries.Column<QueryOutput, Int>("attendeeID", keyPath: \.attendeeID)
+            public var primaryKey: some StructuredQueries.ColumnExpression<QueryOutput> & StructuredQueries.QueryExpression<Int> {
+              self.syncUpID
+            }
+            public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
+              [self.syncUpID, self.attendeeID]
+            }
+          }
+          public struct Draft: StructuredQueries.Draft {
+            var syncUpID: Int
+            var attendeeID: Int
+            public struct Columns: StructuredQueries.DraftSchema {
+              public typealias QueryOutput = Draft
+              public let syncUpID = StructuredQueries.DraftColumn<QueryOutput, Int>("syncUpID", keyPath: \.syncUpID)
+              public let attendeeID = StructuredQueries.DraftColumn<QueryOutput, Int>("attendeeID", keyPath: \.attendeeID)
+              public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
+                [self.syncUpID, self.attendeeID]
+              }
+            }
+            public static let columns = Columns()
+          }
+          public static let columns = Columns()
+          public static let name = "syncUpAttendeeses"
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
+            self.syncUpID = try Self.columns.syncUpID.decode(decoder: decoder)
+            self.attendeeID = try Self.columns.attendeeID.decode(decoder: decoder)
+          }
+        }
+        """#
       }
     }
   }

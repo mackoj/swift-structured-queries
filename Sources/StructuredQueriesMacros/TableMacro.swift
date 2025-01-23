@@ -85,6 +85,7 @@ extension TableMacro: ExtensionMacro {
       return []
     }
     var columnsProperties: [String] = []
+    var diagnostics: [Diagnostic] = []
     var draftProperties: [String] = []
     var draftColumnsProperties: [String] = []
     var allColumns: [String] = []
@@ -115,7 +116,7 @@ extension TableMacro: ExtensionMacro {
           attributeName == "Column",
           case let .argumentList(arguments) = attribute.arguments
         else { continue }
-        for argument in arguments {
+        for (argumentIndex, argument) in zip(arguments.indices, arguments) {
           switch argument.label {
           case nil:
             // TODO: Require string literal
@@ -129,28 +130,37 @@ extension TableMacro: ExtensionMacro {
               break
             }
             if let primaryKey, let originalLabel = primaryKey.label {
-              throw DiagnosticsError(
-                diagnostics: [
-                  Diagnostic(
-                    node: label,
-                    message: MacroExpansionErrorMessage(
+              var newArguments = arguments
+              newArguments.remove(at: argumentIndex)
+              diagnostics.append(
+                Diagnostic(
+                  node: label,
+                  message: MacroExpansionErrorMessage(
+                    """
+                    '@Table' only supports a single primary key
+                    """
+                  ),
+                  notes: [
+                    Note(
+                      node: Syntax(originalLabel),
+                      position: originalLabel.position,
+                      message: MacroExpansionNoteMessage(
+                        """
+                        Primary key already applied to '\(primaryKey.identifier)'
+                        """
+                      )
+                    )
+                  ],
+                  fixIt: .replace(
+                    message: MacroExpansionFixItMessage(
                       """
-                      '@Table' only supports a single primary key
+                      Remove 'primaryKey: true'
                       """
                     ),
-                    notes: [
-                      Note(
-                        node: Syntax(originalLabel),
-                        position: originalLabel.position,
-                        message: MacroExpansionNoteMessage(
-                          """
-                          Primary key already applied to '\(primaryKey.identifier)'
-                          """
-                        )
-                      )
-                    ]
+                    oldNode: Syntax(attribute),
+                    newNode: Syntax(attribute.with(\.arguments, .argumentList(newArguments)))
                   )
-                ]
+                )
               )
             }
             primaryKey = (
@@ -162,7 +172,6 @@ extension TableMacro: ExtensionMacro {
             fatalError("Unexpected argument: \(argument)")
           }
         }
-        break
       }
       if isPrimaryKey {
         primaryKey = (
@@ -182,31 +191,45 @@ extension TableMacro: ExtensionMacro {
         arguments.append(", as: \(columnStrategyArgument)")
       } else if let type {
         typeGeneric = selfRewriter.rewrite(type).trimmedDescription
-        if typeGeneric == "Date" {
-          throw DiagnosticsError(
-            diagnostics: [
-              Diagnostic(
-                node: type,
-                message: MacroExpansionErrorMessage(
-                  """
-                  'Date' column requires a bind strategy
-                  """
+        if typeGeneric == "Date" || typeGeneric == "UUID" {
+          var newProperty = property.with(\.leadingTrivia, "")
+          newProperty.attributes.insert(
+            AttributeListSyntax.Element(
+              AttributeSyntax(
+                attributeName: IdentifierTypeSyntax(name: "Column"),
+                leftParen: .leftParenToken(),
+                arguments: .argumentList([
+                  LabeledExprSyntax(
+                    label: "as",
+                    expression: EditorPlaceholderExprSyntax(placeholder: ".<#strategy#>")
+                  )
+                ]),
+                rightParen: .rightParenToken(),
+                trailingTrivia: .newline.merging(
+                  property.leadingTrivia.indentation(isOnNewline: true)
                 )
               )
-            ]
+            ),
+            at: newProperty.attributes.startIndex
           )
-        } else if typeGeneric == "UUID" {
-          throw DiagnosticsError(
-            diagnostics: [
-              Diagnostic(
-                node: type,
-                message: MacroExpansionErrorMessage(
+          diagnostics.append(
+            Diagnostic(
+              node: type,
+              message: MacroExpansionErrorMessage(
+                """
+                '\(typeGeneric)' column requires a bind strategy
+                """
+              ),
+              fixIt: .replace(
+                message: MacroExpansionFixItMessage(
                   """
-                  'UUID' column requires a bind strategy
+                  Insert '@Column(as: .<#strategy#>)'
                   """
-                )
+                ),
+                oldNode: Syntax(property),
+                newNode: Syntax(newProperty.with(\.leadingTrivia, property.leadingTrivia))
               )
-            ]
+            )
           )
         }
       } else {
@@ -226,11 +249,11 @@ extension TableMacro: ExtensionMacro {
       if !isPrimaryKey {
         draftProperties.append("\(property.with(\.attributes, []).trimmed)")
         draftColumnsProperties.append(
-        """
-        public let \(identifier.trimmed) = \(moduleName).DraftColumn<QueryOutput, \(typeGeneric)>(\
-        \(columnName), keyPath: \\.\(name)\(arguments)\
-        )
-        """
+          """
+          public let \(identifier.trimmed) = \(moduleName).DraftColumn<QueryOutput, \(typeGeneric)>(\
+          \(columnName), keyPath: \\.\(name)\(arguments)\
+          )
+          """
         )
         allDraftColumns.append("self.\(name)")
       }
@@ -290,6 +313,10 @@ extension TableMacro: ExtensionMacro {
       }
     } else {
       conformances = protocolNames.map { $0.qualified() }
+    }
+    guard diagnostics.isEmpty else {
+      diagnostics.forEach(context.diagnose)
+      return []
     }
     return [
       DeclSyntax(

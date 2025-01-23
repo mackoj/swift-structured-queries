@@ -41,7 +41,7 @@ struct AggregatesTests {
       == #"SELECT count(*) FROM "users""#
     )
     #expect(
-      User.all().where(\.isAdmin).count().queryString
+      User.where(\.isAdmin).count().queryString
       == #"SELECT count(*) FROM "users" WHERE "users"."isAdmin""#
     )
   }
