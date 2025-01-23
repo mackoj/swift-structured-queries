@@ -191,7 +191,7 @@ extension TableMacro: ExtensionMacro {
         arguments.append(", as: \(columnStrategyArgument)")
       } else if let type {
         typeGeneric = selfRewriter.rewrite(type).trimmedDescription
-        if typeGeneric == "Date" || typeGeneric == "UUID" {
+        if ["Date", "UUID", "Date?", "UUID?"].contains(typeGeneric) {
           var newProperty = property.with(\.leadingTrivia, "")
           newProperty.attributes.insert(
             AttributeListSyntax.Element(
