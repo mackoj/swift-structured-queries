@@ -35,7 +35,7 @@ extension QueryExpression where QueryOutput == String {
   }
 }
 
-extension QueryExpression where QueryOutput == Bind<ISO8601Strategy> {
+extension QueryExpression where QueryOutput == Bind<SQLiteISO8601Strategy> {
   public func strftime(
     _ format: some QueryExpression<String>
   ) -> some QueryExpression<QueryOutput> {
