@@ -7,9 +7,9 @@ final class SelfRewriter: SyntaxRewriter {
     self.selfEquivalent = selfEquivalent
   }
 
-  override func visit(_ node: IdentifierTypeSyntax) -> TypeSyntax {
-    guard node.name.text == "Self"
-    else { return super.visit(node) }
-    return super.visit(node.with(\.name, self.selfEquivalent))
+  override func visit(_ token: TokenSyntax) -> TokenSyntax {
+    guard token.tokenKind == .keyword(.Self)
+    else { return super.visit(token) }
+    return super.visit(selfEquivalent)
   }
 }

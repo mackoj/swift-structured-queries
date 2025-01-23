@@ -28,8 +28,6 @@ public struct Where<Base: Table> {
     return open(predicate)
   }
 
-  
-
   public func delete() -> DeleteOf<Base> {
     func open(_ predicate: some QueryExpression<Bool>) -> Delete<Base, Void> {
       Base.delete().where { _ in predicate }

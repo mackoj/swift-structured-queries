@@ -89,10 +89,10 @@ extension TableMacro: ExtensionMacro {
     var draftColumnsProperties: [String] = []
     var allColumns: [String] = []
     var allDraftColumns: [String] = []
-    var primaryKey: (identifier: String, type: String, isImplicit: Bool)?
+    var primaryKey: (identifier: String, type: String, label: TokenSyntax?)?
     var decodings: [String] = []
-    let selfRewriter = SelfRewriter(selfEquivalent: declaration.name.trimmed)
-    let memberBlock = selfRewriter.rewrite(declaration.memberBlock).cast(MemberBlockSyntax.self)
+    let selfRewriter = SelfRewriter(selfEquivalent: "QueryOutput")
+    let memberBlock = declaration.memberBlock
     for member in memberBlock.members {
       guard
         let property = member.decl.as(VariableDeclSyntax.self),
@@ -116,28 +116,39 @@ extension TableMacro: ExtensionMacro {
           case let .argumentList(arguments) = attribute.arguments
         else { continue }
         for argument in arguments {
-          switch argument.label?.text {
+          switch argument.label {
           case nil:
             // TODO: Require string literal
             columnNameArgument = argument.expression.trimmedDescription
-          case "as":
+          case let .some(label) where label.text == "as":
             columnStrategyArgument = argument.expression.trimmedDescription
-          case "primaryKey":
+          case let .some(label) where label.text == "primaryKey":
             let boolean = argument.expression.as(BooleanLiteralExprSyntax.self)?.literal.tokenKind
             guard boolean == .keyword(.true) else {
               isPrimaryKey = false
               break
             }
-            guard primaryKey?.isImplicit != false else {
+            if let primaryKey, let originalLabel = primaryKey.label {
               throw DiagnosticsError(
                 diagnostics: [
                   Diagnostic(
-                    node: argument.expression,
+                    node: label,
                     message: MacroExpansionErrorMessage(
                       """
                       '@Table' only supports a single primary key
                       """
-                    )
+                    ),
+                    notes: [
+                      Note(
+                        node: Syntax(originalLabel),
+                        position: originalLabel.position,
+                        message: MacroExpansionNoteMessage(
+                          """
+                          Primary key already applied to '\(primaryKey.identifier)'
+                          """
+                        )
+                      )
+                    ]
                   )
                 ]
               )
@@ -145,7 +156,7 @@ extension TableMacro: ExtensionMacro {
             primaryKey = (
               identifier: identifier.text,
               type: type?.trimmedDescription ?? "_",
-              isImplicit: false
+              label: label
             )
           case let argument?:
             fatalError("Unexpected argument: \(argument)")
@@ -156,8 +167,8 @@ extension TableMacro: ExtensionMacro {
       if isPrimaryKey {
         primaryKey = (
           identifier: identifier.text,
-          type: type?.trimmedDescription ?? "_",
-          isImplicit: true
+          type: type.map { selfRewriter.rewrite($0).trimmedDescription } ?? "_",
+          label: nil
         )
       }
       let typeGeneric: String
@@ -169,11 +180,40 @@ extension TableMacro: ExtensionMacro {
       if let columnStrategyArgument {
         typeGeneric = "_"
         arguments.append(", as: \(columnStrategyArgument)")
+      } else if let type {
+        typeGeneric = selfRewriter.rewrite(type).trimmedDescription
+        if typeGeneric == "Date" {
+          throw DiagnosticsError(
+            diagnostics: [
+              Diagnostic(
+                node: type,
+                message: MacroExpansionErrorMessage(
+                  """
+                  'Date' column requires a bind strategy
+                  """
+                )
+              )
+            ]
+          )
+        } else if typeGeneric == "UUID" {
+          throw DiagnosticsError(
+            diagnostics: [
+              Diagnostic(
+                node: type,
+                message: MacroExpansionErrorMessage(
+                  """
+                  'UUID' column requires a bind strategy
+                  """
+                )
+              )
+            ]
+          )
+        }
       } else {
-        typeGeneric = type?.trimmedDescription ?? "_"
+        typeGeneric = "_"
       }
       if let value = binding.initializer?.value {
-        arguments.append(", default: \(value.trimmedDescription)")
+        arguments.append(", default: \(selfRewriter.rewrite(value).trimmedDescription)")
       }
       columnsProperties.append(
         """

@@ -311,7 +311,6 @@ struct TableMacroTests {
   }
 
   @Test func dateFieldDiagnostic() {
-    // TODO: generate diagnostic with fixit when using bare date
     withMacroTesting(
       record: .failed,
       macros: [TableMacro.self]
@@ -323,28 +322,15 @@ struct TableMacroTests {
           var joined: Date
         }
         """#
-      } expansion: {
-        #"""
+      } diagnostics: {
+        """
+        @Table
         struct User {
-          @Column("joined")
           var joined: Date
+                      ┬───
+                      ╰─ 🛑 'Date' column requires a bind strategy
         }
-
-        extension User: StructuredQueries.Table {
-          public struct Columns: StructuredQueries.Schema {
-            public typealias QueryOutput = User
-            public let joined = StructuredQueries.Column<QueryOutput, Date>("joined", keyPath: \.joined)
-            public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
-              [self.joined]
-            }
-          }
-          public static let columns = Columns()
-          public static let name = "users"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.joined = try Self.columns.joined.decode(decoder: decoder)
-          }
-        }
-        """#
+        """
       }
     }
   }
@@ -397,21 +383,21 @@ struct TableMacroTests {
         """
         @Table
         struct User {
-          var id: Tagged<Self, Int>
+          var id: Tagged<Self, Int> = Tagged(Self.defaultID)
         }
         """
       } expansion: {
         #"""
         struct User {
           @Column("id", primaryKey: true)
-          var id: Tagged<Self, Int>
+          var id: Tagged<Self, Int> = Tagged(Self.defaultID)
         }
 
         extension User: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
           public struct Columns: StructuredQueries.PrimaryKeyedSchema {
             public typealias QueryOutput = User
-            public let id = StructuredQueries.Column<QueryOutput, Tagged<User, Int>>("id", keyPath: \.id)
-            public var primaryKey: some StructuredQueries.ColumnExpression<QueryOutput> & StructuredQueries.QueryExpression<Tagged<User, Int>> {
+            public let id = StructuredQueries.Column<QueryOutput, Tagged<QueryOutput, Int>>("id", keyPath: \.id, default: Tagged(QueryOutput.defaultID))
+            public var primaryKey: some StructuredQueries.ColumnExpression<QueryOutput> & StructuredQueries.QueryExpression<Tagged<QueryOutput, Int>> {
               self.id
             }
             public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
@@ -607,6 +593,37 @@ struct TableMacroTests {
           }
         }
         """#
+      }
+    }
+  }
+
+  @Test func multiplePrimaryKeysDiagnostic() {
+    withMacroTesting(
+      record: .failed,
+      macros: [TableMacro.self]
+    ) {
+      assertMacro {
+        """
+        @Table
+        struct SyncUpAttendees {
+          @Column(primaryKey: true)
+          var syncUpID: Int
+          @Column(primaryKey: true)
+          var attendeeID: Int
+        }
+        """
+      } diagnostics: {
+        """
+        @Table
+        struct SyncUpAttendees {
+          @Column(primaryKey: true)
+          var syncUpID: Int
+          @Column(primaryKey: true)
+                  ┬─────────
+                  ╰─ 🛑 '@Table' only supports a single primary key
+          var attendeeID: Int
+        }
+        """
       }
     }
   }
