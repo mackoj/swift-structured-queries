@@ -1,4 +1,4 @@
-public struct QueryFragment: Hashable, Sendable {
+public struct QueryFragment: Hashable, Sendable, CustomDebugStringConvertible {
   public var string: String
   public var bindings: [QueryBinding]
 
