@@ -68,10 +68,7 @@ struct QueryFunction<QueryOutput>: QueryExpression {
     self.arguments = expressions
   }
 
-  var queryString: String {
-    "\(name)(\(arguments.map(\.queryString).joined(separator: ", ")))"
-  }
-  var queryBindings: [QueryBinding] {
-    arguments.flatMap(\.queryBindings)
+  var queryFragment: QueryFragment {
+    "\(raw: name)(\(arguments.map(\.queryFragment).joined(separator: ", ")))"
   }
 }

@@ -42,9 +42,7 @@ public struct Where<Base: Table> {
 extension Where: Statement {
   public typealias QueryOutput = [Base]
 
-  // TODO: Should this be a single endpoint on 'QueryExpression' instead?
-  public var queryString: String { all().queryString }
-  public var queryBindings: [QueryBinding] { all().queryBindings }
+  public var queryFragment: QueryFragment { all().queryFragment }
 }
 
 extension Where {

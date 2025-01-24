@@ -12,6 +12,5 @@ private struct Cast<
   let strategy: Strategy
 
   typealias QueryOutput = Bind<Strategy>
-  var queryString: String { base.queryString }
-  var queryBindings: [QueryBinding] { base.queryBindings }
+  var queryFragment: QueryFragment { base.queryFragment }
 }

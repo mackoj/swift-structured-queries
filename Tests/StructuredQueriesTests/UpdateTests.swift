@@ -1,107 +1,128 @@
+import InlineSnapshotTesting
 import StructuredQueries
 import Testing
 
-struct UpdateTests {
-  @Table
-  struct SyncUp: Equatable {
-    var id: Int
-    var isActive: Bool
-    var title: String
-  }
+extension SnapshotTests {
+  struct UpdateTests {
+    @Table
+    fileprivate struct SyncUp: Equatable {
+      var id: Int
+      var isActive: Bool
+      var title: String
+    }
 
-  @Test func basics() {
-    #expect(
-      SyncUp
-        .update {
+    @Test func basics() {
+      assertInlineSnapshot(
+        of: SyncUp.update {
           $0.isActive = true
           $0.title = "Engineering"
-        }
-        .queryString == """
-          UPDATE "syncUps" SET "isActive" = ?, "title" = ?
-          """
-    )
-  }
-
-  @Test func conflictResolution() {
-    #expect(
-      SyncUp
-        .update(or: .abort) { $0.isActive = true }
-        .queryString == """
-          UPDATE OR ABORT "syncUps" SET "isActive" = ?
-          """
-    )
-    #expect(
-      SyncUp
-        .update(or: .fail) { $0.isActive = true }
-        .queryString == """
-          UPDATE OR FAIL "syncUps" SET "isActive" = ?
-          """
-    )
-    #expect(
-      SyncUp
-        .update(or: .ignore) { $0.isActive = true }
-        .queryString == """
-          UPDATE OR IGNORE "syncUps" SET "isActive" = ?
-          """
-    )
-    #expect(
-      SyncUp
-        .update(or: .replace) { $0.isActive = true }
-        .queryString == """
-          UPDATE OR REPLACE "syncUps" SET "isActive" = ?
-          """
-    )
-    #expect(
-      SyncUp
-        .update(or: .rollback) { $0.isActive = true }
-        .queryString == """
-          UPDATE OR ROLLBACK "syncUps" SET "isActive" = ?
-          """
-    )
-  }
-
-  @Test func `where`() {
-    // TODO: Support chaining from SELECT or WHERE builders?
-    //       - 'SyncUp.all().where(\.isActive).update { $0.isActive.toggle() }'
-    //         (Runtime warn when 'Select" contains irrelevant clauses?)
-    //       - 'SyncUp.where(\.isActive).update { $0.isActive.toggle() }'`
-    #expect(
-      SyncUp
-        .update {
-          $0.isActive = true
-          $0.title = "Engineering"
-        }
-        .where(\.isActive)
-        .queryString == """
-          UPDATE "syncUps" SET "isActive" = ?, "title" = ? \
-          WHERE "syncUps"."isActive"
-          """
-    )
-  }
-
-  @Test func returning() {
-    #expect(
-      SyncUp
-        .update {
-          $0.isActive = true
-          $0.title = "Engineering"
-        }
-        .returning(\.self)
-        .queryString == """
-          UPDATE "syncUps" SET "isActive" = ?, "title" = ? \
-          RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."title"
-          """
-    )
-  }
-
-  @Test func record() {
-    let query = SyncUp.update(SyncUp(id: 42, isActive: true, title: "Engineering"))
-    #expect(
-      query.queryString == """
-        UPDATE "syncUps" SET "isActive" = ?, "title" = ? \
-        WHERE ("syncUps"."id" = ?)
+        },
+        as: .sql
+      ) {
         """
-    )
-    #expect(query.queryBindings == [.int(1), .text("Engineering"), .int(42)])
+        UPDATE "syncUps" SET "isActive" = 1, "title" = 'Engineering'
+        """
+      }
+    }
+
+    @Test func conflictResolution() {
+      assertInlineSnapshot(
+        of: SyncUp.update(or: .abort) { $0.isActive = true },
+        as: .sql
+      ) {
+        """
+        UPDATE OR ABORT "syncUps" SET "isActive" = 1
+        """
+      }
+      assertInlineSnapshot(
+        of: SyncUp.update(or: .fail) { $0.isActive = true },
+        as: .sql
+      ) {
+        """
+        UPDATE OR FAIL "syncUps" SET "isActive" = 1
+        """
+      }
+      assertInlineSnapshot(
+        of: SyncUp.update(or: .ignore) { $0.isActive = true },
+        as: .sql
+      ) {
+        """
+        UPDATE OR IGNORE "syncUps" SET "isActive" = 1
+        """
+      }
+      assertInlineSnapshot(
+        of: SyncUp.update(or: .replace) { $0.isActive = true },
+        as: .sql
+      ) {
+        """
+        UPDATE OR REPLACE "syncUps" SET "isActive" = 1
+        """
+      }
+      assertInlineSnapshot(
+        of: SyncUp.update(or: .rollback) { $0.isActive = true },
+        as: .sql
+      ) {
+        """
+        UPDATE OR ROLLBACK "syncUps" SET "isActive" = 1
+        """
+      }
+    }
+
+    @Test func `where`() {
+      assertInlineSnapshot(
+        of: SyncUp
+          .update {
+            $0.isActive = true
+            $0.title = "Engineering"
+          }
+          .where(\.isActive),
+        as: .sql
+      ) {
+        """
+        UPDATE "syncUps" SET "isActive" = 1, "title" = 'Engineering' WHERE "syncUps"."isActive"
+        """
+      }
+      assertInlineSnapshot(
+        of: SyncUp
+          .where(\.isActive)
+          .update {
+            $0.isActive = true
+            $0.title = "Engineering"
+          },
+        as: .sql
+      ) {
+        """
+        UPDATE "syncUps" SET "isActive" = 1, "title" = 'Engineering' WHERE "syncUps"."isActive"
+        """
+      }
+    }
+
+    @Test func returning() {
+      assertInlineSnapshot(
+        of: SyncUp
+          .update {
+            $0.isActive = true
+            $0.title = "Engineering"
+          }
+          .returning(\.self),
+        as: .sql
+      ) {
+        """
+        UPDATE "syncUps" SET "isActive" = 1, "title" = 'Engineering' \
+        RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."title"
+        """
+      }
+    }
+
+    @Test func record() {
+      assertInlineSnapshot(
+        of: SyncUp.update(SyncUp(id: 42, isActive: true, title: "Engineering")),
+        as: .sql
+      ) {
+        """
+        UPDATE "syncUps" SET "isActive" = 1, "title" = 'Engineering' WHERE ("syncUps"."id" = 42)
+        """
+      }
+    }
   }
 }

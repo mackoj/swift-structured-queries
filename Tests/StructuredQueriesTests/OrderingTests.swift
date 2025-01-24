@@ -1,23 +1,26 @@
+import InlineSnapshotTesting
 import StructuredQueries
 import Testing
 
-struct OrderingTests {
-  @Table
-  struct User {
-    var id: Int
-    var name: String
-  }
+extension SnapshotTests {
+  struct OrderingTests {
+    @Table
+    struct User {
+      var id: Int
+      var name: String
+    }
 
-  @Test func basics() {
-    #expect(
-      User.columns.id.ascending().queryString == """
+    @Test func basics() {
+      assertInlineSnapshot(of: User.columns.id.ascending(), as: .sql) {
+        """
         "users"."id" ASC
         """
-    )
-    #expect(
-      User.columns.id.descending().queryString == """
+      }
+      assertInlineSnapshot(of: User.columns.id.descending(), as: .sql) {
+        """
         "users"."id" DESC
         """
-    )
+      }
+    }
   }
 }

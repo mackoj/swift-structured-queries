@@ -30,11 +30,12 @@ public struct OrderingTerm {
 
 extension OrderingTerm: QueryExpression {
   public typealias QueryOutput = Void
-  public var queryString: String {
-    "\(base.queryString)\(direction.map { " \($0.rawValue)" } ?? "")"
-  }
-  public var queryBindings: [QueryBinding] {
-    base.queryBindings
+  public var queryFragment: QueryFragment {
+    var fragment: QueryFragment = base.queryFragment
+    if let direction {
+      fragment.append(" \(raw: direction.rawValue)")
+    }
+    return fragment
   }
 }
 

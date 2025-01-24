@@ -8,7 +8,7 @@ public enum ConflictResolution: Sendable {
 
 extension ConflictResolution: QueryExpression {
   public typealias QueryOutput = Void
-  public var queryString: String {
+  public var queryFragment: QueryFragment {
     switch self {
     case .abort: return "ABORT"
     case .fail: return "FAIL"
@@ -17,5 +17,4 @@ extension ConflictResolution: QueryExpression {
     case .rollback: return "ROLLBACK"
     }
   }
-  public var queryBindings: [QueryBinding] { [] }
 }

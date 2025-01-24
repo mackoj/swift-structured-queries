@@ -7,8 +7,7 @@ where QueryOutput: QueryBindable {
 }
 
 extension QueryBindable {
-  public var queryString: String { "?" }
-  public var queryBindings: [QueryBinding] { [queryBinding] }
+  public var queryFragment: QueryFragment { "\(queryBinding)" }
 }
 
 extension QueryBindable where QueryOutput == Self {

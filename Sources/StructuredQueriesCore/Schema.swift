@@ -8,8 +8,9 @@ public protocol Schema<QueryOutput>: QueryExpression where QueryOutput: Table {
 }
 
 extension Schema {
-  public var queryString: String { allColumns.map(\.queryString).joined(separator: ", ") }
-  public var queryBindings: [QueryBinding] { [] }
+  public var queryFragment: QueryFragment {
+    allColumns.map(\.queryFragment).joined(separator: ", ")
+  }
 
   // TODO: Should we keep this?
   //       If so, make more efficient with OrderedDictionary and perhaps get rid of force unwrap.
@@ -32,7 +33,7 @@ extension Schema {
     ) -> some QueryExpression<Bool> {
       for column in allColumns {
         if column.keyPath == keyPathComparator.keyPath {
-          return _KeyPathComparatorExpression(columnAndOrders: [(column, keyPathComparator.order)])
+          return _KeyPathComparatorExpression(columnsAndOrders: [(column, keyPathComparator.order)])
         }
       }
 //      reportIssue(
@@ -52,7 +53,7 @@ extension Schema {
     public func sort(
       by keyPathComparators: [KeyPathComparator<QueryOutput>]
     ) -> some QueryExpression<Bool> {
-      let columnAndOrders = keyPathComparators.compactMap { keyPathComparator in
+      let columnsAndOrders = keyPathComparators.compactMap { keyPathComparator in
         for column in allColumns {
           if column.keyPath == keyPathComparator.keyPath {
             return (column, keyPathComparator.order)
@@ -71,27 +72,19 @@ extension Schema {
           """
         )
       }
-      return _KeyPathComparatorExpression(columnAndOrders: columnAndOrders)
+      return _KeyPathComparatorExpression(columnsAndOrders: columnsAndOrders)
     }
   }
 
   private struct _KeyPathComparatorExpression<Table>: QueryExpression {
     typealias QueryOutput = Bool
-    let columnAndOrders: [(any ColumnExpression<Table>, SortOrder)]
+    let columnsAndOrders: [(any ColumnExpression<Table>, SortOrder)]
 
-    var queryString: String {
-      var query = ""
-      for (index, (column, order)) in columnAndOrders.enumerated() {
-        query += """
-          \(column.queryString) \
-          \(order == .forward ? "ASC" : "DESC")\
-          \(index < columnAndOrders.count - 1 ? ", " : "")
-          """
-      }
-      return query
+    var queryFragment: QueryFragment {
+      columnsAndOrders
+        .map { "\(bind: $0) \(raw: $1 == .forward ? "ASC" : "DESC")" }
+        .joined(separator: ", ")
     }
-
-    var queryBindings: [QueryBinding] { [] }
   }
 #endif
 

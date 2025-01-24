@@ -1,11 +1,11 @@
 extension String {
-  func quoted() -> String {
+  func quoted(_ delimiter: String = "\"") -> String {
     let escaped =
       self
-      .split(separator: #"""#, omittingEmptySubsequences: false)
-      .joined(separator: #""""#)
+      .split(separator: delimiter, omittingEmptySubsequences: false)
+      .joined(separator: delimiter)
     return """
-      "\(escaped)"
+      \(delimiter)\(escaped)\(delimiter)
       """
   }
 }

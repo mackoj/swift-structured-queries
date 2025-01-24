@@ -27,10 +27,7 @@ public struct Record<Base: Table>: Sendable {
 
 extension Record: QueryExpression {
   public typealias QueryOutput = Void
-  public var queryString: String {
-    "SET \(updates.map { "\($0.name.quoted()) = \($1.queryString)" }.joined(separator: ", "))"
-  }
-  public var queryBindings: [QueryBinding] {
-    updates.flatMap { $0.queryBindings + $1.queryBindings }
+  public var queryFragment: QueryFragment {
+    "SET \(updates.map { "\(raw: $0.name.quoted()) = \(bind: $1)" }.joined(separator: ", "))"
   }
 }

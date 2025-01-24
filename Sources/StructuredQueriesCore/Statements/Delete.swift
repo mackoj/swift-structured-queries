@@ -49,25 +49,14 @@ public typealias DeleteOf<T: Table> = Delete<T, Void>
 extension Delete: Statement {
   public typealias QueryOutput = [Output]
 
-  public var queryString: String {
-    var sql = "DELETE FROM \(Base.name.quoted())"
+  public var queryFragment: QueryFragment {
+    var fragment: QueryFragment = "DELETE FROM \(raw: Base.name.quoted())"
     if let `where` {
-      sql.append(" \(`where`.queryString)")
+      fragment.append(" \(bind: `where`)")
     }
     if let returning {
-      sql.append(" \(returning.queryString)")
+      fragment.append(" \(bind: returning)")
     }
-    return sql
-  }
-
-  public var queryBindings: [QueryBinding] {
-    var bindings: [QueryBinding] = []
-    if let `where` {
-      bindings.append(contentsOf: `where`.queryBindings)
-    }
-    if let returning {
-      bindings.append(contentsOf: returning.queryBindings)
-    }
-    return bindings
+    return fragment
   }
 }

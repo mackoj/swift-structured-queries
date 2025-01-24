@@ -11,6 +11,7 @@ struct ReturningClause {
 }
 extension ReturningClause: QueryExpression {
   typealias QueryOutput = Void
-  var queryString: String { "RETURNING \(columns.map(\.queryString).joined(separator: ", "))" }
-  var queryBindings: [QueryBinding] { columns.flatMap(\.queryBindings) }
+  var queryFragment: QueryFragment {
+    "RETURNING \(columns.map(\.queryFragment).joined(separator: ", "))"
+  }
 }

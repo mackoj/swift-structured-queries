@@ -162,37 +162,26 @@ public struct Insert<Base: Table, Draft: StructuredQueriesCore.Draft, Input: Sen
 
 extension Insert: Statement {
   public typealias QueryOutput = [Output]
-  public var queryString: String {
-    let form = form.queryString
+  public var queryFragment: QueryFragment {
+    let form = form.queryFragment
     guard !form.isEmpty else { return "" }
-    var sql = "INSERT"
+    var sql: QueryFragment = "INSERT"
     if let conflictResolution {
-      sql.append(" OR \(conflictResolution.queryString)")
+      sql.append(" OR \(bind: conflictResolution)")
     }
-    sql.append(" INTO \(Base.name.quoted())")
+    sql.append(" INTO \(raw: Base.name.quoted())")
     if !columns.isEmpty {
-      sql.append(" (\(columns.map { $0.name.quoted() }.joined(separator: ", ")))")
+      sql.append(" (\(columns.map { "\(raw: $0.name.quoted())" }.joined(separator: ", ")))")
     }
     sql.append(" \(form)")
     if let record {
       sql.append(
-        " ON CONFLICT DO \(record.updates.isEmpty ? "NOTHING" : "UPDATE \(record.queryString)")")
+        " ON CONFLICT DO \(record.updates.isEmpty ? "NOTHING" : "UPDATE \(bind: record)")")
     }
     if let returning {
-      sql.append(" \(returning.queryString)")
+      sql.append(" \(bind: returning)")
     }
     return sql
-  }
-  public var queryBindings: [QueryBinding] {
-    var bindings: [QueryBinding] = []
-    bindings.append(contentsOf: form.queryBindings)
-    if let record {
-      bindings.append(contentsOf: record.queryBindings)
-    }
-    if let returning {
-      bindings.append(contentsOf: returning.queryBindings)
-    }
-    return bindings
   }
 }
 
@@ -204,60 +193,48 @@ private enum InsertionForm<Base: Table, Draft: StructuredQueriesCore.Draft>: Que
   case drafts([Draft])
 
   typealias QueryOutput = Void
-  var queryString: String {
+  var queryFragment: QueryFragment {
     switch self {
     case .defaultValues:
       return "DEFAULT VALUES"
     case let .values(rows):
-      let values =
+      let values: QueryFragment =
         rows
-        .map { "(\($0.map(\.queryString).joined(separator: ", ")))" }
+        .map { "(\($0.map(\.queryFragment).joined(separator: ", ")))" }
         .joined(separator: ", ")
       return """
         VALUES \(values)
         """
     case let .select(statement):
-      return statement.queryString
+      return statement.queryFragment
     case let .records(records):
       guard !records.isEmpty else { return "" }
-      let row = """
-        (\(Array(repeating: "?", count: Base.columns.allColumns.count).joined(separator: ", ")))
-        """
-      let values = Array(repeating: row, count: records.count).joined(separator: ", ")
+      let values: QueryFragment = records
+        .map { record in
+          let row = Base.columns.allColumns.map { column in
+            (record[keyPath: column.keyPath] as! any QueryBindable).queryFragment
+          }
+          .joined(separator: ", ")
+          return "(\(row))"
+        }
+        .joined(separator: ", ")
       return """
         VALUES \(values)
         """
     case let .drafts(records):
       guard !records.isEmpty else { return "" }
-      let row = """
-        (\(Array(repeating: "?", count: Draft.columns.allColumns.count).joined(separator: ", ")))
-        """
-      let values = Array(repeating: row, count: records.count).joined(separator: ", ")
+      let values: QueryFragment = records
+        .map { record in
+          let row = Draft.columns.allColumns.map { column in
+            (record[keyPath: column.keyPath] as! any QueryBindable).queryFragment
+          }
+          .joined(separator: ", ")
+          return "(\(row))"
+        }
+        .joined(separator: ", ")
       return """
         VALUES \(values)
         """
-    }
-  }
-  var queryBindings: [QueryBinding] {
-    switch self {
-    case .defaultValues:
-      return []
-    case let .values(rows):
-      return rows.flatMap { $0.flatMap(\.queryBindings) }
-    case let .select(statement):
-      return statement.queryBindings
-    case let .records(records):
-      return records.flatMap { record in
-        Base.columns.allColumns.map { column in
-          (record[keyPath: column.keyPath] as! any QueryBindable).queryBinding
-        }
-      }
-    case let .drafts(records):
-      return records.flatMap { record in
-        Draft.columns.allColumns.map { column in
-          (record[keyPath: column.keyPath] as! any QueryBindable).queryBinding
-        }
-      }
     }
   }
 }

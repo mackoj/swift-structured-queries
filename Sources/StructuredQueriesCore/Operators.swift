@@ -91,8 +91,7 @@ extension QueryExpression {
 
 public struct _Null<Wrapped>: QueryExpression {
   public typealias QueryOutput = Wrapped?
-  public var queryString: String { "NULL" }
-  public var queryBindings: [QueryBinding] { [] }
+  public var queryFragment: QueryFragment { "NULL" }
 }
 
 extension _Null: ExpressibleByNilLiteral {
@@ -256,14 +255,13 @@ public enum Collation {
 
 extension Collation: QueryExpression {
   public typealias QueryOutput = Void
-  public var queryString: String {
+  public var queryFragment: QueryFragment {
     switch self {
     case .binary: return "BINARY"
     case .nocase: return "NOCASE"
     case .rtrim: return "RTRIM"
     }
   }
-  public var queryBindings: [QueryBinding] { [] }
 }
 
 extension QueryExpression where QueryOutput == String {
@@ -332,8 +330,7 @@ private struct UnaryOperator<QueryOutput, Base: QueryExpression>: QueryExpressio
   let base: Base
   var separator = " "
 
-  var queryString: String { "\(`operator`)\(separator)(\(base.queryString))" }
-  var queryBindings: [QueryBinding] { base.queryBindings }
+  var queryFragment: QueryFragment { "\(raw: `operator`)\(raw: separator)(\(base.queryFragment))" }
 }
 
 struct BinaryOperator<QueryOutput, LHS: QueryExpression, RHS: QueryExpression>: QueryExpression {
@@ -341,8 +338,9 @@ struct BinaryOperator<QueryOutput, LHS: QueryExpression, RHS: QueryExpression>: 
   let `operator`: String
   let rhs: RHS
 
-  var queryString: String { "(\(lhs.queryString) \(`operator`) \(rhs.queryString))" }
-  var queryBindings: [QueryBinding] { lhs.queryBindings + rhs.queryBindings }
+  var queryFragment: QueryFragment {
+    "(\(lhs.queryFragment) \(raw: `operator`) \(rhs.queryFragment))"
+  }
 }
 
 struct Parenthesize<Base: QueryExpression>: QueryExpression {
@@ -351,6 +349,5 @@ struct Parenthesize<Base: QueryExpression>: QueryExpression {
 
   init(_ base: Base) { self.base = base }
 
-  var queryString: String { "(\(base.queryString))" }
-  var queryBindings: [QueryBinding] { base.queryBindings }
+  var queryFragment: QueryFragment { "(\(base.queryFragment))" }
 }

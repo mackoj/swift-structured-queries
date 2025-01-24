@@ -3,6 +3,5 @@ struct WhereClause {
 }
 extension WhereClause: QueryExpression {
   typealias QueryOutput = Void
-  var queryString: String { "WHERE \(predicate.queryString)" }
-  var queryBindings: [QueryBinding] { predicate.queryBindings }
+  var queryFragment: QueryFragment { "WHERE \(predicate.queryFragment)" }
 }

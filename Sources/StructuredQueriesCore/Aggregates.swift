@@ -34,8 +34,7 @@ extension QueryExpression where Self == CountExpression {
 
 public struct CountExpression: QueryExpression {
   public typealias QueryOutput = Int
-  public var queryString: String { "count(*)" }
-  public var queryBindings: [QueryBinding] { [] }
+  public var queryFragment: QueryFragment { "count(*)" }
 }
 
 private struct AggregateFunction<Argument: QueryExpression, QueryOutput>: QueryExpression {
@@ -53,13 +52,13 @@ private struct AggregateFunction<Argument: QueryExpression, QueryOutput>: QueryE
     self.argument = argument
   }
 
-  var queryString: String {
-    var sql = "\(name)("
+  var queryFragment: QueryFragment {
+    var fragment: QueryFragment = "\(raw: name)("
     if isDistinct {
-      sql.append("DISTINCT ")
+      fragment.append("DISTINCT ")
     }
-    sql.append("\(argument.queryString))")
-    return sql
+    fragment.append(argument.queryFragment)
+    fragment.append(")")
+    return fragment
   }
-  var queryBindings: [QueryBinding] { argument.queryBindings }
 }

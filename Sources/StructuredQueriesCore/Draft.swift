@@ -27,6 +27,5 @@ public struct DraftColumn<Root: Draft, QueryOutput: Sendable>: ColumnExpression 
   }
 
   public var keyPath: PartialKeyPath<Root> { _keyPath }
-  public var queryString: String { name.quoted() }
-  public var queryBindings: [QueryBinding] { [] }
+  public var queryFragment: QueryFragment { "\(raw: name.quoted())" }
 }

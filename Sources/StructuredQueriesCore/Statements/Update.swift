@@ -64,35 +64,21 @@ public typealias UpdateOf<T: Table> = Update<T, Void>
 extension Update: Statement {
   public typealias QueryOutput = [Output]
 
-  public var queryString: String {
+  public var queryFragment: QueryFragment {
     guard !record.updates.isEmpty else {
-      return ""
+      return QueryFragment()
     }
-    var sql = "UPDATE"
+    var sql: QueryFragment = "UPDATE"
     if let conflictResolution {
-      sql.append(" OR \(conflictResolution.queryString)")
+      sql.append(" OR \(bind: conflictResolution)")
     }
-    sql.append(" \(Base.name.quoted()) \(record.queryString)")
+    sql.append(" \(raw: Base.name.quoted()) \(bind: record)")
     if let `where` {
-      sql.append(" \(`where`.queryString)")
+      sql.append(" \(bind: `where`)")
     }
     if let returning {
-      sql.append(" \(returning.queryString)")
+      sql.append(" \(bind: returning)")
     }
     return sql
-  }
-
-  public var queryBindings: [QueryBinding] {
-    guard !record.updates.isEmpty else {
-      return []
-    }
-    var bindings = record.queryBindings
-    if let `where` {
-      bindings.append(contentsOf: `where`.queryBindings)
-    }
-    if let returning {
-      bindings.append(contentsOf: returning.queryBindings)
-    }
-    return bindings
   }
 }

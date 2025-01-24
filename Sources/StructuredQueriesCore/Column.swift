@@ -14,10 +14,9 @@ public struct Column<Root: Table, QueryOutput: QueryBindable> {
 }
 
 extension Column: ColumnExpression {
-  public var queryString: String {
-    "\(Root.name.quoted()).\(name.quoted())"
+  public var queryFragment: QueryFragment {
+    "\(raw: Root.name.quoted()).\(raw: name.quoted())"
   }
-  public var queryBindings: [QueryBinding] { [] }
 }
 
 // TODO: Move to `QueryBindable.swift`

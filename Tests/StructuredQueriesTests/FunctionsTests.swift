@@ -1,64 +1,77 @@
 import Foundation
+import InlineSnapshotTesting
 import StructuredQueries
 import Testing
 
-struct FunctionsTests {
-  @Table
-  struct User {
-    var id: Int
-    var name: String
-    var isAdmin: Bool
-    var salary: Double
-    var referrerID: Int?
-    @Column(as: .iso8601)
-    var updatedAt: Date
-  }
+extension SnapshotTests {
+  struct FunctionsTests {
+    @Table
+    struct User {
+      var id: Int
+      var name: String
+      var isAdmin: Bool
+      var salary: Double
+      var referrerID: Int?
+      @Column(as: .iso8601)
+      var updatedAt: Date
+    }
 
-  @Test func arithmetic() {
-    #expect(
-      User.columns.id.signum().queryString == """
+    @Test func arithmetic() {
+      assertInlineSnapshot(of: User.columns.id.signum(), as: .sql) {
+        """
         sign("users"."id")
         """
-    )
-    #expect(
-      User.columns.salary.sign.queryString == """
+      }
+      assertInlineSnapshot(of: User.columns.salary.sign, as: .sql) {
+        """
         sign("users"."salary")
         """
-    )
-  }
-  @Test func round() {
-    #expect(User.columns.salary.round(2).queryString == #"round("users"."salary", ?)"#)
-  }
-  @Test func strftime() {
-    #expect(
-      User.columns.updatedAt.strftime("%Y.%m%d").queryString
-        == #"strftime(?, "users"."updatedAt")"#
-    )
-  }
-  // TODO: Support something like .raw/.sql for SQL fragments too complex to make in the builder?
-  // TODO: $0.updatedAt.strftime("%Y.%m%d").cast(as: Double.self)
-  // TODO: "now".as.strftime("%Y.%m%d").cast(as: Double.self) - $0.updatedAt.strftime("%Y.%m%d").cast(as: Double.self)
-  // TODO: $0.bornAt.yearsOld
-  @Test func strings() {
-    #expect(
-      User.columns.name.lowercased().queryString == """
+      }
+    }
+    @Test func round() {
+      assertInlineSnapshot(of: User.columns.salary.round(), as: .sql) {
+        """
+        round("users"."salary")
+        """
+      }
+      assertInlineSnapshot(of: User.columns.salary.round(2), as: .sql) {
+        """
+        round("users"."salary", 2)
+        """
+      }
+    }
+    @Test func strftime() {
+      assertInlineSnapshot(of: User.columns.updatedAt.strftime("%Y.%m%d"), as: .sql) {
+        """
+        strftime('%Y.%m%d', "users"."updatedAt")
+        """
+      }
+    }
+    // TODO: Support something like .raw/.sql for SQL fragments too complex to make in the builder?
+    // TODO: $0.updatedAt.strftime("%Y.%m%d").cast(as: Double.self)
+    // TODO: "now".as.strftime("%Y.%m%d").cast(as: Double.self) - $0.updatedAt.strftime("%Y.%m%d").cast(as: Double.self)
+    // TODO: $0.bornAt.yearsOld
+    @Test func strings() {
+      assertInlineSnapshot(of: User.columns.name.lowercased(), as: .sql) {
+        """
         lower("users"."name")
         """
-    )
-    #expect(
-      User.columns.name.uppercased().queryString == """
+      }
+      assertInlineSnapshot(of: User.columns.name.uppercased(), as: .sql) {
+        """
         upper("users"."name")
         """
-    )
-    #expect(
-      User.columns.name.count.queryString == """
+      }
+      assertInlineSnapshot(of: User.columns.name.count, as: .sql) {
+        """
         length("users"."name")
         """
-    )
-    #expect(
-      User.columns.name.length.queryString == """
+      }
+      assertInlineSnapshot(of: User.columns.name.length, as: .sql) {
+        """
         length("users"."name")
         """
-    )
+      }
+    }
   }
 }

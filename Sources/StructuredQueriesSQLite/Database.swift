@@ -35,14 +35,15 @@ public final class Database {
     _ query: some Statement<[(repeat each Value)]>
   ) throws -> [(repeat each Value)] {
     var statement: OpaquePointer?
+    let sql = query.queryFragment
     guard
-      sqlite3_prepare_v2(db, query.queryString, -1, &statement, nil) == SQLITE_OK,
+      sqlite3_prepare_v2(db, sql.string, -1, &statement, nil) == SQLITE_OK,
       let statement
     else {
       throw SQLiteError()
     }
     defer { sqlite3_finalize(statement) }
-    for (index, binding) in zip(Int32(1)..., query.queryBindings) {
+    for (index, binding) in zip(Int32(1)..., sql.bindings) {
       let result =
         switch binding {
         case let .blob(blob):

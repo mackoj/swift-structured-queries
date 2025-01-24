@@ -45,7 +45,6 @@ public struct AliasedColumns<Columns: Schema>: Schema {
   }
 }
 public struct AliasedColumn<Column: ColumnExpression>: ColumnExpression {
-
   public typealias Root = Column.Root
   public typealias QueryOutput = Column.QueryOutput
 
@@ -53,14 +52,13 @@ public struct AliasedColumn<Column: ColumnExpression>: ColumnExpression {
   let column: Column
   public var keyPath: PartialKeyPath<Column.Root> { column.keyPath }
   public var name: String { column.name }
-  public var queryString: String {
+  public var queryFragment: QueryFragment {
     if let alias {
-      "\(alias.quoted()).\(column.name.quoted())"
+      "\(raw: alias.quoted()).\(raw: column.name.quoted())"
     } else {
-      column.queryString
+      column.queryFragment
     }
   }
-  public var queryBindings: [QueryBinding] { [] }
 }
 
 struct TableAlias: QueryExpression {
@@ -68,14 +66,13 @@ struct TableAlias: QueryExpression {
 
   var alias: String?
   let table: any Table.Type
-  var queryString: String {
+  var queryFragment: QueryFragment {
+    var sql = QueryFragment(table.name.quoted())
     if let alias {
-      "\(table.name.quoted()) AS \(alias.quoted())"
-    } else {
-      table.name.quoted()
+      sql.append(" AS \(raw: alias.quoted())")
     }
+    return sql
   }
-  var queryBindings: [QueryBinding] { [] }
 }
 
 public struct Select<Input: Sendable, Output> {
@@ -240,69 +237,43 @@ public typealias SelectOf<each T: Table> = Select<(repeat (each T).Columns), (re
 
 extension Select: Statement {
   public typealias QueryOutput = [Output]
-  public var queryString: String {
-    var sql = "SELECT"
+  public var queryFragment: QueryFragment {
+    var sql: QueryFragment = "SELECT"
     if isDistinct {
       sql.append(" DISTINCT")
     }
     let columns =
       select.isEmpty
     ? ([from] + joins.map(\.right)).map { tableAlias in
-      func open(_ columns: some Schema) -> String {
-        AliasedColumns(alias: tableAlias.alias, columns: columns).queryString
+      func open(_ columns: some Schema) -> QueryFragment {
+        AliasedColumns(alias: tableAlias.alias, columns: columns).queryFragment
       }
       return open(tableAlias.table.columns)
     }
     : select.map {
-      print($0.queryString)
-      return $0.queryString
+      return $0.queryFragment
     }
     sql.append(" \(columns.joined(separator: ", "))")
-    sql.append(" FROM \(from.queryString)")
+    sql.append(" FROM \(from.queryFragment)")
     for join in joins {
-      sql.append(" \(join.queryString)")
+      sql.append(" \(join.queryFragment)")
     }
     if let `where` {
-      sql.append(" \(`where`.queryString)")
+      sql.append(" \(`where`.queryFragment)")
     }
     if let group {
-      sql.append(" \(group.queryString)")
+      sql.append(" \(group.queryFragment)")
     }
     if let having {
-      sql.append(" \(having.queryString)")
+      sql.append(" \(having.queryFragment)")
     }
     if let order {
-      sql.append(" \(order.queryString)")
+      sql.append(" \(order.queryFragment)")
     }
     if let limit {
-      sql.append(" \(limit.queryString)")
+      sql.append(" \(limit.queryFragment)")
     }
     return sql
-  }
-  public var queryBindings: [QueryBinding] {
-    var bindings: [QueryBinding] = []
-    for column in select {
-      bindings.append(contentsOf: column.queryBindings)
-    }
-    for join in joins {
-      bindings.append(contentsOf: join.queryBindings)
-    }
-    if let `where` {
-      bindings.append(contentsOf: `where`.queryBindings)
-    }
-    if let group {
-      bindings.append(contentsOf: group.queryBindings)
-    }
-    if let having {
-      bindings.append(contentsOf: having.queryBindings)
-    }
-    if let order {
-      bindings.append(contentsOf: order.queryBindings)
-    }
-    if let limit {
-      bindings.append(contentsOf: limit.queryBindings)
-    }
-    return bindings
   }
 }
 
@@ -527,10 +498,14 @@ private struct JoinClause {
 }
 extension JoinClause: QueryExpression {
   typealias QueryOutput = Void
-  var queryString: String {
-    "\(`operator`.map { "\($0.rawValue) " } ?? "")JOIN \(right.queryString) ON \(condition.queryString)"
+  var queryFragment: QueryFragment {
+    var sql = QueryFragment()
+    if let `operator` {
+      sql.append("\(raw: `operator`.rawValue) ")
+    }
+    sql.append("JOIN \(bind: right) ON \(bind: condition)")
+    return sql
   }
-  var queryBindings: [QueryBinding] { condition.queryBindings }
 }
 
 private struct GroupClause {
@@ -549,8 +524,9 @@ private struct GroupClause {
 }
 extension GroupClause: QueryExpression {
   typealias QueryOutput = Void
-  var queryString: String { "GROUP BY \(terms.map(\.queryString).joined(separator: ", "))" }
-  var queryBindings: [QueryBinding] { terms.flatMap(\.queryBindings) }
+  var queryFragment: QueryFragment {
+    "GROUP BY \(terms.map(\.queryFragment).joined(separator: ", "))"
+  }
 }
 
 private struct HavingClause {
@@ -558,8 +534,7 @@ private struct HavingClause {
 }
 extension HavingClause: QueryExpression {
   typealias QueryOutput = Void
-  var queryString: String { "HAVING \(predicate.queryString)" }
-  var queryBindings: [QueryBinding] { predicate.queryBindings }
+  var queryFragment: QueryFragment { "HAVING \(bind: predicate)" }
 }
 
 private struct OrderClause {
@@ -578,8 +553,9 @@ private struct OrderClause {
 }
 extension OrderClause: QueryExpression {
   typealias QueryOutput = Void
-  var queryString: String { "ORDER BY \(terms.map(\.queryString).joined(separator: ", "))" }
-  var queryBindings: [QueryBinding] { terms.flatMap(\.queryBindings) }
+  var queryFragment: QueryFragment {
+    "ORDER BY \(terms.map(\.queryFragment).joined(separator: ", "))"
+  }
 }
 
 private struct LimitClause {
@@ -588,8 +564,11 @@ private struct LimitClause {
 }
 extension LimitClause: QueryExpression {
   typealias QueryOutput = Void
-  var queryString: String {
-    "LIMIT \(maxLength.queryString)\(offset.map { " OFFSET \($0.queryString)" } ?? "")"
+  var queryFragment: QueryFragment {
+    var sql: QueryFragment = "LIMIT \(bind: maxLength)"
+    if let offset {
+      sql.append(" OFFSET \(bind: offset)")
+    }
+    return sql
   }
-  var queryBindings: [QueryBinding] { maxLength.queryBindings + (offset?.queryBindings ?? []) }
 }

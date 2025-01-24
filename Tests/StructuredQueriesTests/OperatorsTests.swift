@@ -1,423 +1,425 @@
+import InlineSnapshotTesting
 import StructuredQueries
 import Testing
 
-struct OperatorsTests {
-  @Table
-  struct User {
-    var id: Int
-    var name: String
-    var isAdmin: Bool
-    var salary: Double
-    var referrerID: Int?
-  }
+extension SnapshotTests {
+  struct OperatorsTests {
+    @Table
+    struct User {
+      var id: Int
+      var name: String
+      var isAdmin: Bool
+      var salary: Double
+      var referrerID: Int?
+    }
 
-  @Test func equatable() {
-    #expect(
-      (User.columns.id == 1).queryString == """
-        ("users"."id" = ?)
+    @Test func equatable() {
+      assertInlineSnapshot(of: User.columns.id == 1, as: .sql) {
         """
-    )
-    #expect(
-      (User.columns.id != 1).queryString == """
-        ("users"."id" <> ?)
+        ("users"."id" = 1)
         """
-    )
-    #expect(
-      (User.columns.id == 1).queryString == """
-        ("users"."id" = ?)
+      }
+      assertInlineSnapshot(of: User.columns.id != 1, as: .sql) {
         """
-    )
-    #expect(
-      (User.columns.id != 1).queryString == """
-        ("users"."id" <> ?)
+        ("users"."id" <> 1)
         """
-    )
-    #expect(
-      (User.columns.id == nil).queryString == """
+      }
+      assertInlineSnapshot(of: User.columns.id == nil, as: .sql) {
+        """
         ("users"."id" IS NULL)
         """
-    )
-    #expect(
-      (User.columns.id != nil).queryString == """
+      }
+      assertInlineSnapshot(of: User.columns.id != nil, as: .sql) {
+        """
         ("users"."id" IS NOT NULL)
         """
-    )
-    var id: Int? = nil
-    #expect(
-      (User.columns.id == id).queryString == """
-        ("users"."id" IS ?)
+      }
+      assertInlineSnapshot(of: User.columns.id == nil as Int?, as: .sql) {
         """
-    )
-    #expect(
-      (User.columns.id != id).queryString == """
-        ("users"."id" IS NOT ?)
+        ("users"."id" IS NULL)
         """
-    )
-    id = 42
-    #expect(
-      (User.columns.id == id).queryString == """
-        ("users"."id" = ?)
+      }
+      assertInlineSnapshot(of: User.columns.id != nil as Int?, as: .sql) {
         """
-    )
-    #expect(
-      (User.columns.id != id).queryString == """
-        ("users"."id" <> ?)
+        ("users"."id" IS NOT NULL)
         """
-    )
-    #expect(
-      (User.columns.referrerID == 1).queryString == """
-        ("users"."referrerID" = ?)
+      }
+      assertInlineSnapshot(of: User.columns.id == 42 as Int?, as: .sql) {
         """
-    )
-    #expect(
-      (User.columns.referrerID != 1).queryString == """
-        ("users"."referrerID" <> ?)
+        ("users"."id" = 42)
         """
-    )
-    #expect(
-      (User.columns.referrerID == nil).queryString == """
+      }
+      assertInlineSnapshot(of: User.columns.id != 42 as Int?, as: .sql) {
+        """
+        ("users"."id" <> 42)
+        """
+      }
+      assertInlineSnapshot(of: User.columns.referrerID == 1, as: .sql) {
+        """
+        ("users"."referrerID" = 1)
+        """
+      }
+      assertInlineSnapshot(of: User.columns.referrerID != 1, as: .sql) {
+        """
+        ("users"."referrerID" <> 1)
+        """
+      }
+      assertInlineSnapshot(of: User.columns.referrerID == nil, as: .sql) {
+        """
         ("users"."referrerID" IS NULL)
         """
-    )
-    #expect(
-      (User.columns.referrerID != nil).queryString == """
+      }
+      assertInlineSnapshot(of: User.columns.referrerID != nil, as: .sql) {
+        """
         ("users"."referrerID" IS NOT NULL)
         """
-    )
-    #expect(
-      (User.columns.id == User.columns.referrerID).queryString == """
+      }
+      assertInlineSnapshot(of: User.columns.id == User.columns.referrerID, as: .sql) {
+        """
         ("users"."id" = "users"."referrerID")
         """
-    )
-    #expect(
-      (User.columns.id != User.columns.referrerID).queryString == """
+      }
+      assertInlineSnapshot(of: User.columns.id != User.columns.referrerID, as: .sql) {
+        """
         ("users"."id" <> "users"."referrerID")
         """
-    )
-    #expect(
-      (User.columns.referrerID == User.columns.id).queryString == """
+      }
+      assertInlineSnapshot(of: User.columns.referrerID == User.columns.id, as: .sql) {
+        """
         ("users"."referrerID" = "users"."id")
         """
-    )
-    #expect(
-      (User.columns.referrerID != User.columns.id).queryString == """
+      }
+      assertInlineSnapshot(of: User.columns.referrerID != User.columns.id, as: .sql) {
+        """
         ("users"."referrerID" <> "users"."id")
         """
-    )
-  }
+      }
+    }
 
-  @Test func coalesce() {
-    #expect(
-      (User.columns.referrerID ?? User.columns.id).queryString == """
+    @Test func coalesce() {
+      assertInlineSnapshot(of: User.columns.referrerID ?? User.columns.id, as: .sql) {
+        """
         coalesce("users"."referrerID", "users"."id")
         """
-    )
-    #expect(
-      (User.columns.referrerID ?? 1).queryString == """
-        coalesce("users"."referrerID", ?)
+      }
+      assertInlineSnapshot(of: User.columns.referrerID ?? 1, as: .sql) {
         """
-    )
-    #expect(
-      (User.columns.referrerID ?? nil).queryString == """
+        coalesce("users"."referrerID", 1)
+        """
+      }
+      assertInlineSnapshot(of: User.columns.referrerID ?? nil, as: .sql) {
+        """
         coalesce("users"."referrerID", NULL)
         """
-    )
-    #expect(
-      (User.columns.referrerID ?? User.columns.referrerID).queryString == """
+      }
+      assertInlineSnapshot(of: User.columns.referrerID ?? User.columns.referrerID, as: .sql) {
+        """
         coalesce("users"."referrerID", "users"."referrerID")
         """
-    )
-  }
+      }
+    }
 
-  @Test func comparable() {
-    #expect(
-      (User.columns.id < 1).queryString == """
-        ("users"."id" < ?)
+    @Test func comparable() {
+      assertInlineSnapshot(of: User.columns.id < 1, as: .sql) {
         """
-    )
-    #expect(
-      (User.columns.id > 1).queryString == """
-        ("users"."id" > ?)
+        ("users"."id" < 1)
         """
-    )
-    #expect(
-      (User.columns.id <= 1).queryString == """
-        ("users"."id" <= ?)
+      }
+      assertInlineSnapshot(of: User.columns.id > 1, as: .sql) {
         """
-    )
-    #expect(
-      (User.columns.id >= 1).queryString == """
-        ("users"."id" >= ?)
+        ("users"."id" > 1)
         """
-    )
-  }
+      }
+      assertInlineSnapshot(of: User.columns.id <= 1, as: .sql) {
+        """
+        ("users"."id" <= 1)
+        """
+      }
+      assertInlineSnapshot(of: User.columns.id >= 1, as: .sql) {
+        """
+        ("users"."id" >= 1)
+        """
+      }
+    }
 
-  @Test func boolean() {
-    #expect(
-      (User.columns.isAdmin && User.columns.isAdmin).queryString == """
+    @Test func boolean() {
+      assertInlineSnapshot(of: User.columns.isAdmin && User.columns.isAdmin, as: .sql) {
+        """
         ("users"."isAdmin" AND "users"."isAdmin")
         """
-    )
-    #expect(
-      (User.columns.isAdmin || User.columns.isAdmin).queryString == """
+      }
+      assertInlineSnapshot(of: User.columns.isAdmin || User.columns.isAdmin, as: .sql) {
+        """
         ("users"."isAdmin" OR "users"."isAdmin")
         """
-    )
-    #expect(
-      (!User.columns.isAdmin).queryString == """
+      }
+      assertInlineSnapshot(of: !User.columns.isAdmin, as: .sql) {
+        """
         NOT ("users"."isAdmin")
         """
-    )
-    var isAdmin = AnyQueryExpression(User.columns.isAdmin)
-    isAdmin.toggle()
-    #expect(isAdmin.queryString == (!User.columns.isAdmin).queryString)
-  }
+      }
 
-  @Test func arithmetic() {
-    #expect(
-      (User.columns.id + 1).queryString == """
-        ("users"."id" + ?)
+      var isAdmin = AnyQueryExpression(User.columns.isAdmin)
+      isAdmin.toggle()
+      #expect(isAdmin.queryFragment == (!User.columns.isAdmin).queryFragment)
+    }
+
+    @Test func arithmetic() {
+      assertInlineSnapshot(of: User.columns.id + 1, as: .sql) {
         """
-    )
-    #expect(
-      (User.columns.salary + 16.50).queryString == """
-        ("users"."salary" + ?)
+        ("users"."id" + 1)
         """
-    )
-    #expect(
-      (User.columns.id - 1).queryString == """
-        ("users"."id" - ?)
+      }
+      assertInlineSnapshot(of: User.columns.salary + 50, as: .sql) {
         """
-    )
-    #expect(
-      (User.columns.salary - 16.50).queryString == """
-        ("users"."salary" - ?)
+        ("users"."salary" + 50.0)
         """
-    )
-    #expect(
-      (User.columns.id * 1).queryString == """
-        ("users"."id" * ?)
+      }
+      assertInlineSnapshot(of: User.columns.salary + 16.50, as: .sql) {
         """
-    )
-    #expect(
-      (User.columns.salary * 16.50).queryString == """
-        ("users"."salary" * ?)
+        ("users"."salary" + 16.5)
         """
-    )
-    #expect(
-      (User.columns.id / 1).queryString == """
-        ("users"."id" / ?)
+      }
+      assertInlineSnapshot(of: User.columns.id - 1, as: .sql) {
         """
-    )
-    #expect(
-      (User.columns.salary / 16.50).queryString == """
-        ("users"."salary" / ?)
+        ("users"."id" - 1)
         """
-    )
-    #expect(
-      (-User.columns.id).queryString == """
+      }
+      assertInlineSnapshot(of: User.columns.salary - 50, as: .sql) {
+        """
+        ("users"."salary" - 50.0)
+        """
+      }
+      assertInlineSnapshot(of: User.columns.salary - 16.50, as: .sql) {
+        """
+        ("users"."salary" - 16.5)
+        """
+      }
+      assertInlineSnapshot(of: User.columns.id * 1, as: .sql) {
+        """
+        ("users"."id" * 1)
+        """
+      }
+      assertInlineSnapshot(of: User.columns.salary * 50, as: .sql) {
+        """
+        ("users"."salary" * 50.0)
+        """
+      }
+      assertInlineSnapshot(of: User.columns.salary * 16.50, as: .sql) {
+        """
+        ("users"."salary" * 16.5)
+        """
+      }
+      assertInlineSnapshot(of: User.columns.id / 1, as: .sql) {
+        """
+        ("users"."id" / 1)
+        """
+      }
+      assertInlineSnapshot(of: User.columns.salary / 50, as: .sql) {
+        """
+        ("users"."salary" / 50.0)
+        """
+      }
+      assertInlineSnapshot(of: User.columns.salary / 16.50, as: .sql) {
+        """
+        ("users"."salary" / 16.5)
+        """
+      }
+      assertInlineSnapshot(of: -User.columns.id, as: .sql) {
+        """
         -("users"."id")
         """
-    )
-    #expect(
-      (-User.columns.salary).queryString == """
+      }
+      assertInlineSnapshot(of: -User.columns.salary, as: .sql) {
+        """
         -("users"."salary")
         """
-    )
-    #expect(
-      (+User.columns.id).queryString == """
+      }
+      assertInlineSnapshot(of: +User.columns.id, as: .sql) {
+        """
         +("users"."id")
         """
-    )
-    #expect(
-      (+User.columns.salary).queryString == """
+      }
+      assertInlineSnapshot(of: +User.columns.salary, as: .sql) {
+        """
         +("users"."salary")
         """
-    )
-    var id = AnyQueryExpression(User.columns.id)
-    id += 1
-    #expect(id.queryString == (User.columns.id + 1).queryString)
+      }
 
-    var salary = AnyQueryExpression(User.columns.salary)
-    salary += 1
-    #expect(salary.queryString == (User.columns.salary + 16.50).queryString)
+      var id = AnyQueryExpression(User.columns.id)
+      id += 1
+      #expect(id.queryFragment == (User.columns.id + 1).queryFragment)
 
-    id = AnyQueryExpression(User.columns.id)
-    id -= 1
-    #expect(id.queryString == (User.columns.id - 1).queryString)
+      var salary = AnyQueryExpression(User.columns.salary)
+      salary += 16.50
+      #expect(salary.queryFragment == (User.columns.salary + 16.50).queryFragment)
 
-    salary = AnyQueryExpression(User.columns.salary)
-    salary -= 1
-    #expect(salary.queryString == (User.columns.salary - 16.50).queryString)
+      id = AnyQueryExpression(User.columns.id)
+      id -= 1
+      #expect(id.queryFragment == (User.columns.id - 1).queryFragment)
 
-    id = AnyQueryExpression(User.columns.id)
-    id *= 1
-    #expect(id.queryString == (User.columns.id * 1).queryString)
+      salary = AnyQueryExpression(User.columns.salary)
+      salary -= 16.50
+      #expect(salary.queryFragment == (User.columns.salary - 16.50).queryFragment)
 
-    salary = AnyQueryExpression(User.columns.salary)
-    salary *= 1
-    #expect(salary.queryString == (User.columns.salary * 16.50).queryString)
+      id = AnyQueryExpression(User.columns.id)
+      id *= 1
+      #expect(id.queryFragment == (User.columns.id * 1).queryFragment)
 
-    id = AnyQueryExpression(User.columns.id)
-    id /= 1
-    #expect(id.queryString == (User.columns.id / 1).queryString)
+      salary = AnyQueryExpression(User.columns.salary)
+      salary *= 16.50
+      #expect(salary.queryFragment == (User.columns.salary * 16.50).queryFragment)
 
-    salary = AnyQueryExpression(User.columns.salary)
-    salary /= 1
-    #expect(salary.queryString == (User.columns.salary / 16.50).queryString)
+      id = AnyQueryExpression(User.columns.id)
+      id /= 1
+      #expect(id.queryFragment == (User.columns.id / 1).queryFragment)
 
-    id = AnyQueryExpression(User.columns.id)
-    id.negate()
-    #expect(id.queryString == (-User.columns.id).queryString)
+      salary = AnyQueryExpression(User.columns.salary)
+      salary /= 16.50
+      #expect(salary.queryFragment == (User.columns.salary / 16.50).queryFragment)
 
-    salary = AnyQueryExpression(User.columns.salary)
-    salary.negate()
-    #expect(salary.queryString == (-User.columns.salary).queryString)
-  }
+      id = AnyQueryExpression(User.columns.id)
+      id.negate()
+      #expect(id.queryFragment == (-User.columns.id).queryFragment)
 
-  @Test func modulo() {
-    #expect(
-      (User.columns.id % 2).queryString == """
-        ("users"."id" % ?)
+      salary = AnyQueryExpression(User.columns.salary)
+      salary.negate()
+      #expect(salary.queryFragment == (-User.columns.salary).queryFragment)
+    }
+
+    @Test func modulo() {
+      assertInlineSnapshot(of: User.columns.id % 2, as: .sql) {
         """
-    )
-    var id = AnyQueryExpression(User.columns.id)
-    id %= 2
-    #expect(id.queryString == (User.columns.id % 2).queryString)
-  }
+        ("users"."id" % 2)
+        """
+      }
 
-  @Test func bitwise() {
-    #expect(
-      (User.columns.id & 2).queryString == """
-        ("users"."id" & ?)
+      var id = AnyQueryExpression(User.columns.id)
+      id %= 2
+      #expect(id.queryFragment == (User.columns.id % 2).queryFragment)
+    }
+
+    @Test func bitwise() {
+      assertInlineSnapshot(of: User.columns.id & 2, as: .sql) {
         """
-    )
-    #expect(
-      (User.columns.id | 2).queryString == """
-        ("users"."id" | ?)
+        ("users"."id" & 2)
         """
-    )
-    #expect(
-      (User.columns.id << 2).queryString == """
-        ("users"."id" << ?)
+      }
+      assertInlineSnapshot(of: User.columns.id | 2, as: .sql) {
         """
-    )
-    #expect(
-      (User.columns.id >> 2).queryString == """
-        ("users"."id" >> ?)
+        ("users"."id" | 2)
         """
-    )
-    #expect(
-      (~User.columns.id).queryString == """
+      }
+      assertInlineSnapshot(of: User.columns.id << 2, as: .sql) {
+        """
+        ("users"."id" << 2)
+        """
+      }
+      assertInlineSnapshot(of: User.columns.id >> 2, as: .sql) {
+        """
+        ("users"."id" >> 2)
+        """
+      }
+      assertInlineSnapshot(of: ~User.columns.id, as: .sql) {
+        """
         ~("users"."id")
         """
-    )
-    var id = AnyQueryExpression(User.columns.id)
-    id &= 2
-    #expect(id.queryString == (User.columns.id & 2).queryString)
+      }
 
-    id = AnyQueryExpression(User.columns.id)
-    id |= 2
-    #expect(id.queryString == (User.columns.id | 2).queryString)
+      var id = AnyQueryExpression(User.columns.id)
+      id &= 2
+      #expect(id.queryFragment == (User.columns.id & 2).queryFragment)
 
-    id = AnyQueryExpression(User.columns.id)
-    id <<= 2
-    #expect(id.queryString == (User.columns.id << 2).queryString)
+      id = AnyQueryExpression(User.columns.id)
+      id |= 2
+      #expect(id.queryFragment == (User.columns.id | 2).queryFragment)
 
-    id = AnyQueryExpression(User.columns.id)
-    id >>= 2
-    #expect(id.queryString == (User.columns.id >> 2).queryString)
-  }
+      id = AnyQueryExpression(User.columns.id)
+      id <<= 2
+      #expect(id.queryFragment == (User.columns.id << 2).queryFragment)
 
-  @Test func string() {
-    #expect(
-      (User.columns.name + ", Jr").queryString == """
-        ("users"."name" || ?)
+      id = AnyQueryExpression(User.columns.id)
+      id >>= 2
+      #expect(id.queryFragment == (User.columns.id >> 2).queryFragment)
+    }
+
+    @Test func string() {
+      assertInlineSnapshot(of: User.columns.name + ", Jr", as: .sql) {
         """
-    )
-    #expect(
-      User.columns.name.collate(.binary).queryString == """
+        ("users"."name" || ', Jr')
+        """
+      }
+      assertInlineSnapshot(of: User.columns.name.collate(.binary), as: .sql) {
+        """
         ("users"."name" COLLATE BINARY)
         """
-    )
-    #expect(
-      User.columns.name.collate(.nocase).queryString == """
+      }
+      assertInlineSnapshot(of: User.columns.name.collate(.nocase), as: .sql) {
+        """
         ("users"."name" COLLATE NOCASE)
         """
-    )
-    #expect(
-      User.columns.name.collate(.rtrim).queryString == """
+      }
+      assertInlineSnapshot(of: User.columns.name.collate(.rtrim), as: .sql) {
+        """
         ("users"."name" COLLATE RTRIM)
         """
-    )
-    #expect(
-      User.columns.name.collate(.binary).queryString == """
-        ("users"."name" COLLATE BINARY)
+      }
+      assertInlineSnapshot(of: User.columns.name.like("%Blob%"), as: .sql) {
         """
-    )
-    #expect(
-      User.columns.name.like("%foo%").queryString == """
-        ("users"."name" LIKE ?)
+        ("users"."name" LIKE '%Blob%')
         """
-    )
-    #expect(
-      User.columns.name.glob("*").queryString == """
-        ("users"."name" GLOB ?)
+      }
+      assertInlineSnapshot(of: User.columns.name.glob("*"), as: .sql) {
         """
-    )
-    do {
-      let query = User.columns.name.hasPrefix("foo")
-      #expect(
-        query.queryString == """
-          ("users"."name" LIKE ?)
-          """
-      )
-      #expect(query.queryBindings == [.text("foo%")])
+        ("users"."name" GLOB '*')
+        """
+      }
+      assertInlineSnapshot(of: User.columns.name.contains("Blob"), as: .sql) {
+        """
+        ("users"."name" LIKE '%Blob%')
+        """
+      }
+      assertInlineSnapshot(of: User.columns.name.hasPrefix("Blob"), as: .sql) {
+        """
+        ("users"."name" LIKE 'Blob%')
+        """
+      }
+      assertInlineSnapshot(of: User.columns.name.hasSuffix("Jr"), as: .sql) {
+        """
+        ("users"."name" LIKE '%Jr')
+        """
+      }
+
+      var name = AnyQueryExpression(User.columns.name)
+      name += ", Jr"
+      #expect(name.queryFragment == (User.columns.name + ", Jr").queryFragment)
+
+      name = AnyQueryExpression(User.columns.name)
+      name.append(", Jr")
+      #expect(name.queryFragment == (User.columns.name + ", Jr").queryFragment)
+
+      name = AnyQueryExpression(User.columns.name)
+      name.append(contentsOf: ", Jr")
+      #expect(name.queryFragment == (User.columns.name + ", Jr").queryFragment)
     }
-    do {
-      let query = User.columns.name.hasSuffix("foo")
-      #expect(
-        query.queryString == """
-          ("users"."name" LIKE ?)
-          """
-      )
-      #expect(query.queryBindings == [.text("%foo")])
-    }
-    do {
-      let query = User.columns.name.contains("foo")
-      #expect(
-        query.queryString == """
-          ("users"."name" LIKE ?)
-          """
-      )
-      #expect(query.queryBindings == [.text("%foo%")])
-    }
-    var name = AnyQueryExpression(User.columns.name)
-    name += ", Jr"
-    #expect(name.queryString == (User.columns.name + ", Jr").queryString)
 
-    name = AnyQueryExpression(User.columns.name)
-    name.append(", Jr")
-    #expect(name.queryString == (User.columns.name + ", Jr").queryString)
-
-    name = AnyQueryExpression(User.columns.name)
-    name.append(contentsOf: ", Jr")
-    #expect(name.queryString == (User.columns.name + ", Jr").queryString)
-  }
-
-  @Test func array() {
-    #expect(
-      ["Blob", "Blob Jr", "Blob Sr"].contains(User.columns.name).queryString == """
-        ("users"."name" IN ((?, ?, ?)))
+    @Test func array() {
+      assertInlineSnapshot(
+        of: ["Blob", "Blob Jr", "Blob Sr"].contains(User.columns.name),
+        as: .sql
+      ) {
         """
-    )
-  }
-
-  @Test func range() {
-    #expect(
-      (1...10).contains(User.columns.id).queryString == """
-        ("users"."id" BETWEEN ? AND ?)
+        ("users"."name" IN ('Blob', 'Blob Jr', 'Blob Sr'))
         """
-    )
+      }
+    }
+
+    @Test func range() {
+      assertInlineSnapshot(of: (1...10).contains(User.columns.id), as: .sql) {
+        """
+        ("users"."id" BETWEEN 1 AND 10)
+        """
+      }
+    }
   }
 }

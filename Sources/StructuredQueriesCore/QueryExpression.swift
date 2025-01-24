@@ -1,34 +1,31 @@
+
 // TODO: conform to CustomDebugStringConvertible and pretty print?
 public protocol QueryExpression<QueryOutput>: Sendable {
   associatedtype QueryOutput
-
-  var queryString: String { get }
-
-  var queryBindings: [QueryBinding] { get }
+  var queryFragment: QueryFragment { get }
 }
 
 extension Optional: QueryExpression where Wrapped: QueryExpression {
   public typealias QueryOutput = Self
-  public var queryString: String { self?.queryString ?? "?" }
-  public var queryBindings: [QueryBinding] {
+  public var queryFragment: QueryFragment {
     switch self {
-    case let wrapped?:
-      return wrapped.queryBindings
+    case let .some(wrapped):
+      return wrapped.queryFragment
     case nil:
-      return [.null]
+      return "\(.null)"
     }
   }
 }
 
 extension Array: QueryExpression where Element: QueryExpression {
   public typealias QueryOutput = Self
-  public var queryString: String { "(\(map(\.queryString).joined(separator: ", ")))" }
-  public var queryBindings: [QueryBinding] { flatMap(\.queryBindings) }
+  public var queryFragment: QueryFragment {
+    map(\.queryFragment).joined(separator: ", ")
+  }
 }
 
 extension ClosedRange: QueryExpression where Bound: QueryExpression {
   public typealias QueryOutput = Self
-  public var queryString: String { "\(lowerBound.queryString) AND \(upperBound.queryString)" }
-  public var queryBindings: [QueryBinding] { lowerBound.queryBindings + upperBound.queryBindings }
+  public var queryFragment: QueryFragment { "\(bind: lowerBound) AND \(bind: upperBound)" }
 }
 
