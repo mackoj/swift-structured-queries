@@ -2,8 +2,8 @@ public protocol QueryBindingStrategy<Representable>: Sendable {
   associatedtype Representable: Sendable
   associatedtype RawValue: QueryBindable
   init()
-  func fromQueryBindable(_ rawValue: RawValue) throws -> Representable
-  func toQueryBindable(_ representable: Representable) -> RawValue
+  static func fromQueryBindable(_ rawValue: RawValue) throws -> Representable
+  static func toQueryBindable(_ representable: Representable) -> RawValue
 }
 
 extension Column {
@@ -49,14 +49,14 @@ extension Column {
     _ output: Strategy.Representable
   ) -> QueryFragment
   where QueryOutput == Bind<Strategy> {
-    Strategy().toQueryBindable(output).queryFragment
+    Strategy.toQueryBindable(output).queryFragment
   }
 
   public func encode<Strategy: QueryBindingStrategy>(
     _ output: Strategy.Representable?
   ) -> QueryFragment
   where QueryOutput == Bind<Strategy>? {
-    output.map(Strategy().toQueryBindable).queryFragment
+    output.map(Strategy.toQueryBindable).queryFragment
   }
 }
 
@@ -103,13 +103,13 @@ extension DraftColumn {
     _ output: Strategy.Representable
   ) -> QueryFragment
   where QueryOutput == Bind<Strategy> {
-    Strategy().toQueryBindable(output).queryFragment
+    Strategy.toQueryBindable(output).queryFragment
   }
 
   public func encode<Strategy: QueryBindingStrategy>(
     _ output: Strategy.Representable?
   ) -> QueryFragment
   where QueryOutput == Bind<Strategy>? {
-    output.map(Strategy().toQueryBindable).queryFragment
+    output.map(Strategy.toQueryBindable).queryFragment
   }
 }

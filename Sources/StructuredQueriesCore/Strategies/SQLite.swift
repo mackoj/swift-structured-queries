@@ -26,37 +26,37 @@ extension QueryBindingStrategy where Self == UUIDLowercasedStrategy {
 
 public struct ISO8601Strategy: QueryBindingStrategy {
   public init() {}
-  public func fromQueryBindable(_ rawValue: String) throws -> Date {
+  public static func fromQueryBindable(_ rawValue: String) throws -> Date {
     try Date(rawValue, strategy: .iso8601)
   }
-  public func toQueryBindable(_ representable: Date) -> String {
+  public static func toQueryBindable(_ representable: Date) -> String {
     representable.formatted(.iso8601)
   }
 }
 
 public struct UnixTimeStrategy: QueryBindingStrategy {
   public init() {}
-  public func fromQueryBindable(_ rawValue: Int) -> Date {
+  public static func fromQueryBindable(_ rawValue: Int) -> Date {
     Date(timeIntervalSince1970: TimeInterval(rawValue))
   }
-  public func toQueryBindable(_ representable: Date) -> Int {
+  public static func toQueryBindable(_ representable: Date) -> Int {
     Int(representable.timeIntervalSince1970)
   }
 }
 
 public struct JulianDayStrategy: QueryBindingStrategy {
   public init() {}
-  public func fromQueryBindable(_ rawValue: Double) -> Date {
+  public static func fromQueryBindable(_ rawValue: Double) -> Date {
     Date(timeIntervalSince1970: (rawValue - 2440587.5) * 86400)
   }
-  public func toQueryBindable(_ representable: Date) -> Double {
+  public static func toQueryBindable(_ representable: Date) -> Double {
     2440587.5 + representable.timeIntervalSince1970 / 86400
   }
 }
 
 public struct UUIDBytesStrategy: QueryBindingStrategy {
   public init() {}
-  public func fromQueryBindable(_ rawValue: [UInt8]) throws -> UUID {
+  public static func fromQueryBindable(_ rawValue: [UInt8]) throws -> UUID {
     guard rawValue.count == 16 else {
       struct InvalidBytes: Error {}
       throw InvalidBytes()
@@ -65,35 +65,35 @@ public struct UUIDBytesStrategy: QueryBindingStrategy {
       UUID(uuid: $0.load(as: uuid_t.self))
     }
   }
-  public func toQueryBindable(_ representable: UUID) -> [UInt8] {
+  public static func toQueryBindable(_ representable: UUID) -> [UInt8] {
     withUnsafeBytes(of: representable.uuid, [UInt8].init(_:))
   }
 }
 
 public struct UUIDUppercasedStrategy: QueryBindingStrategy {
   public init() {}
-  public func fromQueryBindable(_ rawValue: String) throws -> UUID {
+  public static func fromQueryBindable(_ rawValue: String) throws -> UUID {
     guard let uuid = UUID(uuidString: rawValue) else {
       struct InvalidString: Error {}
       throw InvalidString()
     }
     return uuid
   }
-  public func toQueryBindable(_ representable: UUID) -> String {
+  public static func toQueryBindable(_ representable: UUID) -> String {
     representable.uuidString
   }
 }
 
 public struct UUIDLowercasedStrategy: QueryBindingStrategy {
   public init() {}
-  public func fromQueryBindable(_ rawValue: String) throws -> UUID {
+  public static func fromQueryBindable(_ rawValue: String) throws -> UUID {
     guard let uuid = UUID(uuidString: rawValue) else {
       struct InvalidString: Error {}
       throw InvalidString()
     }
     return uuid
   }
-  public func toQueryBindable(_ representable: UUID) -> String {
+  public static func toQueryBindable(_ representable: UUID) -> String {
     representable.uuidString.lowercased()
   }
 }
