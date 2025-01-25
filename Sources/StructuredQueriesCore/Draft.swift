@@ -1,6 +1,7 @@
 public protocol Draft: Sendable {
   associatedtype Columns: DraftSchema where Columns.QueryOutput == Self
   static var columns: Columns { get }
+  var queryFragment: QueryFragment { get }
 }
 
 public protocol DraftSchema<QueryOutput>: Sendable {
@@ -13,6 +14,7 @@ extension Never: Draft {
     public let allColumns: [any ColumnExpression<Never>] = []
   }
   public static var columns: Columns { Columns() }
+  public var queryFragment: QueryFragment { fatalError() }
 }
 
 public struct DraftColumn<Root: Draft, QueryOutput: Sendable>: ColumnExpression {
@@ -28,4 +30,8 @@ public struct DraftColumn<Root: Draft, QueryOutput: Sendable>: ColumnExpression 
 
   public var keyPath: PartialKeyPath<Root> { _keyPath }
   public var queryFragment: QueryFragment { "\(raw: name.quoted())" }
+
+  public func encode(_ output: QueryOutput) -> QueryFragment where QueryOutput: QueryBindable {
+    output.queryFragment
+  }
 }

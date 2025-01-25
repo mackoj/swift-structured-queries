@@ -44,6 +44,20 @@ extension Column {
   where QueryOutput == Bind<Strategy>? {
     try decoder.decode(QueryOutput.self)?.representable
   }
+
+  public func encode<Strategy: QueryBindingStrategy>(
+    _ output: Strategy.Representable
+  ) -> QueryFragment
+  where QueryOutput == Bind<Strategy> {
+    Strategy().toQueryBindable(output).queryFragment
+  }
+
+  public func encode<Strategy: QueryBindingStrategy>(
+    _ output: Strategy.Representable?
+  ) -> QueryFragment
+  where QueryOutput == Bind<Strategy>? {
+    output.map(Strategy().toQueryBindable).queryFragment
+  }
 }
 
 extension DraftColumn {
@@ -76,5 +90,26 @@ extension DraftColumn {
   ) throws -> Strategy.Representable
   where QueryOutput == Bind<Strategy> {
     try decoder.decode(QueryOutput.self).representable
+  }
+
+  public func decode<Strategy: QueryBindingStrategy>(
+    decoder: any QueryDecoder
+  ) throws -> Strategy.Representable?
+  where QueryOutput == Bind<Strategy>? {
+    try decoder.decode(QueryOutput.self)?.representable
+  }
+
+  public func encode<Strategy: QueryBindingStrategy>(
+    _ output: Strategy.Representable
+  ) -> QueryFragment
+  where QueryOutput == Bind<Strategy> {
+    Strategy().toQueryBindable(output).queryFragment
+  }
+
+  public func encode<Strategy: QueryBindingStrategy>(
+    _ output: Strategy.Representable?
+  ) -> QueryFragment
+  where QueryOutput == Bind<Strategy>? {
+    output.map(Strategy().toQueryBindable).queryFragment
   }
 }

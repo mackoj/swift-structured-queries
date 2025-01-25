@@ -17,6 +17,10 @@ extension Column: ColumnExpression {
   public var queryFragment: QueryFragment {
     "\(raw: Root.name.quoted()).\(raw: name.quoted())"
   }
+
+  public func encode(_ output: QueryOutput) -> QueryFragment {
+    output.queryFragment
+  }
 }
 
 // TODO: Move to `QueryBindable.swift`

@@ -7,4 +7,6 @@ public protocol Table: QueryDecodable, Sendable {
   static var name: String { get }
 
   static var columns: Columns { get }
+
+  var queryFragment: QueryFragment { get }
 }

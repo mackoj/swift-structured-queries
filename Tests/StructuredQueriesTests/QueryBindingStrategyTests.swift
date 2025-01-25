@@ -20,7 +20,17 @@ extension SnapshotTests {
         SELECT "todos"."id", "todos"."deleted" FROM "todos" WHERE ("todos"."deleted" IS NOT NULL)
         """
       }
-      // TODO: assertInlineSnapshot(of: Todo.insert([Todo.Draft(deleted: Date())]), as: .sql)
+      let date = Date(timeIntervalSince1970: 0)
+      assertInlineSnapshot(of: Todo.insert([Todo.Draft(deleted: date)]), as: .sql) {
+        """
+        INSERT INTO "todos" ("deleted") VALUES ('1970-01-01T00:00:00Z')
+        """
+      }
+      assertInlineSnapshot(of: Todo.insert([Todo.Draft(deleted: nil)]), as: .sql) {
+        """
+        INSERT INTO "todos" ("deleted") VALUES (NULL)
+        """
+      }
     }
   }
 }

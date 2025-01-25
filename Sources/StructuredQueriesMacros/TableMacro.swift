@@ -88,10 +88,12 @@ extension TableMacro: ExtensionMacro {
     var diagnostics: [Diagnostic] = []
     var draftProperties: [String] = []
     var draftColumnsProperties: [String] = []
+    var draftEncodings: [String] = []
     var allColumns: [String] = []
     var allDraftColumns: [String] = []
     var primaryKey: (identifier: String, type: String, label: TokenSyntax?)?
     var decodings: [String] = []
+    var encodings: [String] = []
     let selfRewriter = SelfRewriter(selfEquivalent: "QueryOutput")
     let memberBlock = declaration.memberBlock
     for member in memberBlock.members {
@@ -255,9 +257,11 @@ extension TableMacro: ExtensionMacro {
           )
           """
         )
+        draftEncodings.append("Self.columns.\(name).encode(self.\(name))")
         allDraftColumns.append("self.\(name)")
       }
       decodings.append("self.\(name) = try Self.columns.\(name).decode(decoder: decoder)")
+      encodings.append("Self.columns.\(name).encode(self.\(name))")
     }
     let tableName: String
     if case let .argumentList(arguments) = node.arguments,
@@ -292,6 +296,17 @@ extension TableMacro: ExtensionMacro {
         }
         }
         public static let columns = Columns()
+        public var queryFragment: QueryFragment {
+        var sql: QueryFragment = "("
+        sql.append(
+        [
+        \(draftEncodings.joined(separator: ",\n"))
+        ]
+        .joined(separator: ", ")
+        )
+        sql.append(")")
+        return sql
+        }
         }
         """
       protocolNames = [protocolName(primaryKey: false), protocolName(primaryKey: true)]
@@ -334,6 +349,17 @@ extension TableMacro: ExtensionMacro {
         public static let name = \(raw: tableName)
         public init(decoder: some \(moduleName).QueryDecoder) throws {
         \(raw: decodings.joined(separator: "\n"))
+        }
+        public var queryFragment: QueryFragment {
+        var sql: QueryFragment = "("
+        sql.append(
+        [
+        \(raw: encodings.joined(separator: ",\n"))
+        ]
+        .joined(separator: ", ")
+        )
+        sql.append(")")
+        return sql
         }
         }
         """

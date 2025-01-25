@@ -210,13 +210,7 @@ private enum InsertionForm<Base: Table, Draft: StructuredQueriesCore.Draft>: Que
     case let .records(records):
       guard !records.isEmpty else { return "" }
       let values: QueryFragment = records
-        .map { record in
-          let row = Base.columns.allColumns.map { column in
-            (record[keyPath: column.keyPath] as! any QueryBindable).queryFragment
-          }
-          .joined(separator: ", ")
-          return "(\(row))"
-        }
+        .map(\.queryFragment)
         .joined(separator: ", ")
       return """
         VALUES \(values)
@@ -224,13 +218,7 @@ private enum InsertionForm<Base: Table, Draft: StructuredQueriesCore.Draft>: Que
     case let .drafts(records):
       guard !records.isEmpty else { return "" }
       let values: QueryFragment = records
-        .map { record in
-          let row = Draft.columns.allColumns.map { column in
-            (record[keyPath: column.keyPath] as! any QueryBindable).queryFragment
-          }
-          .joined(separator: ", ")
-          return "(\(row))"
-        }
+        .map(\.queryFragment)
         .joined(separator: ", ")
       return """
         VALUES \(values)
