@@ -4,6 +4,12 @@ extension QueryExpression where QueryOutput: QueryBindable {
   }
 }
 
+extension QueryExpression where QueryOutput: QueryBindable {
+  public func groupConcat(separator: String? = nil) -> some QueryExpression<Int> {
+    AggregateFunction("group_concat", (self, separator))
+  }
+}
+
 extension QueryExpression where QueryOutput: Comparable {
   public func maximum(distinct isDistinct: Bool = false) -> some QueryExpression<Int?> {
     AggregateFunction("max", self)
@@ -37,19 +43,22 @@ public struct CountExpression: QueryExpression {
   public var queryFragment: QueryFragment { "count(*)" }
 }
 
-private struct AggregateFunction<Argument: QueryExpression, QueryOutput>: QueryExpression {
+private struct AggregateFunction<QueryOutput>: QueryExpression {
   var name: String
   var isDistinct: Bool
-  var argument: Argument
+  var arguments: [any QueryExpression]
 
-  init(
+  init<each Argument: QueryExpression>(
     _ name: String,
     isDistinct: Bool = false,
-    _ argument: Argument
+    _ arguments: (repeat each Argument)
   ) {
     self.name = name
     self.isDistinct = isDistinct
-    self.argument = argument
+    self.arguments = []
+    for argument in repeat each arguments {
+      self.arguments.append(argument)
+    }
   }
 
   var queryFragment: QueryFragment {
@@ -57,7 +66,14 @@ private struct AggregateFunction<Argument: QueryExpression, QueryOutput>: QueryE
     if isDistinct {
       fragment.append("DISTINCT ")
     }
-    fragment.append(argument.queryFragment)
+    var isFirst = true
+    for argument in arguments {
+      defer { isFirst = false }
+      if !isFirst {
+        fragment.append(", ")
+      }
+      fragment.append(argument.queryFragment)
+    }
     fragment.append(")")
     return fragment
   }

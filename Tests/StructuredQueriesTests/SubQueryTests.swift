@@ -57,6 +57,19 @@ extension SnapshotTests {
       }
     }
 
+    @Test func selectSubQuery() {
+      // TODO: Can we support this? The problem with that `Team.all().count()` has an output of an
+      //       instead of a single value. Needs a SelectOne?
+//      assertInlineSnapshot(
+//        of: Player.all().select { ($0.id, Team.all().count()) },
+//        as: .sql
+//      ) {
+//        """
+//        SELECT "players"."id", (SELECT count(*) FROM "teams") FROM "players"
+//        """
+//      }
+    }
+
     @Table fileprivate struct Player {
       let id: Int
       var teamID: Int

@@ -87,6 +87,44 @@ extension SnapshotTests {
       }
     }
 
+    @Test func groupConcat() {
+      assertInlineSnapshot(of: User.columns.name.groupConcat(), as: .sql) {
+        """
+        group_concat("users"."name", NULL)
+        """
+      }
+
+      assertInlineSnapshot(of: User.columns.name.groupConcat(separator: ","), as: .sql) {
+        """
+        group_concat("users"."name", ',')
+        """
+      }
+    }
+
+    @Test func orderBy() {
+      // TODO: How to support this:
+      //       group_concat("name", ', ' ORDER BY "name")
+    }
+
+    @Test func filter() {
+      // TODO: How to support this:
+      //       avg("activePlayersCount") FILTER (WHERE "activePlayersCount" > 1)
+    }
+
+    @Test func aggregateOfExpression() {
+      assertInlineSnapshot(of: User.columns.name.length.count(distinct: true), as: .sql) {
+        """
+        count(DISTINCT length("users"."name"))
+        """
+      }
+
+      assertInlineSnapshot(of: (User.columns.name + "!").groupConcat(separator: ", "), as: .sql) {
+        """
+        group_concat(("users"."name" || '!'), ', ')
+        """
+      }
+    }
+
     @Test func invalid() {
       #warning("TODO: Can we get these to not compile?")
       assertInlineSnapshot(of: User.columns.id.count().count(), as: .sql) {

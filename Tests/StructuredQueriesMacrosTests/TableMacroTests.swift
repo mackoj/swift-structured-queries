@@ -47,12 +47,35 @@ struct TableMacroTests {
               }
             }
             public static let columns = Columns()
+            public var queryFragment: QueryFragment {
+              var sql: QueryFragment = "("
+              sql.append(
+                [
+                  Self.columns.name.encode(self.name)
+                ]
+                .joined(separator: ", ")
+              )
+              sql.append(")")
+              return sql
+            }
           }
           public static let columns = Columns()
           public static let name = "users"
           public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.id = try Self.columns.id.decode(decoder: decoder)
             self.name = try Self.columns.name.decode(decoder: decoder)
+          }
+          public var queryFragment: QueryFragment {
+            var sql: QueryFragment = "("
+            sql.append(
+              [
+                Self.columns.id.encode(self.id),
+                Self.columns.name.encode(self.name)
+              ]
+              .joined(separator: ", ")
+            )
+            sql.append(")")
+            return sql
           }
         }
         """#
@@ -91,6 +114,17 @@ struct TableMacroTests {
           public static let name = "configs"
           public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.default = try Self.columns.default.decode(decoder: decoder)
+          }
+          public var queryFragment: QueryFragment {
+            var sql: QueryFragment = "("
+            sql.append(
+              [
+                Self.columns.default.encode(self.default)
+              ]
+              .joined(separator: ", ")
+            )
+            sql.append(")")
+            return sql
           }
         }
         """#
@@ -140,11 +174,33 @@ struct TableMacroTests {
               }
             }
             public static let columns = Columns()
+            public var queryFragment: QueryFragment {
+              var sql: QueryFragment = "("
+              sql.append(
+                [
+
+                ]
+                .joined(separator: ", ")
+              )
+              sql.append(")")
+              return sql
+            }
           }
           public static let columns = Columns()
           public static let name = "users"
           public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.id = try Self.columns.id.decode(decoder: decoder)
+          }
+          public var queryFragment: QueryFragment {
+            var sql: QueryFragment = "("
+            sql.append(
+              [
+                Self.columns.id.encode(self.id)
+              ]
+              .joined(separator: ", ")
+            )
+            sql.append(")")
+            return sql
           }
         }
         """#
@@ -193,11 +249,33 @@ struct TableMacroTests {
               }
             }
             public static let columns = Columns()
+            public var queryFragment: QueryFragment {
+              var sql: QueryFragment = "("
+              sql.append(
+                [
+
+                ]
+                .joined(separator: ", ")
+              )
+              sql.append(")")
+              return sql
+            }
           }
           public static let columns = Columns()
           public static let name = "users"
           public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.id = try Self.columns.id.decode(decoder: decoder)
+          }
+          public var queryFragment: QueryFragment {
+            var sql: QueryFragment = "("
+            sql.append(
+              [
+                Self.columns.id.encode(self.id)
+              ]
+              .joined(separator: ", ")
+            )
+            sql.append(")")
+            return sql
           }
         }
         """#
@@ -245,11 +323,33 @@ struct TableMacroTests {
               }
             }
             public static let columns = Columns()
+            public var queryFragment: QueryFragment {
+              var sql: QueryFragment = "("
+              sql.append(
+                [
+
+                ]
+                .joined(separator: ", ")
+              )
+              sql.append(")")
+              return sql
+            }
           }
           public static let columns = Columns()
           public static let name = "user"
           public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.id = try Self.columns.id.decode(decoder: decoder)
+          }
+          public var queryFragment: QueryFragment {
+            var sql: QueryFragment = "("
+            sql.append(
+              [
+                Self.columns.id.encode(self.id)
+              ]
+              .joined(separator: ", ")
+            )
+            sql.append(")")
+            return sql
           }
         }
         """#
@@ -298,11 +398,33 @@ struct TableMacroTests {
               }
             }
             public static let columns = Columns()
+            public var queryFragment: QueryFragment {
+              var sql: QueryFragment = "("
+              sql.append(
+                [
+
+                ]
+                .joined(separator: ", ")
+              )
+              sql.append(")")
+              return sql
+            }
           }
           public static let columns = Columns()
           public static let name = "users"
           public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.id = try Self.columns.id.decode(decoder: decoder)
+          }
+          public var queryFragment: QueryFragment {
+            var sql: QueryFragment = "("
+            sql.append(
+              [
+                Self.columns.id.encode(self.id)
+              ]
+              .joined(separator: ", ")
+            )
+            sql.append(")")
+            return sql
           }
         }
         """#
@@ -364,6 +486,17 @@ struct TableMacroTests {
           public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.joined = try Self.columns.joined.decode(decoder: decoder)
           }
+          public var queryFragment: QueryFragment {
+            var sql: QueryFragment = "("
+            sql.append(
+              [
+                Self.columns.joined.encode(self.joined)
+              ]
+              .joined(separator: ", ")
+            )
+            sql.append(")")
+            return sql
+          }
         }
         """#
       }
@@ -402,6 +535,17 @@ struct TableMacroTests {
           public static let name = "users"
           public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.joined = try Self.columns.joined.decode(decoder: decoder)
+          }
+          public var queryFragment: QueryFragment {
+            var sql: QueryFragment = "("
+            sql.append(
+              [
+                Self.columns.joined.encode(self.joined)
+              ]
+              .joined(separator: ", ")
+            )
+            sql.append(")")
+            return sql
           }
         }
         """#
@@ -449,11 +593,33 @@ struct TableMacroTests {
               }
             }
             public static let columns = Columns()
+            public var queryFragment: QueryFragment {
+              var sql: QueryFragment = "("
+              sql.append(
+                [
+
+                ]
+                .joined(separator: ", ")
+              )
+              sql.append(")")
+              return sql
+            }
           }
           public static let columns = Columns()
           public static let name = "users"
           public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.id = try Self.columns.id.decode(decoder: decoder)
+          }
+          public var queryFragment: QueryFragment {
+            var sql: QueryFragment = "("
+            sql.append(
+              [
+                Self.columns.id.encode(self.id)
+              ]
+              .joined(separator: ", ")
+            )
+            sql.append(")")
+            return sql
           }
         }
         """#
@@ -501,11 +667,33 @@ struct TableMacroTests {
               }
             }
             public static let columns = Columns()
+            public var queryFragment: QueryFragment {
+              var sql: QueryFragment = "("
+              sql.append(
+                [
+
+                ]
+                .joined(separator: ", ")
+              )
+              sql.append(")")
+              return sql
+            }
           }
           public static let columns = Columns()
           public static let name = "users"
           public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.id = try Self.columns.id.decode(decoder: decoder)
+          }
+          public var queryFragment: QueryFragment {
+            var sql: QueryFragment = "("
+            sql.append(
+              [
+                Self.columns.id.encode(self.id)
+              ]
+              .joined(separator: ", ")
+            )
+            sql.append(")")
+            return sql
           }
         }
         """#
@@ -561,12 +749,35 @@ struct TableMacroTests {
               }
             }
             public static let columns = Columns()
+            public var queryFragment: QueryFragment {
+              var sql: QueryFragment = "("
+              sql.append(
+                [
+                  Self.columns.name.encode(self.name)
+                ]
+                .joined(separator: ", ")
+              )
+              sql.append(")")
+              return sql
+            }
           }
           public static let columns = Columns()
           public static let name = "users"
           public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.id = try Self.columns.id.decode(decoder: decoder)
             self.name = try Self.columns.name.decode(decoder: decoder)
+          }
+          public var queryFragment: QueryFragment {
+            var sql: QueryFragment = "("
+            sql.append(
+              [
+                Self.columns.id.encode(self.id),
+                Self.columns.name.encode(self.name)
+              ]
+              .joined(separator: ", ")
+            )
+            sql.append(")")
+            return sql
           }
         }
         """#
@@ -619,12 +830,35 @@ struct TableMacroTests {
               }
             }
             public static let columns = Columns()
+            public var queryFragment: QueryFragment {
+              var sql: QueryFragment = "("
+              sql.append(
+                [
+                  Self.columns.uuid.encode(self.uuid)
+                ]
+                .joined(separator: ", ")
+              )
+              sql.append(")")
+              return sql
+            }
           }
           public static let columns = Columns()
           public static let name = "users"
           public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.id = try Self.columns.id.decode(decoder: decoder)
             self.uuid = try Self.columns.uuid.decode(decoder: decoder)
+          }
+          public var queryFragment: QueryFragment {
+            var sql: QueryFragment = "("
+            sql.append(
+              [
+                Self.columns.id.encode(self.id),
+                Self.columns.uuid.encode(self.uuid)
+              ]
+              .joined(separator: ", ")
+            )
+            sql.append(")")
+            return sql
           }
         }
         """#
@@ -703,12 +937,36 @@ struct TableMacroTests {
               }
             }
             public static let columns = Columns()
+            public var queryFragment: QueryFragment {
+              var sql: QueryFragment = "("
+              sql.append(
+                [
+                  Self.columns.syncUpID.encode(self.syncUpID),
+                  Self.columns.attendeeID.encode(self.attendeeID)
+                ]
+                .joined(separator: ", ")
+              )
+              sql.append(")")
+              return sql
+            }
           }
           public static let columns = Columns()
           public static let name = "syncUpAttendeeses"
           public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.syncUpID = try Self.columns.syncUpID.decode(decoder: decoder)
             self.attendeeID = try Self.columns.attendeeID.decode(decoder: decoder)
+          }
+          public var queryFragment: QueryFragment {
+            var sql: QueryFragment = "("
+            sql.append(
+              [
+                Self.columns.syncUpID.encode(self.syncUpID),
+                Self.columns.attendeeID.encode(self.attendeeID)
+              ]
+              .joined(separator: ", ")
+            )
+            sql.append(")")
+            return sql
           }
         }
         """#

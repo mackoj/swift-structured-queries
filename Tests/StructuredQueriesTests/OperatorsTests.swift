@@ -245,6 +245,15 @@ extension SnapshotTests {
         +("users"."salary")
         """
       }
+      // TODO: add test for casting when supported
+//      assertInlineSnapshot(
+//        of: User.columns.name + " (" + User.columns.id.cast(String.self) + ")",
+//        as: .sql
+//      ) {
+//        """
+//        ((("users"."name" || ' (') || '') || ')')
+//        """
+//      }
 
       var id = AnyQueryExpression(User.columns.id)
       id += 1
