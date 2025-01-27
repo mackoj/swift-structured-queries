@@ -1,3 +1,5 @@
+// TODO: Finalize/finesse APIs for raw SQL
+
 extension QueryExpression {
   public static func raw<QueryOutput>(
     _ queryFragment: QueryFragment,
@@ -26,6 +28,7 @@ extension RawQueryExpression: _OrderingTerm where QueryOutput == Void {
   }
 }
 
+// TODO: Use a type init instead?
 public func raw<QueryOutput>(
   _ queryFragment: QueryFragment,
   as output: QueryOutput.Type = QueryOutput.self
