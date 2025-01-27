@@ -11,12 +11,14 @@ extension QueryExpression /*where QueryOutput: Equatable*/ {
     BinaryOperator(lhs: lhs, operator: "<>", rhs: rhs)
   }
 
+  @_disfavoredOverload
   public static func == (
     lhs: Self, rhs: some QueryExpression<QueryOutput?>
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: isNull(rhs) ? "IS" : "=", rhs: rhs)
   }
 
+  @_disfavoredOverload
   public static func != (
     lhs: Self, rhs: some QueryExpression<QueryOutput?>
   ) -> some QueryExpression<Bool> {

@@ -2,7 +2,7 @@ public struct QueryFragment: Hashable, Sendable, CustomDebugStringConvertible {
   public var string: String
   public var bindings: [QueryBinding]
 
-  public init(_ string: String = "", _ bindings: [QueryBinding] = []) {
+  init(_ string: String = "", _ bindings: [QueryBinding] = []) {
     self.string = string
     self.bindings = bindings
   }
@@ -31,6 +31,7 @@ public struct QueryFragment: Hashable, Sendable, CustomDebugStringConvertible {
     var bindings = bindings
     compiled.reserveCapacity(string.count)
     for character in string {
+      // TODO: This is brittle
       switch character {
       case "?":
         compiled.append(bindings.removeFirst().debugDescription)
@@ -43,7 +44,7 @@ public struct QueryFragment: Hashable, Sendable, CustomDebugStringConvertible {
 }
 
 extension [QueryFragment] {
-  public func joined(separator: QueryFragment = QueryFragment()) -> QueryFragment {
+  public func joined(separator: QueryFragment = "") -> QueryFragment {
     guard var joined = first else { return QueryFragment() }
     for fragment in dropFirst() {
       joined.append(separator)

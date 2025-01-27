@@ -24,6 +24,7 @@ extension QueryBindingStrategy where Self == UUIDLowercasedStrategy {
   public static var uuidLowercased: Self { Self() }
 }
 
+// TODO: Format like CURRENT_TIMESTAMP
 public struct ISO8601Strategy: QueryBindingStrategy {
   public init() {}
   public static func fromQueryBindable(_ rawValue: String) throws -> Date {
