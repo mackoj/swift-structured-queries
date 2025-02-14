@@ -1,6 +1,5 @@
 extension String {
-  // TODO: Test
   func quoted(_ delimiter: String = "\"") -> String {
-    replacing(delimiter, with: delimiter + delimiter)
+    delimiter + replacing(delimiter, with: delimiter + delimiter) + delimiter
   }
 }

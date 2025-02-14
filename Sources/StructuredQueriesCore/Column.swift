@@ -4,7 +4,11 @@ public struct Column<Root: Table, QueryOutput: QueryBindable> {
   public let name: String
   public let `default`: QueryOutput?
 
-  public init(_ name: String, keyPath: KeyPath<Root, QueryOutput> & Sendable, default: QueryOutput? = nil) {
+  public init(
+    _ name: String,
+    keyPath: KeyPath<Root, QueryOutput> & Sendable,
+    default: QueryOutput? = nil
+  ) {
     self._keyPath = keyPath
     self.default = `default`
     self.name = name
