@@ -87,20 +87,3 @@ extension Schema {
     }
   }
 #endif
-
-// db.addColumn(SyncUp.schema.isActive.name
-
-import SwiftData
-
-@available(macOS 14, *)
-@Model
-class SyncUp {
-  var id: Int
-  var name: String
-  var isActive: Bool
-  init(id: Int, name: String, isActive: Bool) {
-    self.id = id
-    self.name = name
-    self.isActive = isActive
-  }
-}
