@@ -121,7 +121,7 @@ extension SnapshotTests {
     }
 
     @Test func order() {
-      assertInlineSnapshot(of: SyncUp.all().order(\.title), as: .sql) {
+      assertInlineSnapshot(of: SyncUp.all().order(by: \.title), as: .sql) {
         """
         SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."title" \
         FROM "syncUps" \

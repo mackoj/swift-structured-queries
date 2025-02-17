@@ -1,4 +1,4 @@
-extension QueryBindable {
+extension QueryExpression where QueryOutput: QueryBindable {
   public func ascending() -> OrderingTerm {
     OrderingTerm(base: self, direction: .ascending)
   }
