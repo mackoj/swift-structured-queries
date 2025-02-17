@@ -25,6 +25,17 @@ extension SnapshotTests {
       }
     }
 
+    @Test func toggleBoolean() {
+      assertInlineSnapshot(
+        of: SyncUp.update { $0.isActive.toggle() },
+        as: .sql
+      ) {
+        """
+        UPDATE "syncUps" SET "isActive" = NOT ("syncUps"."isActive")
+        """
+      }
+    }
+
     @Test func multipleMutations() {
       assertInlineSnapshot(
         of: SyncUp.update {
