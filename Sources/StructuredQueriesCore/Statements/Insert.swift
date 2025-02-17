@@ -118,6 +118,13 @@ extension Table {
   }
 
   public static func insert(
+    or conflictResolution: ConflictResolution? = nil,
+    _ record: Self
+  ) -> Insert<Self, Never, Void, Void> {
+    insert(or: conflictResolution, [record])
+  }
+
+  public static func insert(
     or conflictResolution: ConflictResolution? = nil
   ) -> Insert<Self, Never, Void, Void> {
     Insert(input: (), conflictResolution: conflictResolution)
@@ -134,6 +141,14 @@ extension Table {
       columns: Self.Draft.columns.allColumns,
       form: .drafts(drafts)
     )
+  }
+
+  @_disfavoredOverload
+  public static func insert(
+    or conflictResolution: ConflictResolution? = nil,
+    _ draft: Self.Draft
+  ) -> Insert<Self, Self.Draft, Void, Void> where Self: PrimaryKeyedTable {
+    insert(or: conflictResolution, [draft])
   }
 }
 
