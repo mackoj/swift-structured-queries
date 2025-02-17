@@ -4,7 +4,7 @@ extension Table {
   }
 }
 
-public struct Where<Base: Table> {
+public struct Where<Base: Table>: SelectProtocol {
   let predicate: any QueryExpression<Bool>
 
   public func `where`(_ predicate: (Base.Columns) -> some QueryExpression<Bool>) -> Self {
@@ -63,28 +63,28 @@ extension Where {
   }
 
   public func join<OtherInput, OtherOutput>(
-    _ other: Select<OtherInput, OtherOutput>,
+    _ other: some SelectProtocol<OtherInput, OtherOutput>,
     on constraint: ((Base.Columns, OtherInput)) -> some QueryExpression<Bool>
   ) -> Select<(Base.Columns, OtherInput), (Base, OtherOutput)> {
     all().join(other, on: constraint)
   }
 
   public func leftJoin<OtherInput, OtherOutput>(
-    _ other: Select<OtherInput, OtherOutput>,
+    _ other: some SelectProtocol<OtherInput, OtherOutput>,
     on constraint: ((Base.Columns, OtherInput)) -> some QueryExpression<Bool>
   ) -> Select<(Base.Columns, OtherInput), (Base, OtherOutput?)> {
     all().leftJoin(other, on: constraint)
   }
 
   public func rightJoin<OtherInput, OtherOutput>(
-    _ other: Select<OtherInput, OtherOutput>,
+    _ other: some SelectProtocol<OtherInput, OtherOutput>,
     on constraint: ((Base.Columns, OtherInput)) -> some QueryExpression<Bool>
   ) -> Select<(Base.Columns, OtherInput), (Base?, OtherOutput)> {
     all().rightJoin(other, on: constraint)
   }
 
   public func fullJoin<OtherInput, OtherOutput>(
-    _ other: Select<OtherInput, OtherOutput>,
+    _ other: some SelectProtocol<OtherInput, OtherOutput>,
     on constraint: ((Base.Columns, OtherInput)) -> some QueryExpression<Bool>
   ) -> Select<(Base.Columns, OtherInput), (Base?, OtherOutput?)> {
     all().fullJoin(other, on: constraint)

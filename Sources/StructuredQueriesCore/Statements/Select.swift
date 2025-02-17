@@ -44,6 +44,7 @@ public struct AliasedColumns<Columns: Schema>: Schema {
     }
   }
 }
+
 public struct AliasedColumn<Column: ColumnExpression>: ColumnExpression {
   public typealias Root = Column.Root
   public typealias QueryOutput = Column.QueryOutput
@@ -75,10 +76,17 @@ struct TableAlias: QueryExpression {
   }
 }
 
-public struct Select<Input: Sendable, Output> {
+public protocol SelectProtocol<Input, Output> {
+  associatedtype Input: Sendable
+  associatedtype Output
+
+  func all() -> Select<Input, Output>
+}
+
+public struct Select<Input: Sendable, Output>: SelectProtocol {
   fileprivate var input: Input
   fileprivate var isDistinct = false
-  fileprivate var select: [any QueryExpression] = []
+  fileprivate var selectedColumns: [any QueryExpression] = []
   fileprivate var from: TableAlias
   fileprivate var joins: [JoinClause] = []
   fileprivate var `where`: WhereClause?
@@ -86,6 +94,10 @@ public struct Select<Input: Sendable, Output> {
   fileprivate var having: HavingClause?
   fileprivate var order: OrderClause?
   fileprivate var limit: LimitClause?
+
+  public func all() -> Self {
+    self
+  }
 
   // TODO: Should 'distinct()' be a separate method?
   //       'SyncUp.all().distinct()' vs. 'SyncUp.all().select(distinct: true, \.self)'
@@ -102,7 +114,7 @@ public struct Select<Input: Sendable, Output> {
     return Select<Input, (repeat (each O).QueryOutput)>(
       input: input,
       isDistinct: isDistinct,
-      select: select,
+      selectedColumns: select,
       from: from,
       joins: joins,
       where: `where`,
@@ -121,7 +133,7 @@ public struct Select<Input: Sendable, Output> {
     Select<Input, O.QueryOutput>(
       input: input,
       isDistinct: isDistinct,
-      select: [selection(input)],
+      selectedColumns: [selection(input)],
       from: from,
       joins: joins,
       where: `where`,
@@ -133,31 +145,31 @@ public struct Select<Input: Sendable, Output> {
   }
 
   public func join<OtherInput, OtherOutput>(
-    _ other: Select<OtherInput, OtherOutput>,
+    _ other: some SelectProtocol<OtherInput, OtherOutput>,
     on constraint: ((Input, OtherInput)) -> some QueryExpression<Bool>
   ) -> Select<(Input, OtherInput), (Output, OtherOutput)> {
-    _join(self, other, on: constraint)
+    _join(self, other.all(), on: constraint)
   }
 
   public func leftJoin<OtherInput, OtherOutput>(
-    _ other: Select<OtherInput, OtherOutput>,
+    _ other: some SelectProtocol<OtherInput, OtherOutput>,
     on constraint: ((Input, OtherInput)) -> some QueryExpression<Bool>
   ) -> Select<(Input, OtherInput), (Output, OtherOutput?)> {
-    _leftJoin(self, other, on: constraint)
+    _leftJoin(self, other.all(), on: constraint)
   }
 
   public func rightJoin<OtherInput, OtherOutput>(
-    _ other: Select<OtherInput, OtherOutput>,
+    _ other: some SelectProtocol<OtherInput, OtherOutput>,
     on constraint: ((Input, OtherInput)) -> some QueryExpression<Bool>
   ) -> Select<(Input, OtherInput), (Output?, OtherOutput)> {
-    _rightJoin(self, other, on: constraint)
+    _rightJoin(self, other.all(), on: constraint)
   }
 
   public func fullJoin<OtherInput, OtherOutput>(
-    _ other: Select<OtherInput, OtherOutput>,
+    _ other: some SelectProtocol<OtherInput, OtherOutput>,
     on constraint: ((Input, OtherInput)) -> some QueryExpression<Bool>
   ) -> Select<(Input, OtherInput), (Output?, OtherOutput?)> {
-    _fullJoin(self, other, on: constraint)
+    _fullJoin(self, other.all(), on: constraint)
   }
 
   public func `where`(_ predicate: (Input) -> some QueryExpression<Bool>) -> Self {
@@ -243,14 +255,14 @@ extension Select: Statement {
       sql.append(" DISTINCT")
     }
     let columns =
-      select.isEmpty
+      selectedColumns.isEmpty
     ? ([from] + joins.map(\.right)).map { tableAlias in
       func open(_ columns: some Schema) -> QueryFragment {
         AliasedColumns(alias: tableAlias.alias, columns: columns).queryFragment
       }
       return open(tableAlias.table.columns)
     }
-    : select.map {
+    : selectedColumns.map {
       return $0.queryFragment
     }
     sql.append(" \(columns.joined(separator: ", "))")
@@ -318,7 +330,7 @@ private func _join<each I1, each I2, each O1, each O2>(
     }
   return Select(
     input: (repeat each lhs.input, repeat each rhs.input),
-    select: lhs.select + rhs.select,
+    selectedColumns: lhs.selectedColumns + rhs.selectedColumns,
     from: lhs.from,
     joins: lhs.joins + rhs.joins + [join],
     where: `where`,
@@ -370,7 +382,7 @@ private func _leftJoin<each I1, each I2, each O1, each O2>(
     }
   return Select(
     input: (repeat each lhs.input, repeat each rhs.input),
-    select: lhs.select + rhs.select,
+    selectedColumns: lhs.selectedColumns + rhs.selectedColumns,
     from: lhs.from,
     joins: lhs.joins + rhs.joins + [join],
     where: `where`,
@@ -422,7 +434,7 @@ private func _rightJoin<each I1, each I2, each O1, each O2>(
     }
   return Select(
     input: (repeat each lhs.input, repeat each rhs.input),
-    select: lhs.select + rhs.select,
+    selectedColumns: lhs.selectedColumns + rhs.selectedColumns,
     from: lhs.from,
     joins: lhs.joins + rhs.joins + [join],
     where: `where`,
@@ -474,7 +486,7 @@ private func _fullJoin<each I1, each I2, each O1, each O2>(
     }
   return Select(
     input: (repeat each lhs.input, repeat each rhs.input),
-    select: lhs.select + rhs.select,
+    selectedColumns: lhs.selectedColumns + rhs.selectedColumns,
     from: lhs.from,
     joins: lhs.joins + rhs.joins + [join],
     where: `where`,
