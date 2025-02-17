@@ -100,7 +100,7 @@ extension _Null: ExpressibleByNilLiteral {
   public init(nilLiteral: ()) {}
 }
 
-extension QueryExpression /*where QueryOutput: Comparable*/ {
+extension QueryExpression {
   public static func < (lhs: Self, rhs: some QueryExpression<QueryOutput>) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: "<", rhs: rhs)
   }
