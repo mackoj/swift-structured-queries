@@ -25,6 +25,20 @@ extension SnapshotTests {
       }
     }
 
+    @Test func multipleMutations() {
+      assertInlineSnapshot(
+        of: SyncUp.update {
+          $0.title += "!"
+          $0.title += "?"
+        },
+        as: .sql
+      ) {
+        """
+        UPDATE "syncUps" SET "title" = ("syncUps"."title" || '!'), "title" = ("syncUps"."title" || '?')
+        """
+      }
+    }
+
     @Test func conflictResolution() {
       assertInlineSnapshot(
         of: SyncUp.update(or: .abort) { $0.isActive = true },
