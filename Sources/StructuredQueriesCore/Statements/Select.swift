@@ -6,6 +6,85 @@ extension Table {
   public static func all(as alias: String) -> Select<AliasedColumns<Columns>, Self> {
     Select(from: Self.self, as: alias)
   }
+
+  public static func select<each O: QueryExpression>(
+    distinct isDistinct: Bool = false,
+    _ selection: (Columns) -> (repeat each O)
+  ) -> Select<Columns, (repeat (each O).QueryOutput)>
+  where repeat (each O).QueryOutput: QueryDecodable {
+    all().select(distinct: isDistinct, selection)
+  }
+
+  public static func select<O: QueryExpression>(
+    distinct isDistinct: Bool = false,
+    _ selection: (Columns) -> O
+  ) -> Select<Columns, O.QueryOutput>
+  where repeat O.QueryOutput: QueryDecodable {
+    all().select(distinct: isDistinct, selection)
+  }
+
+  public static func join<OtherInput, OtherOutput>(
+    _ other: some SelectProtocol<OtherInput, OtherOutput>,
+    on constraint: ((Columns, OtherInput)) -> some QueryExpression<Bool>
+  ) -> Select<(Columns, OtherInput), (Self, OtherOutput)> {
+    all().join(other, on: constraint)
+  }
+
+  public static func leftJoin<OtherInput, OtherOutput>(
+    _ other: some SelectProtocol<OtherInput, OtherOutput>,
+    on constraint: ((Columns, OtherInput)) -> some QueryExpression<Bool>
+  ) -> Select<(Columns, OtherInput), (Self, OtherOutput?)> {
+    all().leftJoin(other, on: constraint)
+  }
+
+  public static func rightJoin<OtherInput, OtherOutput>(
+    _ other: some SelectProtocol<OtherInput, OtherOutput>,
+    on constraint: ((Columns, OtherInput)) -> some QueryExpression<Bool>
+  ) -> Select<(Columns, OtherInput), (Self?, OtherOutput)> {
+    all().rightJoin(other, on: constraint)
+  }
+
+  public static func fullJoin<OtherInput, OtherOutput>(
+    _ other: some SelectProtocol<OtherInput, OtherOutput>,
+    on constraint: ((Columns, OtherInput)) -> some QueryExpression<Bool>
+  ) -> Select<(Columns, OtherInput), (Self?, OtherOutput?)> {
+    all().fullJoin(other, on: constraint)
+  }
+
+  public static func group<each O: QueryExpression>(by grouping: (Columns) -> (repeat each O)) -> SelectOf<Self> {
+    all().group(by: grouping)
+  }
+
+  public static func having(_ predicate: (Columns) -> some QueryExpression<Bool>) -> SelectOf<Self> {
+    all().having(predicate)
+  }
+
+  public static func order<each O: _OrderingTerm>(by ordering: (Columns) -> (repeat each O)) -> SelectOf<Self> {
+    all().order(by: ordering)
+  }
+
+  public static func order(
+    @OrderingBuilder by ordering: (Columns) -> [OrderingTerm]
+  ) -> SelectOf<Self> {
+    all().order(by: ordering)
+  }
+
+  // TODO: write tests
+  public static func limit(
+    _ maxLength: (Columns) -> some QueryExpression<Int>,
+    offset: ((Columns) -> some QueryExpression<Int>)? = nil
+  ) -> SelectOf<Self> {
+    all().limit(maxLength, offset: offset)
+  }
+
+  // TODO: write tests
+  public static func limit(_ maxLength: Int, offset: Int? = nil) -> SelectOf<Self> {
+    all().limit(maxLength, offset: offset)
+  }
+
+  public static func count() -> Select<Columns, Int> {
+    all().count()
+  }
 }
 
 extension Select {
@@ -206,14 +285,14 @@ public struct Select<Input: Sendable, Output>: SelectProtocol {
     return copy
   }
 
-  public func order<each O: _OrderingTerm>(_ ordering: (Input) -> (repeat each O)) -> Self {
+  public func order<each O: _OrderingTerm>(by ordering: (Input) -> (repeat each O)) -> Self {
     var copy = self
     copy.order = OrderClause(repeat each ordering(input))
     return copy
   }
 
   public func order(
-    @OrderingBuilder _ ordering: (Input) -> [OrderingTerm]
+    @OrderingBuilder by ordering: (Input) -> [OrderingTerm]
   ) -> Self {
     var copy = self
     copy.order = OrderClause(terms: ordering(input))

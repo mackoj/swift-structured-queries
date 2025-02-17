@@ -101,15 +101,15 @@ extension Where {
   }
 
   public func order<each O: _OrderingTerm>(
-    _ ordering: (Base.Columns) -> (repeat each O)
+    by ordering: (Base.Columns) -> (repeat each O)
   ) -> SelectOf<Base> {
-    all().order(ordering)
+    all().order(by: ordering)
   }
 
   public func order(
-    @OrderingBuilder _ ordering: (Base.Columns) -> [OrderingTerm]
+    @OrderingBuilder by ordering: (Base.Columns) -> [OrderingTerm]
   ) -> SelectOf<Base> {
-    all().order(ordering)
+    all().order(by: ordering)
   }
 
   public func limit(
