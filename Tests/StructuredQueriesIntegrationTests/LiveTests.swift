@@ -3,14 +3,14 @@ import StructuredQueriesSQLite
 import Testing
 
 @Table
-struct SyncUp: Equatable {
+private struct SyncUp: Equatable {
   var id: Int
   var isActive: Bool
   var title: String
 }
 
 @Table
-struct Attendee: Equatable {
+private struct Attendee: Equatable {
   var id: Int
   var name: String
   var syncUpID: Int

@@ -69,8 +69,7 @@ extension SelectionMacro: ExtensionMacro {
       public init(
       \(namesAndTypes.map { "\($0): some \(moduleName).QueryExpression<\($1)>" }.joined(separator: ",\n"))
       ) {
-      self.queryString = "\(namesAndTypes.map { name, _ in "\\(\(name).queryString)" }.joined(separator: ", "))"
-      self.queryBindings = \(namesAndTypes.map { name, _ in "\(name).queryBindings" }.joined(separator: " + "))
+      self.queryFragment = "\(namesAndTypes.map { name, _ in "\\(\(name).queryFragment)" }.joined(separator: ", "))"
       }
       """
     let typeName = type.trimmed
@@ -81,8 +80,7 @@ extension SelectionMacro: ExtensionMacro {
         \(conformances.isEmpty ? "" : ": \(raw: conformances.joined(separator: ", "))") {
         public struct Columns: \(moduleName).QueryExpression {
         public typealias QueryOutput = \(typeName)
-        public let queryString: String 
-        public let queryBindings: [\(moduleName).QueryBinding]
+        public let queryFragment: QueryFragment 
         \(raw: initializer)
         }
         public init(decoder: some \(moduleName).QueryDecoder) throws {

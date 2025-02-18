@@ -22,14 +22,12 @@ import Testing
       extension PlayerAndTeam: StructuredQueries.QueryDecodable {
         public struct Columns: StructuredQueries.QueryExpression {
           public typealias QueryOutput = PlayerAndTeam
-          public let queryString: String
-          public let queryBindings: [StructuredQueries.QueryBinding]
+          public let queryFragment: QueryFragment
           public init(
             player: some StructuredQueries.QueryExpression<Player>,
             team: some StructuredQueries.QueryExpression<Team>
           ) {
-            self.queryString = "\(player.queryString), \(team.queryString)"
-            self.queryBindings = player.queryBindings + team.queryBindings
+            self.queryFragment = "\(player.queryFragment), \(team.queryFragment)"
           }
         }
         public init(decoder: some StructuredQueries.QueryDecoder) throws {
