@@ -2,9 +2,10 @@ import MacroTesting
 import StructuredQueriesMacros
 import Testing
 
-@Suite/*(.macros(record: .failed, macros: [SelectionMacro.self]))*/ struct SelectionMacroTests {
+@Suite(.macros(record: .failed, macros: [SelectionMacro.self]))
+struct SelectionMacroTests {
   @Test func basics() {
-    assertMacro([SelectionMacro.self], record: .failed) {
+    assertMacro {
       """
       @Selection
       struct PlayerAndTeam {
@@ -40,7 +41,7 @@ import Testing
   }
 
   @Test func `enum`() {
-    assertMacro([SelectionMacro.self], record: .failed) {
+    assertMacro {
       """
       @Selection
       public enum S {}
