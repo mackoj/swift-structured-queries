@@ -5,7 +5,7 @@ extension QueryExpression where QueryOutput: QueryBindable {
 }
 
 extension QueryExpression where QueryOutput: QueryBindable {
-  public func groupConcat(separator: String? = nil) -> some QueryExpression<String> {
+  public func groupConcat(separator: String? = nil) -> some QueryExpression<String?> {
     AggregateFunction("group_concat", (self, separator))
   }
 }
