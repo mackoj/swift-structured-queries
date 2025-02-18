@@ -51,15 +51,20 @@ extension Table {
     all().fullJoin(other, on: constraint)
   }
 
-  public static func group<each O: QueryExpression>(by grouping: (Columns) -> (repeat each O)) -> SelectOf<Self> {
+  public static func group<each O: QueryExpression>(by grouping: (Columns) -> (repeat each O))
+    -> SelectOf<Self>
+  {
     all().group(by: grouping)
   }
 
-  public static func having(_ predicate: (Columns) -> some QueryExpression<Bool>) -> SelectOf<Self> {
+  public static func having(_ predicate: (Columns) -> some QueryExpression<Bool>) -> SelectOf<Self>
+  {
     all().having(predicate)
   }
 
-  public static func order<each O: _OrderingTerm>(by ordering: (Columns) -> (repeat each O)) -> SelectOf<Self> {
+  public static func order<each O: _OrderingTerm>(by ordering: (Columns) -> (repeat each O))
+    -> SelectOf<Self>
+  {
     all().order(by: ordering)
   }
 
@@ -111,12 +116,15 @@ public struct AliasedColumns<Columns: Schema>: Schema {
   public typealias QueryOutput = Columns.QueryOutput
   let alias: String?
   let columns: Columns
-  public subscript<Column>(dynamicMember keyPath: KeyPath<Columns, Column>) -> AliasedColumn<Column> {
+  public subscript<Column>(dynamicMember keyPath: KeyPath<Columns, Column>) -> AliasedColumn<Column>
+  {
     AliasedColumn(alias: alias, column: columns[keyPath: keyPath])
   }
   public var allColumns: [any ColumnExpression<Columns.QueryOutput>] {
     columns.allColumns.map { column in
-      func open(_ column: some ColumnExpression<Columns.QueryOutput>) -> any ColumnExpression<Columns.QueryOutput> {
+      func open(_ column: some ColumnExpression<Columns.QueryOutput>) -> any ColumnExpression<
+        Columns.QueryOutput
+      > {
         AliasedColumn(alias: alias, column: column)
       }
       return open(column)
@@ -162,6 +170,20 @@ public protocol SelectProtocol<Input, Output> {
   func all() -> Select<Input, Output>
 }
 
+#if compiler(>=6.1)
+  extension SelectProtocol {
+    public subscript<S: SelectProtocol>(
+      dynamicMember keyPath: KeyPath<Output.Type, S>
+    ) -> Select<S.Input, S.Output>
+    where Output: Table {
+      fatalError("TODO: finish this")
+    }
+  }
+#endif
+
+#if compiler(>=6.1)
+  @dynamicMemberLookup
+#endif
 public struct Select<Input: Sendable, Output>: SelectProtocol {
   fileprivate var input: Input
   fileprivate var isDistinct = false
@@ -335,15 +357,15 @@ extension Select: Statement {
     }
     let columns =
       selectedColumns.isEmpty
-    ? ([from] + joins.map(\.right)).map { tableAlias in
-      func open(_ columns: some Schema) -> QueryFragment {
-        AliasedColumns(alias: tableAlias.alias, columns: columns).queryFragment
+      ? ([from] + joins.map(\.right)).map { tableAlias in
+        func open(_ columns: some Schema) -> QueryFragment {
+          AliasedColumns(alias: tableAlias.alias, columns: columns).queryFragment
+        }
+        return open(tableAlias.table.columns)
       }
-      return open(tableAlias.table.columns)
-    }
-    : selectedColumns.map {
-      return $0.queryFragment
-    }
+      : selectedColumns.map {
+        return $0.queryFragment
+      }
     sql.append(" \(columns.joined(separator: ", "))")
     sql.append(" FROM \(from.queryFragment)")
     for join in joins {

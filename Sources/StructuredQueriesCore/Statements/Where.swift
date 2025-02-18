@@ -4,6 +4,9 @@ extension Table {
   }
 }
 
+#if compiler(>=6.1)
+  @dynamicMemberLookup
+#endif
 public struct Where<Base: Table>: SelectProtocol {
   let predicate: any QueryExpression<Bool>
 
