@@ -12,7 +12,7 @@ public struct Bind<Strategy: QueryBindingStrategy>: QueryBindable {
 
 extension QueryExpression {
   public static func bind<Strategy: QueryBindingStrategy>(
-    _ value: Strategy.Representable, as strategy: Strategy
+    _ value: Strategy.Representable, as strategy: Strategy = Strategy()
   ) -> Self
   where Self == Bind<Strategy> {
     Bind(value, as: strategy)

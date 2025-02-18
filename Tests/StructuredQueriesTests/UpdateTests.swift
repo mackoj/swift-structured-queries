@@ -1,3 +1,4 @@
+import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
 import Testing
@@ -146,6 +147,38 @@ extension SnapshotTests {
       ) {
         """
         UPDATE "syncUps" SET "isActive" = 1, "title" = 'Engineering' WHERE ("syncUps"."id" = 42)
+        """
+      }
+    }
+
+    @Table
+    fileprivate struct Meeting: Equatable {
+      @Column(as: .iso8601)
+      var date: Date
+    }
+
+    @Test func explicitBind() {
+      assertInlineSnapshot(
+        of: Meeting.update {
+          $0.date = .bind(Date(timeIntervalSinceReferenceDate: 0))
+        },
+        as: .sql
+      ) {
+        """
+        UPDATE "meetings" SET "date" = '2001-01-01T00:00:00Z'
+        """
+      }
+    }
+
+    @Test func implicitBind() {
+      assertInlineSnapshot(
+        of: Meeting.update {
+          $0.date = Date(timeIntervalSinceReferenceDate: 0)
+        },
+        as: .sql
+      ) {
+        """
+        UPDATE "meetings" SET "date" = '2001-01-01T00:00:00Z'
         """
       }
     }
