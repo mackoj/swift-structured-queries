@@ -93,5 +93,19 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     public mutating func appendInterpolation(bind expression: some QueryExpression) {
       appendInterpolation(expression.queryFragment)
     }
+
+    public mutating func appendInterpolation(_ expression: some QueryExpression) {
+      appendInterpolation(expression.queryFragment)
+    }
+
+    @available(
+      *,
+       deprecated,
+       renamed: "appendInterpolation(bind:)",
+       message: "TODO: Cannot interpolate raw SQL."
+    )
+    public mutating func appendInterpolation(_ expression: String) {
+      appendInterpolation(bind: expression)
+    }
   }
 }

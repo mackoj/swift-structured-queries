@@ -1,3 +1,4 @@
+// TODO: ascending(nulls: .first), ascending(nulls: .last), etc...
 extension QueryExpression where QueryOutput: QueryBindable {
   public func ascending() -> OrderingTerm {
     OrderingTerm(base: self, direction: .ascending)

@@ -5,6 +5,8 @@ extension QueryExpression where QueryOutput: QueryBindable {
 }
 
 extension QueryExpression where QueryOutput: QueryBindable {
+  // TODO: Support $0.name.groupConcat(separator: ",", order: $0.priority)
+  // TODO: Support $0.name.groupConcat(filter: $0.name.count > 5)
   public func groupConcat(separator: String? = nil) -> some QueryExpression<String?> {
     AggregateFunction("group_concat", (self, separator))
   }
