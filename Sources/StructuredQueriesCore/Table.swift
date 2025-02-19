@@ -1,4 +1,4 @@
-public protocol Table: QueryDecodable, Sendable {
+public protocol Table: QueryDecodable, OptionalPromotable, Sendable {
   associatedtype Columns: Schema where Columns.QueryOutput == Self
 
   // TODO: Rename tableName

@@ -30,24 +30,26 @@ extension Table {
     all().join(other, on: constraint)
   }
 
-  public static func leftJoin<OtherInput, OtherOutput>(
+  public static func leftJoin<OtherInput, OtherOutput: OptionalPromotable>(
     _ other: some SelectProtocol<OtherInput, OtherOutput>,
     on constraint: ((Columns, OtherInput)) -> some QueryExpression<Bool>
-  ) -> Select<(Columns, OtherInput), (Self, OtherOutput?)> {
+  ) -> Select<(Columns, OtherInput), (Self, OtherOutput.Optionalized)> {
     all().leftJoin(other, on: constraint)
   }
 
   public static func rightJoin<OtherInput, OtherOutput>(
     _ other: some SelectProtocol<OtherInput, OtherOutput>,
     on constraint: ((Columns, OtherInput)) -> some QueryExpression<Bool>
-  ) -> Select<(Columns, OtherInput), (Self?, OtherOutput)> {
+  ) -> Select<(Columns, OtherInput), (Self.Optionalized, OtherOutput)>
+  where Self: OptionalPromotable {
     all().rightJoin(other, on: constraint)
   }
 
-  public static func fullJoin<OtherInput, OtherOutput>(
+  public static func fullJoin<OtherInput, OtherOutput: OptionalPromotable>(
     _ other: some SelectProtocol<OtherInput, OtherOutput>,
     on constraint: ((Columns, OtherInput)) -> some QueryExpression<Bool>
-  ) -> Select<(Columns, OtherInput), (Self?, OtherOutput?)> {
+  ) -> Select<(Columns, OtherInput), (Self.Optionalized, OtherOutput.Optionalized)>
+  where Self: OptionalPromotable {
     all().fullJoin(other, on: constraint)
   }
 
@@ -252,24 +254,26 @@ public struct Select<Input: Sendable, Output>: SelectProtocol {
     _join(self, other.all(), on: constraint)
   }
 
-  public func leftJoin<OtherInput, OtherOutput>(
+  public func leftJoin<OtherInput, OtherOutput: OptionalPromotable>(
     _ other: some SelectProtocol<OtherInput, OtherOutput>,
     on constraint: ((Input, OtherInput)) -> some QueryExpression<Bool>
-  ) -> Select<(Input, OtherInput), (Output, OtherOutput?)> {
+  ) -> Select<(Input, OtherInput), (Output, OtherOutput.Optionalized)> {
     _leftJoin(self, other.all(), on: constraint)
   }
 
   public func rightJoin<OtherInput, OtherOutput>(
     _ other: some SelectProtocol<OtherInput, OtherOutput>,
     on constraint: ((Input, OtherInput)) -> some QueryExpression<Bool>
-  ) -> Select<(Input, OtherInput), (Output?, OtherOutput)> {
+  ) -> Select<(Input, OtherInput), (Output.Optionalized, OtherOutput)>
+  where Output: OptionalPromotable {
     _rightJoin(self, other.all(), on: constraint)
   }
 
-  public func fullJoin<OtherInput, OtherOutput>(
+  public func fullJoin<OtherInput, OtherOutput: OptionalPromotable>(
     _ other: some SelectProtocol<OtherInput, OtherOutput>,
     on constraint: ((Input, OtherInput)) -> some QueryExpression<Bool>
-  ) -> Select<(Input, OtherInput), (Output?, OtherOutput?)> {
+  ) -> Select<(Input, OtherInput), (Output.Optionalized, OtherOutput.Optionalized)>
+  where Output: OptionalPromotable {
     _fullJoin(self, other.all(), on: constraint)
   }
 
@@ -442,11 +446,11 @@ private func _join<each I1, each I2, each O1, each O2>(
   )
 }
 
-private func _leftJoin<each I1, each I2, each O1, each O2>(
+private func _leftJoin<each I1, each I2, each O1, each O2: OptionalPromotable>(
   _ lhs: Select<(repeat each I1), (repeat each O1)>,
   _ rhs: Select<(repeat each I2), (repeat each O2)>,
   on predicate: ((repeat each I1, repeat each I2)) -> some QueryExpression<Bool>
-) -> Select<(repeat each I1, repeat each I2), (repeat each O1, repeat (each O2)?)> {
+) -> Select<(repeat each I1, repeat each I2), (repeat each O1, repeat (each O2).Optionalized)> {
   let join = JoinClause(
     operator: .left,
     right: rhs.from,
@@ -494,11 +498,11 @@ private func _leftJoin<each I1, each I2, each O1, each O2>(
   )
 }
 
-private func _rightJoin<each I1, each I2, each O1, each O2>(
+private func _rightJoin<each I1, each I2, each O1: OptionalPromotable, each O2>(
   _ lhs: Select<(repeat each I1), (repeat each O1)>,
   _ rhs: Select<(repeat each I2), (repeat each O2)>,
   on predicate: ((repeat each I1, repeat each I2)) -> some QueryExpression<Bool>
-) -> Select<(repeat each I1, repeat each I2), (repeat (each O1)?, repeat each O2)> {
+) -> Select<(repeat each I1, repeat each I2), (repeat (each O1).Optionalized, repeat each O2)> {
   let join = JoinClause(
     operator: .right,
     right: rhs.from,
@@ -546,11 +550,13 @@ private func _rightJoin<each I1, each I2, each O1, each O2>(
   )
 }
 
-private func _fullJoin<each I1, each I2, each O1, each O2>(
+private func _fullJoin<each I1, each I2, each O1: OptionalPromotable, each O2: OptionalPromotable>(
   _ lhs: Select<(repeat each I1), (repeat each O1)>,
   _ rhs: Select<(repeat each I2), (repeat each O2)>,
   on predicate: ((repeat each I1, repeat each I2)) -> some QueryExpression<Bool>
-) -> Select<(repeat each I1, repeat each I2), (repeat (each O1)?, repeat (each O2)?)> {
+) -> Select<
+  (repeat each I1, repeat each I2), (repeat (each O1).Optionalized, repeat (each O2).Optionalized)
+> {
   let join = JoinClause(
     operator: .full,
     right: rhs.from,
@@ -683,5 +689,81 @@ extension LimitClause: QueryExpression {
       sql.append(" OFFSET \(bind: offset)")
     }
     return sql
+  }
+}
+
+extension Select {
+  public func join<I1, I2, I3, O1, O2, O3>(
+    _ other: some SelectProtocol<I3, O3>,
+    on constraint: ((I1, I2, I3)) -> some QueryExpression<Bool>
+  ) -> Select<(I1, I2, I3), (O1, O2, O3)>
+  where Input == (I1, I2), Output == (O1, O2) {
+    _join(self, other.all(), on: constraint)
+  }
+
+  public func leftJoin<I1, I2, I3, O1, O2, O3: OptionalPromotable>(
+    _ other: some SelectProtocol<I3, O3>,
+    on constraint: ((I1, I2, I3)) -> some QueryExpression<Bool>
+  ) -> Select<(I1, I2, I3), (O1, O2, O3.Optionalized)>
+  where Input == (I1, I2), Output == (O1, O2) {
+    _leftJoin(self, other.all(), on: constraint)
+  }
+
+  public func rightJoin<I1, I2, I3, O1: OptionalPromotable, O2: OptionalPromotable, O3>(
+    _ other: some SelectProtocol<I3, O3>,
+    on constraint: ((I1, I2, I3)) -> some QueryExpression<Bool>
+  ) -> Select<(I1, I2, I3), (O1.Optionalized, O2.Optionalized, O3)>
+  where Input == (I1, I2), Output == (O1, O2) {
+    _rightJoin(self, other.all(), on: constraint)
+  }
+
+  public func fullJoin<
+    I1, I2, I3, O1: OptionalPromotable, O2: OptionalPromotable, O3: OptionalPromotable
+  >(
+    _ other: some SelectProtocol<I3, O3>,
+    on constraint: ((I1, I2, I3)) -> some QueryExpression<Bool>
+  ) -> Select<(I1, I2, I3), (O1.Optionalized, O2.Optionalized, O3.Optionalized)>
+  where Input == (I1, I2), Output == (O1, O2) {
+    _fullJoin(self, other.all(), on: constraint)
+  }
+
+  public func join<I1, I2, I3, I4, O1, O2, O3, O4>(
+    _ other: some SelectProtocol<I4, O4>,
+    on constraint: ((I1, I2, I3, I4)) -> some QueryExpression<Bool>
+  ) -> Select<(I1, I2, I3, I4), (O1, O2, O3, O4)>
+  where Input == (I1, I2, I3), Output == (O1, O2, O3) {
+    _join(self, other.all(), on: constraint)
+  }
+
+  public func leftJoin<I1, I2, I3, I4, O1, O2, O3, O4: OptionalPromotable>(
+    _ other: some SelectProtocol<I4, O4>,
+    on constraint: ((I1, I2, I3, I4)) -> some QueryExpression<Bool>
+  ) -> Select<(I1, I2, I3, I4), (O1, O2, O3, O4.Optionalized)>
+  where Input == (I1, I2, I3), Output == (O1, O2, O3) {
+    _leftJoin(self, other.all(), on: constraint)
+  }
+
+  public func rightJoin<
+    I1, I2, I3, I4, O1: OptionalPromotable, O2: OptionalPromotable, O3: OptionalPromotable, O4
+  >(
+    _ other: some SelectProtocol<I4, O4>,
+    on constraint: ((I1, I2, I3, I4)) -> some QueryExpression<Bool>
+  ) -> Select<(I1, I2, I3, I4), (O1.Optionalized, O2.Optionalized, O3.Optionalized, O4)>
+  where Input == (I1, I2, I3), Output == (O1, O2, O3) {
+    _rightJoin(self, other.all(), on: constraint)
+  }
+
+  public func fullJoin<
+    I1, I2, I3, I4,
+    O1: OptionalPromotable, O2: OptionalPromotable, O3: OptionalPromotable, O4: OptionalPromotable
+  >(
+    _ other: some SelectProtocol<I4, O4>,
+    on constraint: ((I1, I2, I3, I4)) -> some QueryExpression<Bool>
+  ) -> Select<
+    (I1, I2, I3, I4),
+    (O1.Optionalized, O2.Optionalized, O3.Optionalized, O4.Optionalized)
+  >
+  where Input == (I1, I2, I3), Output == (O1, O2, O3) {
+    _fullJoin(self, other.all(), on: constraint)
   }
 }

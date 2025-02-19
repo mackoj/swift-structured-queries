@@ -38,64 +38,33 @@ public macro Selection() =
   module: "StructuredQueriesMacros", type: "SelectionMacro"
 )
 
-import Foundation
-
 //@Table
-struct User {
-  let id: Int
-  @Column(as: .iso8601)
-  var date: Date?
-}
-extension User: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
-    public struct Columns: StructuredQueries.PrimaryKeyedSchema {
-        public typealias QueryOutput = User
-        public let id = StructuredQueries.Column<QueryOutput, Int>("id", keyPath: \.id)
-        public let date = StructuredQueries.Column<QueryOutput, _>("date", keyPath: \.date, as: .iso8601)
-        public var primaryKey: some StructuredQueries.ColumnExpression<QueryOutput> & StructuredQueries.QueryExpression<Int> {
-            self.id
-        }
-        public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
-            [self.id, self.date]
-        }
-    }
-    public struct Draft: StructuredQueries.Draft {
-        var date: Date?
-        public struct Columns: StructuredQueries.DraftSchema {
-            public typealias QueryOutput = Draft
-            public let date = StructuredQueries.DraftColumn<QueryOutput, _>("date", keyPath: \.date, as: .iso8601)
-            public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
-                [self.date]
-            }
-        }
-        public static let columns = Columns()
-        public var queryFragment: QueryFragment {
-            var sql: QueryFragment = "("
-            sql.append(
-                [
-                    Self.columns.date.encode(self.date)
-                ]
-                .joined(separator: ", ")
-            )
-            sql.append(")")
-            return sql
-        }
-    }
-    public static let columns = Columns()
-    public static let name = "users"
-    public init(decoder: some StructuredQueries.QueryDecoder) throws {
-        self.id = try Self.columns.id.decode(decoder: decoder)
-        self.date = try Self.columns.date.decode(decoder: decoder)
-    }
-    public var queryFragment: QueryFragment {
-        var sql: QueryFragment = "("
-        sql.append(
-            [
-                Self.columns.id.encode(self.id),
-                Self.columns.date.encode(self.date)
-            ]
-            .joined(separator: ", ")
-        )
-        sql.append(")")
-        return sql
-    }
-}
+//struct A {
+//  let id: Int
+//  var name: String
+//}
+//
+//@Table
+//struct A2B {
+//  let aID: Int
+//  let bID: Int
+//}
+//
+//@Table
+//struct B {
+//  let id: Int
+//}
+//
+//func f() {
+//  let _: Select<_, (A, A2B?, B?)> = A.all()
+//    .leftJoin(A2B.all()) { $0.id == $1.aID }
+//    .leftJoin(B.all()) { $1.bID == $2.id }
+//
+//  let _: Select<_, (A?, A2B?, B)> = A.all()
+//    .rightJoin(A2B.all()) { $0.id == $1.aID }
+//    .rightJoin(B.all()) { $1.bID == $2.id }
+//
+//  let _: Select<_, (A?, A2B?, B?)> = A.all()
+//    .fullJoin(A2B.all()) { $0.id == $1.aID }
+//    .fullJoin(B.all()) { $1.bID == $2.id }
+//}

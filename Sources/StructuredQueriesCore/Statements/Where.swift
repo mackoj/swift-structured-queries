@@ -72,24 +72,26 @@ extension Where {
     all().join(other, on: constraint)
   }
 
-  public func leftJoin<OtherInput, OtherOutput>(
+  public func leftJoin<OtherInput, OtherOutput: OptionalPromotable>(
     _ other: some SelectProtocol<OtherInput, OtherOutput>,
     on constraint: ((Base.Columns, OtherInput)) -> some QueryExpression<Bool>
-  ) -> Select<(Base.Columns, OtherInput), (Base, OtherOutput?)> {
+  ) -> Select<(Base.Columns, OtherInput), (Base, OtherOutput.Optionalized)> {
     all().leftJoin(other, on: constraint)
   }
 
   public func rightJoin<OtherInput, OtherOutput>(
     _ other: some SelectProtocol<OtherInput, OtherOutput>,
     on constraint: ((Base.Columns, OtherInput)) -> some QueryExpression<Bool>
-  ) -> Select<(Base.Columns, OtherInput), (Base?, OtherOutput)> {
+  ) -> Select<(Base.Columns, OtherInput), (Base.Optionalized, OtherOutput)>
+  where Base: OptionalPromotable {
     all().rightJoin(other, on: constraint)
   }
 
-  public func fullJoin<OtherInput, OtherOutput>(
+  public func fullJoin<OtherInput, OtherOutput: OptionalPromotable>(
     _ other: some SelectProtocol<OtherInput, OtherOutput>,
     on constraint: ((Base.Columns, OtherInput)) -> some QueryExpression<Bool>
-  ) -> Select<(Base.Columns, OtherInput), (Base?, OtherOutput?)> {
+  ) -> Select<(Base.Columns, OtherInput), (Base.Optionalized, OtherOutput.Optionalized)>
+  where Base: OptionalPromotable {
     all().fullJoin(other, on: constraint)
   }
 
