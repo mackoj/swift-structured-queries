@@ -23,7 +23,7 @@ extension SnapshotTests {
       let date = Date(timeIntervalSince1970: 0)
       assertInlineSnapshot(of: Todo.insert([Todo.Draft(deleted: date)]), as: .sql) {
         """
-        INSERT INTO "todos" ("deleted") VALUES ('1970-01-01T00:00:00Z')
+        INSERT INTO "todos" ("deleted") VALUES ('1970-01-01 00:00:00')
         """
       }
       assertInlineSnapshot(of: Todo.insert([Todo.Draft(deleted: nil)]), as: .sql) {
