@@ -5,7 +5,7 @@ import Testing
 extension SnapshotTests {
   @Suite struct AggregatesTests {
     @Table
-    struct User {
+    fileprivate struct User {
       var id: Int
       var name: String
       var isAdmin: Bool
@@ -88,27 +88,50 @@ extension SnapshotTests {
     }
 
     @Test func groupConcat() {
-      assertInlineSnapshot(of: User.columns.name.groupConcat(), as: .sql) {
+      assertInlineSnapshot(
+        of: User.select { $0.name.groupConcat() },
+        as: .sql
+      ) {
         """
-        group_concat("users"."name", NULL)
+        SELECT group_concat("users"."name") FROM "users"
+        """
+      }
+
+      assertInlineSnapshot(
+        of: User.select { $0.name.groupConcat(separator: "-") },
+        as: .sql
+      ) {
+        """
+        SELECT group_concat("users"."name", '-') FROM "users"
         """
       }
 
-      assertInlineSnapshot(of: User.columns.name.groupConcat(separator: ","), as: .sql) {
+      assertInlineSnapshot(
+        of: User.select { $0.name.groupConcat(separator: $0.id) },
+        as: .sql
+      ) {
         """
-        group_concat("users"."name", ',')
+        SELECT group_concat("users"."name", "users"."id") FROM "users"
         """
       }
-    }
 
-    @Test func orderBy() {
-      // TODO: How to support this:
-      //       group_concat("name", ', ' ORDER BY "name")
-    }
+      assertInlineSnapshot(
+        of: User.select { $0.name.groupConcat(order: $0.isAdmin.descending()) },
+        as: .sql
+      ) {
+        """
+        SELECT group_concat("users"."name" ORDER BY "users"."isAdmin" DESC) FROM "users"
+        """
+      }
 
-    @Test func filter() {
-      // TODO: How to support this:
-      //       avg("activePlayersCount") FILTER (WHERE "activePlayersCount" > 1)
+      assertInlineSnapshot(
+        of: User.select { $0.name.groupConcat(filter: $0.isAdmin) },
+        as: .sql
+      ) {
+        """
+        SELECT group_concat("users"."name") FILTER (WHERE "users"."isAdmin") FROM "users"
+        """
+      }
     }
 
     @Test func aggregateOfExpression() {

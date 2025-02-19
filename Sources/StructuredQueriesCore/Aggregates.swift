@@ -5,10 +5,16 @@ extension QueryExpression where QueryOutput: QueryBindable {
 }
 
 extension QueryExpression where QueryOutput: QueryBindable {
-  // TODO: Support $0.name.groupConcat(separator: ",", order: $0.priority)
-  // TODO: Support $0.name.groupConcat(filter: $0.name.count > 5)
-  public func groupConcat(separator: String? = nil) -> some QueryExpression<String?> {
-    AggregateFunction("group_concat", (self, separator))
+  public func groupConcat(
+    separator: (some QueryExpression)? = String?.none,
+    order: (some QueryExpression)? = Bool?.none,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> some QueryExpression<String?> {
+    if let separator {
+      return AggregateFunction("group_concat", (self, separator), order: order, filter: filter)
+    } else {
+      return AggregateFunction("group_concat", self, order: order, filter: filter)
+    }
   }
 }
 
@@ -49,11 +55,15 @@ private struct AggregateFunction<QueryOutput>: QueryExpression {
   var name: String
   var isDistinct: Bool
   var arguments: [any QueryExpression]
+  var order: (any QueryExpression)?
+  var filter: (any QueryExpression)?
 
   init<each Argument: QueryExpression>(
     _ name: String,
     isDistinct: Bool = false,
-    _ arguments: (repeat each Argument)
+    _ arguments: (repeat each Argument),
+    order: (some QueryExpression)? = Bool?.none,
+    filter: (some QueryExpression)? = Bool?.none
   ) {
     self.name = name
     self.isDistinct = isDistinct
@@ -61,6 +71,8 @@ private struct AggregateFunction<QueryOutput>: QueryExpression {
     for argument in repeat each arguments {
       self.arguments.append(argument)
     }
+    self.order = order
+    self.filter = filter
   }
 
   var queryFragment: QueryFragment {
@@ -76,7 +88,16 @@ private struct AggregateFunction<QueryOutput>: QueryExpression {
       }
       fragment.append(argument.queryFragment)
     }
+    if let order {
+      fragment.append(" ORDER BY ")
+      fragment.append(order.queryFragment)
+    }
     fragment.append(")")
+    if let filter {
+      fragment.append(" FILTER (WHERE ")
+      fragment.append(filter.queryFragment)
+      fragment.append(")")
+    }
     return fragment
   }
 }
