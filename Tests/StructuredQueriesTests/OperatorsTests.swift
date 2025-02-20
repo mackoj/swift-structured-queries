@@ -1,3 +1,4 @@
+import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
 import Testing

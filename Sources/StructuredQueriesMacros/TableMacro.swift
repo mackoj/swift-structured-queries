@@ -291,8 +291,8 @@ extension TableMacro: ExtensionMacro {
         public struct Columns: \(moduleName).DraftSchema {
         public typealias QueryOutput = Draft
         \(draftColumnsProperties.joined(separator: "\n"))
-        public var allColumns: [any \(moduleName).ColumnExpression<QueryOutput>] {\
-        [\(allDraftColumns.joined(separator: ", "))] \
+        public var allColumns: [\(moduleName).AnyColumnExpression<QueryOutput>] {\
+        [\(allDraftColumns.map { "\(moduleName).AnyColumnExpression<QueryOutput>(\($0))" }.joined(separator: ", "))] \
         }
         }
         public static let columns = Columns()
@@ -341,8 +341,8 @@ extension TableMacro: ExtensionMacro {
         public struct Columns: \(moduleName).\(raw: schemaConformance) {
         public typealias QueryOutput = \(typeName)
         \(raw: columnsProperties.joined(separator: "\n"))
-        public var allColumns: [any \(moduleName).ColumnExpression<QueryOutput>] {\
-        [\(raw: allColumns.joined(separator: ", "))] \
+        public var allColumns: [\(moduleName).AnyColumnExpression<QueryOutput>] {\
+        [\(raw: allColumns.map { "\(moduleName).AnyColumnExpression<QueryOutput>(\($0))" }.joined(separator: ", "))] \
         }
         }\(raw: draft)
         public static let columns = Columns()

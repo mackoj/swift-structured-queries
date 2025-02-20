@@ -1,5 +1,6 @@
 import Foundation
 
+@available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
 extension QueryBindingStrategy where Self == ISO8601Strategy {
   public static var iso8601: Self { Self() }
 }
@@ -24,6 +25,7 @@ extension QueryBindingStrategy where Self == UUIDLowercasedStrategy {
   public static var uuidLowercased: Self { Self() }
 }
 
+@available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
 public struct ISO8601Strategy: QueryBindingStrategy {
   public init() {}
   public static func fromQueryBindable(_ rawValue: String) throws -> Date {
@@ -34,6 +36,7 @@ public struct ISO8601Strategy: QueryBindingStrategy {
   }
 }
 
+@available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
 fileprivate extension Date.ISO8601FormatStyle {
   func currentTimestamp() -> Self {
     year().month().day().dateTimeSeparator(.space).time(includingFractionalSeconds: false)

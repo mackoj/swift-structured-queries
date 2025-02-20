@@ -30,8 +30,8 @@ struct TableMacroTests {
           public var primaryKey: some StructuredQueries.ColumnExpression<QueryOutput> & StructuredQueries.QueryExpression<Int> {
             self.id
           }
-          public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
-            [self.id, self.name]
+          public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
+            [StructuredQueries.AnyColumnExpression<QueryOutput>(self.id), StructuredQueries.AnyColumnExpression<QueryOutput>(self.name)]
           }
         }
         public struct Draft: StructuredQueries.Draft {
@@ -39,8 +39,8 @@ struct TableMacroTests {
           public struct Columns: StructuredQueries.DraftSchema {
             public typealias QueryOutput = Draft
             public let name = StructuredQueries.DraftColumn<QueryOutput, String>("name", keyPath: \.name)
-            public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
-              [self.name]
+            public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
+              [StructuredQueries.AnyColumnExpression<QueryOutput>(self.name)]
             }
           }
           public static let columns = Columns()
@@ -98,8 +98,8 @@ struct TableMacroTests {
         public struct Columns: StructuredQueries.Schema {
           public typealias QueryOutput = Config
           public let `default` = StructuredQueries.Column<QueryOutput, Swift.Int>("default", keyPath: \.default, default: 0)
-          public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
-            [self.default]
+          public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
+            [StructuredQueries.AnyColumnExpression<QueryOutput>(self.default)]
           }
         }
         public static let columns = Columns()
@@ -147,8 +147,8 @@ struct TableMacroTests {
           public var primaryKey: some StructuredQueries.ColumnExpression<QueryOutput> & StructuredQueries.QueryExpression<Int> {
             self.id
           }
-          public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
-            [self.id]
+          public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
+            [StructuredQueries.AnyColumnExpression<QueryOutput>(self.id)]
           }
         }
         public struct Draft: StructuredQueries.Draft {
@@ -156,7 +156,7 @@ struct TableMacroTests {
           public struct Columns: StructuredQueries.DraftSchema {
             public typealias QueryOutput = Draft
 
-            public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
+            public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
               []
             }
           }
@@ -217,8 +217,8 @@ struct TableMacroTests {
           public var primaryKey: some StructuredQueries.ColumnExpression<QueryOutput> & StructuredQueries.QueryExpression<Int> {
             self.id
           }
-          public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
-            [self.id]
+          public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
+            [StructuredQueries.AnyColumnExpression<QueryOutput>(self.id)]
           }
         }
         public struct Draft: StructuredQueries.Draft {
@@ -226,7 +226,7 @@ struct TableMacroTests {
           public struct Columns: StructuredQueries.DraftSchema {
             public typealias QueryOutput = Draft
 
-            public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
+            public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
               []
             }
           }
@@ -286,8 +286,8 @@ struct TableMacroTests {
           public var primaryKey: some StructuredQueries.ColumnExpression<QueryOutput> & StructuredQueries.QueryExpression<Int> {
             self.id
           }
-          public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
-            [self.id]
+          public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
+            [StructuredQueries.AnyColumnExpression<QueryOutput>(self.id)]
           }
         }
         public struct Draft: StructuredQueries.Draft {
@@ -295,7 +295,7 @@ struct TableMacroTests {
           public struct Columns: StructuredQueries.DraftSchema {
             public typealias QueryOutput = Draft
 
-            public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
+            public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
               []
             }
           }
@@ -356,8 +356,8 @@ struct TableMacroTests {
           public var primaryKey: some StructuredQueries.ColumnExpression<QueryOutput> & StructuredQueries.QueryExpression<Int> {
             self.id
           }
-          public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
-            [self.id]
+          public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
+            [StructuredQueries.AnyColumnExpression<QueryOutput>(self.id)]
           }
         }
         public struct Draft: StructuredQueries.Draft {
@@ -365,7 +365,7 @@ struct TableMacroTests {
           public struct Columns: StructuredQueries.DraftSchema {
             public typealias QueryOutput = Draft
 
-            public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
+            public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
               []
             }
           }
@@ -444,8 +444,8 @@ struct TableMacroTests {
         public struct Columns: StructuredQueries.Schema {
           public typealias QueryOutput = User
           public let joined = StructuredQueries.Column<QueryOutput, _>("joined", keyPath: \.joined, as: .<#strategy#>)
-          public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
-            [self.joined]
+          public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
+            [StructuredQueries.AnyColumnExpression<QueryOutput>(self.joined)]
           }
         }
         public static let columns = Columns()
@@ -489,8 +489,8 @@ struct TableMacroTests {
         public struct Columns: StructuredQueries.Schema {
           public typealias QueryOutput = User
           public let joined = StructuredQueries.Column<QueryOutput, _>("joined", keyPath: \.joined, as: .iso8601)
-          public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
-            [self.joined]
+          public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
+            [StructuredQueries.AnyColumnExpression<QueryOutput>(self.joined)]
           }
         }
         public static let columns = Columns()
@@ -536,8 +536,8 @@ struct TableMacroTests {
           public var primaryKey: some StructuredQueries.ColumnExpression<QueryOutput> & StructuredQueries.QueryExpression<Tagged<QueryOutput, Int>> {
             self.id
           }
-          public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
-            [self.id]
+          public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
+            [StructuredQueries.AnyColumnExpression<QueryOutput>(self.id)]
           }
         }
         public struct Draft: StructuredQueries.Draft {
@@ -545,7 +545,7 @@ struct TableMacroTests {
           public struct Columns: StructuredQueries.DraftSchema {
             public typealias QueryOutput = Draft
 
-            public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
+            public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
               []
             }
           }
@@ -605,8 +605,8 @@ struct TableMacroTests {
           public var primaryKey: some StructuredQueries.ColumnExpression<QueryOutput> & StructuredQueries.QueryExpression<_> {
             self.id
           }
-          public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
-            [self.id]
+          public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
+            [StructuredQueries.AnyColumnExpression<QueryOutput>(self.id)]
           }
         }
         public struct Draft: StructuredQueries.Draft {
@@ -614,7 +614,7 @@ struct TableMacroTests {
           public struct Columns: StructuredQueries.DraftSchema {
             public typealias QueryOutput = Draft
 
-            public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
+            public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
               []
             }
           }
@@ -682,8 +682,8 @@ struct TableMacroTests {
           public var primaryKey: some StructuredQueries.ColumnExpression<QueryOutput> & StructuredQueries.QueryExpression<Int> {
             self.id
           }
-          public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
-            [self.id, self.name]
+          public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
+            [StructuredQueries.AnyColumnExpression<QueryOutput>(self.id), StructuredQueries.AnyColumnExpression<QueryOutput>(self.name)]
           }
         }
         public struct Draft: StructuredQueries.Draft {
@@ -691,8 +691,8 @@ struct TableMacroTests {
           public struct Columns: StructuredQueries.DraftSchema {
             public typealias QueryOutput = Draft
             public let name = StructuredQueries.DraftColumn<QueryOutput, String>("name", keyPath: \.name)
-            public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
-              [self.name]
+            public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
+              [StructuredQueries.AnyColumnExpression<QueryOutput>(self.name)]
             }
           }
           public static let columns = Columns()
@@ -758,8 +758,8 @@ struct TableMacroTests {
           public var primaryKey: some StructuredQueries.ColumnExpression<QueryOutput> & StructuredQueries.QueryExpression<UUID> {
             self.uuid
           }
-          public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
-            [self.id, self.uuid]
+          public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
+            [StructuredQueries.AnyColumnExpression<QueryOutput>(self.id), StructuredQueries.AnyColumnExpression<QueryOutput>(self.uuid)]
           }
         }
         public struct Draft: StructuredQueries.Draft {
@@ -767,8 +767,8 @@ struct TableMacroTests {
           public struct Columns: StructuredQueries.DraftSchema {
             public typealias QueryOutput = Draft
             public let uuid = StructuredQueries.DraftColumn<QueryOutput, _>("uuid", keyPath: \.uuid, as: .bytes)
-            public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
-              [self.uuid]
+            public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
+              [StructuredQueries.AnyColumnExpression<QueryOutput>(self.uuid)]
             }
           }
           public static let columns = Columns()
@@ -858,8 +858,8 @@ struct TableMacroTests {
           public var primaryKey: some StructuredQueries.ColumnExpression<QueryOutput> & StructuredQueries.QueryExpression<Int> {
             self.syncUpID
           }
-          public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
-            [self.syncUpID, self.attendeeID]
+          public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
+            [StructuredQueries.AnyColumnExpression<QueryOutput>(self.syncUpID), StructuredQueries.AnyColumnExpression<QueryOutput>(self.attendeeID)]
           }
         }
         public struct Draft: StructuredQueries.Draft {
@@ -869,8 +869,8 @@ struct TableMacroTests {
             public typealias QueryOutput = Draft
             public let syncUpID = StructuredQueries.DraftColumn<QueryOutput, Int>("syncUpID", keyPath: \.syncUpID)
             public let attendeeID = StructuredQueries.DraftColumn<QueryOutput, Int>("attendeeID", keyPath: \.attendeeID)
-            public var allColumns: [any StructuredQueries.ColumnExpression<QueryOutput>] {
-              [self.syncUpID, self.attendeeID]
+            public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
+              [StructuredQueries.AnyColumnExpression<QueryOutput>(self.syncUpID), StructuredQueries.AnyColumnExpression<QueryOutput>(self.attendeeID)]
             }
           }
           public static let columns = Columns()

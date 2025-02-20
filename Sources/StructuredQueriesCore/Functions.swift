@@ -35,6 +35,7 @@ extension QueryExpression where QueryOutput == String {
   }
 }
 
+@available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
 extension QueryExpression where QueryOutput == Bind<ISO8601Strategy> {
   public func strftime(
     _ format: some QueryExpression<String>

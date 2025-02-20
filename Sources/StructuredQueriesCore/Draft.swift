@@ -6,12 +6,12 @@ public protocol Draft: Sendable {
 
 public protocol DraftSchema<QueryOutput>: Sendable {
   associatedtype QueryOutput
-  var allColumns: [any ColumnExpression<QueryOutput>] { get }
+  var allColumns: [AnyColumnExpression<QueryOutput>] { get }
 }
 
 extension Never: Draft {
   public struct Columns: DraftSchema {
-    public let allColumns: [any ColumnExpression<Never>] = []
+    public let allColumns: [AnyColumnExpression<Never>] = []
   }
   public static var columns: Columns { Columns() }
   public var queryFragment: QueryFragment { fatalError() }

@@ -122,14 +122,14 @@ public struct AliasedColumns<Columns: Schema>: Schema {
   {
     AliasedColumn(alias: alias, column: columns[keyPath: keyPath])
   }
-  public var allColumns: [any ColumnExpression<Columns.QueryOutput>] {
+  public var allColumns: [AnyColumnExpression<Columns.QueryOutput>] {
     columns.allColumns.map { column in
-      func open(_ column: some ColumnExpression<Columns.QueryOutput>) -> any ColumnExpression<
-        Columns.QueryOutput
-      > {
-        AliasedColumn(alias: alias, column: column)
+      func open(
+        _ column: some ColumnExpression<Columns.QueryOutput>
+      ) -> AnyColumnExpression<Columns.QueryOutput> {
+        AnyColumnExpression(AliasedColumn(alias: alias, column: column))
       }
-      return open(column)
+      return open(column.base)
     }
   }
 }
