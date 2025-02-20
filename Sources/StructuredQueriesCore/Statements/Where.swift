@@ -7,7 +7,7 @@ extension Table {
 #if compiler(>=6.1)
   @dynamicMemberLookup
 #endif
-public struct Where<Base: Table>: SelectProtocol {
+public struct Where<Base: Table>: SelectStatement {
   let predicate: any QueryExpression<Bool>
 
   public func `where`(_ predicate: (Base.Columns) -> some QueryExpression<Bool>) -> Self {
@@ -66,21 +66,21 @@ extension Where {
   }
 
   public func join<OtherInput, OtherOutput>(
-    _ other: some SelectProtocol<OtherInput, OtherOutput>,
+    _ other: some SelectStatement<OtherInput, OtherOutput>,
     on constraint: ((Base.Columns, OtherInput)) -> some QueryExpression<Bool>
   ) -> Select<(Base.Columns, OtherInput), (Base, OtherOutput)> {
     all().join(other, on: constraint)
   }
 
   public func leftJoin<OtherInput, OtherOutput: OptionalPromotable>(
-    _ other: some SelectProtocol<OtherInput, OtherOutput>,
+    _ other: some SelectStatement<OtherInput, OtherOutput>,
     on constraint: ((Base.Columns, OtherInput)) -> some QueryExpression<Bool>
   ) -> Select<(Base.Columns, OtherInput), (Base, OtherOutput.Optionalized)> {
     all().leftJoin(other, on: constraint)
   }
 
   public func rightJoin<OtherInput, OtherOutput>(
-    _ other: some SelectProtocol<OtherInput, OtherOutput>,
+    _ other: some SelectStatement<OtherInput, OtherOutput>,
     on constraint: ((Base.Columns, OtherInput)) -> some QueryExpression<Bool>
   ) -> Select<(Base.Columns, OtherInput), (Base.Optionalized, OtherOutput)>
   where Base: OptionalPromotable {
@@ -88,7 +88,7 @@ extension Where {
   }
 
   public func fullJoin<OtherInput, OtherOutput: OptionalPromotable>(
-    _ other: some SelectProtocol<OtherInput, OtherOutput>,
+    _ other: some SelectStatement<OtherInput, OtherOutput>,
     on constraint: ((Base.Columns, OtherInput)) -> some QueryExpression<Bool>
   ) -> Select<(Base.Columns, OtherInput), (Base.Optionalized, OtherOutput.Optionalized)>
   where Base: OptionalPromotable {

@@ -24,21 +24,21 @@ extension Table {
   }
 
   public static func join<OtherInput, OtherOutput>(
-    _ other: some SelectProtocol<OtherInput, OtherOutput>,
+    _ other: some SelectStatement<OtherInput, OtherOutput>,
     on constraint: ((Columns, OtherInput)) -> some QueryExpression<Bool>
   ) -> Select<(Columns, OtherInput), (Self, OtherOutput)> {
     all().join(other, on: constraint)
   }
 
   public static func leftJoin<OtherInput, OtherOutput: OptionalPromotable>(
-    _ other: some SelectProtocol<OtherInput, OtherOutput>,
+    _ other: some SelectStatement<OtherInput, OtherOutput>,
     on constraint: ((Columns, OtherInput)) -> some QueryExpression<Bool>
   ) -> Select<(Columns, OtherInput), (Self, OtherOutput.Optionalized)> {
     all().leftJoin(other, on: constraint)
   }
 
   public static func rightJoin<OtherInput, OtherOutput>(
-    _ other: some SelectProtocol<OtherInput, OtherOutput>,
+    _ other: some SelectStatement<OtherInput, OtherOutput>,
     on constraint: ((Columns, OtherInput)) -> some QueryExpression<Bool>
   ) -> Select<(Columns, OtherInput), (Self.Optionalized, OtherOutput)>
   where Self: OptionalPromotable {
@@ -46,7 +46,7 @@ extension Table {
   }
 
   public static func fullJoin<OtherInput, OtherOutput: OptionalPromotable>(
-    _ other: some SelectProtocol<OtherInput, OtherOutput>,
+    _ other: some SelectStatement<OtherInput, OtherOutput>,
     on constraint: ((Columns, OtherInput)) -> some QueryExpression<Bool>
   ) -> Select<(Columns, OtherInput), (Self.Optionalized, OtherOutput.Optionalized)>
   where Self: OptionalPromotable {
@@ -165,7 +165,7 @@ struct TableAlias: QueryExpression {
   }
 }
 
-public protocol SelectProtocol<Input, Output> {
+public protocol SelectStatement<Input, Output> {
   associatedtype Input: Sendable
   associatedtype Output
 
@@ -173,8 +173,8 @@ public protocol SelectProtocol<Input, Output> {
 }
 
 #if compiler(>=6.1)
-  extension SelectProtocol {
-    public subscript<S: SelectProtocol>(
+  extension SelectStatement {
+    public subscript<S: SelectStatement>(
       dynamicMember keyPath: KeyPath<Output.Type, S>
     ) -> Select<S.Input, S.Output>
     where Output: Table {
@@ -186,7 +186,7 @@ public protocol SelectProtocol<Input, Output> {
 #if compiler(>=6.1)
   @dynamicMemberLookup
 #endif
-public struct Select<Input: Sendable, Output>: SelectProtocol {
+public struct Select<Input: Sendable, Output>: SelectStatement {
   fileprivate var input: Input
   fileprivate var isDistinct = false
   fileprivate var selectedColumns: [any QueryExpression] = []
@@ -248,21 +248,21 @@ public struct Select<Input: Sendable, Output>: SelectProtocol {
   }
 
   public func join<OtherInput, OtherOutput>(
-    _ other: some SelectProtocol<OtherInput, OtherOutput>,
+    _ other: some SelectStatement<OtherInput, OtherOutput>,
     on constraint: ((Input, OtherInput)) -> some QueryExpression<Bool>
   ) -> Select<(Input, OtherInput), (Output, OtherOutput)> {
     _join(self, other.all(), on: constraint)
   }
 
   public func leftJoin<OtherInput, OtherOutput: OptionalPromotable>(
-    _ other: some SelectProtocol<OtherInput, OtherOutput>,
+    _ other: some SelectStatement<OtherInput, OtherOutput>,
     on constraint: ((Input, OtherInput)) -> some QueryExpression<Bool>
   ) -> Select<(Input, OtherInput), (Output, OtherOutput.Optionalized)> {
     _leftJoin(self, other.all(), on: constraint)
   }
 
   public func rightJoin<OtherInput, OtherOutput>(
-    _ other: some SelectProtocol<OtherInput, OtherOutput>,
+    _ other: some SelectStatement<OtherInput, OtherOutput>,
     on constraint: ((Input, OtherInput)) -> some QueryExpression<Bool>
   ) -> Select<(Input, OtherInput), (Output.Optionalized, OtherOutput)>
   where Output: OptionalPromotable {
@@ -270,7 +270,7 @@ public struct Select<Input: Sendable, Output>: SelectProtocol {
   }
 
   public func fullJoin<OtherInput, OtherOutput: OptionalPromotable>(
-    _ other: some SelectProtocol<OtherInput, OtherOutput>,
+    _ other: some SelectStatement<OtherInput, OtherOutput>,
     on constraint: ((Input, OtherInput)) -> some QueryExpression<Bool>
   ) -> Select<(Input, OtherInput), (Output.Optionalized, OtherOutput.Optionalized)>
   where Output: OptionalPromotable {
@@ -349,6 +349,8 @@ public struct Select<Input: Sendable, Output>: SelectProtocol {
 }
 
 public typealias SelectOf<each T: Table> = Select<(repeat (each T).Columns), (repeat each T)>
+
+public typealias SelectStatementOf<each T: Table> = SelectStatement<(repeat (each T).Columns), (repeat each T)>
 
 // Player.all().join(Team.self) { $0.teamID == $1.id }
 
@@ -694,7 +696,7 @@ extension LimitClause: QueryExpression {
 
 extension Select {
   public func join<I1, I2, I3, O1, O2, O3>(
-    _ other: some SelectProtocol<I3, O3>,
+    _ other: some SelectStatement<I3, O3>,
     on constraint: ((I1, I2, I3)) -> some QueryExpression<Bool>
   ) -> Select<(I1, I2, I3), (O1, O2, O3)>
   where Input == (I1, I2), Output == (O1, O2) {
@@ -702,7 +704,7 @@ extension Select {
   }
 
   public func leftJoin<I1, I2, I3, O1, O2, O3: OptionalPromotable>(
-    _ other: some SelectProtocol<I3, O3>,
+    _ other: some SelectStatement<I3, O3>,
     on constraint: ((I1, I2, I3)) -> some QueryExpression<Bool>
   ) -> Select<(I1, I2, I3), (O1, O2, O3.Optionalized)>
   where Input == (I1, I2), Output == (O1, O2) {
@@ -710,7 +712,7 @@ extension Select {
   }
 
   public func rightJoin<I1, I2, I3, O1: OptionalPromotable, O2: OptionalPromotable, O3>(
-    _ other: some SelectProtocol<I3, O3>,
+    _ other: some SelectStatement<I3, O3>,
     on constraint: ((I1, I2, I3)) -> some QueryExpression<Bool>
   ) -> Select<(I1, I2, I3), (O1.Optionalized, O2.Optionalized, O3)>
   where Input == (I1, I2), Output == (O1, O2) {
@@ -720,7 +722,7 @@ extension Select {
   public func fullJoin<
     I1, I2, I3, O1: OptionalPromotable, O2: OptionalPromotable, O3: OptionalPromotable
   >(
-    _ other: some SelectProtocol<I3, O3>,
+    _ other: some SelectStatement<I3, O3>,
     on constraint: ((I1, I2, I3)) -> some QueryExpression<Bool>
   ) -> Select<(I1, I2, I3), (O1.Optionalized, O2.Optionalized, O3.Optionalized)>
   where Input == (I1, I2), Output == (O1, O2) {
@@ -728,7 +730,7 @@ extension Select {
   }
 
   public func join<I1, I2, I3, I4, O1, O2, O3, O4>(
-    _ other: some SelectProtocol<I4, O4>,
+    _ other: some SelectStatement<I4, O4>,
     on constraint: ((I1, I2, I3, I4)) -> some QueryExpression<Bool>
   ) -> Select<(I1, I2, I3, I4), (O1, O2, O3, O4)>
   where Input == (I1, I2, I3), Output == (O1, O2, O3) {
@@ -736,7 +738,7 @@ extension Select {
   }
 
   public func leftJoin<I1, I2, I3, I4, O1, O2, O3, O4: OptionalPromotable>(
-    _ other: some SelectProtocol<I4, O4>,
+    _ other: some SelectStatement<I4, O4>,
     on constraint: ((I1, I2, I3, I4)) -> some QueryExpression<Bool>
   ) -> Select<(I1, I2, I3, I4), (O1, O2, O3, O4.Optionalized)>
   where Input == (I1, I2, I3), Output == (O1, O2, O3) {
@@ -746,7 +748,7 @@ extension Select {
   public func rightJoin<
     I1, I2, I3, I4, O1: OptionalPromotable, O2: OptionalPromotable, O3: OptionalPromotable, O4
   >(
-    _ other: some SelectProtocol<I4, O4>,
+    _ other: some SelectStatement<I4, O4>,
     on constraint: ((I1, I2, I3, I4)) -> some QueryExpression<Bool>
   ) -> Select<(I1, I2, I3, I4), (O1.Optionalized, O2.Optionalized, O3.Optionalized, O4)>
   where Input == (I1, I2, I3), Output == (O1, O2, O3) {
@@ -757,7 +759,7 @@ extension Select {
     I1, I2, I3, I4,
     O1: OptionalPromotable, O2: OptionalPromotable, O3: OptionalPromotable, O4: OptionalPromotable
   >(
-    _ other: some SelectProtocol<I4, O4>,
+    _ other: some SelectStatement<I4, O4>,
     on constraint: ((I1, I2, I3, I4)) -> some QueryExpression<Bool>
   ) -> Select<
     (I1, I2, I3, I4),
