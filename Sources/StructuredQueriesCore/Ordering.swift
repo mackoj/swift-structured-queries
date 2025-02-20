@@ -1,16 +1,20 @@
-// TODO: ascending(nulls: .first), ascending(nulls: .last), etc...
 extension QueryExpression where QueryOutput: QueryBindable {
-  public func ascending() -> OrderingTerm {
-    OrderingTerm(base: self, direction: .ascending)
+  public func ascending(nulls: NullOrdering? = nil) -> OrderingTerm {
+    OrderingTerm(base: self, direction: .ascending, nulls: nulls)
   }
 
-  public func descending() -> OrderingTerm {
-    OrderingTerm(base: self, direction: .descending)
+  public func descending(nulls: NullOrdering? = nil) -> OrderingTerm {
+    OrderingTerm(base: self, direction: .descending, nulls: nulls)
   }
 }
 
 public protocol _OrderingTerm {
   var _orderingTerm: OrderingTerm { get }
+}
+
+public enum NullOrdering: String, Sendable {
+  case first = "FIRST"
+  case last = "LAST"
 }
 
 public struct OrderingTerm {
@@ -20,12 +24,13 @@ public struct OrderingTerm {
   }
 
   let base: any QueryExpression
-
   let direction: Direction?
+  let nulls: NullOrdering?
 
-  init(base: any QueryExpression, direction: Direction? = nil) {
+  init(base: any QueryExpression, direction: Direction? = nil, nulls: NullOrdering? = nil) {
     self.base = base
     self.direction = direction
+    self.nulls = nulls
   }
 }
 
@@ -35,6 +40,9 @@ extension OrderingTerm: QueryExpression {
     var fragment: QueryFragment = base.queryFragment
     if let direction {
       fragment.append(" \(raw: direction.rawValue)")
+    }
+    if let nulls {
+      fragment.append(" NULLS \(raw: nulls.rawValue)")
     }
     return fragment
   }
