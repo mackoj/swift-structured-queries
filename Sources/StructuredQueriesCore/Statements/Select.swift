@@ -348,11 +348,11 @@ public struct Select<Input: Sendable, Output>: SelectStatement {
   }
 }
 
-public typealias SelectOf<each T: Table> = Select<(repeat (each T).Columns), (repeat each T)>
+public typealias ColumnsOf<each T: Table> = (repeat (each T).Columns)
 
-public typealias SelectStatementOf<each T: Table> = SelectStatement<(repeat (each T).Columns), (repeat each T)>
+public typealias SelectOf<each T: Table> = Select<ColumnsOf<repeat each T>, (repeat each T)>
 
-// Player.all().join(Team.self) { $0.teamID == $1.id }
+public typealias SelectStatementOf<each T: Table> = SelectStatement<ColumnsOf<repeat each T>, (repeat each T)>
 
 extension Select: Statement {
   public typealias QueryOutput = [Output]
