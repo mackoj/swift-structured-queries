@@ -26,6 +26,17 @@ extension SnapshotTests {
       }
     }
 
+    @Test func toggleAssignment() {
+      assertInlineSnapshot(
+        of: SyncUp.update { $0.isActive = !$0.isActive },
+        as: .sql
+      ) {
+        """
+        UPDATE "syncUps" SET "isActive" = NOT ("syncUps"."isActive")
+        """
+      }
+    }
+
     @Test func toggleBoolean() {
       assertInlineSnapshot(
         of: SyncUp.update { $0.isActive.toggle() },
@@ -179,6 +190,19 @@ extension SnapshotTests {
       ) {
         """
         UPDATE "meetings" SET "date" = '2001-01-01 00:00:00'
+        """
+      }
+    }
+
+    @Test func rawBind() {
+      assertInlineSnapshot(
+        of: Meeting.update {
+          $0.date = .raw("CURRENT_TIMESTAMP")
+        },
+        as: .sql
+      ) {
+        """
+        UPDATE "meetings" SET "date" = CURRENT_TIMESTAMP
         """
       }
     }

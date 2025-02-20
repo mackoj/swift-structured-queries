@@ -18,6 +18,23 @@ extension QueryExpression {
   }
 }
 
+extension AnyQueryExpression {
+  public static func raw(
+    _ queryFragment: QueryFragment,
+    as output: QueryOutput.Type = QueryOutput.self
+  ) -> Self {
+    AnyQueryExpression(RawQueryExpression(queryFragment: queryFragment))
+  }
+
+  public static func raw<Strategy: QueryBindingStrategy>(
+    _ queryFragment: QueryFragment,
+    as strategy: Strategy
+  ) -> Self
+  where QueryOutput == Bind<Strategy> {
+    AnyQueryExpression(RawQueryExpression(queryFragment: queryFragment))
+  }
+}
+
 public struct RawQueryExpression<QueryOutput>: QueryExpression {
   public let queryFragment: QueryFragment
 }

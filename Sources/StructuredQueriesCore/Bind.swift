@@ -19,6 +19,14 @@ extension QueryExpression {
   }
 }
 
+extension AnyQueryExpression {
+  public static func bind<Strategy: QueryBindingStrategy>(
+    _ value: Strategy.Representable, as strategy: Strategy = Strategy()
+  ) -> Self where QueryOutput == Bind<Strategy>{
+    Self(Bind(value, as: strategy))
+  }
+}
+
 extension Bind: QueryDecodable {
   public init(decoder: some QueryDecoder) throws {
     try self.init(
