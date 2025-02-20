@@ -6,7 +6,8 @@ extension Table {
 
 extension PrimaryKeyedTable {
   // TODO: Should this be 'delete(_ ids: [Columns.PrimaryKey.QueryOutput])' instead?
-  public static func delete(_ records: [Self]) -> Delete<Self, Void> {
+  public static func delete(_ records: [Self]) -> Delete<Self, Void>
+  where Columns.QueryOutput == Self {
     Delete().where { columns in
       records
         .map { $0[keyPath: columns.primaryKey.keyPath] as! Columns.PrimaryKey.QueryOutput }

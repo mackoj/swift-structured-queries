@@ -14,7 +14,7 @@ extension PrimaryKeyedTable {
     or conflictResolution: ConflictResolution? = nil,
     _ record: Self
   ) -> Update<Self, Void>
-  where Columns: PrimaryKeyedSchema {
+  where Columns: PrimaryKeyedSchema, Columns.QueryOutput == Self {
     update(or: conflictResolution) {
       for column in columns.allColumns where column.name != columns.primaryKey.name {
         $0.updates.append((column, record[keyPath: column.keyPath] as! any QueryExpression))

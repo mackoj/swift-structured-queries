@@ -56,7 +56,7 @@ public macro Selection() =
 //}
 //
 //func f() {
-//  let _: Select<_, (A, A2B?, B?)> = A.all()
+//  let _: SelectOf<A, A2B?, B?> = A.all()
 //    .leftJoin(A2B.all()) { $0.id == $1.aID }
 //    .leftJoin(B.all()) { $1.bID == $2.id }
 //

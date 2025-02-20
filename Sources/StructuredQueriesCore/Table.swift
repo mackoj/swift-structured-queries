@@ -1,5 +1,5 @@
 public protocol Table: QueryDecodable, OptionalPromotable, Sendable {
-  associatedtype Columns: Schema where Columns.QueryOutput == Self
+  associatedtype Columns: Schema
 
   // TODO: Rename tableName
   // TODO: Move to Schema protocol
@@ -9,4 +9,20 @@ public protocol Table: QueryDecodable, OptionalPromotable, Sendable {
   static var columns: Columns { get }
 
   var queryFragment: QueryFragment { get }
+}
+
+extension Optional: Table where Wrapped: Table {
+  public typealias Columns = Wrapped.Columns
+
+  public static var name: String {
+    Wrapped.name
+  }
+
+  public static var columns: Wrapped.Columns {
+    Wrapped.columns
+  }
+
+  public var queryFragment: QueryFragment {
+    self?.queryFragment ?? ""
+  }
 }
