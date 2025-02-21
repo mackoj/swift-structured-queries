@@ -29,17 +29,31 @@ extension QueryBindingStrategy where Self == UUIDLowercasedStrategy {
 public struct ISO8601Strategy: QueryBindingStrategy {
   public init() {}
   public static func fromQueryBindable(_ rawValue: String) throws -> Date {
-    try Date(rawValue, strategy: .iso8601.currentTimestamp())
+    // NB: Can simplify this once ISO8601 'includingFractionalSeconds' is fixed.
+    //     https://forums.swift.org/t/pitch-iso8601-components-format-style/77990
+    do {
+      return try Date(
+        rawValue,
+        strategy: .iso8601.currentTimestamp(includingFractionalSeconds: true)
+      )
+    } catch {
+      return try Date(
+        rawValue,
+        strategy: .iso8601.currentTimestamp(includingFractionalSeconds: false)
+      )
+    }
   }
   public static func toQueryBindable(_ representable: Date) -> String {
-    representable.formatted(.iso8601.currentTimestamp())
+    representable.formatted(.iso8601.currentTimestamp(includingFractionalSeconds: true))
   }
 }
 
 @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
 fileprivate extension Date.ISO8601FormatStyle {
-  func currentTimestamp() -> Self {
-    year().month().day().dateTimeSeparator(.space).time(includingFractionalSeconds: false)
+  func currentTimestamp(includingFractionalSeconds: Bool) -> Self {
+    year().month().day()
+      .dateTimeSeparator(.space)
+      .time(includingFractionalSeconds: includingFractionalSeconds)
   }
 }
 
