@@ -58,6 +58,19 @@ struct TableMacroTests {
             sql.append(")")
             return sql
           }
+          public init(
+            id: Int? = nil,
+            name: String
+          ) {
+            self.id = id
+            self.name = name
+          }
+          public init(
+            _ record: User
+          ) {
+            self.id = record.id
+            self.name = record.name
+          }
         }
         public static let columns = Columns()
         public static let name = "users"
@@ -182,6 +195,16 @@ struct TableMacroTests {
             sql.append(")")
             return sql
           }
+          public init(
+            id: Int? = nil
+          ) {
+            self.id = id
+          }
+          public init(
+            _ record: User
+          ) {
+            self.id = record.id
+          }
         }
         public static let columns = Columns()
         public static let name = "users"
@@ -258,6 +281,16 @@ struct TableMacroTests {
             sql.append(")")
             return sql
           }
+          public init(
+            id: Int? = nil
+          ) {
+            self.id = id
+          }
+          public init(
+            _ record: User
+          ) {
+            self.id = record.id
+          }
         }
         public static let columns = Columns()
         public static let name = "users"
@@ -332,6 +365,16 @@ struct TableMacroTests {
             )
             sql.append(")")
             return sql
+          }
+          public init(
+            id: Int? = nil
+          ) {
+            self.id = id
+          }
+          public init(
+            _ record: User
+          ) {
+            self.id = record.id
           }
         }
         public static let columns = Columns()
@@ -408,6 +451,16 @@ struct TableMacroTests {
             )
             sql.append(")")
             return sql
+          }
+          public init(
+            id: Int? = nil
+          ) {
+            self.id = id
+          }
+          public init(
+            _ record: User
+          ) {
+            self.id = record.id
           }
         }
         public static let columns = Columns()
@@ -566,8 +619,8 @@ struct TableMacroTests {
       extension User: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
         public struct Columns: StructuredQueries.PrimaryKeyedSchema {
           public typealias QueryOutput = User
-          public let id = StructuredQueries.Column<QueryOutput, Tagged<QueryOutput, Int>>("id", keyPath: \.id, default: Tagged(QueryOutput.defaultID))
-          public var primaryKey: some StructuredQueries.ColumnExpression<QueryOutput> & StructuredQueries.QueryExpression<Tagged<QueryOutput, Int>> {
+          public let id = StructuredQueries.Column<QueryOutput, Tagged<User, Int>>("id", keyPath: \.id, default: Tagged(User.defaultID))
+          public var primaryKey: some StructuredQueries.ColumnExpression<QueryOutput> & StructuredQueries.QueryExpression<Tagged<User, Int>> {
             self.id
           }
           public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
@@ -575,10 +628,10 @@ struct TableMacroTests {
           }
         }
         public struct Draft: StructuredQueries.Draft {
-          var id: Tagged<Self, Int>? = Tagged(Self.defaultID)
+          var id: Tagged<User, Int>? = Tagged(Self.defaultID)
           public struct Columns: StructuredQueries.DraftSchema {
             public typealias QueryOutput = Draft
-            public let id = StructuredQueries.DraftColumn<QueryOutput, Tagged<QueryOutput, Int>?>("id", keyPath: \.id, default: Tagged(QueryOutput.defaultID))
+            public let id = StructuredQueries.DraftColumn<QueryOutput, Tagged<User, Int>?>("id", keyPath: \.id, default: Tagged(User.defaultID))
             public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
               [StructuredQueries.AnyColumnExpression<QueryOutput>(self.id)]
             }
@@ -594,6 +647,16 @@ struct TableMacroTests {
             )
             sql.append(")")
             return sql
+          }
+          public init(
+            id: Tagged<User, Int>? = Tagged(User.defaultID)
+          ) {
+            self.id = id
+          }
+          public init(
+            _ record: User
+          ) {
+            self.id = record.id
           }
         }
         public static let columns = Columns()
@@ -669,6 +732,16 @@ struct TableMacroTests {
             )
             sql.append(")")
             return sql
+          }
+          public init(
+            id: Optional = Int(0)
+          ) {
+            self.id = id
+          }
+          public init(
+            _ record: User
+          ) {
+            self.id = record.id
           }
         }
         public static let columns = Columns()
@@ -756,6 +829,19 @@ struct TableMacroTests {
             sql.append(")")
             return sql
           }
+          public init(
+            id: Int? = nil,
+            name: String
+          ) {
+            self.id = id
+            self.name = name
+          }
+          public init(
+            _ record: Outer.User
+          ) {
+            self.id = record.id
+            self.name = record.name
+          }
         }
         public static let columns = Columns()
         public static let name = "users"
@@ -841,6 +927,19 @@ struct TableMacroTests {
             )
             sql.append(")")
             return sql
+          }
+          public init(
+            id: String? = nil,
+            uuid: UUID
+          ) {
+            self.id = id
+            self.uuid = uuid
+          }
+          public init(
+            _ record: User
+          ) {
+            self.id = record.id
+            self.uuid = record.uuid
           }
         }
         public static let columns = Columns()
@@ -951,6 +1050,19 @@ struct TableMacroTests {
             )
             sql.append(")")
             return sql
+          }
+          public init(
+            syncUpID: Int,
+            attendeeID: Int
+          ) {
+            self.syncUpID = syncUpID
+            self.attendeeID = attendeeID
+          }
+          public init(
+            _ record: SyncUpAttendees
+          ) {
+            self.syncUpID = record.syncUpID
+            self.attendeeID = record.attendeeID
           }
         }
         public static let columns = Columns()

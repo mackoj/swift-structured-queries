@@ -72,7 +72,8 @@ extension TableMacro: ExtensionMacro {
     conformingTo protocols: [TypeSyntax],
     in context: C
   ) throws -> [ExtensionDeclSyntax] {
-    guard let declaration = declaration.as(StructDeclSyntax.self)
+    guard
+      let declaration = declaration.as(StructDeclSyntax.self)
     else {
       context.diagnose(
         Diagnostic(
@@ -88,13 +89,16 @@ extension TableMacro: ExtensionMacro {
     var diagnostics: [Diagnostic] = []
     var draftProperties: [String] = []
     var draftColumnsProperties: [String] = []
+    var draftInitArguments: [String] = []
     var draftEncodings: [String] = []
     var allColumns: [String] = []
     var allDraftColumns: [String] = []
     var primaryKey: (identifier: String, type: String, label: TokenSyntax?)?
     var decodings: [String] = []
     var encodings: [String] = []
-    let selfRewriter = SelfRewriter(selfEquivalent: "QueryOutput")
+    let selfRewriter = SelfRewriter(
+      selfEquivalent: type.as(IdentifierTypeSyntax.self)?.name ?? "QueryOutput"
+    )
     let memberBlock = declaration.memberBlock
     for member in memberBlock.members {
       guard
@@ -253,7 +257,9 @@ extension TableMacro: ExtensionMacro {
         if let type,
           let typeAnnotation = property.bindings[property.bindings.startIndex].typeAnnotation
         {
-          optionalTypeAnnotation = typeAnnotation.with(\.type, "\(type.trimmed)?")
+          optionalTypeAnnotation = selfRewriter
+            .rewrite(typeAnnotation.with(\.type, "\(type.trimmed)?"))
+            .cast(TypeAnnotationSyntax.self)
         } else {
           optionalTypeAnnotation = TypeAnnotationSyntax(
             leadingTrivia: nil,
@@ -262,9 +268,7 @@ extension TableMacro: ExtensionMacro {
             trailingTrivia: nil
           )
         }
-        var property = property
-          .with(\.attributes, [])
-          .with(\.bindingSpecifier.tokenKind, .keyword(.var))
+        var property = property.with(\.attributes, [])
         property.bindings[property.bindings.startIndex].typeAnnotation = optionalTypeAnnotation
         draftProperties.append("\(property.trimmed)")
         draftColumnsProperties.append(
@@ -274,8 +278,12 @@ extension TableMacro: ExtensionMacro {
           )
           """
         )
-        draftEncodings.append("Self.columns.\(name).encode(self.\(name))")
-        allDraftColumns.append(name)
+        draftInitArguments.append(
+          """
+          \(name)\(optionalTypeAnnotation.trimmed)\
+          \(binding.initializer.map { selfRewriter.rewrite($0) }?.trimmedDescription ?? " = nil")
+          """
+        )
       } else {
         draftProperties.append("\(property.with(\.attributes, []).trimmed)")
         draftColumnsProperties.append(
@@ -285,9 +293,14 @@ extension TableMacro: ExtensionMacro {
           )
           """
         )
-        draftEncodings.append("Self.columns.\(name).encode(self.\(name))")
-        allDraftColumns.append(name)
+        if let type {
+          draftInitArguments.append(
+            "\(name): \(type)\(binding.initializer?.trimmedDescription ?? "")"
+          )
+        }
       }
+      draftEncodings.append("Self.columns.\(name).encode(self.\(name))")
+      allDraftColumns.append(name)
       decodings.append("self.\(name) = try Self.columns.\(name).decode(decoder: decoder)")
       encodings.append("Self.columns.\(name).encode(self.\(name))")
     }
@@ -336,6 +349,16 @@ extension TableMacro: ExtensionMacro {
         sql.append(")")
         return sql
         }
+        public init(
+        \(draftInitArguments.joined(separator: ",\n"))
+        ) {
+        \(allDraftColumns.map { "self.\($0) = \($0)" }.joined(separator: "\n"))
+        }
+        public init(
+        _ record: \(type.trimmed)
+        ) {
+        \(allDraftColumns.map { "self.\($0) = record.\($0)" }.joined(separator: "\n"))
+        }
         }
         """
       let initFromDraftColumns = allDraftColumns
@@ -348,8 +371,8 @@ extension TableMacro: ExtensionMacro {
       initFromDraft = """
         
         public init?(_ draft: Draft) {
-          guard let id = draft.\(primaryKey.identifier) else { return nil }
-          \(initFromDraftColumns)
+        guard let id = draft.\(primaryKey.identifier) else { return nil }
+        \(initFromDraftColumns)
         }
         """
       protocolNames = [protocolName(primaryKey: false), protocolName(primaryKey: true)]
