@@ -1,20 +1,29 @@
 @attached(
   extension,
-  conformances: Table, PrimaryKeyedTable,
-  names: named(Columns), named(Draft), named(columns), named(queryFragment), named(init(decoder:)), named(name)
+  conformances: Table,
+  PrimaryKeyedTable,
+  names: named(Columns),
+  named(Draft),
+  named(columns),
+  named(queryFragment),
+  named(init(decoder:)),
+  named(init(_:)),
+  named(name)
 )
 @attached(
   memberAttribute
 )
 public macro Table(_ name: String? = nil) =
   #externalMacro(
-    module: "StructuredQueriesMacros", type: "TableMacro"
+    module: "StructuredQueriesMacros",
+    type: "TableMacro"
   )
 
 @attached(accessor, names: named(willSet))
 public macro Column(_ name: String? = nil, primaryKey: Bool = false) =
   #externalMacro(
-    module: "StructuredQueriesMacros", type: "ColumnMacro"
+    module: "StructuredQueriesMacros",
+    type: "ColumnMacro"
   )
 
 @attached(accessor, names: named(willSet))
@@ -24,7 +33,8 @@ public macro Column<Strategy: QueryBindingStrategy>(
   primaryKey: Bool = false
 ) =
   #externalMacro(
-    module: "StructuredQueriesMacros", type: "ColumnMacro"
+    module: "StructuredQueriesMacros",
+    type: "ColumnMacro"
   )
 
 @attached(
@@ -34,16 +44,22 @@ public macro Column<Strategy: QueryBindingStrategy>(
   named(init(decoder:))
 )
 public macro Selection() =
-#externalMacro(
-  module: "StructuredQueriesMacros", type: "SelectionMacro"
-)
+  #externalMacro(
+    module: "StructuredQueriesMacros",
+    type: "SelectionMacro"
+  )
+
+// 0. Table.Draft.id: ID?
+// 1. Table.Draft.init(_: Table)
+// 2. Table.init?(_: Table.Draft)
+// 3. Table.upsert(_: Table.Draft)
 
 //@Table
 //struct A {
 //  let id: Int
 //  var name: String
 //}
-//
+
 //@Table
 //struct A2B {
 //  let aID: Int

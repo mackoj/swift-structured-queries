@@ -248,7 +248,35 @@ extension TableMacro: ExtensionMacro {
         """
       )
       allColumns.append("self.\(name)")
-      if !isPrimaryKey {
+      if isPrimaryKey {
+        let optionalTypeAnnotation: TypeAnnotationSyntax
+        if let type,
+          let typeAnnotation = property.bindings[property.bindings.startIndex].typeAnnotation
+        {
+          optionalTypeAnnotation = typeAnnotation.with(\.type, "\(type.trimmed)?")
+        } else {
+          optionalTypeAnnotation = TypeAnnotationSyntax(
+            leadingTrivia: nil,
+            colon: .colonToken(),
+            type: "Optional" as TypeSyntax,
+            trailingTrivia: nil
+          )
+        }
+        var property = property
+          .with(\.attributes, [])
+          .with(\.bindingSpecifier.tokenKind, .keyword(.var))
+        property.bindings[property.bindings.startIndex].typeAnnotation = optionalTypeAnnotation
+        draftProperties.append("\(property.trimmed)")
+        draftColumnsProperties.append(
+          """
+          public let \(identifier.trimmed) = \(moduleName).DraftColumn<QueryOutput, \(typeGeneric)?>(\
+          \(columnName), keyPath: \\.\(name)\(arguments)\
+          )
+          """
+        )
+        draftEncodings.append("Self.columns.\(name).encode(self.\(name))")
+        allDraftColumns.append(name)
+      } else {
         draftProperties.append("\(property.with(\.attributes, []).trimmed)")
         draftColumnsProperties.append(
           """
@@ -258,7 +286,7 @@ extension TableMacro: ExtensionMacro {
           """
         )
         draftEncodings.append("Self.columns.\(name).encode(self.\(name))")
-        allDraftColumns.append("self.\(name)")
+        allDraftColumns.append(name)
       }
       decodings.append("self.\(name) = try Self.columns.\(name).decode(decoder: decoder)")
       encodings.append("Self.columns.\(name).encode(self.\(name))")
@@ -274,6 +302,7 @@ extension TableMacro: ExtensionMacro {
         """
     }
     let draft: String
+    let initFromDraft: String
     let protocolNames: [String]
     let schemaConformance: String
     if let primaryKey {
@@ -292,7 +321,7 @@ extension TableMacro: ExtensionMacro {
         public typealias QueryOutput = Draft
         \(draftColumnsProperties.joined(separator: "\n"))
         public var allColumns: [\(moduleName).AnyColumnExpression<QueryOutput>] {\
-        [\(allDraftColumns.map { "\(moduleName).AnyColumnExpression<QueryOutput>(\($0))" }.joined(separator: ", "))] \
+        [\(allDraftColumns.map { "\(moduleName).AnyColumnExpression<QueryOutput>(self.\($0))" }.joined(separator: ", "))] \
         }
         }
         public static let columns = Columns()
@@ -309,10 +338,25 @@ extension TableMacro: ExtensionMacro {
         }
         }
         """
+      let initFromDraftColumns = allDraftColumns
+        .map {
+          $0 == primaryKey.identifier
+            ? "self.\($0) = \($0)"
+            : "self.\($0) = draft.\($0)"
+        }
+        .joined(separator: "\n")
+      initFromDraft = """
+        
+        public init?(_ draft: Draft) {
+          guard let id = draft.\(primaryKey.identifier) else { return nil }
+          \(initFromDraftColumns)
+        }
+        """
       protocolNames = [protocolName(primaryKey: false), protocolName(primaryKey: true)]
       schemaConformance = "PrimaryKeyedSchema"
     } else {
       draft = ""
+      initFromDraft = ""
       protocolNames = [protocolName(primaryKey: false)]
       schemaConformance = "Schema"
     }
@@ -349,7 +393,7 @@ extension TableMacro: ExtensionMacro {
         public static let name = \(raw: tableName)
         public init(decoder: some \(moduleName).QueryDecoder) throws {
         \(raw: decodings.joined(separator: "\n"))
-        }
+        }\(raw: initFromDraft)
         public var queryFragment: QueryFragment {
         var sql: QueryFragment = "("
         sql.append(

@@ -50,7 +50,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        ("books"."published" > '1970-01-01 00:00:00')
+        ("books"."published" > '1970-01-01 00:00:00.000')
         """
       }
     }

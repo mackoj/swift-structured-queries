@@ -35,12 +35,14 @@ struct TableMacroTests {
           }
         }
         public struct Draft: StructuredQueries.Draft {
+          var id: Int?
           var name: String
           public struct Columns: StructuredQueries.DraftSchema {
             public typealias QueryOutput = Draft
+            public let id = StructuredQueries.DraftColumn<QueryOutput, Int?>("id", keyPath: \.id)
             public let name = StructuredQueries.DraftColumn<QueryOutput, String>("name", keyPath: \.name)
             public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
-              [StructuredQueries.AnyColumnExpression<QueryOutput>(self.name)]
+              [StructuredQueries.AnyColumnExpression<QueryOutput>(self.id), StructuredQueries.AnyColumnExpression<QueryOutput>(self.name)]
             }
           }
           public static let columns = Columns()
@@ -48,6 +50,7 @@ struct TableMacroTests {
             var sql: QueryFragment = "("
             sql.append(
               [
+                Self.columns.id.encode(self.id),
                 Self.columns.name.encode(self.name)
               ]
               .joined(separator: ", ")
@@ -61,6 +64,13 @@ struct TableMacroTests {
         public init(decoder: some StructuredQueries.QueryDecoder) throws {
           self.id = try Self.columns.id.decode(decoder: decoder)
           self.name = try Self.columns.name.decode(decoder: decoder)
+        }
+        public init?(_ draft: Draft) {
+          guard let id = draft.id else {
+            return nil
+          }
+          self.id = id
+          self.name = draft.name
         }
         public var queryFragment: QueryFragment {
           var sql: QueryFragment = "("
@@ -152,12 +162,12 @@ struct TableMacroTests {
           }
         }
         public struct Draft: StructuredQueries.Draft {
-
+          var id: Int?
           public struct Columns: StructuredQueries.DraftSchema {
             public typealias QueryOutput = Draft
-
+            public let id = StructuredQueries.DraftColumn<QueryOutput, Int?>("id", keyPath: \.id)
             public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
-              []
+              [StructuredQueries.AnyColumnExpression<QueryOutput>(self.id)]
             }
           }
           public static let columns = Columns()
@@ -165,7 +175,7 @@ struct TableMacroTests {
             var sql: QueryFragment = "("
             sql.append(
               [
-
+                Self.columns.id.encode(self.id)
               ]
               .joined(separator: ", ")
             )
@@ -177,6 +187,12 @@ struct TableMacroTests {
         public static let name = "users"
         public init(decoder: some StructuredQueries.QueryDecoder) throws {
           self.id = try Self.columns.id.decode(decoder: decoder)
+        }
+        public init?(_ draft: Draft) {
+          guard let id = draft.id else {
+            return nil
+          }
+          self.id = id
         }
         public var queryFragment: QueryFragment {
           var sql: QueryFragment = "("
@@ -222,12 +238,12 @@ struct TableMacroTests {
           }
         }
         public struct Draft: StructuredQueries.Draft {
-
+          var id: Int?
           public struct Columns: StructuredQueries.DraftSchema {
             public typealias QueryOutput = Draft
-
+            public let id = StructuredQueries.DraftColumn<QueryOutput, Int?>("id", keyPath: \.id)
             public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
-              []
+              [StructuredQueries.AnyColumnExpression<QueryOutput>(self.id)]
             }
           }
           public static let columns = Columns()
@@ -235,7 +251,7 @@ struct TableMacroTests {
             var sql: QueryFragment = "("
             sql.append(
               [
-
+                Self.columns.id.encode(self.id)
               ]
               .joined(separator: ", ")
             )
@@ -247,6 +263,12 @@ struct TableMacroTests {
         public static let name = "users"
         public init(decoder: some StructuredQueries.QueryDecoder) throws {
           self.id = try Self.columns.id.decode(decoder: decoder)
+        }
+        public init?(_ draft: Draft) {
+          guard let id = draft.id else {
+            return nil
+          }
+          self.id = id
         }
         public var queryFragment: QueryFragment {
           var sql: QueryFragment = "("
@@ -291,12 +313,12 @@ struct TableMacroTests {
           }
         }
         public struct Draft: StructuredQueries.Draft {
-
+          var id: Int?
           public struct Columns: StructuredQueries.DraftSchema {
             public typealias QueryOutput = Draft
-
+            public let id = StructuredQueries.DraftColumn<QueryOutput, Int?>("id", keyPath: \.id)
             public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
-              []
+              [StructuredQueries.AnyColumnExpression<QueryOutput>(self.id)]
             }
           }
           public static let columns = Columns()
@@ -304,7 +326,7 @@ struct TableMacroTests {
             var sql: QueryFragment = "("
             sql.append(
               [
-
+                Self.columns.id.encode(self.id)
               ]
               .joined(separator: ", ")
             )
@@ -316,6 +338,12 @@ struct TableMacroTests {
         public static let name = "user"
         public init(decoder: some StructuredQueries.QueryDecoder) throws {
           self.id = try Self.columns.id.decode(decoder: decoder)
+        }
+        public init?(_ draft: Draft) {
+          guard let id = draft.id else {
+            return nil
+          }
+          self.id = id
         }
         public var queryFragment: QueryFragment {
           var sql: QueryFragment = "("
@@ -361,12 +389,12 @@ struct TableMacroTests {
           }
         }
         public struct Draft: StructuredQueries.Draft {
-
+          var id: Int?
           public struct Columns: StructuredQueries.DraftSchema {
             public typealias QueryOutput = Draft
-
+            public let id = StructuredQueries.DraftColumn<QueryOutput, Int?>("user_id", keyPath: \.id)
             public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
-              []
+              [StructuredQueries.AnyColumnExpression<QueryOutput>(self.id)]
             }
           }
           public static let columns = Columns()
@@ -374,7 +402,7 @@ struct TableMacroTests {
             var sql: QueryFragment = "("
             sql.append(
               [
-
+                Self.columns.id.encode(self.id)
               ]
               .joined(separator: ", ")
             )
@@ -386,6 +414,12 @@ struct TableMacroTests {
         public static let name = "users"
         public init(decoder: some StructuredQueries.QueryDecoder) throws {
           self.id = try Self.columns.id.decode(decoder: decoder)
+        }
+        public init?(_ draft: Draft) {
+          guard let id = draft.id else {
+            return nil
+          }
+          self.id = id
         }
         public var queryFragment: QueryFragment {
           var sql: QueryFragment = "("
@@ -541,12 +575,12 @@ struct TableMacroTests {
           }
         }
         public struct Draft: StructuredQueries.Draft {
-
+          var id: Tagged<Self, Int>? = Tagged(Self.defaultID)
           public struct Columns: StructuredQueries.DraftSchema {
             public typealias QueryOutput = Draft
-
+            public let id = StructuredQueries.DraftColumn<QueryOutput, Tagged<QueryOutput, Int>?>("id", keyPath: \.id, default: Tagged(QueryOutput.defaultID))
             public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
-              []
+              [StructuredQueries.AnyColumnExpression<QueryOutput>(self.id)]
             }
           }
           public static let columns = Columns()
@@ -554,7 +588,7 @@ struct TableMacroTests {
             var sql: QueryFragment = "("
             sql.append(
               [
-
+                Self.columns.id.encode(self.id)
               ]
               .joined(separator: ", ")
             )
@@ -566,6 +600,12 @@ struct TableMacroTests {
         public static let name = "users"
         public init(decoder: some StructuredQueries.QueryDecoder) throws {
           self.id = try Self.columns.id.decode(decoder: decoder)
+        }
+        public init?(_ draft: Draft) {
+          guard let id = draft.id else {
+            return nil
+          }
+          self.id = id
         }
         public var queryFragment: QueryFragment {
           var sql: QueryFragment = "("
@@ -610,12 +650,12 @@ struct TableMacroTests {
           }
         }
         public struct Draft: StructuredQueries.Draft {
-
+          var id : Optional = Int(0)
           public struct Columns: StructuredQueries.DraftSchema {
             public typealias QueryOutput = Draft
-
+            public let id = StructuredQueries.DraftColumn<QueryOutput, _?>("id", keyPath: \.id, default: Int(0))
             public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
-              []
+              [StructuredQueries.AnyColumnExpression<QueryOutput>(self.id)]
             }
           }
           public static let columns = Columns()
@@ -623,7 +663,7 @@ struct TableMacroTests {
             var sql: QueryFragment = "("
             sql.append(
               [
-
+                Self.columns.id.encode(self.id)
               ]
               .joined(separator: ", ")
             )
@@ -635,6 +675,12 @@ struct TableMacroTests {
         public static let name = "users"
         public init(decoder: some StructuredQueries.QueryDecoder) throws {
           self.id = try Self.columns.id.decode(decoder: decoder)
+        }
+        public init?(_ draft: Draft) {
+          guard let id = draft.id else {
+            return nil
+          }
+          self.id = id
         }
         public var queryFragment: QueryFragment {
           var sql: QueryFragment = "("
@@ -687,12 +733,14 @@ struct TableMacroTests {
           }
         }
         public struct Draft: StructuredQueries.Draft {
+          var id: Int?
           var name: String
           public struct Columns: StructuredQueries.DraftSchema {
             public typealias QueryOutput = Draft
+            public let id = StructuredQueries.DraftColumn<QueryOutput, Int?>("id", keyPath: \.id)
             public let name = StructuredQueries.DraftColumn<QueryOutput, String>("name", keyPath: \.name)
             public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
-              [StructuredQueries.AnyColumnExpression<QueryOutput>(self.name)]
+              [StructuredQueries.AnyColumnExpression<QueryOutput>(self.id), StructuredQueries.AnyColumnExpression<QueryOutput>(self.name)]
             }
           }
           public static let columns = Columns()
@@ -700,6 +748,7 @@ struct TableMacroTests {
             var sql: QueryFragment = "("
             sql.append(
               [
+                Self.columns.id.encode(self.id),
                 Self.columns.name.encode(self.name)
               ]
               .joined(separator: ", ")
@@ -713,6 +762,13 @@ struct TableMacroTests {
         public init(decoder: some StructuredQueries.QueryDecoder) throws {
           self.id = try Self.columns.id.decode(decoder: decoder)
           self.name = try Self.columns.name.decode(decoder: decoder)
+        }
+        public init?(_ draft: Draft) {
+          guard let id = draft.id else {
+            return nil
+          }
+          self.id = id
+          self.name = draft.name
         }
         public var queryFragment: QueryFragment {
           var sql: QueryFragment = "("
@@ -763,12 +819,14 @@ struct TableMacroTests {
           }
         }
         public struct Draft: StructuredQueries.Draft {
+          var id: String?
           var uuid: UUID
           public struct Columns: StructuredQueries.DraftSchema {
             public typealias QueryOutput = Draft
+            public let id = StructuredQueries.DraftColumn<QueryOutput, String?>("id", keyPath: \.id)
             public let uuid = StructuredQueries.DraftColumn<QueryOutput, _>("uuid", keyPath: \.uuid, as: .bytes)
             public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
-              [StructuredQueries.AnyColumnExpression<QueryOutput>(self.uuid)]
+              [StructuredQueries.AnyColumnExpression<QueryOutput>(self.id), StructuredQueries.AnyColumnExpression<QueryOutput>(self.uuid)]
             }
           }
           public static let columns = Columns()
@@ -776,6 +834,7 @@ struct TableMacroTests {
             var sql: QueryFragment = "("
             sql.append(
               [
+                Self.columns.id.encode(self.id),
                 Self.columns.uuid.encode(self.uuid)
               ]
               .joined(separator: ", ")
@@ -789,6 +848,13 @@ struct TableMacroTests {
         public init(decoder: some StructuredQueries.QueryDecoder) throws {
           self.id = try Self.columns.id.decode(decoder: decoder)
           self.uuid = try Self.columns.uuid.decode(decoder: decoder)
+        }
+        public init?(_ draft: Draft) {
+          guard let id = draft.uuid else {
+            return nil
+          }
+          self.id = draft.id
+          self.uuid = uuid
         }
         public var queryFragment: QueryFragment {
           var sql: QueryFragment = "("
@@ -892,6 +958,13 @@ struct TableMacroTests {
         public init(decoder: some StructuredQueries.QueryDecoder) throws {
           self.syncUpID = try Self.columns.syncUpID.decode(decoder: decoder)
           self.attendeeID = try Self.columns.attendeeID.decode(decoder: decoder)
+        }
+        public init?(_ draft: Draft) {
+          guard let id = draft.syncUpID else {
+            return nil
+          }
+          self.syncUpID = syncUpID
+          self.attendeeID = draft.attendeeID
         }
         public var queryFragment: QueryFragment {
           var sql: QueryFragment = "("

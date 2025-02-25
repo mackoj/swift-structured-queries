@@ -22,9 +22,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        INSERT INTO "syncUps" ("isActive", "seconds", "title") \
-        VALUES (1, 60.0, 'Engineering') \
-        RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."seconds", "syncUps"."title"
+        INSERT INTO "syncUps" ("id", "isActive", "seconds", "title") VALUES (NULL, 1, 60.0, 'Engineering') RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."seconds", "syncUps"."title"
         """
       }
     }

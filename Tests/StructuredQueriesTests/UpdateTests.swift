@@ -176,7 +176,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        UPDATE "meetings" SET "date" = '2001-01-01 00:00:00'
+        UPDATE "meetings" SET "date" = '2001-01-01 00:00:00.000'
         """
       }
     }
@@ -189,7 +189,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        UPDATE "meetings" SET "date" = '2001-01-01 00:00:00'
+        UPDATE "meetings" SET "date" = '2001-01-01 00:00:00.000'
         """
       }
     }
