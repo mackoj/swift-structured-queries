@@ -1094,4 +1094,102 @@ struct TableMacroTests {
       """#
     }
   }
+
+  @Test func optionalPropertyInitializer() {
+    assertMacro {
+      """
+      @Table
+      struct MyTable {
+        let id: Int
+        var myProperty: String?
+      }
+      """
+    } expansion: {
+      #"""
+      struct MyTable {
+        @Column("id", primaryKey: true)
+        let id: Int
+        @Column("myProperty")
+        var myProperty: String?
+      }
+
+      extension MyTable: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
+        public struct Columns: StructuredQueries.PrimaryKeyedSchema {
+          public typealias QueryOutput = MyTable
+          public let id = StructuredQueries.Column<QueryOutput, Int>("id", keyPath: \.id)
+          public let myProperty = StructuredQueries.Column<QueryOutput, String?>("myProperty", keyPath: \.myProperty)
+          public var primaryKey: some StructuredQueries.ColumnExpression<QueryOutput> & StructuredQueries.QueryExpression<Int> {
+            self.id
+          }
+          public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
+            [StructuredQueries.AnyColumnExpression<QueryOutput>(self.id), StructuredQueries.AnyColumnExpression<QueryOutput>(self.myProperty)]
+          }
+        }
+        public struct Draft: StructuredQueries.Draft {
+          let id: Int?
+          var myProperty: String?
+          public struct Columns: StructuredQueries.DraftSchema {
+            public typealias QueryOutput = Draft
+            public let id = StructuredQueries.DraftColumn<QueryOutput, Int?>("id", keyPath: \.id)
+            public let myProperty = StructuredQueries.DraftColumn<QueryOutput, String?>("myProperty", keyPath: \.myProperty)
+            public var allColumns: [StructuredQueries.AnyColumnExpression<QueryOutput>] {
+              [StructuredQueries.AnyColumnExpression<QueryOutput>(self.id), StructuredQueries.AnyColumnExpression<QueryOutput>(self.myProperty)]
+            }
+          }
+          public static let columns = Columns()
+          public var queryFragment: QueryFragment {
+            var sql: QueryFragment = "("
+            sql.append(
+              [
+                Self.columns.id.encode(self.id),
+                Self.columns.myProperty.encode(self.myProperty)
+              ]
+              .joined(separator: ", ")
+            )
+            sql.append(")")
+            return sql
+          }
+          public init(
+            id: Int? = nil,
+            myProperty: String? = nil
+          ) {
+            self.id = id
+            self.myProperty = myProperty
+          }
+          public init(
+            _ record: MyTable
+          ) {
+            self.id = record.id
+            self.myProperty = record.myProperty
+          }
+        }
+        public static let columns = Columns()
+        public static let name = "myTables"
+        public init(decoder: some StructuredQueries.QueryDecoder) throws {
+          self.id = try Self.columns.id.decode(decoder: decoder)
+          self.myProperty = try Self.columns.myProperty.decode(decoder: decoder)
+        }
+        public init?(_ draft: Draft) {
+          guard let id = draft.id else {
+            return nil
+          }
+          self.id = id
+          self.myProperty = draft.myProperty
+        }
+        public var queryFragment: QueryFragment {
+          var sql: QueryFragment = "("
+          sql.append(
+            [
+              Self.columns.id.encode(self.id),
+              Self.columns.myProperty.encode(self.myProperty)
+            ]
+            .joined(separator: ", ")
+          )
+          sql.append(")")
+          return sql
+        }
+      }
+      """#
+    }
+  }
 }

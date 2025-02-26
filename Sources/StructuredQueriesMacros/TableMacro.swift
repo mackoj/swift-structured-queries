@@ -294,8 +294,9 @@ extension TableMacro: ExtensionMacro {
           """
         )
         if let type {
+          let defaultInitializer = type.is(OptionalTypeSyntax.self) ? " = nil" : ""
           draftInitArguments.append(
-            "\(name): \(type)\(binding.initializer?.trimmedDescription ?? "")"
+            "\(name): \(type)\(binding.initializer?.trimmedDescription ?? defaultInitializer)"
           )
         }
       }
