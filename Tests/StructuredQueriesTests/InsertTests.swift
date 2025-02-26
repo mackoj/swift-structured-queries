@@ -1,3 +1,4 @@
+import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
 import Testing
@@ -6,6 +7,8 @@ extension SnapshotTests {
   struct InsertTests {
     @Table
     struct SyncUp: Equatable {
+      @Column(as: .iso8601)
+      var createdAt: Date
       var id: Int
       var isActive: Bool
       var seconds: Double
@@ -14,6 +17,8 @@ extension SnapshotTests {
 
     @Table
     struct Attendee: Equatable {
+      @Column(as: .iso8601)
+      var createdAt: Date
       var id: Int
       var name: String
       var syncUpID: Int
@@ -237,10 +242,24 @@ extension SnapshotTests {
 
     @Test func records() {
       assertInlineSnapshot(
-        of: SyncUp.insert([
-          SyncUp(id: 1, isActive: true, seconds: 60, title: "Engineering"),
-          SyncUp(id: 2, isActive: false, seconds: 15 * 60, title: "Product"),
-        ]),
+        of: SyncUp.insert(
+          [
+            SyncUp(
+              createdAt: Date(timeIntervalSinceReferenceDate: 0),
+              id: 1,
+              isActive: true,
+              seconds: 60,
+              title: "Engineering"
+            ),
+            SyncUp(
+              createdAt: Date(timeIntervalSinceReferenceDate: 10),
+              id: 2,
+              isActive: false,
+              seconds: 15 * 60,
+              title: "Product"
+            ),
+          ]
+        ),
         as: .sql
       ) {
         """
@@ -253,7 +272,14 @@ extension SnapshotTests {
 
     @Test func upsert() {
       assertInlineSnapshot(
-        of: SyncUp.upsert(SyncUp.Draft(isActive: true, seconds: 60, title: "Engineering")),
+        of: SyncUp.upsert(
+          SyncUp.Draft(
+            createdAt: Date(timeIntervalSinceReferenceDate: 0),
+            isActive: true,
+            seconds: 60,
+            title: "Engineering"
+          )
+        ),
         as: .sql
       ) {
         """
@@ -263,7 +289,15 @@ extension SnapshotTests {
         """
       }
       assertInlineSnapshot(
-        of: SyncUp.upsert(SyncUp.Draft(id: 1, isActive: true, seconds: 60, title: "Engineering")),
+        of: SyncUp.upsert(
+          SyncUp.Draft(
+            createdAt: Date(timeIntervalSinceReferenceDate: 0),
+            id: 1,
+            isActive: true,
+            seconds: 60,
+            title: "Engineering"
+          )
+        ),
         as: .sql
       ) {
         """
