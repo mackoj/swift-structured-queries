@@ -153,12 +153,12 @@ extension Table {
 }
 
 public struct Insert<Base: Table, Draft: StructuredQueriesCore.Draft, Input: Sendable, Output> {
-  fileprivate var input: Input
-  fileprivate var conflictResolution: ConflictResolution?
-  fileprivate var columns: [any ColumnExpression] = []
-  fileprivate var form: InsertionForm<Base, Draft> = .defaultValues
-  fileprivate var record: Record<Base>?
-  fileprivate var returning: ReturningClause?
+  var input: Input
+  var conflictResolution: ConflictResolution?
+  var columns: [any ColumnExpression] = []
+  var form: InsertionForm<Base, Draft> = .defaultValues
+  var record: Record<Base>?
+  var returning: ReturningClause?
 
   public func returning<each O: QueryExpression>(
     _ selection: (Base.Columns) -> (repeat each O)
@@ -200,7 +200,7 @@ extension Insert: Statement {
   }
 }
 
-private enum InsertionForm<Base: Table, Draft: StructuredQueriesCore.Draft>: QueryExpression {
+enum InsertionForm<Base: Table, Draft: StructuredQueriesCore.Draft>: QueryExpression {
   case defaultValues
   case values([[any QueryExpression]])
   case select(any Statement)

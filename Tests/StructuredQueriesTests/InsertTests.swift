@@ -250,6 +250,29 @@ extension SnapshotTests {
       }
       #expect(SyncUp.insert([]).queryFragment.isEmpty)
     }
+
+    @Test func upsert() {
+      assertInlineSnapshot(
+        of: SyncUp.upsert(SyncUp.Draft(isActive: true, seconds: 60, title: "Engineering")),
+        as: .sql
+      ) {
+        """
+        INSERT INTO "syncUps" ("id", "isActive", "seconds", "title") \
+        VALUES (NULL, 1, 60.0, 'Engineering') \
+        ON CONFLICT DO UPDATE SET "isActive" = 1, "seconds" = 60.0, "title" = 'Engineering'
+        """
+      }
+      assertInlineSnapshot(
+        of: SyncUp.upsert(SyncUp.Draft(id: 1, isActive: true, seconds: 60, title: "Engineering")),
+        as: .sql
+      ) {
+        """
+        INSERT INTO "syncUps" ("id", "isActive", "seconds", "title") \
+        VALUES (1, 1, 60.0, 'Engineering') \
+        ON CONFLICT DO UPDATE SET "isActive" = 1, "seconds" = 60.0, "title" = 'Engineering'
+        """
+      }
+    }
   }
 }
 
