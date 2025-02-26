@@ -13,6 +13,10 @@ let package = Package(
   ],
   products: [
     .library(
+      name: "ColumnsCore",
+      targets: ["ColumnsCore"]
+    ),
+    .library(
       name: "StructuredQueries",
       targets: ["StructuredQueries"]
     ),
@@ -28,6 +32,10 @@ let package = Package(
     .package(url: "https://github.com/swiftlang/swift-syntax", "600.0.0"..<"601.0.0"),
   ],
   targets: [
+    .target(
+      name: "ColumnsCore",
+      dependencies: []
+    ),
     .target(
       name: "StructuredQueries",
       dependencies: [
