@@ -84,11 +84,3 @@ public macro Selection() =
 //    .fullJoin(A2B.all()) { $0.id == $1.aID }
 //    .fullJoin(B.all()) { $1.bID == $2.id }
 //}
-
-
-import Foundation
-typealias MyDate = Date
-@Table
-struct User {
-  var savedAt: MyDate
-}
