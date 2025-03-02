@@ -42,5 +42,16 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func overrideOrder() {
+      assertInlineSnapshot(
+        of: User.order { $0.id }.order { $0.name },
+        as: .sql
+      ) {
+        """
+        SELECT "users"."id", "users"."name" FROM "users" ORDER BY "users"."name"
+        """
+      }
+    }
   }
 }
