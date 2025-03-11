@@ -1,35 +1,47 @@
-// TODO: Rename `Root` to `Base`?
-public struct Column<Root: Table, QueryOutput: QueryBindable> {
-  public let _keyPath: PartialKeyPath<Root> & Sendable
+public protocol ColumnExpression<Root, Value>: QueryExpression where Value == QueryValue {
+  associatedtype Root: Table
+  associatedtype Value: QueryRepresentable & QueryBindable
+
+  var name: String { get }
+  var keyPath: KeyPath<Root, Value.QueryOutput> { get }
+}
+
+public struct Column<Root: Table, Value: QueryRepresentable & QueryBindable>:
+  ColumnExpression,
+  Sendable
+{
+  public typealias QueryValue = Value
+
   public let name: String
-  public let `default`: QueryOutput?
+  let _keyPath: KeyPath<Root, Value.QueryOutput> & Sendable
+
+  public var keyPath: KeyPath<Root, Value.QueryOutput> {
+    _keyPath
+  }
 
   public init(
     _ name: String,
-    keyPath: KeyPath<Root, QueryOutput> & Sendable,
-    default: QueryOutput? = nil
+    keyPath: KeyPath<Root, Value.QueryOutput> & Sendable,
+    default: Value.QueryOutput? = nil
   ) {
-    self._keyPath = keyPath
-    self.default = `default`
     self.name = name
+    self._keyPath = keyPath
   }
 
-  public var keyPath: PartialKeyPath<Root> { _keyPath }
-}
+  public init(
+    _ name: String,
+    keyPath: KeyPath<Root, Value.QueryOutput> & Sendable,
+    default: Value? = nil
+  ) where Value == Value.QueryOutput {
+    self.name = name
+    self._keyPath = keyPath
+  }
 
-extension Column: ColumnExpression {
+  public func decode(_ decoder: some QueryDecoder) throws -> Value.QueryOutput {
+    try decoder.decode(Value.self)
+  }
+
   public var queryFragment: QueryFragment {
-    "\(raw: Root.name.quoted()).\(raw: name.quoted())"
-  }
-
-  public func encode(_ output: QueryOutput) -> QueryFragment {
-    output.queryFragment
-  }
-}
-
-// TODO: Move to `QueryBindable.swift`
-extension QueryExpression where QueryOutput: QueryBindable {
-  public func decode(decoder: some QueryDecoder) throws -> QueryOutput {
-    try decoder.decode(QueryOutput.self)
+    "\(raw: Root.tableName.quoted()).\(raw: name.quoted())"
   }
 }

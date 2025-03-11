@@ -1,21 +1,6 @@
 import SwiftSyntax
 
 extension VariableDeclSyntax {
-  func accessorsMatching(_ predicate: (TokenKind) -> Bool) -> [AccessorDeclSyntax] {
-    let accessors: [AccessorDeclListSyntax.Element] = bindings.compactMap { patternBinding in
-      switch patternBinding.accessorBlock?.accessors {
-      case .accessors(let accessors):
-        return accessors
-      default:
-        return nil
-      }
-    }
-    .flatMap { $0 }
-    return accessors.compactMap { accessor in
-      predicate(accessor.accessorSpecifier.tokenKind) ? accessor : nil
-    }
-  }
-
   func hasMacroApplication(_ name: String) -> Bool {
     for attribute in attributes {
       switch attribute {
@@ -31,21 +16,25 @@ extension VariableDeclSyntax {
   }
 
   var isComputed: Bool {
-    if accessorsMatching({ $0 == .keyword(.get) }).count > 0 {
-      return true
-    } else {
-      return bindings.contains { binding in
-        if case .getter = binding.accessorBlock?.accessors {
-          return true
-        } else {
-          return false
+    for binding in bindings {
+      switch binding.accessorBlock?.accessors {
+      case .getter:
+        return true
+      case let .accessors(accessors):
+        for accessor in accessors {
+          if accessor.accessorSpecifier.tokenKind == .keyword(.get) {
+            return true
+          }
         }
+      default:
+        continue
       }
     }
+    return false
   }
 
   var isStatic: Bool {
-    self.modifiers.contains { modifier in
+    modifiers.contains { modifier in
       modifier.name.tokenKind == .keyword(.static)
     }
   }

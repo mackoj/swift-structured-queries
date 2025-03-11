@@ -31,9 +31,14 @@ public final class Database {
     }
   }
 
-  public func execute<each Value: QueryDecodable>(
-    _ query: some Statement<[(repeat each Value)]>
-  ) throws -> [(repeat each Value)] {
+  public func execute<S: Statement>(_ query: S) throws where S.Columns == () {
+    _ = try execute(query) as [()]
+  }
+
+  public func execute<S: Statement>(
+    _ query: S
+  ) throws -> [S.Columns.QueryOutput]
+  where S.Columns: QueryRepresentable {
     var statement: OpaquePointer?
     let sql = query.queryFragment
     guard
@@ -59,13 +64,108 @@ public final class Database {
         }
       guard result == SQLITE_OK else { throw SQLiteError() }
     }
-    var results: [(repeat each Value)] = []
+    var results: [S.Columns.QueryOutput] = []
     let decoder = SQLiteQueryDecoder(statement: statement)
     loop: while true {
       let code = sqlite3_step(statement)
       switch code {
       case SQLITE_ROW:
-        try results.append((repeat (each Value)(decoder: decoder)))
+        try results.append(S.Columns(decoder: decoder).queryOutput)
+        decoder.next()
+      case SQLITE_DONE:
+        break loop
+      default:
+        throw SQLiteError()
+      }
+    }
+    return results
+  }
+
+  public func execute<S: Statement, each V: QueryRepresentable>(
+    _ query: S
+  ) throws -> [(repeat (each V).QueryOutput)]
+  where S.Columns == (repeat each V) {
+    var statement: OpaquePointer?
+    let sql = query.queryFragment
+    guard
+      sqlite3_prepare_v2(db, sql.string, -1, &statement, nil) == SQLITE_OK,
+      let statement
+    else {
+      throw SQLiteError()
+    }
+    defer { sqlite3_finalize(statement) }
+    for (index, binding) in zip(Int32(1)..., sql.bindings) {
+      let result =
+        switch binding {
+        case let .blob(blob):
+          sqlite3_bind_blob(statement, index, blob, -1, SQLITE_TRANSIENT)
+        case let .double(double):
+          sqlite3_bind_double(statement, index, double)
+        case let .int(int):
+          sqlite3_bind_int64(statement, index, Int64(int))
+        case .null:
+          sqlite3_bind_null(statement, index)
+        case let .text(text):
+          sqlite3_bind_text(statement, index, text, -1, SQLITE_TRANSIENT)
+        }
+      guard result == SQLITE_OK else { throw SQLiteError() }
+    }
+    var results: [(repeat (each V).QueryOutput)] = []
+    let decoder = SQLiteQueryDecoder(statement: statement)
+    loop: while true {
+      let code = sqlite3_step(statement)
+      switch code {
+      case SQLITE_ROW:
+        try results.append((repeat (each V)(decoder: decoder).queryOutput))
+        decoder.next()
+      case SQLITE_DONE:
+        break loop
+      default:
+        throw SQLiteError()
+      }
+    }
+    return results
+  }
+
+  public func execute<S: SelectStatement, each J: Table>(
+    _ query: S
+  ) throws -> [(S.From.QueryOutput, repeat (each J).QueryOutput)]
+  where S.Columns == (), S.Joins == (repeat each J) {
+    var statement: OpaquePointer?
+    let sql = query.queryFragment
+    guard
+      sqlite3_prepare_v2(db, sql.string, -1, &statement, nil) == SQLITE_OK,
+      let statement
+    else {
+      throw SQLiteError()
+    }
+    defer { sqlite3_finalize(statement) }
+    for (index, binding) in zip(Int32(1)..., sql.bindings) {
+      let result =
+        switch binding {
+        case let .blob(blob):
+          sqlite3_bind_blob(statement, index, blob, -1, SQLITE_TRANSIENT)
+        case let .double(double):
+          sqlite3_bind_double(statement, index, double)
+        case let .int(int):
+          sqlite3_bind_int64(statement, index, Int64(int))
+        case .null:
+          sqlite3_bind_null(statement, index)
+        case let .text(text):
+          sqlite3_bind_text(statement, index, text, -1, SQLITE_TRANSIENT)
+        }
+      guard result == SQLITE_OK else { throw SQLiteError() }
+    }
+    var results: [(S.From.QueryOutput, repeat (each J).QueryOutput)] = []
+    let decoder = SQLiteQueryDecoder(statement: statement)
+    loop: while true {
+      let code = sqlite3_step(statement)
+      switch code {
+      case SQLITE_ROW:
+        try results
+          .append(
+            (S.From(decoder: decoder).queryOutput, repeat (each J)(decoder: decoder).queryOutput)
+          )
         decoder.next()
       case SQLITE_DONE:
         break loop
@@ -78,3 +178,5 @@ public final class Database {
 }
 
 private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
+
+struct SQLiteError: Error {}

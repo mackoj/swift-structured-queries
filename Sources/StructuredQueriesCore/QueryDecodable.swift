@@ -1,14 +1,10 @@
-public protocol QueryDecodable {
+public protocol QueryDecodable: _OptionalPromotable {
   init(decoder: some QueryDecoder) throws
 }
 
-extension QueryDecodable where Self: RawRepresentable, RawValue: QueryDecodable {
+extension Bool: QueryDecodable {
   public init(decoder: some QueryDecoder) throws {
-    guard let rawRepresentable = try Self(rawValue: decoder.decode(RawValue.self))
-    else {
-      throw QueryDecodingError.dataCorrupted
-    }
-    self = rawRepresentable
+    self = try decoder.decode(Int.self) != 0
   }
 }
 
@@ -60,7 +56,12 @@ extension Int64: QueryDecodable {
   }
 }
 
-private struct OverflowError: Error {}
+
+extension String: QueryDecodable {
+  public init(decoder: some QueryDecoder) throws {
+    self = try decoder.decode(String.self)
+  }
+}
 
 extension UInt: QueryDecodable {
   public init(decoder: some QueryDecoder) throws {
@@ -100,30 +101,21 @@ extension UInt64: QueryDecodable {
   }
 }
 
-extension String: QueryDecodable {
-  public init(decoder: some QueryDecoder) throws {
-    self = try decoder.decode(String.self)
-  }
-}
-
-extension [UInt8]: QueryDecodable {
+extension [UInt8]: QueryDecodable, _OptionalPromotable {
   public init(decoder: some QueryDecoder) throws {
     self = try decoder.decode([UInt8].self)
   }
 }
 
-extension Optional: QueryDecodable where Wrapped: QueryDecodable {
+extension QueryDecodable where Self: RawRepresentable, RawValue: QueryDecodable {
   public init(decoder: some QueryDecoder) throws {
-    if try decoder.decodeNil() {
-      self = nil
-    } else {
-      self = try decoder.decode(Wrapped.self)
+    guard let rawRepresentable = try Self(rawValue: decoder.decode(RawValue.self))
+    else {
+      throw DataCorruptedError()
     }
+    self = rawRepresentable
   }
 }
 
-extension Bool: QueryDecodable {
-  public init(decoder: some QueryDecoder) throws {
-    self = try decoder.decode(Int.self) != 0
-  }
-}
+private struct DataCorruptedError: Error {}
+private struct OverflowError: Error {}

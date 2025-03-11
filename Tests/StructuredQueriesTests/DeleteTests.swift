@@ -4,60 +4,72 @@ import StructuredQueries
 import Testing
 
 extension SnapshotTests {
-  struct DeleteTests {
-    @Table
-    struct SyncUp: Equatable {
-      var id: Int
-      var isActive: Bool
-      var title: String
-    }
-
+  @Suite struct DeleteTests {
     @Test func basics() {
-      assertInlineSnapshot(of: SyncUp.delete(), as: .sql) {
+      assertInlineSnapshot(
+        of:
+          SyncUp
+          .delete(),
+        as: .sql
+      ) {
         """
         DELETE FROM "syncUps"
         """
       }
-    }
-
-    @Test func `where`() {
-      assertInlineSnapshot(of: SyncUp.delete().where(\.isActive), as: .sql) {
+      assertInlineSnapshot(
+        of:
+          SyncUp
+          .delete()
+          .returning(\.self),
+        as: .sql
+      ) {
         """
-        DELETE FROM "syncUps" WHERE "syncUps"."isActive"
-        """
-      }
-      assertInlineSnapshot(of: SyncUp.where(\.isActive).delete(), as: .sql) {
-        """
-        DELETE FROM "syncUps" WHERE "syncUps"."isActive"
+        DELETE FROM "syncUps" RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt"
         """
       }
-
-      #expect(
-        SyncUp.delete().where { $0.id == 1 && $0.isActive }.queryFragment
-          == SyncUp.delete().where { $0.id == 1 }.where(\.isActive).queryFragment
-      )
-    }
-
-    @Test func returning() {
-      assertInlineSnapshot(of: SyncUp.delete().returning(\.self), as: .sql) {
+      assertInlineSnapshot(
+        of:
+          SyncUp
+          .delete()
+          .where(\.isActive)
+          .returning(\.self),
+        as: .sql
+      ) {
         """
-        DELETE FROM "syncUps" RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."title"
-        """
-      }
-      assertInlineSnapshot(of: SyncUp.delete().returning(\.id), as: .sql) {
-        """
-        DELETE FROM "syncUps" RETURNING "syncUps"."id"
+        DELETE FROM "syncUps" WHERE "syncUps"."isActive" RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt"
         """
       }
     }
 
     @Test func primaryKey() {
-      let syncUp = SyncUp(id: 1, isActive: true, title: "Morning Sync")
-      assertInlineSnapshot(of: SyncUp.delete([syncUp]), as: .sql) {
+      assertInlineSnapshot(
+        of:
+          SyncUp
+          .delete(SyncUp(id: 1, isActive: true, createdAt: Date(timeIntervalSinceNow: 0)))
+          .returning(\.self),
+        as: .sql
+      ) {
         """
-        DELETE FROM "syncUps" WHERE ("syncUps"."id" IN (1))
+        DELETE FROM "syncUps" WHERE ("syncUps"."id" = 1) RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt"
         """
       }
+    }
+
+    @Table
+    struct SyncUp {
+      let id: Int
+      var isActive: Bool
+      @Column(as: Date.ISO8601Representation.self)
+      var createdAt: Date
+    }
+
+    @Table
+    struct Attendee {
+      let id: Int
+      var syncUpID: Int
+      var name: String
+      @Column(as: Date.ISO8601Representation.self)
+      var createdAt: Date
     }
   }
 }

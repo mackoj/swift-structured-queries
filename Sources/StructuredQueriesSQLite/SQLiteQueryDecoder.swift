@@ -44,5 +44,3 @@ final class SQLiteQueryDecoder: QueryDecoder {
     return sqlite3_column_blob(statement, currentIndex).load(as: [UInt8].self)
   }
 }
-
-struct SQLiteError: Error {}

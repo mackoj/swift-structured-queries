@@ -95,7 +95,7 @@ extension TypeSyntax {
   var identifier: String? {
     for token in tokens(viewMode: .all) {
       switch token.tokenKind {
-      case .identifier(let identifier):
+      case let .identifier(identifier) where !["Optional", "Swift.Optional"].contains(identifier):
         return identifier
       default:
         break

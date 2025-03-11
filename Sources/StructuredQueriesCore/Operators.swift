@@ -1,77 +1,58 @@
-extension QueryExpression /*where QueryOutput: Equatable*/ {
+extension QueryExpression {
   public static func == (
-    lhs: Self, rhs: some QueryExpression<QueryOutput>
+    lhs: Self, rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: "=", rhs: rhs)
   }
 
   public static func != (
-    lhs: Self, rhs: some QueryExpression<QueryOutput>
+    lhs: Self, rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: "<>", rhs: rhs)
   }
 
   @_disfavoredOverload
   public static func == (
-    lhs: Self, rhs: some QueryExpression<QueryOutput?>
+    lhs: Self, rhs: some QueryExpression<QueryValue?>
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: isNull(rhs) ? "IS" : "=", rhs: rhs)
   }
 
   @_disfavoredOverload
   public static func != (
-    lhs: Self, rhs: some QueryExpression<QueryOutput?>
+    lhs: Self, rhs: some QueryExpression<QueryValue?>
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: isNull(rhs) ? "IS NOT" : "<>", rhs: rhs)
   }
 }
 
-private func isNull<QueryOutput>(_ expression: some QueryExpression<QueryOutput>) -> Bool {
-  guard let expression = expression as? any _OptionalProtocol else { return false }
-  return expression._wrapped == nil
+private func isNull<Value>(_ expression: some QueryExpression<Value>) -> Bool {
+  (expression as? any _OptionalProtocol)?._wrapped == nil
 }
 
-extension QueryExpression where QueryOutput: _OptionalProtocol {
+extension QueryExpression where QueryValue: _OptionalProtocol {
   public static func == (
-    lhs: Self, rhs: some QueryExpression<QueryOutput.Wrapped>
+    lhs: Self, rhs: some QueryExpression<QueryValue.Wrapped>
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: "=", rhs: rhs)
   }
 
   public static func != (
-    lhs: Self, rhs: some QueryExpression<QueryOutput.Wrapped>
+    lhs: Self, rhs: some QueryExpression<QueryValue.Wrapped>
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: "<>", rhs: rhs)
   }
 
   public static func == (
-    lhs: Self, rhs: _Null<QueryOutput.Wrapped>
+    lhs: Self, rhs: _Null<QueryValue.Wrapped>
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: "IS", rhs: rhs)
   }
 
   public static func != (
-    lhs: Self, rhs: _Null<QueryOutput.Wrapped>
+    lhs: Self, rhs: _Null<QueryValue.Wrapped>
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: "IS NOT", rhs: rhs)
-  }
-
-  public static func ?? (
-    lhs: Self, rhs: some QueryExpression<QueryOutput.Wrapped>
-  ) -> some QueryExpression<QueryOutput.Wrapped> {
-    QueryFunction("coalesce", lhs, rhs)
-  }
-
-  public static func ?? (
-    lhs: Self, rhs: some QueryExpression<QueryOutput>
-  ) -> some QueryExpression<QueryOutput> {
-    QueryFunction("coalesce", lhs, rhs)
-  }
-
-  public static func ?? (
-    lhs: Self, rhs: _Null<QueryOutput.Wrapped>
-  ) -> some QueryExpression<QueryOutput> {
-    QueryFunction("coalesce", lhs, rhs)
   }
 }
 
@@ -79,20 +60,20 @@ extension QueryExpression {
   @available(
     *, deprecated, message: "Comparing non-optional expression to 'NULL' always returns false"
   )
-  public static func == (lhs: Self, rhs: _Null<QueryOutput>) -> some QueryExpression<Bool> {
+  public static func == (lhs: Self, rhs: _Null<QueryValue>) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: "IS", rhs: rhs)
   }
 
   @available(
-    *, deprecated, message: "Comparing non-optional expression to 'NULL' always returns false"
+    *, deprecated, message: "Comparing non-optional expression to 'NULL' always returns true"
   )
-  public static func != (lhs: Self, rhs: _Null<QueryOutput>) -> some QueryExpression<Bool> {
+  public static func != (lhs: Self, rhs: _Null<QueryValue>) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: "IS NOT", rhs: rhs)
   }
 }
 
 public struct _Null<Wrapped>: QueryExpression {
-  public typealias QueryOutput = Wrapped?
+  public typealias QueryValue = Wrapped?
   public var queryFragment: QueryFragment { "NULL" }
 }
 
@@ -101,41 +82,71 @@ extension _Null: ExpressibleByNilLiteral {
 }
 
 extension QueryExpression {
-  public static func < (lhs: Self, rhs: some QueryExpression<QueryOutput>) -> some QueryExpression<Bool> {
+  public static func < (
+    lhs: Self, rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: "<", rhs: rhs)
   }
 
-  public static func > (lhs: Self, rhs: some QueryExpression<QueryOutput>) -> some QueryExpression<Bool> {
+  public static func > (
+    lhs: Self, rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: ">", rhs: rhs)
   }
 
-  public static func <= (lhs: Self, rhs: some QueryExpression<QueryOutput>) -> some QueryExpression<Bool>
-  {
+  public static func <= (
+    lhs: Self, rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: "<=", rhs: rhs)
   }
 
-  public static func >= (lhs: Self, rhs: some QueryExpression<QueryOutput>) -> some QueryExpression<Bool>
-  {
+  public static func >= (
+    lhs: Self, rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: ">=", rhs: rhs)
   }
 }
 
-extension QueryExpression where QueryOutput == Bool {
+extension QueryExpression where QueryValue == Bool {
   public static func && (
-    lhs: Self, rhs: some QueryExpression<QueryOutput>
-  ) -> some QueryExpression<QueryOutput> {
+    lhs: Self, rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<QueryValue> {
     BinaryOperator(lhs: lhs, operator: "AND", rhs: rhs)
   }
 
   public static func || (
-    lhs: Self, rhs: some QueryExpression<QueryOutput>
-  ) -> some QueryExpression<QueryOutput> {
+    lhs: Self, rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<QueryValue> {
     BinaryOperator(lhs: lhs, operator: "OR", rhs: rhs)
   }
 
-  public static prefix func ! (expression: Self) -> some QueryExpression<QueryOutput> {
+  public static prefix func ! (expression: Self) -> some QueryExpression<QueryValue> {
     UnaryOperator(operator: "NOT", base: expression)
   }
+
+  // TODO: Should we ship these? What about the reverse, like '*', '%', '~', '<<', etc.?
+  // public func and(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<QueryValue> {
+  //   self && other
+  // }
+  //
+  // public func or(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<QueryValue> {
+  //   self || other
+  // }
+  //
+  // public static func not(_ expression: Self) -> some QueryExpression<QueryValue> {
+  //   !expression
+  // }
+}
+
+// NB: This overload is required due to an overload resolution bug of 'Record[dynamicMember:]'.
+@_documentation(visibility: private)
+public prefix func ! (
+  expression: any QueryExpression<Bool>
+) -> some QueryExpression<Bool> {
+  func open(_ expression: some QueryExpression<Bool>) -> AnyQueryExpression<Bool> {
+    AnyQueryExpression(UnaryOperator(operator: "NOT", base: expression))
+  }
+  return open(expression)
 }
 
 extension AnyQueryExpression<Bool> {
@@ -144,50 +155,76 @@ extension AnyQueryExpression<Bool> {
   }
 }
 
-extension QueryExpression where QueryOutput: Numeric {
-  public static func + (lhs: Self, rhs: some QueryExpression<QueryOutput>) -> some QueryExpression<QueryOutput>
-  {
+extension QueryExpression where QueryValue: Numeric {
+  public static func + (
+    lhs: Self, rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<QueryValue> {
     BinaryOperator(lhs: lhs, operator: "+", rhs: rhs)
   }
 
-  public static func - (lhs: Self, rhs: some QueryExpression<QueryOutput>) -> some QueryExpression<QueryOutput>
-  {
+  public static func - (
+    lhs: Self, rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<QueryValue> {
     BinaryOperator(lhs: lhs, operator: "-", rhs: rhs)
   }
 
-  public static func * (lhs: Self, rhs: some QueryExpression<QueryOutput>) -> some QueryExpression<QueryOutput>
-  {
+  public static func * (
+    lhs: Self, rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<QueryValue> {
     BinaryOperator(lhs: lhs, operator: "*", rhs: rhs)
   }
 
-  public static func / (lhs: Self, rhs: some QueryExpression<QueryOutput>) -> some QueryExpression<QueryOutput>
-  {
+  public static func / (
+    lhs: Self, rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<QueryValue> {
     BinaryOperator(lhs: lhs, operator: "/", rhs: rhs)
   }
 
-  public static prefix func - (expression: Self) -> some QueryExpression<QueryOutput> {
+  public static prefix func - (expression: Self) -> some QueryExpression<QueryValue> {
     UnaryOperator(operator: "-", base: expression, separator: "")
   }
 
-  public static prefix func + (expression: Self) -> some QueryExpression<QueryOutput> {
+  public static prefix func + (expression: Self) -> some QueryExpression<QueryValue> {
     UnaryOperator(operator: "+", base: expression, separator: "")
   }
 }
 
-extension AnyQueryExpression where QueryOutput: Numeric {
-  public static func += (lhs: inout Self, rhs: some QueryExpression<QueryOutput>) {
+// NB: This overload is required due to an overload resolution bug of 'Record[dynamicMember:]'.
+@_documentation(visibility: private)
+public prefix func - <QueryValue: Numeric>(
+  expression: any QueryExpression<QueryValue>
+) -> some QueryExpression<QueryValue> {
+  func open(_ expression: some QueryExpression<QueryValue>) -> AnyQueryExpression<QueryValue> {
+    AnyQueryExpression(UnaryOperator(operator: "-", base: expression, separator: ""))
+  }
+  return open(expression)
+}
+
+// NB: This overload is required due to an overload resolution bug of 'Record[dynamicMember:]'.
+@_documentation(visibility: private)
+public prefix func + <QueryValue: Numeric>(
+  expression: any QueryExpression<QueryValue>
+) -> some QueryExpression<QueryValue> {
+  func open(_ expression: some QueryExpression<QueryValue>) -> AnyQueryExpression<QueryValue> {
+    AnyQueryExpression(UnaryOperator(operator: "+", base: expression, separator: ""))
+  }
+  return open(expression)
+}
+
+extension AnyQueryExpression where QueryValue: Numeric {
+  public static func += (lhs: inout Self, rhs: some QueryExpression<QueryValue>) {
     lhs = Self(lhs + rhs)
   }
 
-  public static func -= (lhs: inout Self, rhs: some QueryExpression<QueryOutput>) {
+  public static func -= (lhs: inout Self, rhs: some QueryExpression<QueryValue>) {
     lhs = Self(lhs - rhs)
   }
 
-  public static func *= (lhs: inout Self, rhs: some QueryExpression<QueryOutput>) {
+  public static func *= (lhs: inout Self, rhs: some QueryExpression<QueryValue>) {
     lhs = Self(lhs * rhs)
   }
 
-  public static func /= (lhs: inout Self, rhs: some QueryExpression<QueryOutput>) {
+  public static func /= (lhs: inout Self, rhs: some QueryExpression<QueryValue>) {
     lhs = Self(lhs / rhs)
   }
 
@@ -196,146 +233,161 @@ extension AnyQueryExpression where QueryOutput: Numeric {
   }
 }
 
-extension QueryExpression where QueryOutput == Int {
-  public static func % (lhs: Self, rhs: some QueryExpression<QueryOutput>) -> some QueryExpression<QueryOutput>
-  {
+extension QueryExpression where QueryValue: BinaryInteger {
+  public static func % (
+    lhs: Self, rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<QueryValue> {
     BinaryOperator(lhs: lhs, operator: "%", rhs: rhs)
   }
 
-  public static func & (lhs: Self, rhs: some QueryExpression<QueryOutput>) -> some QueryExpression<QueryOutput>
-  {
+  public static func & (
+    lhs: Self, rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<QueryValue> {
     BinaryOperator(lhs: lhs, operator: "&", rhs: rhs)
   }
 
-  public static func | (lhs: Self, rhs: some QueryExpression<QueryOutput>) -> some QueryExpression<QueryOutput>
-  {
+  public static func | (
+    lhs: Self, rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<QueryValue> {
     BinaryOperator(lhs: lhs, operator: "|", rhs: rhs)
   }
 
-  public static func << (lhs: Self, rhs: some QueryExpression<QueryOutput>) -> some QueryExpression<QueryOutput>
-  {
+  public static func << (
+    lhs: Self, rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<QueryValue> {
     BinaryOperator(lhs: lhs, operator: "<<", rhs: rhs)
   }
 
-  public static func >> (lhs: Self, rhs: some QueryExpression<QueryOutput>) -> some QueryExpression<QueryOutput>
-  {
+  public static func >> (
+    lhs: Self, rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<QueryValue> {
     BinaryOperator(lhs: lhs, operator: ">>", rhs: rhs)
   }
 
-  public static prefix func ~ (expression: Self) -> some QueryExpression<QueryOutput> {
+  public static prefix func ~ (expression: Self) -> some QueryExpression<QueryValue> {
     UnaryOperator(operator: "~", base: expression, separator: "")
   }
 }
 
-extension AnyQueryExpression<Int> {
-  public static func %= (lhs: inout Self, rhs: some QueryExpression<QueryOutput>) {
+// NB: This overload is required due to an overload resolution bug of 'Record[dynamicMember:]'.
+@_documentation(visibility: private)
+public prefix func ~ <QueryValue: BinaryInteger>(
+  expression: any QueryExpression<QueryValue>
+) -> some QueryExpression<QueryValue> {
+  func open(_ expression: some QueryExpression<QueryValue>) -> AnyQueryExpression<QueryValue> {
+    AnyQueryExpression(UnaryOperator(operator: "~", base: expression, separator: ""))
+  }
+  return open(expression)
+}
+
+extension AnyQueryExpression where QueryValue: BinaryInteger {
+  public static func %= (lhs: inout Self, rhs: some QueryExpression<QueryValue>) {
     lhs = Self(lhs % rhs)
   }
 
-  public static func &= (lhs: inout Self, rhs: some QueryExpression<QueryOutput>) {
+  public static func &= (lhs: inout Self, rhs: some QueryExpression<QueryValue>) {
     lhs = Self(lhs & rhs)
   }
 
-  public static func |= (lhs: inout Self, rhs: some QueryExpression<QueryOutput>) {
+  public static func |= (lhs: inout Self, rhs: some QueryExpression<QueryValue>) {
     lhs = Self(lhs | rhs)
   }
 
-  public static func <<= (lhs: inout Self, rhs: some QueryExpression<QueryOutput>) {
+  public static func <<= (lhs: inout Self, rhs: some QueryExpression<QueryValue>) {
     lhs = Self(lhs << rhs)
   }
 
-  public static func >>= (lhs: inout Self, rhs: some QueryExpression<QueryOutput>) {
+  public static func >>= (lhs: inout Self, rhs: some QueryExpression<QueryValue>) {
     lhs = Self(lhs >> rhs)
   }
 }
 
-public enum Collation {
-  case binary
-  case nocase
-  case rtrim
-}
-
-extension Collation: QueryExpression {
-  public typealias QueryOutput = Void
-  public var queryFragment: QueryFragment {
-    switch self {
-    case .binary: return "BINARY"
-    case .nocase: return "NOCASE"
-    case .rtrim: return "RTRIM"
-    }
-  }
-}
-
-extension QueryExpression where QueryOutput == String {
+extension QueryExpression where QueryValue == String {
   public static func + (
-    lhs: Self, rhs: some QueryExpression<QueryOutput>
-  ) -> some QueryExpression<QueryOutput> {
+    lhs: Self, rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<QueryValue> {
     BinaryOperator(lhs: lhs, operator: "||", rhs: rhs)
   }
 
-  public func collate(_ collation: Collation) -> some QueryExpression<QueryOutput> {
-    BinaryOperator(lhs: self, operator: "COLLATE", rhs: collation)
+  public func collate(_ collation: Collation) -> some QueryExpression<QueryValue> {
+    BinaryOperator(
+      lhs: self,
+      operator: "COLLATE",
+      rhs: .raw("\(raw: collation.rawValue)", as: Void.self)
+    )
   }
 
-  public func hasPrefix(_ other: QueryOutput) -> some QueryExpression<Bool> {
+  public func glob(_ pattern: QueryValue) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "GLOB", rhs: pattern)
+  }
+
+  public func like(_ pattern: QueryValue, escape: Character? = nil) -> some QueryExpression<Bool> {
+    LikeOperator(string: self, pattern: "LIKE", escape: escape)
+  }
+
+  public func hasPrefix(_ other: QueryValue) -> some QueryExpression<Bool> {
     like("\(other)%")
   }
 
-  public func hasSuffix(_ other: QueryOutput) -> some QueryExpression<Bool> {
+  public func hasSuffix(_ other: QueryValue) -> some QueryExpression<Bool> {
     like("%\(other)")
   }
 
   @_disfavoredOverload
-  public func contains(_ other: QueryOutput) -> some QueryExpression<Bool> {
+  public func contains(_ other: QueryValue) -> some QueryExpression<Bool> {
     like("%\(other)%")
-  }
-
-  public func like(_ other: QueryOutput) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "LIKE", rhs: "\(other)")
-  }
-
-  public func glob(_ other: QueryOutput) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "GLOB", rhs: "\(other)")
   }
 }
 
 extension AnyQueryExpression<String> {
-  public static func += (lhs: inout Self, rhs: some QueryExpression<QueryOutput>) {
+  public static func += (
+    lhs: inout Self, rhs: some QueryExpression<QueryValue>
+  ) {
     lhs = Self(lhs + rhs)
   }
 
-  public mutating func append(_ other: some QueryExpression<QueryOutput>) {
+  public mutating func append(_ other: some QueryExpression<QueryValue>) {
     self += other
   }
 
-  public mutating func append(contentsOf other: some QueryExpression<QueryOutput>) {
+  public mutating func append(contentsOf other: some QueryExpression<QueryValue>) {
     self += other
   }
 }
 
 extension QueryExpression {
-  public func contains<Element>(_ element: some QueryExpression<Element>) -> some QueryExpression<
-    Bool
-  >
-  where QueryOutput == [Element] {
-    BinaryOperator(lhs: element, operator: "IN", rhs: Parenthesize(self))
+  public func contains<Element>(
+    _ element: some QueryExpression<Element>
+  ) -> some QueryExpression<Bool>
+  where QueryValue == [Element] {
+    element.in(self)
+  }
+
+  public func `in`(_ query: some QueryExpression<[QueryValue]>) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "IN", rhs: .raw("(\(query))", as: Void.self))
   }
 
   public func contains<Bound>(_ element: some QueryExpression<Bound>) -> some QueryExpression<Bool>
-  where QueryOutput == ClosedRange<Bound> {
+  where QueryValue == ClosedRange<Bound> {
     BinaryOperator(lhs: element, operator: "BETWEEN", rhs: self)
   }
 }
 
-private struct UnaryOperator<QueryOutput, Base: QueryExpression>: QueryExpression {
+private struct UnaryOperator<QueryValue, Base: QueryExpression>: QueryExpression {
   let `operator`: String
   let base: Base
   var separator = " "
 
-  var queryFragment: QueryFragment { "\(raw: `operator`)\(raw: separator)(\(base.queryFragment))" }
+  var queryFragment: QueryFragment {
+    "\(raw: `operator`)\(raw: separator)(\(base.queryFragment))"
+  }
 }
 
-struct BinaryOperator<QueryOutput, LHS: QueryExpression, RHS: QueryExpression>: QueryExpression {
+struct BinaryOperator<
+  QueryValue,
+  LHS: QueryExpression,
+  RHS: QueryExpression
+>: QueryExpression {
   let lhs: LHS
   let `operator`: String
   let rhs: RHS
@@ -345,11 +397,22 @@ struct BinaryOperator<QueryOutput, LHS: QueryExpression, RHS: QueryExpression>: 
   }
 }
 
-struct Parenthesize<Base: QueryExpression>: QueryExpression {
-  typealias QueryOutput = Base.QueryOutput
-  let base: Base
+private struct LikeOperator<
+  LHS: QueryExpression<String>,
+  RHS: QueryExpression<String>
+>: QueryExpression {
+  typealias QueryValue = Bool
 
-  init(_ base: Base) { self.base = base }
+  let string: LHS
+  let pattern: RHS
+  let escape: Character?  // TODO: 'QueryExpression<Character>?'
 
-  var queryFragment: QueryFragment { "(\(base.queryFragment))" }
+  var queryFragment: QueryFragment {
+    var query: QueryFragment = "(\(string.queryFragment) LIKE \(pattern.queryFragment)"
+    if let escape {
+      query.append(" ESCAPE \(bind: String(escape))")
+    }
+    query.append(")")
+    return query
+  }
 }

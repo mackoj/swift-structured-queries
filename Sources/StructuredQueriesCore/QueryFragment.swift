@@ -21,9 +21,9 @@ public struct QueryFragment: Hashable, Sendable, CustomDebugStringConvertible {
   }
 
   public static func + (lhs: Self, rhs: Self) -> Self {
-    var sql = lhs
-    sql += rhs
-    return sql
+    var query = lhs
+    query += rhs
+    return query
   }
 
   public var debugDescription: String {
@@ -31,7 +31,7 @@ public struct QueryFragment: Hashable, Sendable, CustomDebugStringConvertible {
     var bindings = bindings
     compiled.reserveCapacity(string.count)
     for character in string {
-      // TODO: This is brittle
+      // TODO: This is brittle.
       switch character {
       case "?":
         compiled.append(bindings.removeFirst().debugDescription)

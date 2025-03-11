@@ -14,4 +14,10 @@ extension ExprSyntax {
       return nil
     }
   }
+
+  var isNonEmptyStringLiteral: Bool {
+    guard let literal = self.as(StringLiteralExprSyntax.self)?.representedLiteralValue
+    else { return false }
+    return !literal.isEmpty
+  }
 }

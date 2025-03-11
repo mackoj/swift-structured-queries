@@ -9,15 +9,18 @@ public protocol QueryDecoder {
 
   func decode<T: QueryDecodable>(_ type: T.Type) throws -> T
 
+  func decode<T: QueryRepresentable>(_ type: T.Type) throws -> T.QueryOutput
+
   func decodeNil() throws -> Bool
 }
 
 extension QueryDecoder {
-  public func decode<T: QueryDecodable>(_ type: T.Type) throws -> T {
+  public func decode<T: QueryDecodable>(_ type: T.Type = T.self) throws -> T {
     try T(decoder: self)
+  }
+
+  public func decode<T: QueryRepresentable>(_ type: T.Type = T.self) throws -> T.QueryOutput {
+    try T(decoder: self).queryOutput
   }
 }
 
-public enum QueryDecodingError: Error {
-  case dataCorrupted  // TODO: Design
-}

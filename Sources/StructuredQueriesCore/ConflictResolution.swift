@@ -1,20 +1,13 @@
-public enum ConflictResolution: Sendable {
-  case abort
-  case fail
-  case ignore
-  case replace
-  case rollback
-}
+public struct ConflictResolution: RawRepresentable, Sendable {
+  public static let abort = Self(rawValue: "ABORT")
+  public static let fail = Self(rawValue: "FAIL")
+  public static let ignore = Self(rawValue: "IGNORE")
+  public static let replace = Self(rawValue: "REPLACE")
+  public static let rollback = Self(rawValue: "ROLLBACK")
 
-extension ConflictResolution: QueryExpression {
-  public typealias QueryOutput = Void
-  public var queryFragment: QueryFragment {
-    switch self {
-    case .abort: return "ABORT"
-    case .fail: return "FAIL"
-    case .ignore: return "IGNORE"
-    case .replace: return "REPLACE"
-    case .rollback: return "ROLLBACK"
-    }
+  public var rawValue: String
+
+  public init(rawValue: String) {
+    self.rawValue = rawValue
   }
 }

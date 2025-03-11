@@ -2,7 +2,7 @@ extension Table {
   public static func update(
     or conflictResolution: ConflictResolution? = nil,
     set updates: (inout Record<Self>) -> Void
-  ) -> Update<Self, Void> {
+  ) -> Update<Self, ()> {
     var record = Record<Self>()
     updates(&record)
     return Update(conflictResolution: conflictResolution, record: record)
@@ -12,73 +12,80 @@ extension Table {
 extension PrimaryKeyedTable {
   public static func update(
     or conflictResolution: ConflictResolution? = nil,
-    _ record: Self
-  ) -> Update<Self, Void>
-  where Columns: PrimaryKeyedSchema, Columns.QueryOutput == Self {
-    update(or: conflictResolution) {
+    _ row: Self
+  ) -> Update<Self, ()> {
+    update(or: conflictResolution) { record in
       for column in columns.allColumns where column.name != columns.primaryKey.name {
-        $0.updates.append((column, record[keyPath: column.keyPath] as! any QueryExpression))
+        func open<Root, Value>(_ column: some ColumnExpression<Root, Value>) {
+          record.updates.append(
+            (
+              column.name,
+              Value(queryOutput: (row as! Root)[keyPath: column.keyPath]).queryFragment
+            )
+          )
+        }
+        open(column)
       }
     }
     .where {
-      $0.primaryKey == record[keyPath: $0.primaryKey.keyPath] as! Columns.PrimaryKey.QueryOutput
+      func open<C: ColumnExpression>(_ column: C) -> BinaryOperator<Bool, C, C.Value>
+      where
+        C.Root == Self,
+        C.QueryValue.QueryValue == C.QueryValue
+      {
+        BinaryOperator(
+          lhs: column,
+          operator: "=",
+          rhs: C.Value(queryOutput: row[keyPath: column.keyPath])
+        )
+      }
+      return open($0.primaryKey)
     }
   }
 }
 
-public struct Update<Base: Table, Output> {
+public struct Update<From: Table, Returning> {
   var conflictResolution: ConflictResolution?
-  var record: Record<Base>
-  var `where`: WhereClause?
-  var returning: ReturningClause?
+  var record: Record<From>
+  var `where`: [any QueryExpression] = []
+  var returning: [any QueryExpression] = []
 
-  public func `where`(_ predicate: (Base.Columns) -> some QueryExpression<Bool>) -> Self {
-    func open(_ `where`: some QueryExpression<Bool>) -> WhereClause {
-      WhereClause(predicate: `where` && predicate(Base.columns))
-    }
-    var copy = self
-    copy.`where` =
-      if let `where` {
-        open(`where`.predicate)
-      } else {
-        WhereClause(predicate: predicate(Base.columns))
-      }
-    return copy
+  public func `where`(_ predicate: (From.Columns) -> some QueryExpression<Bool>) -> Self {
+    var update = self
+    update.where.append(predicate(From.columns))
+    return update
   }
 
-  public func returning<each O: QueryExpression>(
-    _ selection: (Base.Columns) -> (repeat each O)
-  ) -> Update<Base, (repeat (each O).QueryOutput)>
-  where repeat (each O).QueryOutput: QueryDecodable {
-    Update<Base, (repeat (each O).QueryOutput)>(
+  public func returning<each ResultColumn: QueryExpression>(
+    _ selection: (From.Columns) -> (repeat each ResultColumn)
+  ) -> Update<From, (repeat (each ResultColumn).QueryValue)>
+  where repeat (each ResultColumn).QueryValue: QueryDecodable {
+    Update<From, (repeat (each ResultColumn).QueryValue)>(
       conflictResolution: conflictResolution,
       record: record,
       where: `where`,
-      returning: ReturningClause(repeat each selection(Base.columns))
+      returning: Array(repeat each selection(From.columns))
     )
   }
 }
 
-public typealias UpdateOf<T: Table> = Update<T, Void>
+public typealias UpdateOf<Base: Table> = Update<Base, ()>
 
 extension Update: Statement {
-  public typealias QueryOutput = [Output]
+  public typealias Columns = Returning
 
   public var queryFragment: QueryFragment {
-    guard !record.updates.isEmpty else {
-      return QueryFragment()
-    }
-    var sql: QueryFragment = "UPDATE"
+    var query: QueryFragment = "UPDATE"
     if let conflictResolution {
-      sql.append(" OR \(bind: conflictResolution)")
+      query.append(" OR \(raw: conflictResolution.rawValue)")
     }
-    sql.append(" \(raw: Base.name.quoted()) \(bind: record)")
-    if let `where` {
-      sql.append(" \(bind: `where`)")
+    query.append(" \(raw: From.tableName.quoted()) \(bind: record)")
+    if !`where`.isEmpty {
+      query.append(" WHERE \(`where`.map(\.queryFragment).joined(separator: " AND "))")
     }
-    if let returning {
-      sql.append(" \(bind: returning)")
+    if !returning.isEmpty {
+      query.append(" RETURNING \(returning.map(\.queryFragment).joined(separator: ", "))")
     }
-    return sql
+    return query
   }
 }

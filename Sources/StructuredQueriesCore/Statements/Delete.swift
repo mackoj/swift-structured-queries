@@ -5,59 +5,59 @@ extension Table {
 }
 
 extension PrimaryKeyedTable {
-  // TODO: Should this be 'delete(_ ids: [Columns.PrimaryKey.QueryOutput])' instead?
-  public static func delete(_ records: [Self]) -> Delete<Self, Void>
-  where Columns.QueryOutput == Self {
-    Delete().where { columns in
-      records
-        .map { $0[keyPath: columns.primaryKey.keyPath] as! Columns.PrimaryKey.QueryOutput }
-        .contains(columns.primaryKey)
-    }
+  public static func delete(_ row: Self) -> Delete<Self, Void> {
+    Delete()
+      .where {
+        func open<C: ColumnExpression>(_ column: C) -> BinaryOperator<Bool, C, C.Value>
+        where
+          C.Root == Self,
+          C.QueryValue.QueryValue == C.QueryValue
+        {
+          BinaryOperator(
+            lhs: column,
+            operator: "=",
+            rhs: C.Value(queryOutput: row[keyPath: column.keyPath])
+          )
+        }
+        return open($0.primaryKey)
+      }
   }
 }
 
-public struct Delete<Base: Table, Output> {
-  var `where`: WhereClause?
-  var returning: ReturningClause?
+public struct Delete<From: Table, Returning> {
+  var `where`: [any QueryExpression] = []
+  var returning: [any QueryExpression] = []
 
-  public func `where`(_ predicate: (Base.Columns) -> some QueryExpression<Bool>) -> Self {
-    func open(_ `where`: some QueryExpression<Bool>) -> WhereClause {
-      WhereClause(predicate: `where` && predicate(Base.columns))
-    }
-    var copy = self
-    copy.`where` =
-      if let `where` {
-        open(`where`.predicate)
-      } else {
-        WhereClause(predicate: predicate(Base.columns))
-      }
-    return copy
+  public func `where`(_ predicate: (From.Columns) -> some QueryExpression<Bool>) -> Self {
+    var update = self
+    update.where.append(predicate(From.columns))
+    return update
   }
 
-  public func returning<each O: QueryExpression>(
-    _ selection: (Base.Columns) -> (repeat each O)
-  ) -> Delete<Base, (repeat (each O).QueryOutput)>
-  where repeat (each O).QueryOutput: QueryDecodable {
-    Delete<Base, (repeat (each O).QueryOutput)>(
+  public func returning<each ResultColumn: QueryExpression>(
+    _ selection: (From.Columns) -> (repeat each ResultColumn)
+  ) -> Delete<From, (repeat (each ResultColumn).QueryValue)>
+  where repeat (each ResultColumn).QueryValue: QueryDecodable {
+    Delete<From, (repeat (each ResultColumn).QueryValue)>(
       where: `where`,
-      returning: ReturningClause(repeat each selection(Base.columns))
+      returning: Array(repeat each selection(From.columns))
     )
   }
 }
 
-public typealias DeleteOf<T: Table> = Delete<T, Void>
+public typealias DeleteOf<From: Table> = Delete<From, ()>
 
 extension Delete: Statement {
-  public typealias QueryOutput = [Output]
+  public typealias Columns = Returning
 
   public var queryFragment: QueryFragment {
-    var fragment: QueryFragment = "DELETE FROM \(raw: Base.name.quoted())"
-    if let `where` {
-      fragment.append(" \(bind: `where`)")
+    var query: QueryFragment = "DELETE FROM \(raw: From.tableName.quoted())"
+    if !`where`.isEmpty {
+      query.append(" WHERE \(`where`.map(\.queryFragment).joined(separator: " AND "))")
     }
-    if let returning {
-      fragment.append(" \(bind: returning)")
+    if !returning.isEmpty {
+      query.append(" RETURNING \(returning.map(\.queryFragment).joined(separator: ", "))")
     }
-    return fragment
+    return query
   }
 }

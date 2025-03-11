@@ -1,22 +1,49 @@
 extension Table {
-  public static func insert<each C: ColumnExpression>(
+  public static func insert(
     or conflictResolution: ConflictResolution? = nil,
-    _ columns: (Columns) -> (repeat each C),
-    @InsertValuesBuilder<(repeat (each C).QueryOutput)> values: () -> [(repeat (each C).QueryOutput)],
+    _ row: Self,
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
-  ) -> Insert<Self, Never, (repeat each C), Void>
-  where repeat (each C).QueryOutput: QueryExpression {
-    let input = columns(Self.columns)
-    var columns: [any ColumnExpression] = []
-    for column in repeat each input {
-      columns.append(column)
+  ) -> Insert<Self, ()> {
+    insert(or: conflictResolution, [row], onConflict: updates)
+  }
+
+  public static func insert(
+    or conflictResolution: ConflictResolution? = nil,
+    _ rows: [Self],
+    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+  ) -> Insert<Self, ()> {
+    insert(
+      or: conflictResolution,
+      values: {
+        for row in rows {
+          row
+        }
+      },
+      onConflict: updates
+    )
+  }
+
+  public static func insert(
+    or conflictResolution: ConflictResolution? = nil,
+    _ columns: (Columns) -> (Columns) = { $0 },
+    @InsertValuesBuilder<Self>
+    values rows: () -> [Self],
+    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+  ) -> Insert<Self, ()> {
+    var columnNames: [String] = []
+    for column in Self.columns.allColumns {
+      columnNames.append(column.name)
     }
-    let values: [[any QueryExpression]] = values().map {
-      var row: [any QueryExpression] = []
-      for value in repeat each $0 {
-        row.append(value)
+    var values: [[QueryFragment]] = []
+    for row in rows() {
+      var value: [QueryFragment] = []
+      for column in Self.columns.allColumns {
+        func open<Root, Value>(_ column: some ColumnExpression<Root, Value>) -> QueryFragment {
+          Value(queryOutput: (row as! Root)[keyPath: column.keyPath]).queryFragment
+        }
+        value.append(open(column))
       }
-      return row
+      values.append(value)
     }
     let record = updates.map { updates in
       var record = Record<Self>()
@@ -24,49 +51,47 @@ extension Table {
       return record
     }
     return Insert(
-      input: input,
       conflictResolution: conflictResolution,
-      columns: columns,
-      form: .values(values),
-      record: record
+      columnNames: columnNames,
+      values: .values(values),
+      record: record,
+      returning: []
     )
   }
 
-  // NB: Overload required to work around bug with parameter packs and result builders.
-  public static func insert<C: ColumnExpression>(
+  public static func insert<V1: QueryBindable, each V2: QueryBindable>(
     or conflictResolution: ConflictResolution? = nil,
-    _ columns: (Columns) -> C,
-    @InsertValuesBuilder<C.QueryOutput> values: () -> [C.QueryOutput],
+    _ columns: (Columns) -> (Column<Self, V1>, repeat Column<Self, each V2>),
+    @InsertValuesBuilder<(V1.QueryOutput, repeat (each V2).QueryOutput)>
+    values rows: () -> [(V1.QueryOutput, repeat (each V2).QueryOutput)],
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
-  ) -> Insert<Self, Never, C, Void>
-  where C.QueryOutput: QueryExpression {
-    let input = columns(Self.columns)
-    let values: [[any QueryExpression]] = values().map { [$0] }
-    let record = updates.map { updates in
-      var record = Record<Self>()
-      updates(&record)
-      return record
-    }
-    return Insert(
-      input: input,
-      conflictResolution: conflictResolution,
-      columns: [input],
-      form: .values(values),
-      record: record
+  ) -> Insert<Self, ()> {
+    _insert(
+      or: conflictResolution,
+      columns,
+      values: rows,
+      onConflict: updates
     )
   }
 
-  public static func insert<I, each C: ColumnExpression>(
+  private static func _insert<each Value: QueryBindable>(
     or conflictResolution: ConflictResolution? = nil,
-    _ columns: (Columns) -> (repeat each C),
-    select selection: () -> Select<I, (repeat (each C).QueryOutput)>,
+    _ columns: (Columns) -> (repeat Column<Self, each Value>),
+    @InsertValuesBuilder<(repeat (each Value).QueryOutput)>
+    values rows: () -> [(repeat (each Value).QueryOutput)],
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
-  ) -> Insert<Self, Never, (repeat each C), Void>
-  where repeat (each C).QueryOutput: QueryExpression {
-    let input = columns(Self.columns)
-    var columns: [any ColumnExpression] = []
-    for column in repeat each input {
-      columns.append(column)
+  ) -> Insert<Self, ()> {
+    var columnNames: [String] = []
+    for column in repeat each columns(Self.columns) {
+      columnNames.append(column.name)
+    }
+    var values: [[QueryFragment]] = []
+    for row in rows() {
+      var value: [QueryFragment] = []
+      for (columnType, column) in repeat ((each Value).self, each row) {
+        value.append("\(columnType.init(queryOutput: column).queryFragment)")
+      }
+      values.append(value)
     }
     let record = updates.map { updates in
       var record = Record<Self>()
@@ -74,173 +99,223 @@ extension Table {
       return record
     }
     return Insert(
-      input: input,
       conflictResolution: conflictResolution,
-      columns: columns,
-      form: .select(selection()),
-      record: record
+      columnNames: columnNames,
+      values: .values(values),
+      record: record,
+      returning: []
     )
   }
 
-  // NB: Overload required to work around bug with parameter packs and result builders.
-  public static func insert<I, C: ColumnExpression>(
+  public static func insert<
+    V1: QueryBindable,
+    each V2: QueryBindable,
+    C1: QueryExpression<V1>,
+    each C2: QueryExpression,
+    From,
+    Joins
+  >(
     or conflictResolution: ConflictResolution? = nil,
-    _ columns: (Columns) -> C,
-    select selection: () -> Select<I, C.QueryOutput>,
+    _ columns: (Columns) -> (Column<Self, V1>, repeat Column<Self, each V2>),
+    select selection: () -> Select<(C1, repeat each C2), From, Joins>,
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
-  ) -> Insert<Self, Never, C, Void>
-  where C.QueryOutput: QueryExpression {
-    let input = columns(Self.columns)
+  ) -> Insert<Self, ()>
+  where (repeat (each C2).QueryValue) == (repeat each V2) {
+    _insert(
+      or: conflictResolution,
+      columns,
+      select: selection,
+      onConflict: updates
+    )
+  }
+
+  private static func _insert<
+    each Value: QueryBindable,
+    each ResultColumn: QueryExpression,
+    From,
+    Joins
+  >(
+    or conflictResolution: ConflictResolution? = nil,
+    _ columns: (Columns) -> (repeat Column<Self, each Value>),
+    select selection: () -> Select<(repeat each ResultColumn), From, Joins>,
+    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+  ) -> Insert<Self, ()>
+  where (repeat (each ResultColumn).QueryValue) == (repeat each Value) {
+    var columnNames: [String] = []
+    for column in repeat each columns(Self.columns) {
+      columnNames.append(column.name)
+    }
     let record = updates.map { updates in
       var record = Record<Self>()
       updates(&record)
       return record
     }
     return Insert(
-      input: input,
       conflictResolution: conflictResolution,
-      columns: [input],
-      form: .select(selection()),
-      record: record
+      columnNames: columnNames,
+      values: .select(selection()),
+      record: record,
+      returning: []
     )
   }
 
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
-    _ records: [Self]
-  ) -> Insert<Self, Never, Void, Void> {
-    Insert(
-      input: (),
+    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+  ) -> Insert<Self, ()> {
+    let record = updates.map { updates in
+      var record = Record<Self>()
+      updates(&record)
+      return record
+    }
+    return Insert(
       conflictResolution: conflictResolution,
-      columns: columns.allColumns,
-      form: .records(records)
+      columnNames: [],
+      values: .default,
+      record: record,
+      returning: []
     )
-  }
-
-  public static func insert(
-    or conflictResolution: ConflictResolution? = nil,
-    _ record: Self
-  ) -> Insert<Self, Never, Void, Void> {
-    insert(or: conflictResolution, [record])
-  }
-
-  public static func insert(
-    or conflictResolution: ConflictResolution? = nil
-  ) -> Insert<Self, Never, Void, Void> {
-    Insert(input: (), conflictResolution: conflictResolution)
-  }
-
-  @_disfavoredOverload
-  public static func insert(
-    or conflictResolution: ConflictResolution? = nil,
-    _ drafts: [Self.Draft]
-  ) -> Insert<Self, Self.Draft, Void, Void> where Self: PrimaryKeyedTable {
-    Insert(
-      input: (),
-      conflictResolution: conflictResolution,
-      columns: Self.Draft.columns.allColumns,
-      form: .drafts(drafts)
-    )
-  }
-
-  @_disfavoredOverload
-  public static func insert(
-    or conflictResolution: ConflictResolution? = nil,
-    _ draft: Self.Draft
-  ) -> Insert<Self, Self.Draft, Void, Void> where Self: PrimaryKeyedTable {
-    insert(or: conflictResolution, [draft])
   }
 }
 
-public struct Insert<Base: Table, Draft: StructuredQueriesCore.Draft, Input: Sendable, Output> {
-  var input: Input
-  var conflictResolution: ConflictResolution?
-  var columns: [any ColumnExpression] = []
-  var form: InsertionForm<Base, Draft> = .defaultValues
-  var record: Record<Base>?
-  var returning: ReturningClause?
-
-  public func returning<each O: QueryExpression>(
-    _ selection: (Base.Columns) -> (repeat each O)
-  ) -> Insert<Base, Draft, Input, (repeat (each O).QueryOutput)>
-  where repeat (each O).QueryOutput: QueryDecodable {
-    Insert<Base, Draft, Input, (repeat (each O).QueryOutput)>(
-      input: input,
-      conflictResolution: conflictResolution,
-      columns: columns,
-      form: form,
-      record: record,
-      returning: ReturningClause(repeat each selection(Base.columns))
+extension PrimaryKeyedTable {
+  public static func insert(
+    or conflictResolution: ConflictResolution? = nil,
+    _ row: Draft,
+    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+  ) -> Insert<Self, ()> {
+    Self.insert(
+      or: conflictResolution,
+      [row],
+      onConflict: updates
     )
   }
+
+  public static func insert(
+    or conflictResolution: ConflictResolution? = nil,
+    _ rows: [Draft],
+    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+  ) -> Insert<Self, ()> {
+    Self.insert(
+      or: conflictResolution,
+      values: {
+        for row in rows {
+          row
+        }
+      },
+      onConflict: updates
+    )
+  }
+
+  public static func insert(
+    or conflictResolution: ConflictResolution? = nil,
+    _ columns: (Draft.Columns) -> (Draft.Columns) = { $0 },
+    @InsertValuesBuilder<Draft>
+    values rows: () -> [Draft],
+    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+  ) -> Insert<Self, ()> {
+    var columnNames: [String] = []
+    for column in Draft.columns.allColumns {
+      columnNames.append(column.name)
+    }
+    var values: [[QueryFragment]] = []
+    for row in rows() {
+      var value: [QueryFragment] = []
+      for column in Draft.columns.allColumns {
+        func open<Root, Value>(_ column: some ColumnExpression<Root, Value>) -> QueryFragment {
+          Value(queryOutput: (row as! Root)[keyPath: column.keyPath]).queryFragment
+        }
+        value.append(open(column))
+      }
+      values.append(value)
+    }
+    let record = updates.map { updates in
+      var record = Record<Self>()
+      updates(&record)
+      return record
+    }
+    return Insert(
+      conflictResolution: conflictResolution,
+      columnNames: columnNames,
+      values: .values(values),
+      record: record,
+      returning: []
+    )
+  }
+}
+
+public struct Insert<Into: Table, Returning> {
+  var conflictResolution: ConflictResolution?
+  var columnNames: [String] = []
+  var values: Values
+  var record: Record<Into>?
+  var returning: [any QueryExpression] = []
+
+  public func returning<each ResultColumn: QueryExpression>(
+    _ selection: (Into.Columns) -> (repeat each ResultColumn)
+  ) -> Insert<Into, (repeat (each ResultColumn).QueryValue)>
+  where repeat (each ResultColumn).QueryValue: QueryDecodable {
+    Insert<Into, (repeat (each ResultColumn).QueryValue)>(
+      conflictResolution: conflictResolution,
+      columnNames: columnNames,
+      values: values,
+      record: record,
+      returning: Array(repeat each selection(Into.columns))
+    )
+  }
+}
+
+enum Values {
+  case `default`
+  case values([[QueryFragment]])
+  case select(any SelectStatement)
 }
 
 extension Insert: Statement {
-  public typealias QueryOutput = [Output]
+  public typealias Columns = Returning
+  public typealias From = Into
+
   public var queryFragment: QueryFragment {
-    let form = form.queryFragment
-    guard !form.isEmpty else { return "" }
-    var sql: QueryFragment = "INSERT"
+    var query: QueryFragment = "INSERT"
     if let conflictResolution {
-      sql.append(" OR \(bind: conflictResolution)")
+      query.append(" OR \(raw: conflictResolution.rawValue)")
     }
-    sql.append(" INTO \(raw: Base.name.quoted())")
-    if !columns.isEmpty {
-      sql.append(" (\(columns.map { "\(raw: $0.name.quoted())" }.joined(separator: ", ")))")
+    query.append(" INTO \(raw: Into.tableName.quoted())")
+    if !columnNames.isEmpty {
+      query.append(" (\(columnNames.map { "\(raw: $0.quoted())" }.joined(separator: ", ")))")
     }
-    sql.append(" \(form)")
+    switch values {
+    case .default:
+      query.append(" DEFAULT VALUES")
+
+    case let .select(select):
+      query.append(" \(select)")
+
+    case .values(let values):
+      guard !values.isEmpty else { return "" }
+      query.append(" VALUES ")
+      let values: [QueryFragment] = values.map {
+        var value: QueryFragment = "("
+        value.append($0.joined(separator: ", "))
+        value.append(")")
+        return value
+      }
+      query.append(values.joined(separator: ", "))
+    }
+    
     if let record {
-      sql.append(
-        " ON CONFLICT DO \(record.updates.isEmpty ? "NOTHING" : "UPDATE \(bind: record)")")
+      query.append(
+        " ON CONFLICT DO \(record.updates.isEmpty ? "NOTHING" : "UPDATE \(bind: record)")"
+      )
     }
-    if let returning {
-      sql.append(" \(bind: returning)")
+    if !returning.isEmpty {
+      query.append(" RETURNING \(returning.map(\.queryFragment).joined(separator: ", "))")
     }
-    return sql
+    return query
   }
 }
 
-enum InsertionForm<Base: Table, Draft: StructuredQueriesCore.Draft>: QueryExpression {
-  case defaultValues
-  case values([[any QueryExpression]])
-  case select(any Statement)
-  case records([Base])
-  case drafts([Draft])
-
-  typealias QueryOutput = Void
-  var queryFragment: QueryFragment {
-    switch self {
-    case .defaultValues:
-      return "DEFAULT VALUES"
-    case let .values(rows):
-      let values: QueryFragment =
-        rows
-        .map { "(\($0.map(\.queryFragment).joined(separator: ", ")))" }
-        .joined(separator: ", ")
-      return """
-        VALUES \(values)
-        """
-    case let .select(statement):
-      return statement.queryFragment
-    case let .records(records):
-      guard !records.isEmpty else { return "" }
-      let values: QueryFragment = records
-        .map(\.queryFragment)
-        .joined(separator: ", ")
-      return """
-        VALUES \(values)
-        """
-    case let .drafts(records):
-      guard !records.isEmpty else { return "" }
-      let values: QueryFragment = records
-        .map(\.queryFragment)
-        .joined(separator: ", ")
-      return """
-        VALUES \(values)
-        """
-    }
-  }
-}
+public typealias InsertOf<Into: Table> = Insert<Into, ()>
 
 @resultBuilder
 public enum InsertValuesBuilder<Value> {
@@ -262,10 +337,6 @@ public enum InsertValuesBuilder<Value> {
 
   public static func buildExpression(_ expression: Value) -> [Value] {
     [expression]
-  }
-
-  public static func buildExpression(_ expression: [Value]) -> [Value] {
-    expression
   }
 
   public static func buildLimitedAvailability(_ component: [Value]) -> [Value] {

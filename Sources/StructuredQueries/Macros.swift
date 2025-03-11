@@ -5,10 +5,9 @@
   names: named(Columns),
   named(Draft),
   named(columns),
-  named(queryFragment),
-  named(init(decoder:)),
   named(init(_:)),
-  named(name)
+  named(init(decoder:)),
+  named(tableName)
 )
 @attached(
   memberAttribute
@@ -20,16 +19,9 @@ public macro Table(_ name: String? = nil) =
   )
 
 @attached(accessor, names: named(willSet))
-public macro Column(_ name: String? = nil, primaryKey: Bool = false) =
-  #externalMacro(
-    module: "StructuredQueriesMacros",
-    type: "ColumnMacro"
-  )
-
-@attached(accessor, names: named(willSet))
-public macro Column<Strategy: QueryBindingStrategy>(
+public macro Column(
   _ name: String? = nil,
-  as strategy: Strategy,
+  as representableType: (any QueryRepresentable.Type)? = nil,
   primaryKey: Bool = false
 ) =
   #externalMacro(
@@ -38,49 +30,38 @@ public macro Column<Strategy: QueryBindingStrategy>(
   )
 
 @attached(
-  extension,
-  conformances: QueryDecodable,
-  names: named(Columns),
-  named(init(decoder:))
+  memberAttribute
 )
-public macro Selection() =
+@attached(
+  extension,
+  conformances: Table,
+  names: named(Columns),
+  named(columns),
+  named(init(_:)),
+  named(init(decoder:)),
+  named(tableName)
+)
+public macro _Draft<T: Table>(_: T.Type) =
   #externalMacro(
     module: "StructuredQueriesMacros",
-    type: "SelectionMacro"
+    type: "TableMacro"
   )
 
-// 0. Table.Draft.id: ID?
-// 1. Table.Draft.init(_: Table)
-// 2. Table.init?(_: Table.Draft)
-// 3. Table.upsert(_: Table.Draft)
 
-//@Table
-//struct A {
-//  let id: Int
-//  var name: String
-//}
 
-//@Table
-//struct A2B {
-//  let aID: Int
-//  let bID: Int
-//}
-//
-//@Table
-//struct B {
-//  let id: Int
-//}
-//
-//func f() {
-//  let _: SelectOf<A, A2B?, B?> = A.all()
-//    .leftJoin(A2B.all()) { $0.id == $1.aID }
-//    .leftJoin(B.all()) { $1.bID == $2.id }
-//
-//  let _: Select<_, (A?, A2B?, B)> = A.all()
-//    .rightJoin(A2B.all()) { $0.id == $1.aID }
-//    .rightJoin(B.all()) { $1.bID == $2.id }
-//
-//  let _: Select<_, (A?, A2B?, B?)> = A.all()
-//    .fullJoin(A2B.all()) { $0.id == $1.aID }
-//    .fullJoin(B.all()) { $1.bID == $2.id }
-//}
+ import Foundation
+
+ enum Priority: Int, QueryBindable {
+   case high = 3
+   case medium = 2
+   case low = 1
+ }
+
+ @Table
+ struct Reminder {
+   let id: Int
+   var title = ""
+   @Column(as: Date.UnixTimeRepresentation?.self)
+   var date: Date?
+   var priority: Priority?
+ }

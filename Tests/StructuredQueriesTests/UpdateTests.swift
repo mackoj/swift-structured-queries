@@ -4,37 +4,63 @@ import StructuredQueries
 import Testing
 
 extension SnapshotTests {
-  struct UpdateTests {
-    @Table
-    fileprivate struct SyncUp: Equatable {
-      var id: Int
-      var isActive: Bool
-      var title: String
-    }
-
-    @Table
-    fileprivate struct Meeting: Equatable {
-      @Column(as: .iso8601)
-      var date: Date
-    }
-
+  @Suite struct UpdateTests {
     @Test func basics() {
       assertInlineSnapshot(
-        of: SyncUp.update {
-          $0.isActive = true
-          $0.title = "Engineering"
-        },
+        of:
+          SyncUp
+          .update { $0.isActive = true },
         as: .sql
       ) {
         """
-        UPDATE "syncUps" SET "isActive" = 1, "title" = 'Engineering'
+        UPDATE "syncUps" SET "isActive" = 1
+        """
+      }
+      assertInlineSnapshot(
+        of:
+          SyncUp
+          .update { $0.isActive = true }
+          .returning(\.self),
+        as: .sql
+      ) {
+        """
+        UPDATE "syncUps" SET "isActive" = 1 RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt", "syncUps"."title"
+        """
+      }
+      assertInlineSnapshot(
+        of:
+          SyncUp
+          .update { $0.isActive = false }
+          .where(\.isActive)
+          .returning(\.self),
+        as: .sql
+      ) {
+        """
+        UPDATE "syncUps" SET "isActive" = 0 WHERE "syncUps"."isActive" RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt", "syncUps"."title"
+        """
+      }
+    }
+
+    @Test func primaryKey() {
+      assertInlineSnapshot(
+        of:
+          SyncUp
+          .update(
+            SyncUp(id: 1, isActive: true, createdAt: Date(timeIntervalSinceReferenceDate: 0))
+          ),
+        as: .sql
+      ) {
+        """
+        UPDATE "syncUps" SET "isActive" = 1, "createdAt" = '2001-01-01 00:00:00.000', "title" = '' WHERE ("syncUps"."id" = 1)
         """
       }
     }
 
     @Test func toggleAssignment() {
       assertInlineSnapshot(
-        of: SyncUp.update { $0.isActive = !$0.isActive },
+        of: SyncUp.update {
+          $0.isActive = !$0.isActive
+        },
         as: .sql
       ) {
         """
@@ -151,60 +177,75 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        UPDATE "syncUps" SET "isActive" = 1, "title" = 'Engineering' \
-        RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."title"
+        UPDATE "syncUps" SET "isActive" = 1, "title" = 'Engineering' RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt", "syncUps"."title"
         """
       }
     }
 
     @Test func record() {
       assertInlineSnapshot(
-        of: SyncUp.update(SyncUp(id: 42, isActive: true, title: "Engineering")),
+        of: SyncUp.update(
+          SyncUp(
+            id: 42,
+            isActive: true,
+            createdAt: Date(timeIntervalSince1970: 123456789),
+            title: "Engineering"
+          )
+        ),
         as: .sql
       ) {
         """
-        UPDATE "syncUps" SET "isActive" = 1, "title" = 'Engineering' WHERE ("syncUps"."id" = 42)
+        UPDATE \
+        "syncUps" SET "isActive" = 1, "createdAt" = '1973-11-29 21:33:09.000', "title" = 'Engineering' \
+        WHERE ("syncUps"."id" = 42)
         """
       }
     }
 
-    @Test func explicitBind() {
+    @Test func date() {
       assertInlineSnapshot(
-        of: Meeting.update {
-          $0.date = .bind(Date(timeIntervalSinceReferenceDate: 0))
+        of: SyncUp.update {
+          $0.createdAt = Date(timeIntervalSinceReferenceDate: 0)
         },
         as: .sql
       ) {
         """
-        UPDATE "meetings" SET "date" = '2001-01-01 00:00:00.000'
-        """
-      }
-    }
-
-    @Test func implicitBind() {
-      assertInlineSnapshot(
-        of: Meeting.update {
-          $0.date = Date(timeIntervalSinceReferenceDate: 0)
-        },
-        as: .sql
-      ) {
-        """
-        UPDATE "meetings" SET "date" = '2001-01-01 00:00:00.000'
+        UPDATE "syncUps" SET "createdAt" = '2001-01-01 00:00:00.000'
         """
       }
     }
 
     @Test func rawBind() {
       assertInlineSnapshot(
-        of: Meeting.update {
-          $0.date = .raw("CURRENT_TIMESTAMP")
+        of: SyncUp.update {
+          $0.createdAt = RawQueryExpression("CURRENT_TIMESTAMP")
+          // TODO: does not compile, but also may be removing '.raw'
+          _ = $0
         },
         as: .sql
       ) {
         """
-        UPDATE "meetings" SET "date" = CURRENT_TIMESTAMP
+        UPDATE "syncUps" SET "createdAt" = CURRENT_TIMESTAMP
         """
       }
     }
   }
+}
+
+@Table
+private struct SyncUp {
+  let id: Int
+  var isActive: Bool
+  @Column(as: Date.ISO8601Representation.self)
+  var createdAt: Date
+  var title = ""
+}
+
+@Table
+private struct Attendee {
+  let id: Int
+  var syncUpID: Int
+  var name: String
+  @Column(as: Date.ISO8601Representation.self)
+  var createdAt: Date
 }

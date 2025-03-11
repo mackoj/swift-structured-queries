@@ -1,82 +1,42 @@
-extension QueryExpression where QueryOutput: QueryBindable {
-  public func ascending(nulls: NullOrdering? = nil) -> OrderingTerm {
-    OrderingTerm(base: self, direction: .ascending, nulls: nulls)
+extension QueryExpression where QueryValue: QueryDecodable {
+  public func asc(nulls nullOrdering: NullOrdering? = nil) -> some QueryExpression {
+    OrderingTerm(base: self, direction: .asc, nullOrdering: nullOrdering)
   }
 
-  public func descending(nulls: NullOrdering? = nil) -> OrderingTerm {
-    OrderingTerm(base: self, direction: .descending, nulls: nulls)
+  public func desc(nulls nullOrdering: NullOrdering? = nil) -> some QueryExpression {
+    OrderingTerm(base: self, direction: .desc, nullOrdering: nullOrdering)
   }
 }
 
-public protocol _OrderingTerm {
-  var _orderingTerm: OrderingTerm { get }
+public enum NullOrdering: Sendable {
+  case first
+  case last
+
+  fileprivate var rawValue: String {
+    switch self {
+    case .first: "FIRST"
+    case .last: "LAST"
+    }
+  }
 }
 
-public enum NullOrdering: String, Sendable {
-  case first = "FIRST"
-  case last = "LAST"
-}
+private struct OrderingTerm<Base: QueryExpression>: QueryExpression {
+  typealias QueryValue = Void
 
-public struct OrderingTerm {
   enum Direction: String {
-    case ascending = "ASC"
-    case descending = "DESC"
+    case asc = "ASC"
+    case desc = "DESC"
   }
 
-  let base: any QueryExpression
-  let direction: Direction?
-  let nulls: NullOrdering?
+  let base: Base
+  let direction: Direction
+  let nullOrdering: NullOrdering?
 
-  init(base: any QueryExpression, direction: Direction? = nil, nulls: NullOrdering? = nil) {
-    self.base = base
-    self.direction = direction
-    self.nulls = nulls
-  }
-}
-
-extension OrderingTerm: QueryExpression {
-  public typealias QueryOutput = Void
-  public var queryFragment: QueryFragment {
-    var fragment: QueryFragment = base.queryFragment
-    if let direction {
-      fragment.append(" \(raw: direction.rawValue)")
+  var queryFragment: QueryFragment {
+    var query: QueryFragment = "\(base) \(raw: direction.rawValue)"
+    if let nullOrdering {
+      query.append(" NULLS \(raw: nullOrdering.rawValue)")
     }
-    if let nulls {
-      fragment.append(" NULLS \(raw: nulls.rawValue)")
-    }
-    return fragment
-  }
-}
-
-extension OrderingTerm: _OrderingTerm {
-  public var _orderingTerm: Self { self }
-}
-
-@resultBuilder
-public enum OrderingBuilder {
-  public static func buildExpression<each Value: _OrderingTerm>(
-    _ expression: (repeat each Value)
-  ) -> [OrderingTerm] {
-    var terms: [OrderingTerm] = []
-    for term in repeat each expression {
-      terms.append(term._orderingTerm)
-    }
-    return terms
-  }
-
-  public static func buildBlock(_ component: [OrderingTerm]) -> [OrderingTerm] {
-    component
-  }
-
-  public static func buildEither(first component: [OrderingTerm]) -> [OrderingTerm] {
-    component
-  }
-
-  public static func buildEither(second component: [OrderingTerm]) -> [OrderingTerm] {
-    component
-  }
-
-  public static func buildOptional(_ component: [OrderingTerm]?) -> [OrderingTerm] {
-    component ?? []
+    return query
   }
 }

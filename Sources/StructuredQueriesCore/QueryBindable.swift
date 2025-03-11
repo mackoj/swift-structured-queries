@@ -1,21 +1,10 @@
-// TODO: Should we underscore these requirements in order to somewhat hide them from stdlib types?
-public protocol QueryBindable<QueryOutput>: QueryDecodable, QueryExpression
-where QueryOutput: QueryBindable {
-  associatedtype QueryOutput = Self
-  var queryValue: QueryOutput { get }
+public protocol QueryBindable: QueryRepresentable, QueryExpression where QueryValue: QueryBindable {
+  associatedtype QueryValue = Self
   var queryBinding: QueryBinding { get }
 }
 
 extension QueryBindable {
   public var queryFragment: QueryFragment { "\(queryBinding)" }
-}
-
-extension QueryBindable where QueryOutput == Self {
-  public var queryValue: Self { self }
-}
-
-extension QueryBindable where Self: RawRepresentable, RawValue: QueryBindable {
-  public var queryBinding: QueryBinding { rawValue.queryBinding }
 }
 
 extension Bool: QueryBindable {
@@ -66,7 +55,7 @@ extension UInt32: QueryBindable {
   public var queryBinding: QueryBinding { .int(Int64(self)) }
 }
 
-extension [UInt8]: QueryBindable {
+extension [UInt8]: QueryBindable, QueryExpression {
   public var queryBinding: QueryBinding { .blob(self) }
 }
 
@@ -97,13 +86,6 @@ extension DefaultStringInterpolation {
   }
 }
 
-extension Optional: QueryBindable where Wrapped: QueryBindable {
-  public var queryBinding: QueryBinding {
-    switch self {
-    case let .some(wrapped):
-      return wrapped.queryBinding
-    case .none:
-      return .null
-    }
-  }
+extension QueryBindable where Self: RawRepresentable, RawValue: QueryBindable {
+  public var queryBinding: QueryBinding { rawValue.queryBinding }
 }

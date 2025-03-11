@@ -1,6 +1,9 @@
-// TODO: Can we get rid of this?
-
-public protocol Statement<QueryOutput>: QueryExpression, Hashable {}
+public protocol Statement<Columns, From, Joins>: QueryExpression, Hashable
+where QueryValue == [Columns] {
+  associatedtype Columns
+  associatedtype From: Table
+  associatedtype Joins = ()
+}
 
 extension Statement {
   public static func == (lhs: Self, rhs: Self) -> Bool {

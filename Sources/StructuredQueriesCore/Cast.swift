@@ -1,16 +1,53 @@
 extension QueryExpression {
-  public func `as`<S: QueryBindingStrategy>(_ strategy: S) -> some QueryExpression<Bind<S>>
-  where S.RawValue == QueryOutput {
-    Cast(base: self, strategy: strategy)
+  public func cast<Other: SQLiteType>(as _: Other.Type) -> some QueryExpression<Other> {
+    Cast(base: self)
   }
 }
 
-private struct Cast<
-  Base: QueryExpression<Strategy.RawValue>, Strategy: QueryBindingStrategy
->: QueryExpression {
-  let base: Base
-  let strategy: Strategy
+public protocol SQLiteType: QueryBindable {
+  static var typeAffinity: String { get }
+}
 
-  typealias QueryOutput = Bind<Strategy>
-  var queryFragment: QueryFragment { base.queryFragment }
+extension SQLiteType where Self: BinaryInteger {
+  public static var typeAffinity: String { "INTEGER" }
+}
+
+extension Int: SQLiteType {}
+extension Int8: SQLiteType {}
+extension Int16: SQLiteType {}
+extension Int32: SQLiteType {}
+extension Int64: SQLiteType {}
+
+extension UInt8: SQLiteType {}
+extension UInt16: SQLiteType {}
+extension UInt32: SQLiteType {}
+
+extension SQLiteType where Self: FloatingPoint {
+  public static var typeAffinity: String { "REAL" }
+}
+
+extension Double: SQLiteType {}
+extension Float: SQLiteType {}
+
+extension Bool: SQLiteType {
+  public static var typeAffinity: String { Int.typeAffinity }
+}
+
+extension String: SQLiteType {
+  public static var typeAffinity: String { "TEXT" }
+}
+
+extension [UInt8]: SQLiteType {
+  public static var typeAffinity: String { "BLOB" }
+}
+
+extension Optional: SQLiteType where Wrapped: SQLiteType {
+  public static var typeAffinity: String { Wrapped.typeAffinity }
+}
+
+private struct Cast<QueryValue: SQLiteType, Base: QueryExpression>: QueryExpression {
+  let base: Base
+  var queryFragment: QueryFragment {
+    "CAST(\(base.queryFragment) AS \(raw: QueryValue.typeAffinity))"
+  }
 }
