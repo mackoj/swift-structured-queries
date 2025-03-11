@@ -13,10 +13,6 @@ let package = Package(
   ],
   products: [
     .library(
-      name: "ColumnsCore",
-      targets: ["ColumnsCore"]
-    ),
-    .library(
       name: "StructuredQueries",
       targets: ["StructuredQueries"]
     ),
@@ -26,15 +22,13 @@ let package = Package(
     ),
   ],
   dependencies: [
-    .package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.0.0"),
-    .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.1.0"),
-    .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.0.0"),
+    .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.6.0"),
+    .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.18.1"),
     .package(url: "https://github.com/swiftlang/swift-syntax", "600.0.0"..<"601.0.0"),
   ],
   targets: [
     .target(
-      name: "ColumnsCore",
-      dependencies: []
+      name: "StructuredQueriesCore"
     ),
     .target(
       name: "StructuredQueries",
@@ -42,9 +36,6 @@ let package = Package(
         "StructuredQueriesCore",
         "StructuredQueriesMacros",
       ]
-    ),
-    .target(
-      name: "StructuredQueriesCore"
     ),
     .macro(
       name: "StructuredQueriesMacros",
@@ -60,28 +51,19 @@ let package = Package(
       ]
     ),
     .testTarget(
-      name: "StructuredQueriesTests",
-      dependencies: [
-        "StructuredQueries",
-        .product(name: "CustomDump", package: "swift-custom-dump"),
-        .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing")
-      ]
-    ),
-    .testTarget(
-      name: "StructuredQueriesIntegrationTests",
-      dependencies: [
-        "StructuredQueries",
-        "StructuredQueriesSQLite",
-        .product(name: "CustomDump", package: "swift-custom-dump"),
-        .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
-      ]
-    ),
-    .testTarget(
       name: "StructuredQueriesMacrosTests",
       dependencies: [
         "StructuredQueries",
         "StructuredQueriesMacros",
         .product(name: "MacroTesting", package: "swift-macro-testing"),
+      ]
+    ),
+    .testTarget(
+      name: "StructuredQueriesTests",
+      dependencies: [
+        "StructuredQueries",
+        "StructuredQueriesSQLite",
+        .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
       ]
     ),
   ],
