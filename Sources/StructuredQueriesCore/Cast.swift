@@ -9,7 +9,8 @@ public protocol SQLiteType: QueryBindable {
 }
 
 extension SQLiteType where Self: BinaryInteger {
-  public static var typeAffinity: String { "INTEGER" }
+  // Should this be 'INTEGER'?
+  public static var typeAffinity: String { "NUMERIC" }
 }
 
 extension Int: SQLiteType {}
@@ -23,7 +24,8 @@ extension UInt16: SQLiteType {}
 extension UInt32: SQLiteType {}
 
 extension SQLiteType where Self: FloatingPoint {
-  public static var typeAffinity: String { "REAL" }
+  // Should this be 'REAL'?
+  public static var typeAffinity: String { "NUMERIC" }
 }
 
 extension Double: SQLiteType {}

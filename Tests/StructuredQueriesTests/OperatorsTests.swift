@@ -29,7 +29,9 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool" FROM "rows" WHERE ("rows"."c" IN (SELECT CAST("rows"."bool" AS INTEGER) FROM "rows"))
+        SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool" \
+        FROM "rows" \
+        WHERE ("rows"."c" IN (SELECT CAST("rows"."bool" AS NUMERIC) FROM "rows"))
         """
       }
     }
@@ -42,23 +44,27 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool" FROM "rows" WHERE ("rows"."c" IN (SELECT CAST("rows"."bool" AS INTEGER) FROM "rows"))
+        SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool" \
+        FROM "rows" \
+        WHERE ("rows"."c" IN (SELECT CAST("rows"."bool" AS NUMERIC) FROM "rows"))
         """
       }
     }
 
-//    @Test func selectSubQuery() {
-//      // TODO: Can we support this? The problem with that `Team.all().count()` has an output of an
-//      //       instead of a single value. Needs a SelectOne?
-//      assertInlineSnapshot(
-//        of: Row.select { ($0.a, Row.count()) },
-//        as: .sql
-//      ) {
-//        """
-//        SELECT "players"."id", (SELECT count(*) FROM "teams") FROM "players"
-//        """
-//      }
-//    }
+    // @Test func selectSubquery() {
+    //   // TODO: Can we support this?
+    //   // 'Team.all().count()' -> 'some QueryExpression<[Int]>'
+    //   // vs.
+    //   // 'Team.all().count()' -> 'some QueryExpression<Int>'
+    //   assertInlineSnapshot(
+    //     of: Row.select { ($0.a, Row.count()) },
+    //     as: .sql
+    //   ) {
+    //     """
+    //     SELECT "players"."id", (SELECT count(*) FROM "teams") FROM "players"
+    //     """
+    //   }
+    // }
 
     @available(*, deprecated)
     @Test func isNullWithNonNullableColumn() {
