@@ -12,6 +12,12 @@ extension SnapshotTests {
       var title: String
     }
 
+    @Table
+    fileprivate struct Meeting: Equatable {
+      @Column(as: .iso8601)
+      var date: Date
+    }
+
     @Test func basics() {
       assertInlineSnapshot(
         of: SyncUp.update {
@@ -160,12 +166,6 @@ extension SnapshotTests {
         UPDATE "syncUps" SET "isActive" = 1, "title" = 'Engineering' WHERE ("syncUps"."id" = 42)
         """
       }
-    }
-
-    @Table
-    fileprivate struct Meeting: Equatable {
-      @Column(as: .iso8601)
-      var date: Date
     }
 
     @Test func explicitBind() {
