@@ -164,8 +164,7 @@ extension SnapshotTests {
           .group(by: \.id)
           .join(Reminder.all()) { $0.id.eq($1.remindersListID) }
           .select { ($0, $1.id.count()) }
-      )
-      {
+      ) {
         """
         SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", count("reminders"."id") FROM "remindersLists" JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID") GROUP BY "remindersLists"."id"
         """

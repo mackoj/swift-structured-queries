@@ -6,21 +6,27 @@ import StructuredQueriesSQLite
 
 @Table
 struct RemindersList: Equatable, Identifiable {
-  var id: Int64
+  static let withReminderCount = group(by: \.id)
+    .join(Reminder.all()) { $0.id == $1.remindersListID }
+    .select { $1.id.count() }
+
+  let id: Int
   var color = 0x4a99ef
   var name = ""
 }
 
 @Table
 struct Reminder: Equatable, Identifiable {
-  var id: Int64
+  static let incomplete = Self.where { !$0.isCompleted }
+
+  let id: Int
   @Column(as: Date.ISO8601Representation?.self)
   var date: Date?
   var isCompleted = false
   var isFlagged = false
   var notes = ""
   var priority: Priority?
-  var remindersListID: Int64
+  var remindersListID: Int
   var title = ""
   static func searching(_ text: String) -> Where<Reminder> {
     Self.where {
@@ -28,7 +34,6 @@ struct Reminder: Equatable, Identifiable {
       || $0.notes.collate(.nocase).contains(text)
     }
   }
-  static let incomplete = Self.where { !$0.isCompleted }
 }
 
 enum Priority: Int, QueryBindable {
@@ -43,14 +48,14 @@ extension Reminder.Columns {
 
 @Table
 struct Tag: Equatable, Identifiable {
-  var id: Int64
+  let id: Int
   var name = ""
 }
 
 @Table("remindersTags")
 struct ReminderTag: Equatable {
-  var reminderID: Int64
-  var tagID: Int64
+  let reminderID: Int
+  let tagID: Int
 }
 
 extension Database {

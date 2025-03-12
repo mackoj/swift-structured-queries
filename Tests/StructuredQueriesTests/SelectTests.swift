@@ -104,249 +104,409 @@ extension SnapshotTests {
         └───┴────────────┘
         """
       }
+    }
+
+    @Test func join() throws {
+      try assertQuery(
+        RemindersList.join(Reminder.all()) { $0.id == $1.remindersListID }
+      ) {
+        """
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "remindersLists" JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        """
+      } results: {
+        #"""
+        ┌────────────────────┬─────────────────────────────────────────┐
+        │ RemindersList(     │ Reminder(                               │
+        │   id: 1,           │   id: 1,                                │
+        │   color: 4889071,  │   date: Date(2001-01-01T00:00:00.000Z), │
+        │   name: "Personal" │   isCompleted: false,                   │
+        │ )                  │   isFlagged: false,                     │
+        │                    │   notes: "Milk, Eggs, Apples",          │
+        │                    │   priority: nil,                        │
+        │                    │   remindersListID: 1,                   │
+        │                    │   title: "Groceries"                    │
+        │                    │ )                                       │
+        ├────────────────────┼─────────────────────────────────────────┤
+        │ RemindersList(     │ Reminder(                               │
+        │   id: 1,           │   id: 2,                                │
+        │   color: 4889071,  │   date: Date(2000-12-30T00:00:00.000Z), │
+        │   name: "Personal" │   isCompleted: false,                   │
+        │ )                  │   isFlagged: true,                      │
+        │                    │   notes: "",                            │
+        │                    │   priority: nil,                        │
+        │                    │   remindersListID: 1,                   │
+        │                    │   title: "Haircut"                      │
+        │                    │ )                                       │
+        ├────────────────────┼─────────────────────────────────────────┤
+        │ RemindersList(     │ Reminder(                               │
+        │   id: 1,           │   id: 3,                                │
+        │   color: 4889071,  │   date: Date(2001-01-01T00:00:00.000Z), │
+        │   name: "Personal" │   isCompleted: false,                   │
+        │ )                  │   isFlagged: false,                     │
+        │                    │   notes: "Ask about diet",              │
+        │                    │   priority: .high,                      │
+        │                    │   remindersListID: 1,                   │
+        │                    │   title: "Doctor appointment"           │
+        │                    │ )                                       │
+        ├────────────────────┼─────────────────────────────────────────┤
+        │ RemindersList(     │ Reminder(                               │
+        │   id: 1,           │   id: 4,                                │
+        │   color: 4889071,  │   date: Date(2000-06-25T00:00:00.000Z), │
+        │   name: "Personal" │   isCompleted: true,                    │
+        │ )                  │   isFlagged: false,                     │
+        │                    │   notes: "",                            │
+        │                    │   priority: nil,                        │
+        │                    │   remindersListID: 1,                   │
+        │                    │   title: "Take a walk"                  │
+        │                    │ )                                       │
+        ├────────────────────┼─────────────────────────────────────────┤
+        │ RemindersList(     │ Reminder(                               │
+        │   id: 1,           │   id: 5,                                │
+        │   color: 4889071,  │   date: Date(2001-01-01T00:00:00.000Z), │
+        │   name: "Personal" │   isCompleted: false,                   │
+        │ )                  │   isFlagged: false,                     │
+        │                    │   notes: "",                            │
+        │                    │   priority: nil,                        │
+        │                    │   remindersListID: 1,                   │
+        │                    │   title: "Buy concert tickets"          │
+        │                    │ )                                       │
+        ├────────────────────┼─────────────────────────────────────────┤
+        │ RemindersList(     │ Reminder(                               │
+        │   id: 2,           │   id: 6,                                │
+        │   color: 15567157, │   date: Date(2001-01-03T00:00:00.000Z), │
+        │   name: "Family"   │   isCompleted: false,                   │
+        │ )                  │   isFlagged: true,                      │
+        │                    │   notes: "",                            │
+        │                    │   priority: .high,                      │
+        │                    │   remindersListID: 2,                   │
+        │                    │   title: "Pick up kids from school"     │
+        │                    │ )                                       │
+        ├────────────────────┼─────────────────────────────────────────┤
+        │ RemindersList(     │ Reminder(                               │
+        │   id: 2,           │   id: 7,                                │
+        │   color: 15567157, │   date: Date(2000-12-30T00:00:00.000Z), │
+        │   name: "Family"   │   isCompleted: true,                    │
+        │ )                  │   isFlagged: false,                     │
+        │                    │   notes: "",                            │
+        │                    │   priority: .low,                       │
+        │                    │   remindersListID: 2,                   │
+        │                    │   title: "Get laundry"                  │
+        │                    │ )                                       │
+        ├────────────────────┼─────────────────────────────────────────┤
+        │ RemindersList(     │ Reminder(                               │
+        │   id: 2,           │   id: 8,                                │
+        │   color: 15567157, │   date: Date(2001-01-05T00:00:00.000Z), │
+        │   name: "Family"   │   isCompleted: false,                   │
+        │ )                  │   isFlagged: false,                     │
+        │                    │   notes: "",                            │
+        │                    │   priority: .high,                      │
+        │                    │   remindersListID: 2,                   │
+        │                    │   title: "Take out trash"               │
+        │                    │ )                                       │
+        ├────────────────────┼─────────────────────────────────────────┤
+        │ RemindersList(     │ Reminder(                               │
+        │   id: 3,           │   id: 9,                                │
+        │   color: 11689427, │   date: Date(2001-01-03T00:00:00.000Z), │
+        │   name: "Business" │   isCompleted: false,                   │
+        │ )                  │   isFlagged: false,                     │
+        │                    │   notes: """                            │
+        │                    │     Status of tax return                │
+        │                    │     Expenses for next year              │
+        │                    │     Changing payroll company            │
+        │                    │     """,                                │
+        │                    │   priority: nil,                        │
+        │                    │   remindersListID: 3,                   │
+        │                    │   title: "Call accountant"              │
+        │                    │ )                                       │
+        ├────────────────────┼─────────────────────────────────────────┤
+        │ RemindersList(     │ Reminder(                               │
+        │   id: 3,           │   id: 10,                               │
+        │   color: 11689427, │   date: Date(2000-12-30T00:00:00.000Z), │
+        │   name: "Business" │   isCompleted: true,                    │
+        │ )                  │   isFlagged: false,                     │
+        │                    │   notes: "",                            │
+        │                    │   priority: .medium,                    │
+        │                    │   remindersListID: 3,                   │
+        │                    │   title: "Send weekly emails"           │
+        │                    │ )                                       │
+        └────────────────────┴─────────────────────────────────────────┘
+        """#
+      }
+      // TODO: Get coverage on optional relations.
       assertInlineSnapshot(
-        of: SyncUp.all().select(\.id).select { ($0.createdAt, $0.isActive) },
+        of: RemindersList.leftJoin(Reminder.all()) { $0.id == $1.remindersListID },
         as: .sql
       ) {
         """
-        SELECT "syncUps"."id", "syncUps"."createdAt", "syncUps"."isActive" \
-        FROM "syncUps"
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "remindersLists" LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        """
+      }
+      assertInlineSnapshot(
+        of: RemindersList.rightJoin(Reminder.all()) { $0.id == $1.remindersListID },
+        as: .sql
+      ) {
+        """
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "remindersLists" RIGHT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        """
+      }
+      assertInlineSnapshot(
+        of: RemindersList.fullJoin(Reminder.all()) { $0.id == $1.remindersListID },
+        as: .sql
+      ) {
+        """
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "remindersLists" FULL JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        """
+      }
+
+      try assertQuery(
+        RemindersList
+          .join(Reminder.all()) { $0.id == $1.remindersListID }
+          .select { ($0.name, $1.title) }
+      ) {
+        """
+        SELECT "remindersLists"."name", "reminders"."title" FROM "remindersLists" JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        """
+      } results: {
+        """
+        ┌────────────┬────────────────────────────┐
+        │ "Personal" │ "Groceries"                │
+        │ "Personal" │ "Haircut"                  │
+        │ "Personal" │ "Doctor appointment"       │
+        │ "Personal" │ "Take a walk"              │
+        │ "Personal" │ "Buy concert tickets"      │
+        │ "Family"   │ "Pick up kids from school" │
+        │ "Family"   │ "Get laundry"              │
+        │ "Family"   │ "Take out trash"           │
+        │ "Business" │ "Call accountant"          │
+        │ "Business" │ "Send weekly emails"       │
+        └────────────┴────────────────────────────┘
         """
       }
     }
 
-    @Test func join() {
-      assertInlineSnapshot(
-        of: SyncUp.all().join(Attendee.all()) { $0.id == $1.syncUpID },
-        as: .sql
+    @Test func `where`() throws {
+      try assertQuery(
+        Reminder.where(\.isCompleted)
       ) {
         """
-        SELECT \
-        "syncUps"."id", \
-        "syncUps"."isActive", \
-        "syncUps"."createdAt", \
-        "attendees"."id", \
-        "attendees"."syncUpID", \
-        "attendees"."name", \
-        "attendees"."createdAt" \
-        FROM "syncUps" \
-        JOIN "attendees" ON ("syncUps"."id" = "attendees"."syncUpID")
+        SELECT "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "reminders" WHERE "reminders"."isCompleted"
         """
-      }
-      assertInlineSnapshot(
-        of: SyncUp.all().leftJoin(Attendee.all()) { $0.id == $1.syncUpID },
-        as: .sql
-      ) {
+      } results: {
         """
-        SELECT "syncUps"."id", \
-        "syncUps"."isActive", \
-        "syncUps"."createdAt", \
-        "attendees"."id", \
-        "attendees"."syncUpID", \
-        "attendees"."name", \
-        "attendees"."createdAt" \
-        FROM "syncUps" \
-        LEFT JOIN "attendees" ON ("syncUps"."id" = "attendees"."syncUpID")
-        """
-      }
-      assertInlineSnapshot(
-        of: SyncUp.all().rightJoin(Attendee.all()) { $0.id == $1.syncUpID },
-        as: .sql
-      ) {
-        """
-        SELECT "syncUps"."id", \
-        "syncUps"."isActive", \
-        "syncUps"."createdAt", \
-        "attendees"."id", \
-        "attendees"."syncUpID", \
-        "attendees"."name", \
-        "attendees"."createdAt" \
-        FROM "syncUps" \
-        RIGHT JOIN "attendees" ON ("syncUps"."id" = "attendees"."syncUpID")
-        """
-      }
-      assertInlineSnapshot(
-        of: SyncUp.all().fullJoin(Attendee.all()) { $0.id == $1.syncUpID },
-        as: .sql
-      ) {
-        """
-        SELECT "syncUps"."id", \
-        "syncUps"."isActive", \
-        "syncUps"."createdAt", \
-        "attendees"."id", \
-        "attendees"."syncUpID", \
-        "attendees"."name", \
-        "attendees"."createdAt" \
-        FROM "syncUps" \
-        FULL JOIN "attendees" ON ("syncUps"."id" = "attendees"."syncUpID")
-        """
-      }
-
-      assertInlineSnapshot(
-        of: SyncUp.all().join(Attendee.all()) { $0.id == $1.syncUpID }.select { ($0.id, $1.id) },
-        as: .sql
-      ) {
-        """
-        SELECT "syncUps"."id", "attendees"."id" \
-        FROM "syncUps" \
-        JOIN "attendees" ON ("syncUps"."id" = "attendees"."syncUpID")
+        ┌─────────────────────────────────────────┐
+        │ Reminder(                               │
+        │   id: 4,                                │
+        │   date: Date(2000-06-25T00:00:00.000Z), │
+        │   isCompleted: true,                    │
+        │   isFlagged: false,                     │
+        │   notes: "",                            │
+        │   priority: nil,                        │
+        │   remindersListID: 1,                   │
+        │   title: "Take a walk"                  │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ Reminder(                               │
+        │   id: 7,                                │
+        │   date: Date(2000-12-30T00:00:00.000Z), │
+        │   isCompleted: true,                    │
+        │   isFlagged: false,                     │
+        │   notes: "",                            │
+        │   priority: .low,                       │
+        │   remindersListID: 2,                   │
+        │   title: "Get laundry"                  │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ Reminder(                               │
+        │   id: 10,                               │
+        │   date: Date(2000-12-30T00:00:00.000Z), │
+        │   isCompleted: true,                    │
+        │   isFlagged: false,                     │
+        │   notes: "",                            │
+        │   priority: .medium,                    │
+        │   remindersListID: 3,                   │
+        │   title: "Send weekly emails"           │
+        │ )                                       │
+        └─────────────────────────────────────────┘
         """
       }
     }
 
-    @Test func `where`() {
-      assertInlineSnapshot(
-        of: SyncUp.all().where(\.isActive),
-        as: .sql
+    @Test func group() throws {
+      try assertQuery(
+        Reminder.group(by: \.isCompleted)
       ) {
         """
-        SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt" \
-        FROM "syncUps" \
-        WHERE "syncUps"."isActive"
+        SELECT "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "reminders" GROUP BY "reminders"."isCompleted"
         """
-      }
-    }
-
-    @Test func group() {
-      assertInlineSnapshot(
-        of: SyncUp.all().group(by: \.id),
-        as: .sql
-      ) {
+      } results: {
         """
-        SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt" \
-        FROM "syncUps" \
-        GROUP BY "syncUps"."id"
+        ┌─────────────────────────────────────────┐
+        │ Reminder(                               │
+        │   id: 1,                                │
+        │   date: Date(2001-01-01T00:00:00.000Z), │
+        │   isCompleted: false,                   │
+        │   isFlagged: false,                     │
+        │   notes: "Milk, Eggs, Apples",          │
+        │   priority: nil,                        │
+        │   remindersListID: 1,                   │
+        │   title: "Groceries"                    │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ Reminder(                               │
+        │   id: 4,                                │
+        │   date: Date(2000-06-25T00:00:00.000Z), │
+        │   isCompleted: true,                    │
+        │   isFlagged: false,                     │
+        │   notes: "",                            │
+        │   priority: nil,                        │
+        │   remindersListID: 1,                   │
+        │   title: "Take a walk"                  │
+        │ )                                       │
+        └─────────────────────────────────────────┘
         """
       }
     }
 
     @Test func having() {
       assertInlineSnapshot(
-        of: SyncUp.all().having(\.isActive),
+        of: Reminder.having(\.isCompleted),
         as: .sql
       ) {
         """
-        SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt" \
-        FROM "syncUps" \
-        HAVING "syncUps"."isActive"
+        SELECT "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "reminders" HAVING "reminders"."isCompleted"
         """
       }
     }
 
-    @Test func order() {
-      assertInlineSnapshot(
-        of: SyncUp.all().order(by: \.id),
-        as: .sql
+    @Test func order() throws {
+      try assertQuery(
+        Reminder
+          .select(\.title)
+          .order(by: \.title)
       ) {
         """
-        SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt" \
-        FROM "syncUps" \
-        ORDER BY "syncUps"."id"
+        SELECT "reminders"."title" FROM "reminders" ORDER BY "reminders"."title"
+        """
+      } results: {
+        """
+        ┌────────────────────────────┐
+        │ "Buy concert tickets"      │
+        │ "Call accountant"          │
+        │ "Doctor appointment"       │
+        │ "Get laundry"              │
+        │ "Groceries"                │
+        │ "Haircut"                  │
+        │ "Pick up kids from school" │
+        │ "Send weekly emails"       │
+        │ "Take a walk"              │
+        │ "Take out trash"           │
+        └────────────────────────────┘
         """
       }
-      assertInlineSnapshot(
-        of: SyncUp.all().order(by: { ($0.isActive.asc(), $0.createdAt.desc()) }),
-        as: .sql
+      try assertQuery(
+        Reminder
+          .select { ($0.isCompleted, $0.date) }
+          .order { ($0.isCompleted.asc(), $0.date.desc()) }
       ) {
         """
-        SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt" \
-        FROM "syncUps" \
-        ORDER BY "syncUps"."isActive" ASC, "syncUps"."createdAt" DESC
+        SELECT "reminders"."isCompleted", "reminders"."date" FROM "reminders" ORDER BY "reminders"."isCompleted" ASC, "reminders"."date" DESC
+        """
+      } results: {
+        """
+        ┌───────┬────────────────────────────────┐
+        │ false │ Date(2001-01-05T00:00:00.000Z) │
+        │ false │ Date(2001-01-03T00:00:00.000Z) │
+        │ false │ Date(2001-01-03T00:00:00.000Z) │
+        │ false │ Date(2001-01-01T00:00:00.000Z) │
+        │ false │ Date(2001-01-01T00:00:00.000Z) │
+        │ false │ Date(2001-01-01T00:00:00.000Z) │
+        │ false │ Date(2000-12-30T00:00:00.000Z) │
+        │ true  │ Date(2000-12-30T00:00:00.000Z) │
+        │ true  │ Date(2000-12-30T00:00:00.000Z) │
+        │ true  │ Date(2000-06-25T00:00:00.000Z) │
+        └───────┴────────────────────────────────┘
         """
       }
-      assertInlineSnapshot(
-        of: SyncUp.all().order {
-          if true {
-            ($0.isActive.asc(nulls: .last), $0.createdAt.desc(nulls: .first))
-          } else {
-            $0.createdAt
+      try assertQuery(
+        Reminder
+          .select { ($0.priority, $0.date) }
+          .order {
+            if true {
+              ($0.priority.asc(nulls: .last), $0.date.desc(nulls: .first))
+            }
           }
-        },
-        as: .sql
       ) {
         """
-        SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt" \
-        FROM "syncUps" \
-        ORDER BY "syncUps"."isActive" ASC NULLS LAST, "syncUps"."createdAt" DESC NULLS FIRST
+        SELECT "reminders"."priority", "reminders"."date" FROM "reminders" ORDER BY "reminders"."priority" ASC NULLS LAST, "reminders"."date" DESC NULLS FIRST
+        """
+      } results: {
+        """
+        ┌─────────┬────────────────────────────────┐
+        │ .low    │ Date(2000-12-30T00:00:00.000Z) │
+        │ .medium │ Date(2000-12-30T00:00:00.000Z) │
+        │ .high   │ Date(2001-01-05T00:00:00.000Z) │
+        │ .high   │ Date(2001-01-03T00:00:00.000Z) │
+        │ .high   │ Date(2001-01-01T00:00:00.000Z) │
+        │ nil     │ Date(2001-01-03T00:00:00.000Z) │
+        │ nil     │ Date(2001-01-01T00:00:00.000Z) │
+        │ nil     │ Date(2001-01-01T00:00:00.000Z) │
+        │ nil     │ Date(2000-12-30T00:00:00.000Z) │
+        │ nil     │ Date(2000-06-25T00:00:00.000Z) │
+        └─────────┴────────────────────────────────┘
         """
       }
     }
 
-    @Test func limit() {
-      assertInlineSnapshot(
-        of: SyncUp.all().limit(10),
-        as: .sql
-      ) {
+    @Test func limit() throws {
+      try assertQuery(Reminder.select(\.id).limit(2)) {
         """
-        SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt" \
-        FROM "syncUps" \
-        LIMIT 10
+        SELECT "reminders"."id" FROM "reminders" LIMIT 2
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        └───┘
         """
       }
-      assertInlineSnapshot(
-        of: SyncUp.all().limit(10, offset: 10),
-        as: .sql
-      ) {
+      try assertQuery(Reminder.select(\.id).limit(2, offset: 2)) {
         """
-        SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt" \
-        FROM "syncUps" \
-        LIMIT 10 \
-        OFFSET 10
+        SELECT "reminders"."id" FROM "reminders" LIMIT 2 OFFSET 2
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 3 │
+        │ 4 │
+        └───┘
         """
       }
     }
 
     #if compiler(>=6.1)
-      @Test func dynamicMember1() {
-        assertInlineSnapshot(
-          of: SyncUp.all().active.withAttendeeCount.select { syncUp, _ in syncUp },
-          as: .sql
+      @Test func dynamicMember() throws {
+        try assertQuery(
+          RemindersList
+            .limit(1)
+            .select(\.name)
+            .withReminderCount
         ) {
           """
-          SELECT \
-          count("attendees"."id"), "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt" \
-          FROM "syncUps" \
-          LEFT JOIN "attendees" ON ("syncUps"."id" = "attendees"."syncUpID") \
-          WHERE "syncUps"."isActive" \
-          GROUP BY "syncUps"."id"
+          SELECT "remindersLists"."name", count("reminders"."id") FROM "remindersLists" JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID") GROUP BY "remindersLists"."id" LIMIT 1
+          """
+        } results: {
+          """
+          ┌────────────┬───┐
+          │ "Personal" │ 5 │
+          └────────────┴───┘
           """
         }
       }
     #endif
 
     @Test func selfJoin() {
-      assertInlineSnapshot(
-        of: SyncUp.join(SyncUp.all()) { $0.id == $1.id },
-        as: .sql
-      ) {
-        """
-        SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt", \
-        "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt" \
-        FROM "syncUps" JOIN "syncUps" ON ("syncUps"."id" = "syncUps"."id")
-        """
-      }
-    }
-
-    @Table
-    struct SyncUp {
-      static let active = Self.where(\.isActive)
-      static let withAttendeeCount = group(by: \.id)
-        .leftJoin(Attendee.all()) { $0.id == $1.syncUpID }
-        .select { $1.id.count() }
-
-      let id: Int
-      var isActive: Bool
-      @Column(as: Date.ISO8601Representation.self)
-      var createdAt: Date
-    }
-
-    @Table
-    struct Attendee {
-      let id: Int
-      var syncUpID: Int
-      var name: String
-      @Column(as: Date.ISO8601Representation.self)
-      var createdAt: Date
+      // TODO: This is not currently possible.
     }
   }
 }
