@@ -54,3 +54,15 @@ public macro _Draft<T: Table>(_: T.Type) =
     module: "StructuredQueriesMacros",
     type: "TableMacro"
   )
+
+@attached(
+  extension,
+  conformances: QueryRepresentable,
+  names: named(Columns),
+  named(init(decoder:))
+)
+public macro Selection() =
+#externalMacro(
+  module: "StructuredQueriesMacros",
+  type: "SelectionMacro"
+)

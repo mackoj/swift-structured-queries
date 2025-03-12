@@ -21,4 +21,8 @@ extension String {
     }
     return String(result)
   }
+  
+  func qualified() -> String {
+    "\(moduleName).\(self)"
+  }
 }
