@@ -48,9 +48,9 @@ public struct Delete<From: Table, Returning> {
 public typealias DeleteOf<From: Table> = Delete<From, ()>
 
 extension Delete: Statement {
-  public typealias Columns = Returning
+  public typealias QueryValue = Returning
 
-  public var queryFragment: QueryFragment {
+  public var query: QueryFragment {
     var query: QueryFragment = "DELETE FROM \(raw: From.tableName.quoted())"
     if !`where`.isEmpty {
       query.append(" WHERE \(`where`.map(\.queryFragment).joined(separator: " AND "))")

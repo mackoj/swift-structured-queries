@@ -351,7 +351,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        ("rows"."c" IN ((1, 2, 3))
+        ("rows"."c" IN (1, 2, 3)
         """
       }
       assertInlineSnapshot(
@@ -367,7 +367,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        ("rows"."c" IN ((1, 2, 3))
+        ("rows"."c" IN (1, 2, 3)
         """
       }
       assertInlineSnapshot(
@@ -399,20 +399,16 @@ extension SnapshotTests {
       }
     }
 
-    // @Test func selectSubquery() {
-    //   // TODO: Can we support this?
-    //   // 'Team.all().count()' -> 'some QueryExpression<[Int]>'
-    //   // vs.
-    //   // 'Team.all().count()' -> 'some QueryExpression<Int>'
-    //   assertInlineSnapshot(
-    //     of: Row.select { ($0.a, Row.count()) },
-    //     as: .sql
-    //   ) {
-    //     """
-    //     SELECT "players"."id", (SELECT count(*) FROM "teams") FROM "players"
-    //     """
-    //   }
-    // }
+     @Test func selectSubquery() {
+       assertInlineSnapshot(
+         of: Row.select { ($0.a, Row.count()) },
+         as: .sql
+       ) {
+         """
+         SELECT "rows"."a", (SELECT count(*) FROM "rows") FROM "rows"
+         """
+       }
+     }
 
     @Test func whereSubquery() async throws {
       assertInlineSnapshot(

@@ -72,9 +72,9 @@ public struct Update<From: Table, Returning> {
 public typealias UpdateOf<Base: Table> = Update<Base, ()>
 
 extension Update: Statement {
-  public typealias Columns = Returning
+  public typealias QueryValue = Returning
 
-  public var queryFragment: QueryFragment {
+  public var query: QueryFragment {
     var query: QueryFragment = "UPDATE"
     if let conflictResolution {
       query.append(" OR \(raw: conflictResolution.rawValue)")

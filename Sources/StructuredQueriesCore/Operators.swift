@@ -356,8 +356,13 @@ extension AnyQueryExpression<String> {
 }
 
 extension QueryExpression {
-  public func `in`(_ query: some QueryExpression<[QueryValue]>) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "IN", rhs: .raw("(\(query))", as: Void.self))
+  public func `in`(_ expression: some QueryExpression<[QueryValue]>) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "IN", rhs: expression)
+  }
+
+  public func `in`<S: Statement>(_ query: S) -> some QueryExpression<Bool>
+  where S.QueryValue == QueryValue {
+    BinaryOperator(lhs: self, operator: "IN", rhs: .raw("(\(query.query))", as: Void.self))
   }
 
   public func between(
@@ -381,6 +386,14 @@ extension QueryExpression {
   public func contains<Bound>(_ element: some QueryExpression<Bound>) -> some QueryExpression<Bool>
   where QueryValue == ClosedRange<Bound> {
     BinaryOperator(lhs: element, operator: "BETWEEN", rhs: self)
+  }
+}
+
+extension Statement {
+  public func contains(
+    _ element: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
+    element.in(self)
   }
 }
 

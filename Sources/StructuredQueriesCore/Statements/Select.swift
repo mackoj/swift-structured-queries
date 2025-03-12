@@ -836,13 +836,13 @@ public func + <
 }
 
 extension Select: SelectStatement {
-  public typealias QueryValue = [Columns]
+  public typealias QueryValue = Columns
 
   public func all() -> Self {
     self
   }
 
-  public var queryFragment: QueryFragment {
+  public var query: QueryFragment {
     let columns =
       columns.isEmpty
       ? (From.columns.allColumns + joins.flatMap { $0.table.columns.allColumns })

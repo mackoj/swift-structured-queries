@@ -145,8 +145,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        INSERT INTO "attendees" \
-        ("name", "syncUpID") \
+        INSERT INTO "attendees" ("name", "syncUpID") \
         SELECT ("syncUps"."title" || ' Lead'), "syncUps"."id" FROM "syncUps"
         """
       }

@@ -1,20 +1,20 @@
 import StructuredQueries
 
-struct SimpleSelect<Columns>: Statement {
+struct SimpleSelect<QueryValue>: Statement {
   typealias From = Never
 
-  var queryFragment: QueryFragment
+  var query: QueryFragment
 
   init(
-    _ selection: () -> some QueryExpression<Columns>
-  ) where Columns: QueryRepresentable  {
-    queryFragment = "SELECT \(selection().queryFragment)"
+    _ selection: () -> some QueryExpression<QueryValue>
+  ) where QueryValue: QueryRepresentable  {
+    query = "SELECT \(selection().queryFragment)"
   }
 
   init<each C: QueryExpression>(
     _ selection: () -> (repeat each C)
-  ) where repeat (each C).QueryValue: QueryRepresentable, Columns == (repeat (each C).QueryValue) {
+  ) where repeat (each C).QueryValue: QueryRepresentable, QueryValue == (repeat (each C).QueryValue) {
     let columns = Array(repeat each selection())
-    queryFragment = "SELECT \(columns.map(\.queryFragment).joined(separator: ", "))"
+    query = "SELECT \(columns.map(\.queryFragment).joined(separator: ", "))"
   }
 }

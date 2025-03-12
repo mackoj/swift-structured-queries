@@ -59,7 +59,7 @@ public struct Where<From: Table> {
 }
 
 extension Where: SelectStatement {
-  public typealias Columns = ()
+  public typealias QueryValue = ()
 
   public func all() -> Select<(), From, ()> {
     Select(where: predicates)
@@ -231,7 +231,7 @@ extension Where: SelectStatement {
     return Update(conflictResolution: conflictResolution, record: record, where: predicates)
   }
 
-  public var queryFragment: QueryFragment {
-    all().queryFragment
+  public var query: QueryFragment {
+    all().query
   }
 }

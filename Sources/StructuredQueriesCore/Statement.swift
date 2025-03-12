@@ -1,8 +1,14 @@
-public protocol Statement<Columns, From, Joins>: QueryExpression, Hashable
-where QueryValue == [Columns] {
-  associatedtype Columns
+public protocol Statement<QueryValue, From, Joins>: QueryExpression, Hashable {
   associatedtype From: Table
   associatedtype Joins = ()
+
+  var query: QueryFragment { get }
+}
+
+extension Statement {
+  public var queryFragment: QueryFragment {
+    "(\(query))"
+  }
 }
 
 extension Statement {

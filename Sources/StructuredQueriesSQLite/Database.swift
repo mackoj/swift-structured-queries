@@ -31,16 +31,16 @@ public final class Database {
     }
   }
 
-  public func execute<S: Statement>(_ query: S) throws where S.Columns == () {
+  public func execute<S: Statement>(_ query: S) throws where S.QueryValue == () {
     _ = try execute(query) as [()]
   }
 
   public func execute<S: Statement>(
     _ query: S
-  ) throws -> [S.Columns.QueryOutput]
-  where S.Columns: QueryRepresentable {
+  ) throws -> [S.QueryValue.QueryOutput]
+  where S.QueryValue: QueryRepresentable {
     var statement: OpaquePointer?
-    let sql = query.queryFragment
+    let sql = query.query
     guard
       sqlite3_prepare_v2(db, sql.string, -1, &statement, nil) == SQLITE_OK,
       let statement
@@ -64,13 +64,13 @@ public final class Database {
         }
       guard result == SQLITE_OK else { throw SQLiteError() }
     }
-    var results: [S.Columns.QueryOutput] = []
+    var results: [S.QueryValue.QueryOutput] = []
     let decoder = SQLiteQueryDecoder(statement: statement)
     loop: while true {
       let code = sqlite3_step(statement)
       switch code {
       case SQLITE_ROW:
-        try results.append(S.Columns(decoder: decoder).queryOutput)
+        try results.append(S.QueryValue(decoder: decoder).queryOutput)
         decoder.next()
       case SQLITE_DONE:
         break loop
@@ -84,9 +84,9 @@ public final class Database {
   public func execute<S: Statement, each V: QueryRepresentable>(
     _ query: S
   ) throws -> [(repeat (each V).QueryOutput)]
-  where S.Columns == (repeat each V) {
+  where S.QueryValue == (repeat each V) {
     var statement: OpaquePointer?
-    let sql = query.queryFragment
+    let sql = query.query
     guard
       sqlite3_prepare_v2(db, sql.string, -1, &statement, nil) == SQLITE_OK,
       let statement
@@ -130,9 +130,9 @@ public final class Database {
   public func execute<S: SelectStatement, each J: Table>(
     _ query: S
   ) throws -> [(S.From.QueryOutput, repeat (each J).QueryOutput)]
-  where S.Columns == (), S.Joins == (repeat each J) {
+  where S.QueryValue == (), S.Joins == (repeat each J) {
     var statement: OpaquePointer?
-    let sql = query.queryFragment
+    let sql = query.query
     guard
       sqlite3_prepare_v2(db, sql.string, -1, &statement, nil) == SQLITE_OK,
       let statement

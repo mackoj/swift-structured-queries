@@ -272,10 +272,10 @@ enum Values {
 }
 
 extension Insert: Statement {
-  public typealias Columns = Returning
+  public typealias QueryValue = Returning
   public typealias From = Into
 
-  public var queryFragment: QueryFragment {
+  public var query: QueryFragment {
     var query: QueryFragment = "INSERT"
     if let conflictResolution {
       query.append(" OR \(raw: conflictResolution.rawValue)")
@@ -289,7 +289,7 @@ extension Insert: Statement {
       query.append(" DEFAULT VALUES")
 
     case let .select(select):
-      query.append(" \(select)")
+      query.append(" \(select.query)")
 
     case .values(let values):
       guard !values.isEmpty else { return "" }
