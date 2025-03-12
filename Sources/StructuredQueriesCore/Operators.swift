@@ -1,4 +1,13 @@
 extension QueryExpression {
+
+  public func eq(_ other: some QueryExpression<QueryValue?>) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "=", rhs: other)
+  }
+
+  public func eq(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "=", rhs: other)
+  }
+
   public static func == (
     lhs: Self, rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
@@ -37,6 +46,10 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
     BinaryOperator(lhs: lhs, operator: isNull(lhs) ? "IS" : "=", rhs: rhs)
   }
 
+  public func eq(_ other: some QueryExpression<QueryValue.Wrapped>) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "=", rhs: other)
+  }
+
   public static func != (
     lhs: Self, rhs: some QueryExpression<QueryValue.Wrapped>
   ) -> some QueryExpression<Bool> {
@@ -49,6 +62,10 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
     BinaryOperator(lhs: lhs, operator: isNull(lhs) || isNull(rhs) ? "IS" : "=", rhs: rhs)
   }
 
+  public func eq(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "=", rhs: other)
+  }
+
   public static func != (
     lhs: Self, rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
@@ -57,16 +74,9 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
 }
 
 extension QueryExpression {
-  @available(
-    *, deprecated, message: "Comparing non-optional expression to 'NULL' always returns false"
-  )
   public static func == (lhs: Self, rhs: _Null<QueryValue>) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: "IS", rhs: rhs)
   }
-
-  @available(
-    *, deprecated, message: "Comparing non-optional expression to 'NULL' always returns true"
-  )
   public static func != (lhs: Self, rhs: _Null<QueryValue>) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: "IS NOT", rhs: rhs)
   }

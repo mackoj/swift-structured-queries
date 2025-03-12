@@ -152,11 +152,7 @@ extension Database {
         Reminder.Draft(
           date: now,
           notes: """
-            Milk
-            Eggs
-            Apples
-            Oatmeal
-            Spinach
+            Milk, Eggs, Apples
             """,
           remindersListID: 1,
           title: "Groceries"

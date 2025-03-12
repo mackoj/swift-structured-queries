@@ -19,13 +19,7 @@ extension SnapshotTests {
         │   date: Date(2001-01-01T00:00:00.000Z), │
         │   isCompleted: false,                   │
         │   isFlagged: false,                     │
-        │   notes: """                            │
-        │     Milk                                │
-        │     Eggs                                │
-        │     Apples                              │
-        │     Oatmeal                             │
-        │     Spinach                             │
-        │     """,                                │
+        │   notes: "Milk, Eggs, Apples",          │
         │   priority: nil,                        │
         │   remindersListID: 1,                   │
         │   title: "Groceries"                    │
@@ -139,22 +133,27 @@ extension SnapshotTests {
     }
 
     @Test func select() throws {
-      let averagePriority = Reminder.select { $0.priority.cast(as: Int.self).avg() ?? 0 }
+      let averagePriority = Reminder.select { $0.priority.cast(as: Int.self).avg() }
       try assertQuery(
         Reminder
           .select { ($0.title, $0.priority, averagePriority) }
-          .where { $0.priority.cast(as: Double.self) > averagePriority }
+          .where { $0.priority.cast(as: Double?.self) < averagePriority || $0.priority == nil }
+          .order { $0.priority.desc() }
       ) {
         """
-        SELECT "reminders"."title", "reminders"."priority", (SELECT coalesce(avg(CAST("reminders"."priority" AS NUMERIC)), 0.0) FROM "reminders") FROM "reminders" WHERE (CAST("reminders"."priority" AS NUMERIC) > (SELECT coalesce(avg(CAST("reminders"."priority" AS NUMERIC)), 0.0) FROM "reminders"))
+        SELECT "reminders"."title", "reminders"."priority", (SELECT avg(CAST("reminders"."priority" AS NUMERIC)) FROM "reminders") FROM "reminders" WHERE ((CAST("reminders"."priority" AS NUMERIC) < (SELECT avg(CAST("reminders"."priority" AS NUMERIC)) FROM "reminders")) OR ("reminders"."priority" IS NULL)) ORDER BY "reminders"."priority" DESC
         """
-      } results: {
+      }results: {
         """
-        ┌────────────────────────────┬───────┬─────┐
-        │ "Doctor appointment"       │ .high │ 2.4 │
-        │ "Pick up kids from school" │ .high │ 2.4 │
-        │ "Take out trash"           │ .high │ 2.4 │
-        └────────────────────────────┴───────┴─────┘
+        ┌───────────────────────┬─────────┬─────┐
+        │ "Send weekly emails"  │ .medium │ 2.4 │
+        │ "Get laundry"         │ .low    │ 2.4 │
+        │ "Groceries"           │ nil     │ 2.4 │
+        │ "Haircut"             │ nil     │ 2.4 │
+        │ "Take a walk"         │ nil     │ 2.4 │
+        │ "Buy concert tickets" │ nil     │ 2.4 │
+        │ "Call accountant"     │ nil     │ 2.4 │
+        └───────────────────────┴─────────┴─────┘
         """
       }
     }
@@ -195,32 +194,27 @@ extension SnapshotTests {
     }
 
     @Test func remindersWithTags() throws {
-      // TODO: Does removing tuple destructure overloads make it possible to write this query in one expression?
-      let query = Reminder
-        .group(by: \.id)
-        .join(ReminderTag.all()) { $0.id == $1.reminderID }
-        .join(Tag.all()) { $1.tagID == $2.id }
       try assertQuery(
-        query.select { ($0, $2.name.groupConcat()) }
+        Reminder
+          .group(by: \.id)
+          .join(ReminderTag.all()) { $0.id.eq($1.reminderID) }
+          .join(Tag.all()) { $1.tagID.eq($2.id) }
+          .select { ($0, $2.name.groupConcat()) }
+
+        // $0.priority.is(not: nil)
       ) {
         """
         SELECT "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", group_concat("tags"."name") FROM "reminders" JOIN "remindersTags" ON ("reminders"."id" = "remindersTags"."reminderID") JOIN "tags" ON ("remindersTags"."tagID" = "tags"."id") GROUP BY "reminders"."id"
         """
       } results: {
-        #"""
+        """
         ┌─────────────────────────────────────────┬────────────────────┐
         │ Reminder(                               │ "someday,optional" │
         │   id: 1,                                │                    │
         │   date: Date(2001-01-01T00:00:00.000Z), │                    │
         │   isCompleted: false,                   │                    │
         │   isFlagged: false,                     │                    │
-        │   notes: """                            │                    │
-        │     Milk                                │                    │
-        │     Eggs                                │                    │
-        │     Apples                              │                    │
-        │     Oatmeal                             │                    │
-        │     Spinach                             │                    │
-        │     """,                                │                    │
+        │   notes: "Milk, Eggs, Apples",          │                    │
         │   priority: nil,                        │                    │
         │   remindersListID: 1,                   │                    │
         │   title: "Groceries"                    │                    │
@@ -248,7 +242,7 @@ extension SnapshotTests {
         │   title: "Take a walk"                  │                    │
         │ )                                       │                    │
         └─────────────────────────────────────────┴────────────────────┘
-        """#
+        """
       }
     }
 
