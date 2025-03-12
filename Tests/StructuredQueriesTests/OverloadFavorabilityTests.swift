@@ -19,6 +19,14 @@ import Testing
       let result = [1, 2, 3].count
       #expect(result == 3)
     }
+    do {
+      let result = [1, 2, 3].contains(1)
+      #expect(result == true)
+    }
+    do {
+      let result = (1...3).contains(1)
+      #expect(result == true)
+    }
     // do {
     //   let result = 42.signum()
     //   #expect(result == 1)
