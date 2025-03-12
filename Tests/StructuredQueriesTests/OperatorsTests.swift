@@ -429,7 +429,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool", "rows"."string" FROM "rows" WHERE (CAST("rows"."c" AS NUMERIC) >= (SELECT coalesce(avg("rows"."c"), 0.0) FROM "rows"))
+        SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool", "rows"."string" FROM "rows" WHERE ((CAST("rows"."c" AS NUMERIC) >= (SELECT coalesce(avg("rows"."c"), 0.0) FROM "rows")) AND (CAST("rows"."c" AS NUMERIC) > 1.0))
         """
       }
     }

@@ -22,6 +22,7 @@ let package = Package(
     ),
   ],
   dependencies: [
+    .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.0.0"),
     .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.6.0"),
     .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.18.1"),
     .package(url: "https://github.com/swiftlang/swift-syntax", "600.0.0"..<"601.0.0"),
@@ -63,7 +64,17 @@ let package = Package(
       dependencies: [
         "StructuredQueries",
         "StructuredQueriesSQLite",
+        .product(name: "Dependencies", package: "swift-dependencies"),
+        .product(name: "DependenciesTestSupport", package: "swift-dependencies"),
         .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
+      ],
+      swiftSettings: [
+        .unsafeFlags([
+          "-Xfrontend",
+          "-warn-long-function-bodies=50",
+          "-Xfrontend",
+          "-warn-long-expression-type-checking=50"
+        ])
       ]
     ),
   ],

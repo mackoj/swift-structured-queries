@@ -3,13 +3,13 @@ import SQLite3
 import StructuredQueries
 
 public final class Database {
-  private var db: OpaquePointer?
+  private var handle: OpaquePointer?
 
   public init(path: String = ":memory:") throws {
     guard
       sqlite3_open_v2(
         path,
-        &db,
+        &handle,
         SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
         nil
       ) == SQLITE_OK
@@ -19,13 +19,13 @@ public final class Database {
   }
 
   deinit {
-    sqlite3_close_v2(db)
+    sqlite3_close_v2(handle)
   }
 
   public func execute(
     _ sql: String
   ) throws {
-    guard sqlite3_exec(db, sql, nil, nil, nil) == SQLITE_OK
+    guard sqlite3_exec(handle, sql, nil, nil, nil) == SQLITE_OK
     else {
       throw SQLiteError()
     }
@@ -42,7 +42,7 @@ public final class Database {
     var statement: OpaquePointer?
     let sql = query.query
     guard
-      sqlite3_prepare_v2(db, sql.string, -1, &statement, nil) == SQLITE_OK,
+      sqlite3_prepare_v2(handle, sql.string, -1, &statement, nil) == SQLITE_OK,
       let statement
     else {
       throw SQLiteError()
@@ -88,7 +88,7 @@ public final class Database {
     var statement: OpaquePointer?
     let sql = query.query
     guard
-      sqlite3_prepare_v2(db, sql.string, -1, &statement, nil) == SQLITE_OK,
+      sqlite3_prepare_v2(handle, sql.string, -1, &statement, nil) == SQLITE_OK,
       let statement
     else {
       throw SQLiteError()
@@ -134,7 +134,7 @@ public final class Database {
     var statement: OpaquePointer?
     let sql = query.query
     guard
-      sqlite3_prepare_v2(db, sql.string, -1, &statement, nil) == SQLITE_OK,
+      sqlite3_prepare_v2(handle, sql.string, -1, &statement, nil) == SQLITE_OK,
       let statement
     else {
       throw SQLiteError()

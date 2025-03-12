@@ -6,6 +6,27 @@ import Testing
 
 extension SnapshotTests {
   @Suite struct LiveTests {
+    @Test func select() throws {
+      let averagePriority = Reminder.select { $0.priority.cast(as: Int.self).avg() ?? 0 }
+      try assertQuery(
+        Reminder
+          .select { ($0.title, $0.priority, averagePriority) }
+          .where { $0.priority.cast(as: Double.self) > averagePriority }
+      ) {
+        """
+        SELECT "reminders"."title", "reminders"."priority", (SELECT coalesce(avg(CAST("reminders"."priority" AS NUMERIC)), 0.0) FROM "reminders") FROM "reminders" WHERE (CAST("reminders"."priority" AS NUMERIC) > (SELECT coalesce(avg(CAST("reminders"."priority" AS NUMERIC)), 0.0) FROM "reminders"))
+        """
+      } results: {
+        """
+        ┌──────────────────────────┬────────────────────────────────────────────────┬─────┐
+        │ Doctor appointment       │ Optional(StructuredQueriesTests.Priority.high) │ 2.4 │
+        │ Pick up kids from school │ Optional(StructuredQueriesTests.Priority.high) │ 2.4 │
+        │ Take out trash           │ Optional(StructuredQueriesTests.Priority.high) │ 2.4 │
+        └──────────────────────────┴────────────────────────────────────────────────┴─────┘
+        """
+      }
+    }
+
     @Test func basics() throws {
       let db = try Database()
       try db.execute(
