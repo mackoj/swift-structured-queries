@@ -153,7 +153,7 @@ func printTable<each C>(_ rows: [(repeat each C)], to output: inout some TextOut
       output.write("│ ")
       var line: [String] = []
       for (columns, maxColumnSpan) in zip(row, maxColumnSpan) {
-        if columns.count < rowOffset {
+        if columns.count <= rowOffset {
           line.append(String(repeating: " ", count: maxColumnSpan))
         } else {
           line.append(
