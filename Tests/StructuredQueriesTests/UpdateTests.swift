@@ -178,9 +178,7 @@ extension SnapshotTests {
     @Test func rawBind() {
       assertInlineSnapshot(
         of: Reminder.update {
-          $0.date = RawQueryExpression("CURRENT_TIMESTAMP")
-          // TODO: does not compile, but also may be removing '.raw'
-          _ = $0
+          $0.date = #raw("CURRENT_TIMESTAMP")
         },
         as: .sql
       ) {
