@@ -52,7 +52,7 @@ public final class Database {
       let result =
         switch binding {
         case let .blob(blob):
-          sqlite3_bind_blob(statement, index, blob, -1, SQLITE_TRANSIENT)
+          sqlite3_bind_blob(statement, index, Array(blob), -1, SQLITE_TRANSIENT)
         case let .double(double):
           sqlite3_bind_double(statement, index, double)
         case let .int(int):
@@ -98,7 +98,7 @@ public final class Database {
       let result =
         switch binding {
         case let .blob(blob):
-          sqlite3_bind_blob(statement, index, blob, -1, SQLITE_TRANSIENT)
+          sqlite3_bind_blob(statement, index, Array(blob), -1, SQLITE_TRANSIENT)
         case let .double(double):
           sqlite3_bind_double(statement, index, double)
         case let .int(int):
@@ -144,7 +144,7 @@ public final class Database {
       let result =
         switch binding {
         case let .blob(blob):
-          sqlite3_bind_blob(statement, index, blob, -1, SQLITE_TRANSIENT)
+          sqlite3_bind_blob(statement, index, Array(blob), -1, SQLITE_TRANSIENT)
         case let .double(double):
           sqlite3_bind_double(statement, index, double)
         case let .int(int):

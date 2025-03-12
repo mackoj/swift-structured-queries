@@ -185,13 +185,13 @@ extension QueryExpression where QueryValue == String {
     QueryFunction("trim", self, characters)
   }
 
-  public func unhex() -> some QueryExpression<[UInt8]?> {
+  public func unhex() -> some QueryExpression<ContiguousArray<UInt8>?> {
     QueryFunction("unhex", self)
   }
 
   public func unhex(
     _ characters: some QueryExpression<QueryValue>
-  ) -> some QueryExpression<[UInt8]?> {
+  ) -> some QueryExpression<ContiguousArray<UInt8>?> {
     QueryFunction("unhex", self, characters)
   }
 
@@ -204,7 +204,7 @@ extension QueryExpression where QueryValue == String {
   }
 }
 
-extension QueryExpression where QueryValue == [UInt8] {
+extension QueryExpression where QueryValue == ContiguousArray<UInt8> {
   public func hex() -> some QueryExpression<Int> {
     QueryFunction("hex", self)
   }

@@ -38,9 +38,9 @@ final class SQLiteQueryDecoder: QueryDecoder {
     return String(cString: sqlite3_column_text(statement, currentIndex))
   }
 
-  func decode(_ type: [UInt8].Type) throws -> [UInt8] {
+  func decode(_ type: ContiguousArray<UInt8>.Type) throws -> ContiguousArray<UInt8> {
     defer { currentIndex += 1 }
     guard currentIndex < sqlite3_column_count(statement) else { throw SQLiteError() }
-    return sqlite3_column_blob(statement, currentIndex).load(as: [UInt8].self)
+    return sqlite3_column_blob(statement, currentIndex).load(as: ContiguousArray<UInt8>.self)
   }
 }

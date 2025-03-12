@@ -1,7 +1,7 @@
 public struct Collation: RawRepresentable, Sendable {
-  static let binary = Self(rawValue: "BINARY")
-  static let nocase = Self(rawValue: "NOCASE")
-  static let rtrim = Self(rawValue: "RTRIM")
+  public static let binary = Self(rawValue: "BINARY")
+  public static let nocase = Self(rawValue: "NOCASE")
+  public static let rtrim = Self(rawValue: "RTRIM")
 
   public var rawValue: String
 

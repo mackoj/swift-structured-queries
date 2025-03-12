@@ -40,4 +40,4 @@ extension UInt16: QueryRepresentable {}
 
 extension UInt32: QueryRepresentable {}
 
-extension [UInt8]: QueryRepresentable {}
+extension ContiguousArray<UInt8>: QueryRepresentable {}

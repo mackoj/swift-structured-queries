@@ -6,11 +6,10 @@ extension Table {
   }
 
   public static func select<ResultColumn: QueryExpression>(
-    distinct isDistinct: Bool = false,
     _ selection: (Columns) -> ResultColumn
   ) -> Select<ResultColumn.QueryValue, Self, ()>
   where ResultColumn.QueryValue: QueryRepresentable {
-    all().select(distinct: isDistinct, selection)
+    all().select(selection)
   }
 
   public static func select<
@@ -18,7 +17,6 @@ extension Table {
     C2: QueryExpression,
     each C3: QueryExpression
   >(
-    distinct isDistinct: Bool = false,
     _ selection: (Columns) -> (C1, C2, repeat each C3)
   ) -> Select<(C1.QueryValue, C2.QueryValue, repeat (each C3).QueryValue), Self, ()>
   where
@@ -26,7 +24,11 @@ extension Table {
     C2.QueryValue: QueryRepresentable,
     repeat (each C3).QueryValue: QueryRepresentable
   {
-    all().select(distinct: isDistinct, selection)
+    all().select(selection)
+  }
+
+  public static func distinct(_ isDistinct: Bool = true) -> Select<(), Self, ()> {
+    all().distinct(isDistinct)
   }
 
   public static func join<
@@ -292,28 +294,25 @@ extension Select {
   // #endif
 
   public func select<each C1: QueryRepresentable, C2: QueryExpression>(
-    distinct isDistinct: Bool = false,
     _ selection: (From.Columns) -> C2
   ) -> Select<(repeat each C1, C2.QueryValue), From, ()>
   where Columns == (repeat each C1), C2.QueryValue: QueryRepresentable, Joins == () {
-    _select(distinct: isDistinct, selection)
+    _select(selection)
   }
 
   public func select<each C1: QueryRepresentable, C2: QueryExpression, each J: Table>(
-    distinct isDistinct: Bool = false,
     _ selection: ((From.Columns, repeat (each J).Columns)) -> C2
   ) -> Select<(repeat each C1, C2.QueryValue), From, (repeat each J)>
   where Columns == (repeat each C1), C2.QueryValue: QueryRepresentable, Joins == (repeat each J) {
-    _select(distinct: isDistinct, selection)
+    _select(selection)
   }
 
   @_disfavoredOverload
   public func select<each C1: QueryRepresentable, C2: QueryExpression, each J: Table>(
-    distinct isDistinct: Bool = false,
     _ selection: (From.Columns, repeat (each J).Columns) -> C2
   ) -> Select<(repeat each C1, C2.QueryValue), From, (repeat each J)>
   where Columns == (repeat each C1), C2.QueryValue: QueryRepresentable, Joins == (repeat each J) {
-    _select(distinct: isDistinct, selection)
+    _select(selection)
   }
 
   public func select<
@@ -323,7 +322,6 @@ extension Select {
     each C4: QueryExpression,
     each J: Table
   >(
-    distinct isDistinct: Bool = false,
     _ selection: ((From.Columns, repeat (each J).Columns)) -> (C2, C3, repeat each C4)
   ) -> Select<
     (repeat each C1, C2.QueryValue, C3.QueryValue, repeat (each C4).QueryValue),
@@ -337,7 +335,7 @@ extension Select {
     repeat (each C4).QueryValue: QueryRepresentable,
     Joins == (repeat each J)
   {
-    _select(distinct: isDistinct, selection)
+    _select(selection)
   }
 
   @_disfavoredOverload
@@ -348,7 +346,6 @@ extension Select {
     each C4: QueryExpression,
     each J: Table
   >(
-    distinct isDistinct: Bool = false,
     _ selection: (From.Columns, repeat (each J).Columns) -> (C2, C3, repeat each C4)
   ) -> Select<
     (repeat each C1, C2.QueryValue, C3.QueryValue, repeat (each C4).QueryValue),
@@ -362,7 +359,7 @@ extension Select {
     repeat (each C4).QueryValue: QueryRepresentable,
     Joins == (repeat each J)
   {
-    _select(distinct: isDistinct, selection)
+    _select(selection)
   }
 
   private func _select<
@@ -370,7 +367,6 @@ extension Select {
     each C2: QueryExpression,
     each J: Table
   >(
-    distinct isDistinct: Bool = false,
     _ selection: ((From.Columns, repeat (each J).Columns)) -> (repeat each C2)
   ) -> Select<(repeat each C1, repeat (each C2).QueryValue), From, (repeat each J)>
   where
@@ -379,7 +375,7 @@ extension Select {
     Joins == (repeat each J)
   {
     Select<(repeat each C1, repeat (each C2).QueryValue), From, (repeat each J)>(
-      distinct: isDistinct,
+      distinct: distinct,
       columns: columns + Array(repeat each selection((From.columns, repeat (each J).columns))),
       joins: joins,
       where: `where`,
@@ -388,6 +384,12 @@ extension Select {
       order: order,
       limit: limit
     )
+  }
+
+  public func distinct(_ isDistinct: Bool = true) -> Self {
+    var select = self
+    select.distinct = distinct
+    return select
   }
 
   public func join<

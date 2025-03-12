@@ -12,13 +12,13 @@ extension UUID {
 
 extension UUID.BytesRepresentation: QueryBindable {
   public var queryBinding: QueryBinding {
-    .blob(withUnsafeBytes(of: queryOutput.uuid, [UInt8].init(_:)))
+    .blob(withUnsafeBytes(of: queryOutput.uuid, ContiguousArray<UInt8>.init(_:)))
   }
 }
 
 extension UUID.BytesRepresentation: QueryDecodable {
   public init(decoder: some QueryDecoder) throws {
-    let queryOutput = try decoder.decode([UInt8].self)
+    let queryOutput = try decoder.decode(ContiguousArray<UInt8>.self)
     guard queryOutput.count == 16 else {
       throw InvalidBytes()
     }

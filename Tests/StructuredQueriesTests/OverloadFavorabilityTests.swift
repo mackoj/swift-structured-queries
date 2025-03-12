@@ -4,6 +4,14 @@ import Testing
 @Suite struct OverloadFavorabilityTests {
   @Test func basics() {
     do {
+      let result = "a".hasPrefix("a")
+      #expect(result == true)
+    }
+    do {
+      let result = "a".hasSuffix("a")
+      #expect(result == true)
+    }
+    do {
       let result = "a".contains("a")
       #expect(result == true)
     }

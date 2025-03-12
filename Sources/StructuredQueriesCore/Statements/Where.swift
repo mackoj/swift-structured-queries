@@ -1,4 +1,30 @@
 extension Table {
+  /// Applies a filter to a statement using a `WHERE` clause.
+  ///
+  /// ```swift
+  /// @Table
+  /// struct User {
+  ///   let id: Int
+  ///   var email: String
+  /// }
+  ///
+  /// User.where { $0.id == 1 }
+  /// // WHERE ("users"."id" = 1)
+  ///
+  /// User.where { $0.like("%@pointfree.co") }
+  /// // WHERE ("users"."email" LIKE '%@pointfree.co')
+  /// ```
+  ///
+  /// If executed directly, `WHERE` is applied to an otherwise bare `SELECT` statement:
+  ///
+  /// ```swift
+  /// try db.execute(User.where { $0.id == 1 })
+  /// // SELECT "users"."id", "users"."email" FROM "users"
+  /// // WHERE "users"."id" = 1
+  /// ```
+  ///
+  /// - Parameter predicate: A predicate used to generate the `WHERE` clause.
+  /// - Returns: A `WHERE` clause.
   public static func `where`(
     _ predicate: (Columns) -> some QueryExpression<Bool>
   ) -> Where<Self> {
@@ -6,6 +32,9 @@ extension Table {
   }
 }
 
+/// A `WHERE` clause used to apply a filter to a statement.
+///
+/// See ``Table/where(_:)`` for how to create this type.
 #if compiler(>=6.1)
   @dynamicMemberLookup
 #endif
@@ -37,15 +66,13 @@ extension Where: SelectStatement {
   }
 
   public func select<C: QueryExpression>(
-    distinct isDistinct: Bool = false,
     _ selection: (From.Columns) -> C
   ) -> Select<C.QueryValue, From, ()>
   where C.QueryValue: QueryRepresentable {
-    all().select(distinct: isDistinct, selection)
+    all().select(selection)
   }
 
   public func select<C1: QueryExpression, C2: QueryExpression, each C3: QueryExpression>(
-    distinct isDistinct: Bool = false,
     _ selection: (From.Columns) -> (C1, C2, repeat each C3)
   ) -> Select<(C1.QueryValue, C2.QueryValue, repeat (each C3).QueryValue), From, ()>
   where
@@ -53,7 +80,11 @@ extension Where: SelectStatement {
     C2.QueryValue: QueryRepresentable,
     repeat (each C3).QueryValue: QueryRepresentable
   {
-    all().select(distinct: isDistinct, selection)
+    all().select(selection)
+  }
+
+  public func distinct(_ isDistinct: Bool = true) -> Select<(), From, ()> {
+    all().distinct(isDistinct)
   }
 
   public func join<each C: QueryDecodable, F: Table, each J: Table>(

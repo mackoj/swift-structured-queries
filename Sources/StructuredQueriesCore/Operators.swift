@@ -27,32 +27,32 @@ extension QueryExpression {
 }
 
 private func isNull<Value>(_ expression: some QueryExpression<Value>) -> Bool {
-  (expression as? any _OptionalProtocol)?._wrapped == nil
+  (expression as? any _OptionalProtocol).map { $0._wrapped == nil } ?? false
 }
 
 extension QueryExpression where QueryValue: _OptionalProtocol {
   public static func == (
     lhs: Self, rhs: some QueryExpression<QueryValue.Wrapped>
   ) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: lhs, operator: "=", rhs: rhs)
+    BinaryOperator(lhs: lhs, operator: isNull(lhs) ? "IS" : "=", rhs: rhs)
   }
 
   public static func != (
     lhs: Self, rhs: some QueryExpression<QueryValue.Wrapped>
   ) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: lhs, operator: "<>", rhs: rhs)
+    BinaryOperator(lhs: lhs, operator: isNull(lhs) ? "IS NOT" : "<>", rhs: rhs)
   }
 
   public static func == (
-    lhs: Self, rhs: _Null<QueryValue.Wrapped>
+    lhs: Self, rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: lhs, operator: "IS", rhs: rhs)
+    BinaryOperator(lhs: lhs, operator: isNull(lhs) || isNull(rhs) ? "IS" : "=", rhs: rhs)
   }
 
   public static func != (
-    lhs: Self, rhs: _Null<QueryValue.Wrapped>
+    lhs: Self, rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: lhs, operator: "IS NOT", rhs: rhs)
+    BinaryOperator(lhs: lhs, operator: isNull(lhs) || isNull(rhs) ? "IS NOT" : "<>", rhs: rhs)
   }
 }
 
@@ -322,7 +322,7 @@ extension QueryExpression where QueryValue == String {
   }
 
   public func like(_ pattern: QueryValue, escape: Character? = nil) -> some QueryExpression<Bool> {
-    LikeOperator(string: self, pattern: "LIKE", escape: escape)
+    LikeOperator(string: self, pattern: pattern, escape: escape)
   }
 
   public func hasPrefix(_ other: QueryValue) -> some QueryExpression<Bool> {
@@ -356,15 +356,26 @@ extension AnyQueryExpression<String> {
 }
 
 extension QueryExpression {
+  public func `in`(_ query: some QueryExpression<[QueryValue]>) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "IN", rhs: .raw("(\(query))", as: Void.self))
+  }
+
+  public func between(
+    _ lowerBound: some QueryExpression<QueryValue>,
+    and upperBound: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(
+      lhs: self,
+      operator: "BETWEEN",
+      rhs: BinaryOperator<Void, _, _>(lhs: lowerBound, operator: "AND", rhs: upperBound)
+    )
+  }
+
   public func contains<Element>(
     _ element: some QueryExpression<Element>
   ) -> some QueryExpression<Bool>
   where QueryValue == [Element] {
     element.in(self)
-  }
-
-  public func `in`(_ query: some QueryExpression<[QueryValue]>) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "IN", rhs: .raw("(\(query))", as: Void.self))
   }
 
   public func contains<Bound>(_ element: some QueryExpression<Bound>) -> some QueryExpression<Bool>

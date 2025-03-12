@@ -4,7 +4,7 @@ public protocol Table: QueryRepresentable where Columns.QueryValue == Self {
   static var tableName: String { get }
 }
 
-// TODO: Explore
+// TODO: Explore?
 // @dynamicMemberLookup
 // struct TableColumns<Base: Table> {
 //   subscript<Member: QueryExpression>(

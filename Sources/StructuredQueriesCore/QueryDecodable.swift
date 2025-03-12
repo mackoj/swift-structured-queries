@@ -101,9 +101,9 @@ extension UInt64: QueryDecodable {
   }
 }
 
-extension [UInt8]: QueryDecodable, _OptionalPromotable {
+extension ContiguousArray<UInt8>: QueryDecodable, _OptionalPromotable {
   public init(decoder: some QueryDecoder) throws {
-    self = try decoder.decode([UInt8].self)
+    self = try decoder.decode(ContiguousArray<UInt8>.self)
   }
 }
 

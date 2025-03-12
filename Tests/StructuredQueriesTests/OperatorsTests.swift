@@ -5,10 +5,276 @@ import Testing
 
 extension SnapshotTests {
   struct OperatorsTests {
-    @Test func toggle() {
+    @Test func equality() {
+      assertInlineSnapshot(of: Row.columns.c == Row.columns.c, as: .sql) {
+        """
+        ("rows"."c" = "rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.c == Row.columns.a, as: .sql) {
+        """
+        ("rows"."c" = "rows"."a")
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.c == nil as Int?, as: .sql) {
+        """
+        ("rows"."c" IS NULL)
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.a == Row.columns.c, as: .sql) {
+        """
+        ("rows"."a" = "rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.a == Row.columns.a, as: .sql) {
+        """
+        ("rows"."a" = "rows"."a")
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.a == nil as Int?, as: .sql) {
+        """
+        ("rows"."a" IS NULL)
+        """
+      }
+      assertInlineSnapshot(of: nil as Int? == Row.columns.c, as: .sql) {
+        """
+        (NULL IS "rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: nil as Int? == Row.columns.a, as: .sql) {
+        """
+        (NULL IS "rows"."a")
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.c != Row.columns.c, as: .sql) {
+        """
+        ("rows"."c" <> "rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.c != Row.columns.a, as: .sql) {
+        """
+        ("rows"."c" <> "rows"."a")
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.c != nil as Int?, as: .sql) {
+        """
+        ("rows"."c" IS NOT NULL)
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.a != Row.columns.c, as: .sql) {
+        """
+        ("rows"."a" <> "rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.a != Row.columns.a, as: .sql) {
+        """
+        ("rows"."a" <> "rows"."a")
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.a != nil as Int?, as: .sql) {
+        """
+        ("rows"."a" IS NOT NULL)
+        """
+      }
+      assertInlineSnapshot(of: nil as Int? != Row.columns.c, as: .sql) {
+        """
+        (NULL IS NOT "rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: nil as Int? != Row.columns.a, as: .sql) {
+        """
+        (NULL IS NOT "rows"."a")
+        """
+      }
+    }
+
+    @available(*, deprecated)
+    @Test func deprecatedEquality() {
+      assertInlineSnapshot(of: Row.columns.c == nil, as: .sql) {
+        """
+        ("rows"."c" IS NULL)
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.c != nil, as: .sql) {
+        """
+        ("rows"."c" IS NOT NULL)
+        """
+      }
+    }
+
+    @Test func comparison() {
+      assertInlineSnapshot(of: Row.columns.c < Row.columns.c, as: .sql) {
+        """
+        ("rows"."c" < "rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.c > Row.columns.c, as: .sql) {
+        """
+        ("rows"."c" > "rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.c <= Row.columns.c, as: .sql) {
+        """
+        ("rows"."c" <= "rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.c >= Row.columns.c, as: .sql) {
+        """
+        ("rows"."c" >= "rows"."c")
+        """
+      }
+    }
+
+    @Test func logic() {
+      assertInlineSnapshot(of: Row.columns.bool && Row.columns.bool, as: .sql) {
+        """
+        ("rows"."bool" AND "rows"."bool")
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.bool || Row.columns.bool, as: .sql) {
+        """
+        ("rows"."bool" OR "rows"."bool")
+        """
+      }
+      assertInlineSnapshot(of: !Row.columns.bool, as: .sql) {
+        """
+        NOT ("rows"."bool")
+        """
+      }
       assertInlineSnapshot(of: Row.update { $0.bool.toggle() }, as: .sql) {
         """
         UPDATE "rows" SET "bool" = NOT ("rows"."bool")
+        """
+      }
+    }
+
+    @Test func arithmetic() {
+      assertInlineSnapshot(of: Row.columns.c + Row.columns.c, as: .sql) {
+        """
+        ("rows"."c" + "rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.c - Row.columns.c, as: .sql) {
+        """
+        ("rows"."c" - "rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.c * Row.columns.c, as: .sql) {
+        """
+        ("rows"."c" * "rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.c / Row.columns.c, as: .sql) {
+        """
+        ("rows"."c" / "rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: -Row.columns.c, as: .sql) {
+        """
+        -("rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: +Row.columns.c, as: .sql) {
+        """
+        +("rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: Row.update { $0.c += 1 }, as: .sql) {
+        """
+        UPDATE "rows" SET "c" = ("rows"."c" + 1)
+        """
+      }
+      assertInlineSnapshot(of: Row.update { $0.c -= 2 }, as: .sql) {
+        """
+        UPDATE "rows" SET "c" = ("rows"."c" - 2)
+        """
+      }
+      assertInlineSnapshot(of: Row.update { $0.c *= 3 }, as: .sql) {
+        """
+        UPDATE "rows" SET "c" = ("rows"."c" * 3)
+        """
+      }
+      assertInlineSnapshot(of: Row.update { $0.c /= 4 }, as: .sql) {
+        """
+        UPDATE "rows" SET "c" = ("rows"."c" / 4)
+        """
+      }
+      assertInlineSnapshot(of: Row.update { $0.c = -$0.c }, as: .sql) {
+        """
+        UPDATE "rows" SET "c" = -("rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: Row.update { $0.c = +$0.c }, as: .sql) {
+        """
+        UPDATE "rows" SET "c" = +("rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: Row.update { $0.c.negate() }, as: .sql) {
+        """
+        UPDATE "rows" SET "c" = -("rows"."c")
+        """
+      }
+    }
+
+    @Test func bitwise() {
+      assertInlineSnapshot(of: Row.columns.c % Row.columns.c, as: .sql) {
+        """
+        ("rows"."c" % "rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.c & Row.columns.c, as: .sql) {
+        """
+        ("rows"."c" & "rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.c | Row.columns.c, as: .sql) {
+        """
+        ("rows"."c" | "rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.c << Row.columns.c, as: .sql) {
+        """
+        ("rows"."c" << "rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.c >> Row.columns.c, as: .sql) {
+        """
+        ("rows"."c" >> "rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: ~Row.columns.c, as: .sql) {
+        """
+        ~("rows"."c")
+        """
+      }
+      assertInlineSnapshot(of: Row.update { $0.c %= 1 }, as: .sql) {
+        """
+        UPDATE "rows" SET "c" = ("rows"."c" % 1)
+        """
+      }
+      assertInlineSnapshot(of: Row.update { $0.c &= 2 }, as: .sql) {
+        """
+        UPDATE "rows" SET "c" = ("rows"."c" & 2)
+        """
+      }
+      assertInlineSnapshot(of: Row.update { $0.c |= 3 }, as: .sql) {
+        """
+        UPDATE "rows" SET "c" = ("rows"."c" | 3)
+        """
+      }
+      assertInlineSnapshot(of: Row.update { $0.c <<= 4 }, as: .sql) {
+        """
+        UPDATE "rows" SET "c" = ("rows"."c" << 4)
+        """
+      }
+      assertInlineSnapshot(of: Row.update { $0.c >>= 5 }, as: .sql) {
+        """
+        UPDATE "rows" SET "c" = ("rows"."c" >> 5)
+        """
+      }
+      assertInlineSnapshot(of: Row.update { $0.c = ~$0.c }, as: .sql) {
+        """
+        UPDATE "rows" SET "c" = ~("rows"."c")
         """
       }
     }
@@ -21,32 +287,114 @@ extension SnapshotTests {
       }
     }
 
-    @Test func `in`() async throws {
-      assertInlineSnapshot(
-        of: Row.where {
-          $0.c.in(Row.select { $0.bool.cast(as: Int.self) })
-        },
-        as: .sql
-      ) {
+    @Test func strings() {
+      assertInlineSnapshot(of: Row.columns.string + Row.columns.string, as: .sql) {
         """
-        SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool" \
-        FROM "rows" \
-        WHERE ("rows"."c" IN (SELECT CAST("rows"."bool" AS NUMERIC) FROM "rows"))
+        ("rows"."string" || "rows"."string")
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.string.collate(.nocase), as: .sql) {
+        """
+        ("rows"."string" COLLATE NOCASE)
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.string.glob("a*"), as: .sql) {
+        """
+        ("rows"."string" GLOB 'a*')
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.string.like("a%"), as: .sql) {
+        """
+        ("rows"."string" LIKE 'a%')
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.string.like("a%", escape: #"\"#), as: .sql) {
+        #"""
+        ("rows"."string" LIKE 'a%' ESCAPE '\')
+        """#
+      }
+      assertInlineSnapshot(of: Row.columns.string.hasPrefix("a"), as: .sql) {
+        """
+        ("rows"."string" LIKE 'a%')
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.string.hasSuffix("a"), as: .sql) {
+        """
+        ("rows"."string" LIKE '%a')
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.string.contains("a"), as: .sql) {
+        """
+        ("rows"."string" LIKE '%a%')
+        """
+      }
+      assertInlineSnapshot(of: Row.update { $0.string += "!" }, as: .sql) {
+        """
+        UPDATE "rows" SET "string" = ("rows"."string" || '!')
+        """
+      }
+      assertInlineSnapshot(of: Row.update { $0.string.append("!") }, as: .sql) {
+        """
+        UPDATE "rows" SET "string" = ("rows"."string" || '!')
+        """
+      }
+      assertInlineSnapshot(of: Row.update { $0.string.append(contentsOf: "!") }, as: .sql) {
+        """
+        UPDATE "rows" SET "string" = ("rows"."string" || '!')
         """
       }
     }
 
-    @Test func contains() async throws {
+    @Test func collectionIn() async throws {
       assertInlineSnapshot(
-        of: Row.where {
-          Row.select { $0.bool.cast(as: Int.self) }.contains($0.c)
-        },
+        of: Row.columns.c.in([1, 2, 3]),
         as: .sql
       ) {
         """
-        SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool" \
-        FROM "rows" \
-        WHERE ("rows"."c" IN (SELECT CAST("rows"."bool" AS NUMERIC) FROM "rows"))
+        ("rows"."c" IN ((1, 2, 3))
+        """
+      }
+      assertInlineSnapshot(
+        of: Row.columns.c.in(Row.select(\.c)),
+        as: .sql
+      ) {
+        """
+        ("rows"."c" IN (SELECT "rows"."c" FROM "rows"))
+        """
+      }
+      assertInlineSnapshot(
+        of: [1, 2, 3].contains(Row.columns.c),
+        as: .sql
+      ) {
+        """
+        ("rows"."c" IN ((1, 2, 3))
+        """
+      }
+      assertInlineSnapshot(
+        of: Row.select(\.c).contains(Row.columns.c),
+        as: .sql
+      ) {
+        """
+        ("rows"."c" IN (SELECT "rows"."c" FROM "rows"))
+        """
+      }
+    }
+
+    @Test func rangeContains() async throws {
+      assertInlineSnapshot(
+        of: (0...10).contains(Row.columns.c),
+        as: .sql
+      ) {
+        """
+        ("rows"."c" BETWEEN (0 AND 10))
+        """
+      }
+      assertInlineSnapshot(
+        of: Row.columns.c.between(0, and: 10),
+        as: .sql
+      ) {
+        """
+        ("rows"."c" BETWEEN (0 AND 10))
         """
       }
     }
@@ -66,20 +414,16 @@ extension SnapshotTests {
     //   }
     // }
 
-    @available(*, deprecated)
-    @Test func isNullWithNonNullableColumn() {
-      assertInlineSnapshot(of: Row.columns.c == nil, as: .sql) {
+    @Test func whereSubquery() async throws {
+      assertInlineSnapshot(
+        of: Row.where {
+          $0.c.in(Row.select { $0.bool.cast(as: Int.self) })
+        },
+        as: .sql
+      ) {
         """
-        ("rows"."c" IS NULL)
-        """
-      }
-    }
-
-    @available(*, deprecated)
-    @Test func isNotNullWithNonNullableColumn() {
-      assertInlineSnapshot(of: Row.columns.c != nil, as: .sql) {
-        """
-        ("rows"."c" IS NOT NULL)
+        SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool", "rows"."string" FROM "rows" \
+        WHERE ("rows"."c" IN (SELECT CAST("rows"."bool" AS NUMERIC) FROM "rows"))
         """
       }
     }
@@ -90,6 +434,7 @@ extension SnapshotTests {
       var b: Int?
       var c: Int
       var bool: Bool
+      var string: String
     }
   }
 }

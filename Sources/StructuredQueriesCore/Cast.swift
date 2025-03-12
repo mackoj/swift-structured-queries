@@ -39,7 +39,7 @@ extension String: SQLiteType {
   public static var typeAffinity: String { "TEXT" }
 }
 
-extension [UInt8]: SQLiteType {
+extension ContiguousArray<UInt8>: SQLiteType {
   public static var typeAffinity: String { "BLOB" }
 }
 
