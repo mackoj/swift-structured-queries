@@ -138,7 +138,7 @@ extension SnapshotTests {
       }
       assertInlineSnapshot(of: User.columns.name.rtrim(), as: .sql) {
         """
-        rtrim("users"."name", ' ')
+        rtrim("users"."name")
         """
       }
       assertInlineSnapshot(of: User.columns.name.rtrim(" "), as: .sql) {

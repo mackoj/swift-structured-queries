@@ -41,6 +41,11 @@ final class SQLiteQueryDecoder: QueryDecoder {
   func decode(_ type: ContiguousArray<UInt8>.Type) throws -> ContiguousArray<UInt8> {
     defer { currentIndex += 1 }
     guard currentIndex < sqlite3_column_count(statement) else { throw SQLiteError() }
-    return sqlite3_column_blob(statement, currentIndex).load(as: ContiguousArray<UInt8>.self)
+    return ContiguousArray<UInt8>(
+      UnsafeRawBufferPointer(
+        start: sqlite3_column_blob(statement, currentIndex),
+        count: Int(sqlite3_column_bytes(statement, currentIndex))
+      )
+    )
   }
 }
