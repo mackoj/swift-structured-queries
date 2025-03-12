@@ -147,11 +147,12 @@ func printTable<each C>(_ rows: [(repeat each C)], to output: inout some TextOut
       .joined(separator: "─┬─")
   )
   output.write("─┐\n")
-  for (row, maxRowSpan) in table {
+  for (offset, rowAndMaxRowSpan) in table.enumerated() {
+    let (row, maxRowSpan) = rowAndMaxRowSpan
     for rowOffset in 0..<maxRowSpan {
       output.write("│ ")
+      var line: [String] = []
       for (columns, maxColumnSpan) in zip(row, maxColumnSpan) {
-        var line: [String] = []
         if columns.count < rowOffset {
           line.append(String(repeating: " ", count: maxColumnSpan))
         } else {
@@ -160,11 +161,11 @@ func printTable<each C>(_ rows: [(repeat each C)], to output: inout some TextOut
               + String(repeating: " ", count: maxColumnSpan - columns[rowOffset].count)
           )
         }
-        output.write(line.joined(separator: " │ "))
       }
+      output.write(line.joined(separator: " │ "))
       output.write(" │\n")
     }
-    if hasMultiLineRows {
+    if hasMultiLineRows, offset != table.count - 1 {
       output.write("├─")
       output.write(
         maxColumnSpan

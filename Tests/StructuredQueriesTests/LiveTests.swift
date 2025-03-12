@@ -11,7 +11,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "reminders"
         """
-      }results: {
+      } results: {
         #"""
         ┌─────────────────────────────────────────┐
         │ Reminder(                               │
@@ -133,7 +133,6 @@ extension SnapshotTests {
         │   remindersListID: 3,                   │
         │   title: "Send weekly emails"           │
         │ )                                       │
-        ├─────────────────────────────────────────┤
         └─────────────────────────────────────────┘
         """#
       }
@@ -150,11 +149,11 @@ extension SnapshotTests {
         """
       } results: {
         """
-        ┌──────────────────────────┬────────────────────────────────────────────────┬─────┐
-        │ Doctor appointment       │ Optional(StructuredQueriesTests.Priority.high) │ 2.4 │
-        │ Pick up kids from school │ Optional(StructuredQueriesTests.Priority.high) │ 2.4 │
-        │ Take out trash           │ Optional(StructuredQueriesTests.Priority.high) │ 2.4 │
-        └──────────────────────────┴────────────────────────────────────────────────┴─────┘
+        ┌────────────────────────────┬───────┬─────┐
+        │ "Doctor appointment"       │ .high │ 2.4 │
+        │ "Pick up kids from school" │ .high │ 2.4 │
+        │ "Take out trash"           │ .high │ 2.4 │
+        └────────────────────────────┴───────┴─────┘
         """
       }
     }
