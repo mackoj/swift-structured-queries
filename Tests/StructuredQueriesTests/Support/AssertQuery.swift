@@ -1,3 +1,4 @@
+import CustomDump
 import Dependencies
 import InlineSnapshotTesting
 import StructuredQueries
@@ -117,38 +118,65 @@ func assertQuery<S: Statement, each V: QueryRepresentable>(
 }
 
 func printTable<each C>(_ rows: [(repeat each C)], to output: inout some TextOutputStream) {
-  var maxLengths: [Int] = []
+  var maxColumnSpan: [Int] = []
+  var hasMultiLineRows = false
   for _ in repeat (each C).self {
-    maxLengths.append(0)
+    maxColumnSpan.append(0)
   }
-  var table: [[String]] = []
+  var table: [([[Substring]], maxRowSpan: Int)] = []
   for row in rows {
-    var columns: [String] = []
+    var columns: [[Substring]] = []
     var index = 0
+    var maxRowSpan = 0
     for column in repeat each row {
       defer { index += 1 }
       var cell = ""
-      print(column, terminator: "", to: &cell)
-      maxLengths[index] = max(maxLengths[index], cell.count)
-      columns.append(cell)
+      customDump(column, to: &cell)
+      let lines = cell.split(separator: "\n")
+      hasMultiLineRows = hasMultiLineRows || lines.count > 1
+      maxRowSpan = max(maxRowSpan, lines.count)
+      maxColumnSpan[index] = max(maxColumnSpan[index], lines.map(\.count).max() ?? 0)
+      columns.append(lines)
     }
-    table.append(columns)
+    table.append((columns, maxRowSpan))
   }
   output.write("┌─")
   output.write(
-    maxLengths
+    maxColumnSpan
       .map { String(repeating: "─", count: $0) }
       .joined(separator: "─┬─")
   )
   output.write("─┐\n")
-  for row in table {
-    let row = zip(row, maxLengths)
-      .map { $0 + String(repeating: " ", count: $1 - $0.count) }
-    output.write("│ \(row.joined(separator: " │ ")) │\n")
+  for (row, maxRowSpan) in table {
+    for rowOffset in 0..<maxRowSpan {
+      output.write("│ ")
+      for (columns, maxColumnSpan) in zip(row, maxColumnSpan) {
+        var line: [String] = []
+        if columns.count < rowOffset {
+          line.append(String(repeating: " ", count: maxColumnSpan))
+        } else {
+          line.append(
+            columns[rowOffset]
+              + String(repeating: " ", count: maxColumnSpan - columns[rowOffset].count)
+          )
+        }
+        output.write(line.joined(separator: " │ "))
+      }
+      output.write(" │\n")
+    }
+    if hasMultiLineRows {
+      output.write("├─")
+      output.write(
+        maxColumnSpan
+          .map { String(repeating: "─", count: $0) }
+          .joined(separator: "─┼─")
+      )
+      output.write("─┤\n")
+    }
   }
   output.write("└─")
   output.write(
-    maxLengths
+    maxColumnSpan
       .map { String(repeating: "─", count: $0) }
       .joined(separator: "─┴─")
   )
