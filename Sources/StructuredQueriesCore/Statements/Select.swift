@@ -6,6 +6,13 @@ extension Table {
   }
 
   public static func select<ResultColumn: QueryExpression>(
+    _ selection: KeyPath<Columns, ResultColumn>
+  ) -> Select<ResultColumn.QueryValue, Self, ()>
+  where ResultColumn.QueryValue: QueryRepresentable {
+    all().select(selection)
+  }
+
+  public static func select<ResultColumn: QueryExpression>(
     _ selection: (Columns) -> ResultColumn
   ) -> Select<ResultColumn.QueryValue, Self, ()>
   where ResultColumn.QueryValue: QueryRepresentable {
@@ -298,6 +305,13 @@ extension Select {
       self + From.self[keyPath: keyPath]
     }
   #endif
+
+  public func select<each C1: QueryRepresentable, C2: QueryExpression>(
+    _ selection: KeyPath<From.Columns, C2>
+  ) -> Select<(repeat each C1, C2.QueryValue), From, ()>
+  where Columns == (repeat each C1), C2.QueryValue: QueryRepresentable, Joins == () {
+    select { $0[keyPath: selection] }
+  }
 
   public func select<each C1: QueryRepresentable, C2: QueryExpression>(
     _ selection: (From.Columns) -> C2

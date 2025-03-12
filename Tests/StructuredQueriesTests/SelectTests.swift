@@ -90,9 +90,7 @@ extension SnapshotTests {
     }
 
     @Test func selectChaining() throws {
-      // TODO: Make this compile:
-      // _ = Tag.select(\.id).select(\.name)
-      try assertQuery(Tag.all().select(\.id).select(\.name)) {
+      try assertQuery(Tag.select(\.id).select(\.name)) {
         """
         SELECT "tags"."id", "tags"."name" FROM "tags"
         """

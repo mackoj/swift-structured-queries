@@ -66,6 +66,13 @@ extension Where: SelectStatement {
   }
 
   public func select<C: QueryExpression>(
+    _ selection: KeyPath<From.Columns, C>
+  ) -> Select<C.QueryValue, From, ()>
+  where C.QueryValue: QueryRepresentable {
+    all().select(selection)
+  }
+
+  public func select<C: QueryExpression>(
     _ selection: (From.Columns) -> C
   ) -> Select<C.QueryValue, From, ()>
   where C.QueryValue: QueryRepresentable {
