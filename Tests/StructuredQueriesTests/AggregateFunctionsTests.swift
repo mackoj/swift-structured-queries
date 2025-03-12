@@ -13,7 +13,7 @@ extension SnapshotTests {
     }
 
     @Test func average() {
-      assertInlineSnapshot(of: User.columns.id.average(), as: .sql) {
+      assertInlineSnapshot(of: User.columns.id.avg(), as: .sql) {
         """
         avg("users"."id")
         """

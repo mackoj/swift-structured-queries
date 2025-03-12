@@ -399,16 +399,16 @@ extension SnapshotTests {
       }
     }
 
-     @Test func selectSubquery() {
-       assertInlineSnapshot(
-         of: Row.select { ($0.a, Row.count()) },
-         as: .sql
-       ) {
-         """
-         SELECT "rows"."a", (SELECT count(*) FROM "rows") FROM "rows"
-         """
-       }
-     }
+    @Test func selectSubquery() {
+      assertInlineSnapshot(
+        of: Row.select { ($0.a, Row.count()) },
+        as: .sql
+      ) {
+        """
+        SELECT "rows"."a", (SELECT count(*) FROM "rows") FROM "rows"
+        """
+      }
+    }
 
     @Test func whereSubquery() async throws {
       assertInlineSnapshot(
@@ -420,6 +420,16 @@ extension SnapshotTests {
         """
         SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool", "rows"."string" FROM "rows" \
         WHERE ("rows"."c" IN (SELECT CAST("rows"."bool" AS NUMERIC) FROM "rows"))
+        """
+      }
+      assertInlineSnapshot(
+        of: Row.where {
+          $0.c.cast() >= Row.select { $0.c.avg() ?? 0 } && $0.c.cast() > 1.0
+        },
+        as: .sql
+      ) {
+        """
+        SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool", "rows"."string" FROM "rows" WHERE (CAST("rows"."c" AS NUMERIC) >= (SELECT coalesce(avg("rows"."c"), 0.0) FROM "rows"))
         """
       }
     }

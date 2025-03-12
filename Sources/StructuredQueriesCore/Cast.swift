@@ -1,6 +1,15 @@
 extension QueryExpression {
-  public func cast<Other: SQLiteType>(as _: Other.Type) -> some QueryExpression<Other> {
+  public func cast<Other: SQLiteType>(
+    as _: Other.Type = Other.self
+  ) -> some QueryExpression<Other> {
     Cast(base: self)
+  }
+
+  @available(*, deprecated, message: "TODO")
+  public func cast(
+    as _: QueryValue.Type = QueryValue.self
+  ) -> some QueryExpression<QueryValue> {
+    self
   }
 }
 

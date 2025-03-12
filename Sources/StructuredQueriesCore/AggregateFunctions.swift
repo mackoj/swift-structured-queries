@@ -29,7 +29,7 @@ extension QueryExpression where QueryValue: Comparable {
 }
 
 extension QueryExpression where QueryValue: Numeric {
-  public func average(distinct isDistinct: Bool = false) -> some QueryExpression<Double?> {
+  public func avg(distinct isDistinct: Bool = false) -> some QueryExpression<Double?> {
     AggregateFunction("avg", isDistinct: isDistinct, self)
   }
 
