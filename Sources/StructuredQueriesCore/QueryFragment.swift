@@ -29,13 +29,28 @@ public struct QueryFragment: Hashable, Sendable, CustomDebugStringConvertible {
   public var debugDescription: String {
     var compiled = ""
     var bindings = bindings
+    var currentDelimiter: Character?
     compiled.reserveCapacity(string.count)
+    let delimiters: [Character: Character] = [
+      #"""#: #"""#,
+      "'": "'",
+      "`": "`",
+      "[": "]",
+    ]
     for character in string {
-      // TODO: This is brittle.
-      switch character {
-      case "?":
+      if let nesting = currentDelimiter {
+        if nesting == character,
+           compiled.last != character || compiled.last == delimiters[nesting]
+        {
+          currentDelimiter = nil
+        }
+        compiled.append(character)
+      } else if delimiters.keys.contains(character) {
+        currentDelimiter = character
+        compiled.append(character)
+      } else if character == "?" {
         compiled.append(bindings.removeFirst().debugDescription)
-      default:
+      } else {
         compiled.append(character)
       }
     }
