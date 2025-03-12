@@ -1,6 +1,6 @@
 import Foundation
 
-extension QueryExpression {
+extension QueryExpression where QueryValue == Bool {
   public func likelihood(
     _ probability: some QueryExpression<some FloatingPoint>
   ) -> some QueryExpression<QueryValue> {
@@ -17,11 +17,11 @@ extension QueryExpression {
 }
 
 extension QueryExpression where QueryValue: BinaryInteger {
-  public func randomblob() -> some QueryExpression<QueryValue> {
+  public func randomblob() -> some QueryExpression<ContiguousArray<UInt8>> {
     QueryFunction("randomblob", self)
   }
 
-  public func zeroblob() -> some QueryExpression<QueryValue> {
+  public func zeroblob() -> some QueryExpression<ContiguousArray<UInt8>> {
     QueryFunction("zeroblob", self)
   }
 }
@@ -34,7 +34,7 @@ extension QueryExpression where QueryValue: Collection {
   @available(
     *,
     deprecated,
-    message: "Use 'count()' for SQL's 'count' aggregate function, or 'length'"
+    message: "Use 'count()' for SQL's 'count' aggregate function, or 'length()'"
   )
   public var count: some QueryExpression<Int> {
     length()
@@ -205,7 +205,7 @@ extension QueryExpression where QueryValue == String {
 }
 
 extension QueryExpression where QueryValue == ContiguousArray<UInt8> {
-  public func hex() -> some QueryExpression<Int> {
+  public func hex() -> some QueryExpression<String> {
     QueryFunction("hex", self)
   }
 }
