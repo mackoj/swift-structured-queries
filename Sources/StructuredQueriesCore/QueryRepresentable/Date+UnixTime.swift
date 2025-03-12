@@ -21,3 +21,9 @@ extension Date.UnixTimeRepresentation: QueryDecodable {
     try self.init(queryOutput: Date(timeIntervalSince1970: Double(decoder.decode(Int.self))))
   }
 }
+
+extension Date.UnixTimeRepresentation: SQLiteType {
+  public static var typeAffinity: String {
+    Int.typeAffinity
+  }
+}

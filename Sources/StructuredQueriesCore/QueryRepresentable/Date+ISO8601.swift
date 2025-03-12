@@ -41,6 +41,13 @@ extension Date.ISO8601Representation: QueryDecodable {
 }
 
 @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
+extension Date.ISO8601Representation: SQLiteType {
+  public static var typeAffinity: String {
+    String.typeAffinity
+  }
+}
+
+@available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
 fileprivate extension Date.ISO8601FormatStyle {
   func currentTimestamp(includingFractionalSeconds: Bool) -> Self {
     year().month().day()

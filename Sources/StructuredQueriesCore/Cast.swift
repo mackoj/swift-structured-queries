@@ -4,6 +4,7 @@ extension QueryExpression {
   }
 }
 
+// TODO: Can we make automatically conforming to this easier? See 'UUID.LowercasedRepresentation'.
 public protocol SQLiteType: QueryBindable {
   static var typeAffinity: String { get }
 }
@@ -52,4 +53,8 @@ private struct Cast<QueryValue: SQLiteType, Base: QueryExpression>: QueryExpress
   var queryFragment: QueryFragment {
     "CAST(\(base.queryFragment) AS \(raw: QueryValue.typeAffinity))"
   }
+}
+
+extension RawRepresentable where RawValue: SQLiteType {
+  public static var typeAffinity: String { RawValue.typeAffinity }
 }

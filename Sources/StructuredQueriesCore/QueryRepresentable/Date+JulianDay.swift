@@ -23,3 +23,9 @@ extension Date.JulianDayRepresentation: QueryDecodable {
     )
   }
 }
+
+extension Date.JulianDayRepresentation: SQLiteType {
+  public static var typeAffinity: String {
+    Double.typeAffinity
+  }
+}

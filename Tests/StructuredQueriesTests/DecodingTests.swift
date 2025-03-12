@@ -52,4 +52,57 @@ struct DecodingTests {
       .first == .high
     )
   }
+
+  @Test func queryRepresentable() throws {
+    #expect(
+      try db.execute(
+        SimpleSelect { .raw("'2001-01-01 00:00:00'", as: Date.ISO8601Representation.self) }
+      )
+      .first == Date(timeIntervalSinceReferenceDate: 0)
+    )
+    #expect(
+      try db.execute(
+        SimpleSelect { .raw("1234567890", as: Date.UnixTimeRepresentation.self) }
+      )
+      .first == Date(timeIntervalSince1970: 1234567890)
+    )
+    #expect(
+      try db.execute(
+        SimpleSelect { .raw("2451910.5", as: Date.JulianDayRepresentation.self) }
+      )
+      .first == Date(timeIntervalSinceReferenceDate: 0)
+    )
+    #expect(
+      try db.execute(
+        SimpleSelect {
+          .raw("'deadbeef-dead-beef-dead-beefdeadbeef'", as: UUID.LowercasedRepresentation.self)
+        }
+      )
+      .first == UUID(uuidString: "deadbeef-dead-beef-dead-beefdeadbeef")
+    )
+    #expect(
+      try db.execute(
+        SimpleSelect {
+          .raw("'DEADBEEF-DEAD-BEEF-DEAD-BEEFDEADBEEF'", as: UUID.UppercasedRepresentation.self)
+        }
+      )
+      .first == UUID(uuidString: "DEADBEEF-DEAD-BEEF-DEAD-BEEFDEADBEEF")
+    )
+    #expect(
+      try db.execute(
+        SimpleSelect {
+          "deadbeef-dead-beef-dead-beefdeadbeef".unhex("-").cast(as: UUID.BytesRepresentation.self)
+        }
+      )
+      .first == UUID(
+        uuid: (
+          0xDE, 0xAD, 0xBE, 0xEF,
+          0xDE, 0xAD,
+          0xBE, 0xEF,
+          0xDE, 0xAD,
+          0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF
+        )
+      )
+    )
+  }
 }
