@@ -276,22 +276,28 @@ extension Select {
     self.where = `where`
   }
 
-  // NB: This can cause 'EXC_BAD_ACCESS' when 'C2' or 'J2' contain parameters.
-  // TODO: Report issue to Swift team.
-  // TODO: Should we mark this 'unavailable' with instructions to file an issue for more overloads?
-  // #if compiler(>=6.1)
-  //   public subscript<
-  //     each C1: QueryRepresentable,
-  //     each C2: QueryRepresentable,
-  //     each J1: Table,
-  //     each J2: Table
-  //   >(
-  //     dynamicMember keyPath: KeyPath<From.Type, Select<(repeat each C2), From, (repeat each J2)>>
-  //   ) -> Select<(repeat each C1, repeat each C2), From, (repeat each J1, repeat each J2)>
-  //   where Columns == (repeat each C1), Joins == (repeat each J1) {
-  //     self + From.self[keyPath: keyPath]
-  //   }
-  // #endif
+  #if compiler(>=6.1)
+    // NB: This can cause 'EXC_BAD_ACCESS' when 'C2' or 'J2' contain parameters.
+    // TODO: Report issue to Swift team.
+    @available(
+      *,
+      unavailable,
+      message: """
+        No overload is available for this many columns/joins. To request more overloads, please file a GitHub issue that describes your use case: https://github.com/pointfreeco/swift-structured/queries
+        """
+    )
+    public subscript<
+      each C1: QueryRepresentable,
+      each C2: QueryRepresentable,
+      each J1: Table,
+      each J2: Table
+    >(
+      dynamicMember keyPath: KeyPath<From.Type, Select<(repeat each C2), From, (repeat each J2)>>
+    ) -> Select<(repeat each C1, repeat each C2), From, (repeat each J1, repeat each J2)>
+    where Columns == (repeat each C1), Joins == (repeat each J1) {
+      self + From.self[keyPath: keyPath]
+    }
+  #endif
 
   public func select<each C1: QueryRepresentable, C2: QueryExpression>(
     _ selection: (From.Columns) -> C2
