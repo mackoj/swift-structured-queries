@@ -1,23 +1,14 @@
 extension QueryExpression {
-
-  public func eq(_ other: some QueryExpression<QueryValue?>) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "=", rhs: other)
-  }
-
-  public func eq(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "=", rhs: other)
-  }
-
   public static func == (
     lhs: Self, rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: lhs, operator: "=", rhs: rhs)
+    lhs.eq(rhs)
   }
 
   public static func != (
     lhs: Self, rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: lhs, operator: "<>", rhs: rhs)
+    lhs.neq(rhs)
   }
 
   @_disfavoredOverload
@@ -33,6 +24,28 @@ extension QueryExpression {
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: isNull(rhs) ? "IS NOT" : "<>", rhs: rhs)
   }
+
+  public func eq(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "=", rhs: other)
+  }
+
+  public func neq(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "<>", rhs: other)
+  }
+}
+
+extension QueryExpression where QueryValue: _OptionalPromotable {
+  public func `is`(
+    _ other: some QueryExpression<QueryValue._Optionalized>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "IS", rhs: other)
+  }
+
+  public func isNot(
+    _ other: some QueryExpression<QueryValue._Optionalized>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "IS NOT", rhs: other)
+  }
 }
 
 private func isNull<Value>(_ expression: some QueryExpression<Value>) -> Bool {
@@ -44,10 +57,6 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
     lhs: Self, rhs: some QueryExpression<QueryValue.Wrapped>
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: isNull(lhs) ? "IS" : "=", rhs: rhs)
-  }
-
-  public func eq(_ other: some QueryExpression<QueryValue.Wrapped>) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "=", rhs: other)
   }
 
   public static func != (
@@ -62,23 +71,60 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
     BinaryOperator(lhs: lhs, operator: isNull(lhs) || isNull(rhs) ? "IS" : "=", rhs: rhs)
   }
 
-  public func eq(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "=", rhs: other)
-  }
-
   public static func != (
     lhs: Self, rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: isNull(lhs) || isNull(rhs) ? "IS NOT" : "<>", rhs: rhs)
   }
+
+  public func eq(_ other: some QueryExpression<QueryValue.Wrapped>) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "=", rhs: other)
+  }
+
+  public func neq(_ other: some QueryExpression<QueryValue.Wrapped>) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "=", rhs: other)
+  }
+
+  public func eq(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "=", rhs: other)
+  }
+
+  public func neq(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "=", rhs: other)
+  }
+
+  public func `is`(
+    _ other: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "IS", rhs: other)
+  }
+
+  public func isNot(
+    _ other: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "IS NOT", rhs: other)
+  }
 }
 
 extension QueryExpression {
   public static func == (lhs: Self, rhs: _Null<QueryValue>) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: lhs, operator: "IS", rhs: rhs)
+    lhs.is(rhs)
   }
+
   public static func != (lhs: Self, rhs: _Null<QueryValue>) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: lhs, operator: "IS NOT", rhs: rhs)
+    lhs.isNot(rhs)
+  }
+
+  public func `is`(
+    _ other: _Null<QueryValue>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "IS", rhs: other)
+  }
+
+  public func isNot(
+    _ other: _Null<QueryValue>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "IS NOT", rhs: other)
   }
 }
 
@@ -95,25 +141,49 @@ extension QueryExpression {
   public static func < (
     lhs: Self, rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: lhs, operator: "<", rhs: rhs)
+    lhs.lt(rhs)
   }
 
   public static func > (
     lhs: Self, rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: lhs, operator: ">", rhs: rhs)
+    lhs.gt(rhs)
   }
 
   public static func <= (
     lhs: Self, rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: lhs, operator: "<=", rhs: rhs)
+    lhs.lte(rhs)
   }
 
   public static func >= (
     lhs: Self, rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: lhs, operator: ">=", rhs: rhs)
+    lhs.gte(rhs)
+  }
+
+  public func lt(
+    _ other: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "<", rhs: other)
+  }
+
+  public func gt(
+    _ other: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: ">", rhs: other)
+  }
+
+  public func lte(
+    _ other: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "<=", rhs: other)
+  }
+
+  public func gte(
+    _ other: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: ">=", rhs: other)
   }
 }
 
@@ -121,31 +191,30 @@ extension QueryExpression where QueryValue == Bool {
   public static func && (
     lhs: Self, rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<QueryValue> {
-    BinaryOperator(lhs: lhs, operator: "AND", rhs: rhs)
+    lhs.and(rhs)
   }
 
   public static func || (
     lhs: Self, rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<QueryValue> {
-    BinaryOperator(lhs: lhs, operator: "OR", rhs: rhs)
+    lhs.or(rhs)
   }
 
   public static prefix func ! (expression: Self) -> some QueryExpression<QueryValue> {
-    UnaryOperator(operator: "NOT", base: expression)
+    expression.not()
   }
 
-  // TODO: Should we ship these? What about the reverse, like '*', '%', '~', '<<', etc.?
-  // public func and(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<QueryValue> {
-  //   self && other
-  // }
-  //
-  // public func or(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<QueryValue> {
-  //   self || other
-  // }
-  //
-  // public static func not(_ expression: Self) -> some QueryExpression<QueryValue> {
-  //   !expression
-  // }
+  public func and(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<QueryValue> {
+    BinaryOperator(lhs: self, operator: "AND", rhs: other)
+  }
+
+  public func or(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<QueryValue> {
+    BinaryOperator(lhs: self, operator: "OR", rhs: other)
+  }
+
+  public func not() -> some QueryExpression<QueryValue> {
+    UnaryOperator(operator: "NOT", base: self)
+  }
 }
 
 // NB: This overload is required due to an overload resolution bug of 'Record[dynamicMember:]'.
@@ -154,14 +223,14 @@ public prefix func ! (
   expression: any QueryExpression<Bool>
 ) -> some QueryExpression<Bool> {
   func open(_ expression: some QueryExpression<Bool>) -> AnyQueryExpression<Bool> {
-    AnyQueryExpression(UnaryOperator(operator: "NOT", base: expression))
+    AnyQueryExpression(expression.not())
   }
   return open(expression)
 }
 
 extension AnyQueryExpression<Bool> {
   public mutating func toggle() {
-    self = Self(!self)
+    self = Self(not())
   }
 }
 
