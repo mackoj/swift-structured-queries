@@ -62,7 +62,14 @@ public macro _Draft<T: Table>(_: T.Type) =
   named(init(decoder:))
 )
 public macro Selection() =
-#externalMacro(
-  module: "StructuredQueriesMacros",
-  type: "SelectionMacro"
-)
+  #externalMacro(
+    module: "StructuredQueriesMacros",
+    type: "SelectionMacro"
+  )
+
+@freestanding(expression)
+public macro raw<QueryValue>(
+  _ queryFragment: QueryFragment,
+  as queryValueType: QueryValue.Type = QueryValue.self
+) -> RawQueryExpression<QueryValue> =
+  #externalMacro(module: "StructuredQueriesMacros", type: "RawMacro")

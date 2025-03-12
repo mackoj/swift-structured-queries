@@ -484,6 +484,20 @@ extension SnapshotTests {
       }
     }
 
+    @Test func count() throws {
+      try assertQuery(Reminder.count()) {
+        """
+        SELECT count(*) FROM "reminders"
+        """
+      } results: {
+        """
+        ┌────┐
+        │ 10 │
+        └────┘
+        """
+      }
+    }
+
     #if compiler(>=6.1)
       @Test func dynamicMember() throws {
         try assertQuery(

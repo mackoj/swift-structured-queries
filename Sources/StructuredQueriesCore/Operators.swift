@@ -392,7 +392,7 @@ extension QueryExpression where QueryValue == String {
     BinaryOperator(
       lhs: self,
       operator: "COLLATE",
-      rhs: .raw("\(raw: collation.rawValue)", as: Void.self)
+      rhs: RawQueryExpression("\(raw: collation.rawValue)", as: Void.self)
     )
   }
 
@@ -441,7 +441,11 @@ extension QueryExpression {
 
   public func `in`<S: Statement>(_ query: S) -> some QueryExpression<Bool>
   where S.QueryValue == QueryValue {
-    BinaryOperator(lhs: self, operator: "IN", rhs: .raw("(\(query.query))", as: Void.self))
+    BinaryOperator(
+      lhs: self,
+      operator: "IN",
+      rhs: RawQueryExpression("(\(query.query))", as: Void.self)
+    )
   }
 
   public func between(

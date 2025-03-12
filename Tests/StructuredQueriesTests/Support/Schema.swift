@@ -42,7 +42,7 @@ enum Priority: Int, QueryBindable {
 
 extension Reminder.Columns {
   var isPastDue: some QueryExpression<Bool> {
-    !isCompleted && .raw("coalesce(\(date), date('now')) < date('now')")
+    !isCompleted && #raw("coalesce(\(date), date('now')) < date('now')")
   }
 }
 

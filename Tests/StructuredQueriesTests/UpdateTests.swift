@@ -1,3 +1,4 @@
+import Dependencies
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
@@ -5,247 +6,188 @@ import Testing
 
 extension SnapshotTests {
   @Suite struct UpdateTests {
-    @Test func basics() {
+    @Dependency(\.defaultDatabase) var db
+
+    @Test func basics() throws {
       assertInlineSnapshot(
         of:
-          SyncUp
-          .update { $0.isActive = true },
+          Reminder
+          .update { $0.isCompleted = true },
         as: .sql
       ) {
         """
-        UPDATE "syncUps" SET "isActive" = 1
+        UPDATE "reminders" SET "isCompleted" = 1
         """
       }
-      assertInlineSnapshot(
-        of:
-          SyncUp
-          .update { $0.isActive = true }
-          .returning(\.self),
-        as: .sql
+      try assertQuery(
+        Reminder
+          .update { $0.isCompleted.toggle() }
+          .returning { ($0.title, $0.priority, $0.isCompleted) }
       ) {
         """
-        UPDATE "syncUps" SET "isActive" = 1 RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt", "syncUps"."title"
+        UPDATE "reminders" SET "isCompleted" = NOT ("reminders"."isCompleted") RETURNING "reminders"."title", "reminders"."priority", "reminders"."isCompleted"
+        """
+      } results: {
+        """
+        ┌────────────────────────────┬─────────┬───────┐
+        │ "Groceries"                │ nil     │ true  │
+        │ "Haircut"                  │ nil     │ true  │
+        │ "Doctor appointment"       │ .high   │ true  │
+        │ "Take a walk"              │ nil     │ false │
+        │ "Buy concert tickets"      │ nil     │ true  │
+        │ "Pick up kids from school" │ .high   │ true  │
+        │ "Get laundry"              │ .low    │ false │
+        │ "Take out trash"           │ .high   │ true  │
+        │ "Call accountant"          │ nil     │ true  │
+        │ "Send weekly emails"       │ .medium │ false │
+        └────────────────────────────┴─────────┴───────┘
         """
       }
-      assertInlineSnapshot(
-        of:
-          SyncUp
-          .update { $0.isActive = false }
-          .where(\.isActive)
-          .returning(\.self),
-        as: .sql
+      try assertQuery(
+        Reminder
+          .where { $0.priority == nil }
+          .update { $0.isCompleted = true }
+          .returning { ($0.title, $0.priority, $0.isCompleted) }
       ) {
         """
-        UPDATE "syncUps" SET "isActive" = 0 WHERE "syncUps"."isActive" RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt", "syncUps"."title"
+        UPDATE "reminders" SET "isCompleted" = 1 WHERE ("reminders"."priority" IS NULL) RETURNING "reminders"."title", "reminders"."priority", "reminders"."isCompleted"
+        """
+      } results: {
+        """
+        ┌───────────────────────┬─────┬──────┐
+        │ "Groceries"           │ nil │ true │
+        │ "Haircut"             │ nil │ true │
+        │ "Take a walk"         │ nil │ true │
+        │ "Buy concert tickets" │ nil │ true │
+        │ "Call accountant"     │ nil │ true │
+        └───────────────────────┴─────┴──────┘
         """
       }
     }
 
-    @Test func primaryKey() {
-      assertInlineSnapshot(
-        of:
-          SyncUp
-          .update(
-            SyncUp(id: 1, isActive: true, createdAt: Date(timeIntervalSinceReferenceDate: 0))
-          ),
-        as: .sql
+    @Test func primaryKey() throws {
+      var reminder = try #require(try db.execute(Reminder.all()).first)
+      reminder.isCompleted.toggle()
+      try assertQuery(
+        Reminder
+          .update(reminder)
+          .returning(\.self)
       ) {
         """
-        UPDATE "syncUps" SET "isActive" = 1, "createdAt" = '2001-01-01 00:00:00.000', "title" = '' WHERE ("syncUps"."id" = 1)
+        UPDATE "reminders" SET "date" = '2001-01-01 00:00:00.000', "isCompleted" = 1, "isFlagged" = 0, "notes" = 'Milk, Eggs, Apples', "priority" = NULL, "remindersListID" = 1, "title" = 'Groceries' WHERE ("reminders"."id" = 1) RETURNING "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────────┐
+        │ Reminder(                               │
+        │   id: 1,                                │
+        │   date: Date(2001-01-01T00:00:00.000Z), │
+        │   isCompleted: true,                    │
+        │   isFlagged: false,                     │
+        │   notes: "Milk, Eggs, Apples",          │
+        │   priority: nil,                        │
+        │   remindersListID: 1,                   │
+        │   title: "Groceries"                    │
+        │ )                                       │
+        └─────────────────────────────────────────┘
         """
       }
     }
 
     @Test func toggleAssignment() {
       assertInlineSnapshot(
-        of: SyncUp.update {
-          $0.isActive = !$0.isActive
+        of: Reminder.update {
+          $0.isCompleted = !$0.isCompleted
         },
         as: .sql
       ) {
         """
-        UPDATE "syncUps" SET "isActive" = NOT ("syncUps"."isActive")
+        UPDATE "reminders" SET "isCompleted" = NOT ("reminders"."isCompleted")
         """
       }
     }
 
     @Test func toggleBoolean() {
       assertInlineSnapshot(
-        of: SyncUp.update { $0.isActive.toggle() },
+        of: Reminder.update { $0.isCompleted.toggle() },
         as: .sql
       ) {
         """
-        UPDATE "syncUps" SET "isActive" = NOT ("syncUps"."isActive")
+        UPDATE "reminders" SET "isCompleted" = NOT ("reminders"."isCompleted")
         """
       }
     }
 
     @Test func multipleMutations() {
       assertInlineSnapshot(
-        of: SyncUp.update {
+        of: Reminder.update {
           $0.title += "!"
           $0.title += "?"
         },
         as: .sql
       ) {
         """
-        UPDATE "syncUps" SET "title" = ("syncUps"."title" || '!'), "title" = ("syncUps"."title" || '?')
+        UPDATE "reminders" SET "title" = ("reminders"."title" || '!'), "title" = ("reminders"."title" || '?')
         """
       }
     }
 
     @Test func conflictResolution() {
       assertInlineSnapshot(
-        of: SyncUp.update(or: .abort) { $0.isActive = true },
+        of: Reminder.update(or: .abort) { $0.isCompleted = true },
         as: .sql
       ) {
         """
-        UPDATE OR ABORT "syncUps" SET "isActive" = 1
+        UPDATE OR ABORT "reminders" SET "isCompleted" = 1
         """
       }
       assertInlineSnapshot(
-        of: SyncUp.update(or: .fail) { $0.isActive = true },
+        of: Reminder.update(or: .fail) { $0.isCompleted = true },
         as: .sql
       ) {
         """
-        UPDATE OR FAIL "syncUps" SET "isActive" = 1
+        UPDATE OR FAIL "reminders" SET "isCompleted" = 1
         """
       }
       assertInlineSnapshot(
-        of: SyncUp.update(or: .ignore) { $0.isActive = true },
+        of: Reminder.update(or: .ignore) { $0.isCompleted = true },
         as: .sql
       ) {
         """
-        UPDATE OR IGNORE "syncUps" SET "isActive" = 1
+        UPDATE OR IGNORE "reminders" SET "isCompleted" = 1
         """
       }
       assertInlineSnapshot(
-        of: SyncUp.update(or: .replace) { $0.isActive = true },
+        of: Reminder.update(or: .replace) { $0.isCompleted = true },
         as: .sql
       ) {
         """
-        UPDATE OR REPLACE "syncUps" SET "isActive" = 1
+        UPDATE OR REPLACE "reminders" SET "isCompleted" = 1
         """
       }
       assertInlineSnapshot(
-        of: SyncUp.update(or: .rollback) { $0.isActive = true },
+        of: Reminder.update(or: .rollback) { $0.isCompleted = true },
         as: .sql
       ) {
         """
-        UPDATE OR ROLLBACK "syncUps" SET "isActive" = 1
-        """
-      }
-    }
-
-    @Test func `where`() {
-      assertInlineSnapshot(
-        of: SyncUp
-          .update {
-            $0.isActive = true
-            $0.title = "Engineering"
-          }
-          .where(\.isActive),
-        as: .sql
-      ) {
-        """
-        UPDATE "syncUps" SET "isActive" = 1, "title" = 'Engineering' WHERE "syncUps"."isActive"
-        """
-      }
-      assertInlineSnapshot(
-        of: SyncUp
-          .where(\.isActive)
-          .update {
-            $0.isActive = true
-            $0.title = "Engineering"
-          },
-        as: .sql
-      ) {
-        """
-        UPDATE "syncUps" SET "isActive" = 1, "title" = 'Engineering' WHERE "syncUps"."isActive"
-        """
-      }
-    }
-
-    @Test func returning() {
-      assertInlineSnapshot(
-        of: SyncUp
-          .update {
-            $0.isActive = true
-            $0.title = "Engineering"
-          }
-          .returning(\.self),
-        as: .sql
-      ) {
-        """
-        UPDATE "syncUps" SET "isActive" = 1, "title" = 'Engineering' RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt", "syncUps"."title"
-        """
-      }
-    }
-
-    @Test func record() {
-      assertInlineSnapshot(
-        of: SyncUp.update(
-          SyncUp(
-            id: 42,
-            isActive: true,
-            createdAt: Date(timeIntervalSince1970: 123456789),
-            title: "Engineering"
-          )
-        ),
-        as: .sql
-      ) {
-        """
-        UPDATE \
-        "syncUps" SET "isActive" = 1, "createdAt" = '1973-11-29 21:33:09.000', "title" = 'Engineering' \
-        WHERE ("syncUps"."id" = 42)
-        """
-      }
-    }
-
-    @Test func date() {
-      assertInlineSnapshot(
-        of: SyncUp.update {
-          $0.createdAt = Date(timeIntervalSinceReferenceDate: 0)
-        },
-        as: .sql
-      ) {
-        """
-        UPDATE "syncUps" SET "createdAt" = '2001-01-01 00:00:00.000'
+        UPDATE OR ROLLBACK "reminders" SET "isCompleted" = 1
         """
       }
     }
 
     @Test func rawBind() {
       assertInlineSnapshot(
-        of: SyncUp.update {
-          $0.createdAt = RawQueryExpression("CURRENT_TIMESTAMP")
+        of: Reminder.update {
+          $0.date = RawQueryExpression("CURRENT_TIMESTAMP")
           // TODO: does not compile, but also may be removing '.raw'
           _ = $0
         },
         as: .sql
       ) {
         """
-        UPDATE "syncUps" SET "createdAt" = CURRENT_TIMESTAMP
+        UPDATE "reminders" SET "date" = CURRENT_TIMESTAMP
         """
       }
     }
   }
-}
-
-@Table
-private struct SyncUp {
-  let id: Int
-  var isActive: Bool
-  @Column(as: Date.ISO8601Representation.self)
-  var createdAt: Date
-  var title = ""
-}
-
-@Table
-private struct Attendee {
-  let id: Int
-  var syncUpID: Int
-  var name: String
-  @Column(as: Date.ISO8601Representation.self)
-  var createdAt: Date
 }
