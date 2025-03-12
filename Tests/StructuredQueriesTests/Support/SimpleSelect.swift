@@ -7,13 +7,17 @@ struct SimpleSelect<QueryValue>: Statement {
 
   init(
     _ selection: () -> some QueryExpression<QueryValue>
-  ) where QueryValue: QueryRepresentable  {
+  ) where QueryValue: QueryRepresentable {
     query = "SELECT \(selection().queryFragment)"
   }
 
   init<each C: QueryExpression>(
     _ selection: () -> (repeat each C)
-  ) where repeat (each C).QueryValue: QueryRepresentable, QueryValue == (repeat (each C).QueryValue) {
+  )
+  where
+    repeat (each C).QueryValue: QueryRepresentable,
+    QueryValue == (repeat (each C).QueryValue)
+  {
     let columns = Array(repeat each selection())
     query = "SELECT \(columns.map(\.queryFragment).joined(separator: ", "))"
   }

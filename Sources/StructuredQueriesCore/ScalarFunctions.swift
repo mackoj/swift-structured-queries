@@ -90,7 +90,7 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
 
   @available(
     *,
-    unavailable,
+    deprecated,
     message:
       "Left side of 'NULL' coalescing operator '??' has non-optional query type, so the right side is never used"
   )

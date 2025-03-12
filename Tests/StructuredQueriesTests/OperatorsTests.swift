@@ -102,7 +102,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func comparison() {
+    @Test func comparison() throws {
       assertInlineSnapshot(of: Row.columns.c < Row.columns.c, as: .sql) {
         """
         ("rows"."c" < "rows"."c")

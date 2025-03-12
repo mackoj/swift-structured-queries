@@ -6,53 +6,106 @@ import Testing
 extension SnapshotTests {
   @Suite struct SelectTests {
     func f() {
-      _ = SyncUp.select(\.id)
-      _ = SyncUp.select { $0.id }
-      _ = SyncUp.select { ($0.id, $0.isActive) }
-      _ = SyncUp.all().select(\.id)
-      _ = SyncUp.all().select { $0.id }
-      _ = SyncUp.all().select { ($0.id, $0.isActive) }
-      _ = SyncUp.where(\.isActive).select(\.id)
-      _ = SyncUp.where(\.isActive).select { $0.id }
-      _ = SyncUp.where(\.isActive).select { ($0.id, $0.isActive) }
+      _ = Reminder.select(\.id)
+      _ = Reminder.select { $0.id }
+      _ = Reminder.select { ($0.id, $0.isCompleted) }
+      _ = Reminder.all().select(\.id)
+      _ = Reminder.all().select { $0.id }
+      _ = Reminder.all().select { ($0.id, $0.isCompleted) }
+      _ = Reminder.where(\.isCompleted).select(\.id)
+      _ = Reminder.where(\.isCompleted).select { $0.id }
+      _ = Reminder.where(\.isCompleted).select { ($0.id, $0.isCompleted) }
     }
 
-    @Test func basics() {
-      assertInlineSnapshot(
-        of: SyncUp.all(),
-        as: .sql
-      ) {
+    @Test func selectAll() throws {
+      try assertQuery(Tag.all()) {
         """
-        SELECT "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt" \
-        FROM "syncUps"
+        SELECT "tags"."id", "tags"."name" FROM "tags"
+        """
+      } results: {
+        """
+        ┌────────────────────┐
+        │ Tag(               │
+        │   id: 1,           │
+        │   name: "car"      │
+        │ )                  │
+        ├────────────────────┤
+        │ Tag(               │
+        │   id: 2,           │
+        │   name: "kids"     │
+        │ )                  │
+        ├────────────────────┤
+        │ Tag(               │
+        │   id: 3,           │
+        │   name: "someday"  │
+        │ )                  │
+        ├────────────────────┤
+        │ Tag(               │
+        │   id: 4,           │
+        │   name: "optional" │
+        │ )                  │
+        └────────────────────┘
         """
       }
     }
 
-    @Test func select() {
-      assertInlineSnapshot(
-        of: SyncUp.all().select { ($0.id, $0.createdAt) },
-        as: .sql
-      ) {
+    @Test func select() throws {
+      try assertQuery(Reminder.select { ($0.id, $0.title) }) {
         """
-        SELECT "syncUps"."id", "syncUps"."createdAt" \
-        FROM "syncUps"
+        SELECT "reminders"."id", "reminders"."title" FROM "reminders"
+        """
+      } results: {
+        """
+        ┌────┬────────────────────────────┐
+        │ 1  │ "Groceries"                │
+        │ 2  │ "Haircut"                  │
+        │ 3  │ "Doctor appointment"       │
+        │ 4  │ "Take a walk"              │
+        │ 5  │ "Buy concert tickets"      │
+        │ 6  │ "Pick up kids from school" │
+        │ 7  │ "Get laundry"              │
+        │ 8  │ "Take out trash"           │
+        │ 9  │ "Call accountant"          │
+        │ 10 │ "Send weekly emails"       │
+        └────┴────────────────────────────┘
         """
       }
     }
 
-    @Test func selectSingleColumn() {
-      assertInlineSnapshot(
-        of: SyncUp.all().select(\.id),
-        as: .sql
-      ) {
+    @Test func selectSingleColumn() throws {
+      try assertQuery(Tag.select(\.name)) {
         """
-        SELECT "syncUps"."id" FROM "syncUps"
+        SELECT "tags"."name" FROM "tags"
+        """
+      } results: {
+        """
+        ┌────────────┐
+        │ "car"      │
+        │ "kids"     │
+        │ "someday"  │
+        │ "optional" │
+        └────────────┘
         """
       }
     }
 
-    @Test func chaining() {
+    @Test func selectChaining() throws {
+      // TODO: Make this compile:
+      // _ = Tag.select(\.id).select(\.name)
+      try assertQuery(Tag.all().select(\.id).select(\.name)) {
+        """
+        SELECT "tags"."id", "tags"."name" FROM "tags"
+        """
+      } results: {
+        """
+        ┌───┬────────────┐
+        │ 1 │ "car"      │
+        │ 2 │ "kids"     │
+        │ 3 │ "someday"  │
+        │ 4 │ "optional" │
+        └───┴────────────┘
+        """
+      }
       assertInlineSnapshot(
         of: SyncUp.all().select(\.id).select { ($0.createdAt, $0.isActive) },
         as: .sql

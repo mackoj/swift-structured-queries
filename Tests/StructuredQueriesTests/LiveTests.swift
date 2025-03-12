@@ -162,9 +162,10 @@ extension SnapshotTests {
       try assertQuery(
         RemindersList
           .group(by: \.id)
-          .join(Reminder.all()) { $0.id == $1.remindersListID }
+          .join(Reminder.all()) { $0.id.eq($1.remindersListID) }
           .select { ($0, $1.id.count()) }
-      ) {
+      )
+      {
         """
         SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", count("reminders"."id") FROM "remindersLists" JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID") GROUP BY "remindersLists"."id"
         """
@@ -200,8 +201,6 @@ extension SnapshotTests {
           .join(ReminderTag.all()) { $0.id.eq($1.reminderID) }
           .join(Tag.all()) { $1.tagID.eq($2.id) }
           .select { ($0, $2.name.groupConcat()) }
-
-        // $0.priority.is(not: nil)
       ) {
         """
         SELECT "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", group_concat("tags"."name") FROM "reminders" JOIN "remindersTags" ON ("reminders"."id" = "remindersTags"."reminderID") JOIN "tags" ON ("remindersTags"."tagID" = "tags"."id") GROUP BY "reminders"."id"
