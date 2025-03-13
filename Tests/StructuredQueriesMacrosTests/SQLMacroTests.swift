@@ -91,6 +91,15 @@ extension SnapshotTests {
         #sql("CURRENT_TIMESTAMP = ?")
              ─────────────────────┬─
                                   ╰─ 🛑 Invalid bind parameter in literal; use interpolation to bind values into SQL.
+                                     ✏️ Use 'SQLQueryExpression.init(_:)' to silence this warning
+        """
+      } fixes: {
+        """
+        SQLQueryExpression("CURRENT_TIMESTAMP = ?")
+        """
+      } expansion: {
+        """
+        SQLQueryExpression("CURRENT_TIMESTAMP = ?")
         """
       }
     }
@@ -98,12 +107,26 @@ extension SnapshotTests {
     @Test func escapedBind() {
       assertMacro {
         """
-        #sql(#"text" = 'hello?'"#)
+        #sql(#""text" = 'hello?'"#)
         """
       } expansion: {
         """
-        StructuredQueries.SQLQueryExpression(#"text" = 'hello?'"#)
+        StructuredQueries.SQLQueryExpression(#""text" = 'hello?'"#)
         """
+      }
+    }
+
+    @Test func invalidBind() {
+      assertMacro {
+        #"""
+        #sql("'\(42)'")
+        """#
+      } diagnostics: {
+        #"""
+        #sql("'\(42)'")
+               ┬────
+               ╰─ 🛑 Bind after opening "'" in SQL string produces invalid fragment
+        """#
       }
     }
   }

@@ -432,12 +432,16 @@ extension SnapshotTests {
           .select { ($0.priority, $0.date) }
           .order {
             if true {
-              ($0.priority.asc(nulls: .last), $0.date.desc(nulls: .first))
+              (
+                $0.priority.asc(nulls: .last),
+                $0.date.desc(nulls: .first),
+                $0.title.collate(.nocase).desc()
+              )
             }
           }
       ) {
         """
-        SELECT "reminders"."priority", "reminders"."date" FROM "reminders" ORDER BY "reminders"."priority" ASC NULLS LAST, "reminders"."date" DESC NULLS FIRST
+        SELECT "reminders"."priority", "reminders"."date" FROM "reminders" ORDER BY "reminders"."priority" ASC NULLS LAST, "reminders"."date" DESC NULLS FIRST, ("reminders"."title" COLLATE NOCASE) DESC
         """
       } results: {
         """

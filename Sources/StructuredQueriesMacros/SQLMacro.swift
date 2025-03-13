@@ -2,6 +2,8 @@ import SwiftDiagnostics
 import SwiftSyntax
 import SwiftSyntaxMacros
 
+// TODO: Detect other bind templates? ':VVV', '@VVV', '$VVV'
+// https://www.sqlite.org/c3ref/bind_blob.html
 public enum SQLMacro: ExpressionMacro {
   public static func expansion<N: FreestandingMacroExpansionSyntax, C: MacroExpansionContext>(
     of node: N,
@@ -18,17 +20,45 @@ public enum SQLMacro: ExpressionMacro {
     var parenStack: [(delimiter: UInt8, segment: StringSegmentSyntax, offset: Int)] = []
     var currentDelimiter: (delimiter: UInt8, segment: StringSegmentSyntax, offset: Int)?
     var unexpectedBind: (segment: StringSegmentSyntax, offset: Int)?
+    var invalidBind = false
     if let string = argument.as(StringLiteralExprSyntax.self) {
       for segment in string.segments {
         guard let segment = segment.as(StringSegmentSyntax.self)
-        else { continue }
+        else {
+          if invalidBind, let currentDelimiter {
+            let openingDelimiter = UnicodeScalar(currentDelimiter.delimiter)
+            let q = openingDelimiter == "'" ? #"""# : "'"
+            context.diagnose(
+              Diagnostic(
+                node: segment,
+                message: MacroExpansionErrorMessage(
+                  """
+                  Bind after opening \(q)\(openingDelimiter)\(q) in SQL string produces invalid \
+                  fragment
+                  """
+                ),
+                notes: [
+                  Note(
+                    node: Syntax(string),
+                    position: currentDelimiter.segment.position.advanced(
+                      by: currentDelimiter.offset
+                    ),
+                    message: MacroExpansionNoteMessage("Opening \(q)\(openingDelimiter)\(q)")
+                  )
+                ]
+              )
+            )
+          }
+          continue
+        }
 
         for (offset, byte) in segment.content.syntaxTextBytes.enumerated() {
           if let delimiter = currentDelimiter ?? parenStack.last {
             if byte == delimiters[delimiter.delimiter],
                offset != delimiter.offset + 1,
-               case let previousByte = segment.content.syntaxTextBytes[offset - 1],
-               previousByte != delimiters[byte]
+               segment.content.syntaxTextBytes.indices.contains(offset - 1)
+                 ? segment.content.syntaxTextBytes[offset - 1] != delimiters[byte]
+                 : true
             {
               if currentDelimiter == nil {
                 parenStack.removeLast()
@@ -51,6 +81,8 @@ public enum SQLMacro: ExpressionMacro {
             }
           }
         }
+
+        invalidBind = currentDelimiter?.segment == segment
       }
       
       if let currentDelimiter = currentDelimiter ?? parenStack.last,
@@ -85,7 +117,8 @@ public enum SQLMacro: ExpressionMacro {
             )
           )
         )
-      } else if let unexpectedBind {
+      }
+      if let unexpectedBind {
         context.diagnose(
           Diagnostic(
             node: string,
