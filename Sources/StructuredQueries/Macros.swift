@@ -92,8 +92,16 @@ public macro bind<QueryValue: QueryBindable>(
 /// > when type-checking complex query expressions involving heavily overloaded operators and
 /// > literals. See <doc:CompilerPerformance> for more information.
 @freestanding(expression)
-public macro raw<QueryValue>(
+public macro sql<QueryValue>(
   _ queryFragment: QueryFragment,
   as queryValueType: QueryValue.Type = QueryValue.self
-) -> RawQueryExpression<QueryValue> =
-  #externalMacro(module: "StructuredQueriesMacros", type: "RawMacro")
+) -> SQLQueryExpression<QueryValue> =
+  #externalMacro(module: "StructuredQueriesMacros", type: "SQLMacro")
+
+// TODO: Do we want to expose this functionality?
+// @freestanding(expression)
+// public macro sql<QueryValue>(
+//   raw queryFragment: String,
+//   as queryValueType: QueryValue.Type = QueryValue.self
+// ) -> SQLQueryExpression<QueryValue> =
+//   #externalMacro(module: "StructuredQueriesMacros", type: "SQLMacro")

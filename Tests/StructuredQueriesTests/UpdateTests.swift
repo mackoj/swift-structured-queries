@@ -178,7 +178,7 @@ extension SnapshotTests {
     @Test func rawBind() {
       assertInlineSnapshot(
         of: Reminder.update {
-          $0.date = #raw("CURRENT_TIMESTAMP")
+          $0.date = #sql("CURRENT_TIMESTAMP")
         },
         as: .sql
       ) {

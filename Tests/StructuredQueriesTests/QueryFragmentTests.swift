@@ -7,7 +7,7 @@ extension SnapshotTests {
   struct QueryFragmentTests {
     @Test func string() {
       assertInlineSnapshot(
-        of: RawQueryExpression("'What''s the point?'", as: String.self),
+        of: SQLQueryExpression("'What''s the point?'", as: String.self),
         as: .sql
       ) {
         """
@@ -17,7 +17,7 @@ extension SnapshotTests {
     }
     @Test func identifier() {
       assertInlineSnapshot(
-        of: RawQueryExpression(#""What's the point?""#, as: String.self),
+        of: SQLQueryExpression(#""What's the point?""#, as: String.self),
         as: .sql
       ) {
         """
@@ -27,7 +27,7 @@ extension SnapshotTests {
     }
     @Test func brackets() {
       assertInlineSnapshot(
-        of: RawQueryExpression("[What's the point?]", as: String.self),
+        of: SQLQueryExpression("[What's the point?]", as: String.self),
         as: .sql
       ) {
         """
@@ -37,7 +37,7 @@ extension SnapshotTests {
     }
     @Test func backticks() {
       assertInlineSnapshot(
-        of: RawQueryExpression("`What's the point?`", as: String.self),
+        of: SQLQueryExpression("`What's the point?`", as: String.self),
         as: .sql
       ) {
         """

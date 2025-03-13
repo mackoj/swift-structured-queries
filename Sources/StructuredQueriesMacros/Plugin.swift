@@ -6,8 +6,8 @@ struct StructuredQueriesPlugin: CompilerPlugin {
   let providingMacros: [Macro.Type] = [
     BindMacro.self,
     ColumnMacro.self,
-    RawMacro.self,
     SelectionMacro.self,
+    SQLMacro.self,
     TableMacro.self,
   ]
 }

@@ -392,7 +392,7 @@ extension QueryExpression where QueryValue == String {
     BinaryOperator(
       lhs: self,
       operator: "COLLATE",
-      rhs: RawQueryExpression("\(raw: collation.rawValue)", as: Void.self)
+      rhs: SQLQueryExpression("\(raw: collation.rawValue)", as: Void.self)
     )
   }
 
@@ -443,7 +443,7 @@ extension QueryExpression {
     BinaryOperator(
       lhs: self,
       operator: "IN",
-      rhs: RawQueryExpression("(\(query.query))", as: Void.self)
+      rhs: SQLQueryExpression("(\(query.query))", as: Void.self)
     )
   }
 
