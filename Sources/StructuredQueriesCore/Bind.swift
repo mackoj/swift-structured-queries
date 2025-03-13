@@ -1,8 +1,8 @@
 public struct BindQueryExpression<QueryValue: QueryBindable>: QueryExpression {
   public let base: QueryValue
 
-  public init(_ queryValue: QueryValue) {
-    self.base = queryValue
+  public init(_ queryOutput: QueryValue.QueryOutput) {
+    self.base = QueryValue(queryOutput: queryOutput)
   }
 
   public var queryFragment: QueryFragment {

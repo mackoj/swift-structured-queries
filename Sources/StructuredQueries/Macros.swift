@@ -67,15 +67,33 @@ public macro Selection() =
     type: "SelectionMacro"
   )
 
+/// Explicitly bind a value to a query.
+///
+/// This macro explicitly binds a Swift value to a query. This is required when binding a value with
+/// multiple query representations, like `Date` and `UUID`:
+///
+/// ```swift
+/// Reminder.where { $0.date >= #bind(Date()) }
+/// ```
+///
+/// > Tip: Explicit binding can also improve the performance of the Swift compiler when
+/// > type-checking complex query expressions involving heavily overloaded operators and literals.
+/// > See <doc:CompilerPerformance> for more information.
+@freestanding(expression)
+public macro bind<QueryValue: QueryBindable>(
+  _ queryValue: QueryValue.QueryOutput,
+  as queryValueType: QueryValue.Type = QueryValue.self
+) -> BindQueryExpression<QueryValue> =
+  #externalMacro(module: "StructuredQueriesMacros", type: "BindMacro")
+
+/// Introduces raw SQL to a query.
+///
+/// > Tip: Selectively introducing raw SQL can also improve the performance of the Swift compiler
+/// > when type-checking complex query expressions involving heavily overloaded operators and
+/// > literals. See <doc:CompilerPerformance> for more information.
 @freestanding(expression)
 public macro raw<QueryValue>(
   _ queryFragment: QueryFragment,
   as queryValueType: QueryValue.Type = QueryValue.self
 ) -> RawQueryExpression<QueryValue> =
   #externalMacro(module: "StructuredQueriesMacros", type: "RawMacro")
-
-@freestanding(expression)
-public macro bind<QueryValue: QueryBindable>(
-  _ queryValue: QueryValue
-) -> BindQueryExpression<QueryValue> =
-  #externalMacro(module: "StructuredQueriesMacros", type: "BindMacro")
