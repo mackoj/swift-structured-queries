@@ -439,8 +439,7 @@ extension QueryExpression {
     BinaryOperator(lhs: self, operator: "IN", rhs: expression)
   }
 
-  public func `in`<S: Statement>(_ query: S) -> some QueryExpression<Bool>
-  where S.QueryValue == QueryValue {
+  public func `in`(_ query: some Statement<QueryValue>) -> some QueryExpression<Bool> {
     BinaryOperator(
       lhs: self,
       operator: "IN",

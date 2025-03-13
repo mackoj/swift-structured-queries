@@ -49,30 +49,8 @@ func assertQuery<S: SelectStatement, each J: Table>(
   )
 }
 
-//func assertQuery<S: Statement>(
-//  _ query: S,
-//  sql: (() -> String)? = nil,
-//  results: (() -> String)? = nil,
-//  fileID: StaticString = #fileID,
-//  filePath: StaticString = #filePath,
-//  function: StaticString = #function,
-//  line: UInt = #line,
-//  column: UInt = #column
-//) throws where S.QueryValue: QueryRepresentable {
-//  try _assertQuery(
-//    query,
-//    sql: sql,
-//    results: results,
-//    fileID: fileID,
-//    filePath: filePath,
-//    function: function,
-//    line: line,
-//    column: column
-//  )
-//}
-
-func assertQuery<S: Statement, each V: QueryRepresentable>(
-  _ query: S,
+func assertQuery<each V: QueryRepresentable>(
+  _ query: some Statement<(repeat each V)>,
   sql: (() -> String)? = nil,
   results: (() -> String)? = nil,
   fileID: StaticString = #fileID,
@@ -80,7 +58,7 @@ func assertQuery<S: Statement, each V: QueryRepresentable>(
   function: StaticString = #function,
   line: UInt = #line,
   column: UInt = #column
-) throws where S.QueryValue == (repeat each V) {
+) throws {
   assertInlineSnapshot(
     of: query,
     as: .sql,

@@ -1,4 +1,4 @@
-public protocol Statement<QueryValue, From, Joins>: QueryExpression, Hashable {
+public protocol Statement<QueryValue>: QueryExpression, Hashable {
   associatedtype From: Table
   associatedtype Joins = ()
 
@@ -13,10 +13,10 @@ extension Statement {
 
 extension Statement {
   public static func == (lhs: Self, rhs: Self) -> Bool {
-    lhs.queryFragment == rhs.queryFragment
+    lhs.query == rhs.query
   }
 
   public func hash(into hasher: inout Hasher) {
-    hasher.combine(queryFragment)
+    hasher.combine(query)
   }
 }

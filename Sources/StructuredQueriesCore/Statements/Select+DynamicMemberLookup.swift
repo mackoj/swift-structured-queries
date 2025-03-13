@@ -118,6 +118,18 @@
     }
 
     public subscript<
+      each C: QueryRepresentable,
+      each J1: Table,
+      J2: Table,
+      J3: Table
+    >(
+      dynamicMember keyPath: KeyPath<From.Type, Select<(), From, (J2, J3)>>
+    ) -> Select<(repeat each C), From, (repeat each J1, J2, J3)>
+    where Columns == (repeat each C), Joins == (repeat each J1) {
+      self + From.self[keyPath: keyPath]
+    }
+
+    public subscript<
       each C1: QueryRepresentable,
       C2: QueryRepresentable,
       each J1: Table,

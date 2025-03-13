@@ -31,14 +31,13 @@ public final class Database {
     }
   }
 
-  public func execute<S: Statement>(_ query: S) throws where S.QueryValue == () {
+  public func execute(_ query: some Statement<()>) throws {
     _ = try execute(query) as [()]
   }
 
-  public func execute<S: Statement>(
-    _ query: S
-  ) throws -> [S.QueryValue.QueryOutput]
-  where S.QueryValue: QueryRepresentable {
+  public func execute<QueryValue: QueryRepresentable>(
+    _ query: some Statement<QueryValue>
+  ) throws -> [QueryValue.QueryOutput]{
     var statement: OpaquePointer?
     let sql = query.query
     guard
@@ -64,13 +63,13 @@ public final class Database {
         }
       guard result == SQLITE_OK else { throw SQLiteError(handle) }
     }
-    var results: [S.QueryValue.QueryOutput] = []
+    var results: [QueryValue.QueryOutput] = []
     let decoder = SQLiteQueryDecoder(database: handle, statement: statement)
     loop: while true {
       let code = sqlite3_step(statement)
       switch code {
       case SQLITE_ROW:
-        try results.append(S.QueryValue(decoder: decoder).queryOutput)
+        try results.append(QueryValue(decoder: decoder).queryOutput)
         decoder.next()
       case SQLITE_DONE:
         break loop
@@ -81,10 +80,9 @@ public final class Database {
     return results
   }
 
-  public func execute<S: Statement, each V: QueryRepresentable>(
-    _ query: S
-  ) throws -> [(repeat (each V).QueryOutput)]
-  where S.QueryValue == (repeat each V) {
+  public func execute<each V: QueryRepresentable>(
+    _ query: some Statement<(repeat each V)>
+  ) throws -> [(repeat (each V).QueryOutput)] {
     var statement: OpaquePointer?
     let sql = query.query
     guard

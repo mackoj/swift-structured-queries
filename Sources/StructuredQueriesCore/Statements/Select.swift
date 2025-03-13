@@ -290,7 +290,7 @@ extension Select {
       *,
       unavailable,
       message: """
-        No overload is available for this many columns/joins. To request more overloads, please file a GitHub issue that describes your use case: https://github.com/pointfreeco/swift-structured/queries
+        No overload is available for this many columns/joins. To request more overloads, please file a GitHub issue that describes your use case: https://github.com/pointfreeco/swift-structured-queries
         """
     )
     public subscript<
