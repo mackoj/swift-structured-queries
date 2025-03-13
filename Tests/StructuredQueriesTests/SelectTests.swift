@@ -5,7 +5,7 @@ import Testing
 
 extension SnapshotTests {
   @Suite struct SelectTests {
-    func f() {
+    func compileTimeTests() {
       _ = Reminder.select(\.id)
       _ = Reminder.select { $0.id }
       _ = Reminder.select { ($0.id, $0.isCompleted) }

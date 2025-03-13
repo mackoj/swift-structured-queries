@@ -73,3 +73,9 @@ public macro raw<QueryValue>(
   as queryValueType: QueryValue.Type = QueryValue.self
 ) -> RawQueryExpression<QueryValue> =
   #externalMacro(module: "StructuredQueriesMacros", type: "RawMacro")
+
+@freestanding(expression)
+public macro bind<QueryValue: QueryBindable>(
+  _ queryValue: QueryValue
+) -> BindQueryExpression<QueryValue> =
+  #externalMacro(module: "StructuredQueriesMacros", type: "BindMacro")

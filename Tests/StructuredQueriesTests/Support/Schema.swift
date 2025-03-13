@@ -72,7 +72,7 @@ extension Database {
       CREATE TABLE "\(RemindersList.tableName)" (
         "\(RemindersList.columns.id.name)" INTEGER PRIMARY KEY AUTOINCREMENT,
         "\(RemindersList.columns.color.name)" INTEGER NOT NULL DEFAULT 4889071,
-        "\(RemindersList.columns.name.name)" TEXT NOT NULL
+        "\(RemindersList.columns.name.name)" TEXT NOT NULL DEFAULT ''
       )
       """
     )
@@ -88,7 +88,7 @@ extension Database {
           ON DELETE CASCADE,
         "\(Reminder.columns.notes.name)" TEXT NOT NULL DEFAULT '',
         "\(Reminder.columns.priority.name)" INTEGER,
-        "\(Reminder.columns.title.name)" TEXT NOT NULL
+        "\(Reminder.columns.title.name)" TEXT NOT NULL DEFAULT ''
       )
       """
     )

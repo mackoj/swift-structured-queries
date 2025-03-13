@@ -12,10 +12,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        SELECT "syncUps"."id", "syncUps"."title", "syncUps"."isActive", "syncUps"."createdAt", \
-        "attendees"."id", "attendees"."syncUpID", "attendees"."name", "attendees"."createdAt" \
-        FROM "syncUps" JOIN "attendees" ON ("syncUps"."id" = "attendees"."syncUpID") \
-        ORDER BY "syncUps"."createdAt" DESC
+        SELECT "syncUps"."id", "syncUps"."duration", "syncUps"."title", "syncUps"."isActive", "syncUps"."createdAt", "attendees"."id", "attendees"."syncUpID", "attendees"."name", "attendees"."createdAt" FROM "syncUps" JOIN "attendees" ON ("syncUps"."id" = "attendees"."syncUpID") ORDER BY "syncUps"."createdAt" DESC
         """
       }
     }
@@ -25,6 +22,7 @@ extension SnapshotTests {
 @Table
 private struct SyncUp {
   let id: Int
+  var duration: Int
   var title: String
   var isActive: Bool
   @Column(as: Date.ISO8601Representation.self)

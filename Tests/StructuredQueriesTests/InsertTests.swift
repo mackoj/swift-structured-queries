@@ -15,43 +15,70 @@ extension SnapshotTests {
         } onConflict: {
           $0.title += " Copy"
         }
+        .returning(\.self)
       ) {
         """
-        INSERT INTO "reminders" ("remindersListID", "title", "isCompleted", "date", "priority") VALUES (1, 'Groceries', 1, '2001-01-01 00:00:00.000', 3), (2, 'Haircut', 0, '1970-01-01 00:00:00.000', 1) ON CONFLICT DO UPDATE SET "title" = ("reminders"."title" || ' Copy')
+        INSERT INTO "reminders" ("remindersListID", "title", "isCompleted", "date", "priority") VALUES (1, 'Groceries', 1, '2001-01-01 00:00:00.000', 3), (2, 'Haircut', 0, '1970-01-01 00:00:00.000', 1) ON CONFLICT DO UPDATE SET "title" = ("reminders"."title" || ' Copy') RETURNING "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
         """
       } results: {
         """
-
+        ┌─────────────────────────────────────────┐
+        │ Reminder(                               │
+        │   id: 11,                               │
+        │   date: Date(2001-01-01T00:00:00.000Z), │
+        │   isCompleted: true,                    │
+        │   isFlagged: false,                     │
+        │   notes: "",                            │
+        │   priority: .high,                      │
+        │   remindersListID: 1,                   │
+        │   title: "Groceries"                    │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ Reminder(                               │
+        │   id: 12,                               │
+        │   date: Date(1970-01-01T00:00:00.000Z), │
+        │   isCompleted: false,                   │
+        │   isFlagged: false,                     │
+        │   notes: "",                            │
+        │   priority: .low,                       │
+        │   remindersListID: 2,                   │
+        │   title: "Haircut"                      │
+        │ )                                       │
+        └─────────────────────────────────────────┘
         """
       }
     }
 
-    @Test func testSingleColumn() {
-      assertInlineSnapshot(
-        of: SyncUp.insert(\.createdAt) {
-          Date(timeIntervalSinceReferenceDate: 0)
-        },
-        as: .sql
+    @Test func testSingleColumn() throws {
+      try assertQuery(
+        Reminder
+          .insert(\.remindersListID) { 1 }
+          .returning(\.self)
       ) {
         """
-        INSERT INTO "syncUps" \
-        ("createdAt") \
-        VALUES \
-        ('2001-01-01 00:00:00.000')
+        INSERT INTO "reminders" ("remindersListID") VALUES (1) RETURNING "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        """
+      } results: {
+        """
+        ┌───────────────────────┐
+        │ Reminder(             │
+        │   id: 11,             │
+        │   date: nil,          │
+        │   isCompleted: false, │
+        │   isFlagged: false,   │
+        │   notes: "",          │
+        │   priority: nil,      │
+        │   remindersListID: 1, │
+        │   title: ""           │
+        │ )                     │
+        └───────────────────────┘
         """
       }
     }
 
     @Test
     func emptyValues() {
-      assertInlineSnapshot(
-        of: SyncUp.insert(\.id) { return [] },
-        as: .sql
-      ) {
-        """
-
-        """
-      }
+      #expect(SyncUp.insert(\.id) { return [] }.query.isEmpty)
     }
 
     @Test
