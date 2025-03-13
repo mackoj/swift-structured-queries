@@ -86,7 +86,11 @@ public macro bind<QueryValue: QueryBindable>(
 ) -> BindQueryExpression<QueryValue> =
   #externalMacro(module: "StructuredQueriesMacros", type: "BindMacro")
 
-/// Introduces raw SQL to a query.
+/// Introduces a raw SQL fragment to a query.
+///
+/// The `#sql` macro also performs rudimentary validation to detect invalid and partial query
+/// fragments, _e.g._ unmatched parentheses and quotations. To opt out of this validation, use
+/// `SQLQueryExpression.init(_:)`, instead.
 ///
 /// > Tip: Selectively introducing raw SQL can also improve the performance of the Swift compiler
 /// > when type-checking complex query expressions involving heavily overloaded operators and

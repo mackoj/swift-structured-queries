@@ -60,6 +60,27 @@ extension SnapshotTests {
       }
     }
 
+    @Test func escapedDelimiters() {
+      assertMacro {
+        """
+        #sql("'('")
+        """
+      } expansion: {
+        """
+        StructuredQueries.SQLQueryExpression("'('")
+        """
+      }
+      assertMacro {
+        """
+        #sql("[it's fine]")
+        """
+      } expansion: {
+        """
+        StructuredQueries.SQLQueryExpression("[it's fine]")
+        """
+      }
+    }
+
     @Test func unexpectedBind() {
       assertMacro {
         """

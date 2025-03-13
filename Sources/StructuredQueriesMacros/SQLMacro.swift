@@ -39,14 +39,16 @@ public enum SQLMacro: ExpressionMacro {
               }
             }
           }
-          if delimiters.keys.contains(byte) {
-            if byte == UInt8(ascii: "(") {
-              parenStack.append((byte, segment, offset))
-            } else {
-              currentDelimiter = (byte, segment, offset)
+          if currentDelimiter == nil {
+            if delimiters.keys.contains(byte) {
+              if byte == UInt8(ascii: "(") {
+                parenStack.append((byte, segment, offset))
+              } else {
+                currentDelimiter = (byte, segment, offset)
+              }
+            } else if byte == UInt8(ascii: "?") {
+              unexpectedBind = (segment, offset)
             }
-          } else if currentDelimiter == nil, byte == UInt8(ascii: "?") {
-            unexpectedBind = (segment, offset)
           }
         }
       }
