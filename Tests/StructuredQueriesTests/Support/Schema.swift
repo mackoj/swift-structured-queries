@@ -86,7 +86,7 @@ extension Database {
         "\(Reminder.columns.remindersListID.name)" INTEGER NOT NULL
           REFERENCES "\(RemindersList.tableName)"("\(RemindersList.columns.id.name)")
           ON DELETE CASCADE,
-        "\(Reminder.columns.notes.name)" TEXT NOT NULL,
+        "\(Reminder.columns.notes.name)" TEXT NOT NULL DEFAULT '',
         "\(Reminder.columns.priority.name)" INTEGER,
         "\(Reminder.columns.title.name)" TEXT NOT NULL
       )

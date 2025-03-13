@@ -5,26 +5,23 @@ import Testing
 
 extension SnapshotTests {
   @Suite struct InsertTests {
-    @Test func basics() {
-      assertInlineSnapshot(
-        of: SyncUp.insert {
-          ($0.isActive, $0.createdAt)
+    @Test func basics() throws {
+      try assertQuery(
+        Reminder.insert {
+          ($0.remindersListID, $0.title, $0.isCompleted, $0.date, $0.priority)
         } values: {
-          (true, Date(timeIntervalSinceReferenceDate: 0))
-          (false, Date(timeIntervalSince1970: 0))
+          (1, "Groceries", true, Date(timeIntervalSinceReferenceDate: 0), .high)
+          (2, "Haircut", false, Date(timeIntervalSince1970: 0), .low)
         } onConflict: {
-          $0.isActive.toggle()
-        },
-        as: .sql
+          $0.title += " Copy"
+        }
       ) {
         """
-        INSERT INTO "syncUps" \
-        ("isActive", "createdAt") \
-        VALUES \
-        (1, '2001-01-01 00:00:00.000'), \
-        (0, '1970-01-01 00:00:00.000') \
-        ON CONFLICT DO UPDATE SET \
-        "isActive" = NOT ("syncUps"."isActive")
+        INSERT INTO "reminders" ("remindersListID", "title", "isCompleted", "date", "priority") VALUES (1, 'Groceries', 1, '2001-01-01 00:00:00.000', 3), (2, 'Haircut', 0, '1970-01-01 00:00:00.000', 1) ON CONFLICT DO UPDATE SET "title" = ("reminders"."title" || ' Copy')
+        """
+      } results: {
+        """
+
         """
       }
     }

@@ -140,6 +140,7 @@ func printTable<each C>(_ rows: [(repeat each C)], to output: inout some TextOut
     }
     table.append((columns, maxRowSpan))
   }
+  guard !table.isEmpty else { return }
   output.write("┌─")
   output.write(
     maxColumnSpan

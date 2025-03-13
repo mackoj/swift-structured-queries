@@ -14,7 +14,7 @@ public final class Database {
         nil
       ) == SQLITE_OK
     else {
-      throw SQLiteError()
+      throw SQLiteError(handle)
     }
   }
 
@@ -27,7 +27,7 @@ public final class Database {
   ) throws {
     guard sqlite3_exec(handle, sql, nil, nil, nil) == SQLITE_OK
     else {
-      throw SQLiteError()
+      throw SQLiteError(handle)
     }
   }
 
@@ -45,7 +45,7 @@ public final class Database {
       sqlite3_prepare_v2(handle, sql.string, -1, &statement, nil) == SQLITE_OK,
       let statement
     else {
-      throw SQLiteError()
+      throw SQLiteError(handle)
     }
     defer { sqlite3_finalize(statement) }
     for (index, binding) in zip(Int32(1)..., sql.bindings) {
@@ -62,10 +62,10 @@ public final class Database {
         case let .text(text):
           sqlite3_bind_text(statement, index, text, -1, SQLITE_TRANSIENT)
         }
-      guard result == SQLITE_OK else { throw SQLiteError() }
+      guard result == SQLITE_OK else { throw SQLiteError(handle) }
     }
     var results: [S.QueryValue.QueryOutput] = []
-    let decoder = SQLiteQueryDecoder(statement: statement)
+    let decoder = SQLiteQueryDecoder(database: handle, statement: statement)
     loop: while true {
       let code = sqlite3_step(statement)
       switch code {
@@ -75,7 +75,7 @@ public final class Database {
       case SQLITE_DONE:
         break loop
       default:
-        throw SQLiteError()
+        throw SQLiteError(handle)
       }
     }
     return results
@@ -91,7 +91,7 @@ public final class Database {
       sqlite3_prepare_v2(handle, sql.string, -1, &statement, nil) == SQLITE_OK,
       let statement
     else {
-      throw SQLiteError()
+      throw SQLiteError(handle)
     }
     defer { sqlite3_finalize(statement) }
     for (index, binding) in zip(Int32(1)..., sql.bindings) {
@@ -108,10 +108,10 @@ public final class Database {
         case let .text(text):
           sqlite3_bind_text(statement, index, text, -1, SQLITE_TRANSIENT)
         }
-      guard result == SQLITE_OK else { throw SQLiteError() }
+      guard result == SQLITE_OK else { throw SQLiteError(handle) }
     }
     var results: [(repeat (each V).QueryOutput)] = []
-    let decoder = SQLiteQueryDecoder(statement: statement)
+    let decoder = SQLiteQueryDecoder(database: handle, statement: statement)
     loop: while true {
       let code = sqlite3_step(statement)
       switch code {
@@ -121,7 +121,7 @@ public final class Database {
       case SQLITE_DONE:
         break loop
       default:
-        throw SQLiteError()
+        throw SQLiteError(handle)
       }
     }
     return results
@@ -137,7 +137,7 @@ public final class Database {
       sqlite3_prepare_v2(handle, sql.string, -1, &statement, nil) == SQLITE_OK,
       let statement
     else {
-      throw SQLiteError()
+      throw SQLiteError(handle)
     }
     defer { sqlite3_finalize(statement) }
     for (index, binding) in zip(Int32(1)..., sql.bindings) {
@@ -154,10 +154,10 @@ public final class Database {
         case let .text(text):
           sqlite3_bind_text(statement, index, text, -1, SQLITE_TRANSIENT)
         }
-      guard result == SQLITE_OK else { throw SQLiteError() }
+      guard result == SQLITE_OK else { throw SQLiteError(handle) }
     }
     var results: [(S.From.QueryOutput, repeat (each J).QueryOutput)] = []
-    let decoder = SQLiteQueryDecoder(statement: statement)
+    let decoder = SQLiteQueryDecoder(database: handle, statement: statement)
     loop: while true {
       let code = sqlite3_step(statement)
       switch code {
@@ -170,7 +170,7 @@ public final class Database {
       case SQLITE_DONE:
         break loop
       default:
-        throw SQLiteError()
+        throw SQLiteError(handle)
       }
     }
     return results
@@ -179,4 +179,10 @@ public final class Database {
 
 private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
-struct SQLiteError: Error {}
+struct SQLiteError: Error {
+  let message: String
+
+  init(_ handle: OpaquePointer?) {
+    self.message = String(cString: sqlite3_errmsg(handle))
+  }
+}
