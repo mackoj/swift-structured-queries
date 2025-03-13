@@ -38,9 +38,9 @@ public struct QueryFragment: Hashable, Sendable, CustomDebugStringConvertible {
       "[": "]",
     ]
     for character in string {
-      if let nesting = currentDelimiter {
-        if nesting == character,
-           compiled.last != character || compiled.last == delimiters[nesting]
+      if let delimiter = currentDelimiter {
+        if delimiter == character,
+          compiled.last != character || compiled.last == delimiters[delimiter]
         {
           currentDelimiter = nil
         }

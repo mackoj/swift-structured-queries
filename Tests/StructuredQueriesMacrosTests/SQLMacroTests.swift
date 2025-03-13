@@ -1,0 +1,89 @@
+import MacroTesting
+import StructuredQueriesMacros
+import Testing
+
+extension SnapshotTests {
+  @MainActor
+  @Suite(.macros(macros: [SQLMacro.self])) struct SQLMacroTests {
+    @Test func basics() {
+      assertMacro {
+        """
+        #sql("CURRENT_TIMESTAMP")
+        """
+      } expansion: {
+        """
+        StructuredQueries.SQLQueryExpression("CURRENT_TIMESTAMP")
+        """
+      }
+    }
+
+    @Test func unmatchedDelimiters() {
+      assertMacro {
+        """
+        #sql("date('now)")
+        """
+      } diagnostics: {
+        """
+        #sql("date('now)")
+             ──────┬─────
+                   ╰─ ⚠️ Cannot find "'" to match opening "'" in SQL string produces incomplete fragment; did you mean to make this explicit?
+                      ✏️ Use 'SQLQueryExpression.init(_:)' to silence this warning
+        """
+      } fixes: {
+        """
+        SQLQueryExpression("date('now)")
+        """
+      } expansion: {
+        """
+        SQLQueryExpression("date('now)")
+        """
+      }
+      assertMacro {
+        #"""
+        #sql("(\($0.id) = \($1.id)")
+        """#
+      } diagnostics: {
+        #"""
+        #sql("(\($0.id) = \($1.id)")
+             ─┬────────────────────
+              ╰─ ⚠️ Cannot find ')' to match opening '(' in SQL string produces incomplete fragment; did you mean to make this explicit?
+                 ✏️ Use 'SQLQueryExpression.init(_:)' to silence this warning
+        """#
+      } fixes: {
+        #"""
+        SQLQueryExpression("(\($0.id) = \($1.id)")
+        """#
+      } expansion: {
+        #"""
+        SQLQueryExpression("(\($0.id) = \($1.id)")
+        """#
+      }
+    }
+
+    @Test func unexpectedBind() {
+      assertMacro {
+        """
+        #sql("CURRENT_TIMESTAMP = ?")
+        """
+      } diagnostics: {
+        """
+        #sql("CURRENT_TIMESTAMP = ?")
+             ─────────────────────┬─
+                                  ╰─ 🛑 Invalid bind parameter in literal; use interpolation to bind values into SQL.
+        """
+      }
+    }
+
+    @Test func escapedBind() {
+      assertMacro {
+        """
+        #sql(#"text" = 'hello?'"#)
+        """
+      } expansion: {
+        """
+        StructuredQueries.SQLQueryExpression(#"text" = 'hello?'"#)
+        """
+      }
+    }
+  }
+}
