@@ -2,8 +2,6 @@ import SwiftDiagnostics
 import SwiftSyntax
 import SwiftSyntaxMacros
 
-// TODO: Detect other bind templates? ':VVV', '@VVV', '$VVV'
-// https://www.sqlite.org/c3ref/bind_blob.html
 public enum SQLMacro: ExpressionMacro {
   public static func expansion<N: FreestandingMacroExpansionSyntax, C: MacroExpansionContext>(
     of node: N,
@@ -76,8 +74,13 @@ public enum SQLMacro: ExpressionMacro {
               } else {
                 currentDelimiter = (byte, segment, offset)
               }
-            } else if byte == UInt8(ascii: "?") {
-              unexpectedBind = (segment, offset)
+            } else {
+              let binds = [
+                UInt8(ascii: "?"), UInt8(ascii: ":"), UInt8(ascii: "@"), UInt8(ascii: "$")
+              ]
+              if binds.contains(byte) {
+                unexpectedBind = (segment, offset)
+              }
             }
           }
         }
@@ -125,22 +128,8 @@ public enum SQLMacro: ExpressionMacro {
             position: unexpectedBind.segment.position.advanced(by: unexpectedBind.offset),
             message: MacroExpansionErrorMessage(
               """
-              Invalid bind parameter in literal; use interpolation to bind values into SQL.
+              Invalid bind parameter in literal; use interpolation to bind values into SQL
               """
-            ),
-            fixIt: .replace(
-              message: MacroExpansionFixItMessage(
-                "Use 'SQLQueryExpression.init(_:)' to silence this warning"
-              ),
-              oldNode: node,
-              newNode: FunctionCallExprSyntax(
-                calledExpression: DeclReferenceExprSyntax(
-                  baseName: .identifier("SQLQueryExpression")
-                ),
-                leftParen: .leftParenToken(),
-                arguments: node.arguments,
-                rightParen: .rightParenToken()
-              )
             )
           )
         )

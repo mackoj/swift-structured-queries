@@ -90,16 +90,51 @@ extension SnapshotTests {
         """
         #sql("CURRENT_TIMESTAMP = ?")
              ─────────────────────┬─
-                                  ╰─ 🛑 Invalid bind parameter in literal; use interpolation to bind values into SQL.
-                                     ✏️ Use 'SQLQueryExpression.init(_:)' to silence this warning
+                                  ╰─ 🛑 Invalid bind parameter in literal; use interpolation to bind values into SQL
         """
-      } fixes: {
+      }
+      assertMacro {
         """
-        SQLQueryExpression("CURRENT_TIMESTAMP = ?")
+        #sql("CURRENT_TIMESTAMP = ?1")
         """
-      } expansion: {
+      } diagnostics: {
         """
-        SQLQueryExpression("CURRENT_TIMESTAMP = ?")
+        #sql("CURRENT_TIMESTAMP = ?1")
+             ─────────────────────┬──
+                                  ╰─ 🛑 Invalid bind parameter in literal; use interpolation to bind values into SQL
+        """
+      }
+      assertMacro {
+        """
+        #sql("CURRENT_TIMESTAMP = :timestamp")
+        """
+      } diagnostics: {
+        """
+        #sql("CURRENT_TIMESTAMP = :timestamp")
+             ─────────────────────┬──────────
+                                  ╰─ 🛑 Invalid bind parameter in literal; use interpolation to bind values into SQL
+        """
+      }
+      assertMacro {
+        """
+        #sql("CURRENT_TIMESTAMP = @timestamp")
+        """
+      } diagnostics: {
+        """
+        #sql("CURRENT_TIMESTAMP = @timestamp")
+             ─────────────────────┬──────────
+                                  ╰─ 🛑 Invalid bind parameter in literal; use interpolation to bind values into SQL
+        """
+      }
+      assertMacro {
+        """
+        #sql("CURRENT_TIMESTAMP = $timestamp")
+        """
+      } diagnostics: {
+        """
+        #sql("CURRENT_TIMESTAMP = $timestamp")
+             ─────────────────────┬──────────
+                                  ╰─ 🛑 Invalid bind parameter in literal; use interpolation to bind values into SQL
         """
       }
     }
