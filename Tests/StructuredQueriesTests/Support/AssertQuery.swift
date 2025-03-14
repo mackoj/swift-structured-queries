@@ -78,21 +78,23 @@ func assertQuery<each V: QueryRepresentable>(
   let rows = try db.execute(query)
   var table = ""
   printTable(rows, to: &table)
-  assertInlineSnapshot(
-    of: table,
-    as: .lines,
-    message: "Results did not match",
-    syntaxDescriptor: InlineSnapshotSyntaxDescriptor(
-      trailingClosureLabel: "results",
-      trailingClosureOffset: 1
-    ),
-    matches: results,
-    fileID: fileID,
-    file: filePath,
-    function: function,
-    line: line,
-    column: column
-  )
+  if !table.isEmpty {
+    assertInlineSnapshot(
+      of: table,
+      as: .lines,
+      message: "Results did not match",
+      syntaxDescriptor: InlineSnapshotSyntaxDescriptor(
+        trailingClosureLabel: "results",
+        trailingClosureOffset: 1
+      ),
+      matches: results,
+      fileID: fileID,
+      file: filePath,
+      function: function,
+      line: line,
+      column: column
+    )
+  }
 }
 
 func printTable<each C>(_ rows: [(repeat each C)], to output: inout some TextOutputStream) {

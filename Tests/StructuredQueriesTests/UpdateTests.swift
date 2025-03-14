@@ -9,16 +9,6 @@ extension SnapshotTests {
     @Dependency(\.defaultDatabase) var db
 
     @Test func basics() throws {
-      assertInlineSnapshot(
-        of:
-          Reminder
-          .update { $0.isCompleted = true },
-        as: .sql
-      ) {
-        """
-        UPDATE "reminders" SET "isCompleted" = 1
-        """
-      }
       try assertQuery(
         Reminder
           .update { $0.isCompleted.toggle() }

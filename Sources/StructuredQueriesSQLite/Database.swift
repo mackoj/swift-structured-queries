@@ -37,7 +37,7 @@ public final class Database {
 
   public func execute<QueryValue: QueryRepresentable>(
     _ query: some Statement<QueryValue>
-  ) throws -> [QueryValue.QueryOutput]{
+  ) throws -> [QueryValue.QueryOutput] {
     var statement: OpaquePointer?
     let sql = query.query
     guard

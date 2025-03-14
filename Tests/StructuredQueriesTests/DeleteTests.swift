@@ -1,3 +1,4 @@
+import Dependencies
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
@@ -5,71 +6,194 @@ import Testing
 
 extension SnapshotTests {
   @Suite struct DeleteTests {
-    @Test func basics() {
-      assertInlineSnapshot(
-        of:
-          SyncUp
-          .delete(),
-        as: .sql
-      ) {
+    @Test func deleteAll() throws {
+      try assertQuery(Reminder.delete().returning(\.self)) {
         """
-        DELETE FROM "syncUps"
+        DELETE FROM "reminders" RETURNING "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
         """
+      }results: {
+        #"""
+        ┌─────────────────────────────────────────┐
+        │ Reminder(                               │
+        │   id: 1,                                │
+        │   date: Date(2001-01-01T00:00:00.000Z), │
+        │   isCompleted: false,                   │
+        │   isFlagged: false,                     │
+        │   notes: "Milk, Eggs, Apples",          │
+        │   priority: nil,                        │
+        │   remindersListID: 1,                   │
+        │   title: "Groceries"                    │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ Reminder(                               │
+        │   id: 2,                                │
+        │   date: Date(2000-12-30T00:00:00.000Z), │
+        │   isCompleted: false,                   │
+        │   isFlagged: true,                      │
+        │   notes: "",                            │
+        │   priority: nil,                        │
+        │   remindersListID: 1,                   │
+        │   title: "Haircut"                      │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ Reminder(                               │
+        │   id: 3,                                │
+        │   date: Date(2001-01-01T00:00:00.000Z), │
+        │   isCompleted: false,                   │
+        │   isFlagged: false,                     │
+        │   notes: "Ask about diet",              │
+        │   priority: .high,                      │
+        │   remindersListID: 1,                   │
+        │   title: "Doctor appointment"           │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ Reminder(                               │
+        │   id: 4,                                │
+        │   date: Date(2000-06-25T00:00:00.000Z), │
+        │   isCompleted: true,                    │
+        │   isFlagged: false,                     │
+        │   notes: "",                            │
+        │   priority: nil,                        │
+        │   remindersListID: 1,                   │
+        │   title: "Take a walk"                  │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ Reminder(                               │
+        │   id: 5,                                │
+        │   date: Date(2001-01-01T00:00:00.000Z), │
+        │   isCompleted: false,                   │
+        │   isFlagged: false,                     │
+        │   notes: "",                            │
+        │   priority: nil,                        │
+        │   remindersListID: 1,                   │
+        │   title: "Buy concert tickets"          │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ Reminder(                               │
+        │   id: 6,                                │
+        │   date: Date(2001-01-03T00:00:00.000Z), │
+        │   isCompleted: false,                   │
+        │   isFlagged: true,                      │
+        │   notes: "",                            │
+        │   priority: .high,                      │
+        │   remindersListID: 2,                   │
+        │   title: "Pick up kids from school"     │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ Reminder(                               │
+        │   id: 7,                                │
+        │   date: Date(2000-12-30T00:00:00.000Z), │
+        │   isCompleted: true,                    │
+        │   isFlagged: false,                     │
+        │   notes: "",                            │
+        │   priority: .low,                       │
+        │   remindersListID: 2,                   │
+        │   title: "Get laundry"                  │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ Reminder(                               │
+        │   id: 8,                                │
+        │   date: Date(2001-01-05T00:00:00.000Z), │
+        │   isCompleted: false,                   │
+        │   isFlagged: false,                     │
+        │   notes: "",                            │
+        │   priority: .high,                      │
+        │   remindersListID: 2,                   │
+        │   title: "Take out trash"               │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ Reminder(                               │
+        │   id: 9,                                │
+        │   date: Date(2001-01-03T00:00:00.000Z), │
+        │   isCompleted: false,                   │
+        │   isFlagged: false,                     │
+        │   notes: """                            │
+        │     Status of tax return                │
+        │     Expenses for next year              │
+        │     Changing payroll company            │
+        │     """,                                │
+        │   priority: nil,                        │
+        │   remindersListID: 3,                   │
+        │   title: "Call accountant"              │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ Reminder(                               │
+        │   id: 10,                               │
+        │   date: Date(2000-12-30T00:00:00.000Z), │
+        │   isCompleted: true,                    │
+        │   isFlagged: false,                     │
+        │   notes: "",                            │
+        │   priority: .medium,                    │
+        │   remindersListID: 3,                   │
+        │   title: "Send weekly emails"           │
+        │ )                                       │
+        └─────────────────────────────────────────┘
+        """#
       }
-      assertInlineSnapshot(
-        of:
-          SyncUp
-          .delete()
-          .returning(\.self),
-        as: .sql
-      ) {
+      try assertQuery(Reminder.count()) {
         """
-        DELETE FROM "syncUps" RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt"
+        SELECT count(*) FROM "reminders"
         """
-      }
-      assertInlineSnapshot(
-        of:
-          SyncUp
-          .delete()
-          .where(\.isActive)
-          .returning(\.self),
-        as: .sql
-      ) {
+      } results: {
         """
-        DELETE FROM "syncUps" WHERE "syncUps"."isActive" RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt"
+        ┌───┐
+        │ 0 │
+        └───┘
         """
       }
     }
 
-    @Test func primaryKey() {
-      assertInlineSnapshot(
-        of:
-          SyncUp
-          .delete(SyncUp(id: 1, isActive: true, createdAt: Date(timeIntervalSinceNow: 0)))
-          .returning(\.self),
-        as: .sql
-      ) {
+    @Test func deleteID1() throws {
+      try assertQuery(Reminder.delete().where { $0.id == 1 }.returning(\.self)) {
         """
-        DELETE FROM "syncUps" WHERE ("syncUps"."id" = 1) RETURNING "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt"
+        DELETE FROM "reminders" WHERE ("reminders"."id" = 1) RETURNING "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────────┐
+        │ Reminder(                               │
+        │   id: 1,                                │
+        │   date: Date(2001-01-01T00:00:00.000Z), │
+        │   isCompleted: false,                   │
+        │   isFlagged: false,                     │
+        │   notes: "Milk, Eggs, Apples",          │
+        │   priority: nil,                        │
+        │   remindersListID: 1,                   │
+        │   title: "Groceries"                    │
+        │ )                                       │
+        └─────────────────────────────────────────┘
+        """
+      }
+      try assertQuery(Reminder.count()) {
+        """
+        SELECT count(*) FROM "reminders"
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 9 │
+        └───┘
         """
       }
     }
 
-    @Table
-    struct SyncUp {
-      let id: Int
-      var isActive: Bool
-      @Column(as: Date.ISO8601Representation.self)
-      var createdAt: Date
-    }
-
-    @Table
-    struct Attendee {
-      let id: Int
-      var syncUpID: Int
-      var name: String
-      @Column(as: Date.ISO8601Representation.self)
-      var createdAt: Date
+    @Test func primaryKey() throws {
+      try assertQuery(Reminder.delete(Reminder(id: 1, remindersListID: 1))) {
+        """
+        DELETE FROM "reminders" WHERE ("reminders"."id" = 1)
+        """
+      }
+      try assertQuery(Reminder.count()) {
+        """
+        SELECT count(*) FROM "reminders"
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 9 │
+        └───┘
+        """
+      }
     }
   }
 }
