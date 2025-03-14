@@ -194,10 +194,7 @@ extension SelectionMacro: ExtensionMacro {
         )
       }
 
-      let defaultValue = (binding.initializer?.value).map {
-        ", default: \(selfRewriter.rewrite($0).trimmedDescription)"
-      }
-      allColumns.append((identifier, columnQueryOutputType))
+      allColumns.append((identifier, columnQueryValueType))
       decodings.append(
         """
         self.\(identifier) = try decoder.decode(\(columnQueryValueType.map { "\($0).self" } ?? ""))
@@ -225,23 +222,6 @@ extension SelectionMacro: ExtensionMacro {
       return []
     }
 
-    /*
-     public struct Columns: StructuredQueries.QueryExpression {
-       public typealias QueryValue = ReminderTitleAndListTitle
-       public let queryFragment: QueryFragment
-       public init(
-         reminderTitle: some StructuredQueries.QueryExpression<String>,
-         listTitle: some StructuredQueries.QueryExpression<String?>
-       ) {
-         self.queryFragment = "\(reminderTitle.queryFragment), \(listTitle.queryFragment)"
-       }
-     }
-     public init(decoder: some StructuredQueries.QueryDecoder) throws {
-       self.reminderTitle = try decoder.decode(String.self)
-       self.listTitle = try decoder.decode(String?.self)
-     }
-
-     */
     let initArguments = allColumns
       .map { "\($0): some \(moduleName).QueryExpression\($1.map { "<\($0)>" } ?? "")" }
       .joined(separator: ",\n")

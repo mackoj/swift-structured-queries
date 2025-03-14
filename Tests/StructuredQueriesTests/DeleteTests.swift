@@ -65,7 +65,7 @@ extension SnapshotTests {
         │ Reminder(                               │
         │   id: 5,                                │
         │   assignedUserID: nil,                  │
-        │   date: Date(2001-01-01T00:00:00.000Z), │
+        │   date: nil,                            │
         │   isCompleted: false,                   │
         │   isFlagged: false,                     │
         │   notes: "",                            │

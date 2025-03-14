@@ -75,22 +75,40 @@ extension SnapshotTests {
       }
     }
 
-    // TODO: This doesn't compile, but should...
-//    @Test func date() throws {
-//      try assertQuery(
-//        Reminder.select {
-//          ReminderDate.Columns(date: $0.date)
-//        }
-//      )
-//    }
+    @Test func date() throws {
+      try assertQuery(
+        Reminder.select {
+          ReminderDate.Columns(date: $0.date)
+        }
+      ) {
+        """
+        SELECT "reminders"."date" FROM "reminders"
+        """
+      } results: {
+        """
+        ┌────────────────────────────────────────────────────┐
+        │ ReminderDate(date: Date(2001-01-01T00:00:00.000Z)) │
+        │ ReminderDate(date: Date(2000-12-30T00:00:00.000Z)) │
+        │ ReminderDate(date: Date(2001-01-01T00:00:00.000Z)) │
+        │ ReminderDate(date: Date(2000-06-25T00:00:00.000Z)) │
+        │ ReminderDate(date: nil)                            │
+        │ ReminderDate(date: Date(2001-01-03T00:00:00.000Z)) │
+        │ ReminderDate(date: Date(2000-12-30T00:00:00.000Z)) │
+        │ ReminderDate(date: Date(2001-01-05T00:00:00.000Z)) │
+        │ ReminderDate(date: Date(2001-01-03T00:00:00.000Z)) │
+        │ ReminderDate(date: Date(2000-12-30T00:00:00.000Z)) │
+        └────────────────────────────────────────────────────┘
+        """
+      }
+    }
   }
 }
 
-//@Selection
-//struct ReminderDate {
-//  @Column(as: Date.ISO8601Representation?.self)
-//  var date: Date?
-//}
+@Selection
+struct ReminderDate {
+  @Column(as: Date.ISO8601Representation?.self)
+  var date: Date?
+}
 
 @Selection
 struct ReminderTitleAndAssignedUserName {

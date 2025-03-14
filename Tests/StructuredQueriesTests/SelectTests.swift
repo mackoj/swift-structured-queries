@@ -167,7 +167,7 @@ extension SnapshotTests {
         │ RemindersList(     │ Reminder(                               │
         │   id: 1,           │   id: 5,                                │
         │   color: 4889071,  │   assignedUserID: nil,                  │
-        │   name: "Personal" │   date: Date(2001-01-01T00:00:00.000Z), │
+        │   name: "Personal" │   date: nil,                            │
         │ )                  │   isCompleted: false,                   │
         │                    │   isFlagged: false,                     │
         │                    │   notes: "",                            │
@@ -434,8 +434,8 @@ extension SnapshotTests {
         │ false │ Date(2001-01-03T00:00:00.000Z) │
         │ false │ Date(2001-01-01T00:00:00.000Z) │
         │ false │ Date(2001-01-01T00:00:00.000Z) │
-        │ false │ Date(2001-01-01T00:00:00.000Z) │
         │ false │ Date(2000-12-30T00:00:00.000Z) │
+        │ false │ nil                            │
         │ true  │ Date(2000-12-30T00:00:00.000Z) │
         │ true  │ Date(2000-12-30T00:00:00.000Z) │
         │ true  │ Date(2000-06-25T00:00:00.000Z) │
@@ -466,8 +466,8 @@ extension SnapshotTests {
         │ .high   │ Date(2001-01-05T00:00:00.000Z) │
         │ .high   │ Date(2001-01-03T00:00:00.000Z) │
         │ .high   │ Date(2001-01-01T00:00:00.000Z) │
+        │ nil     │ nil                            │
         │ nil     │ Date(2001-01-03T00:00:00.000Z) │
-        │ nil     │ Date(2001-01-01T00:00:00.000Z) │
         │ nil     │ Date(2001-01-01T00:00:00.000Z) │
         │ nil     │ Date(2000-12-30T00:00:00.000Z) │
         │ nil     │ Date(2000-06-25T00:00:00.000Z) │

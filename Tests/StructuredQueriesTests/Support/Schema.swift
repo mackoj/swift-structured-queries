@@ -212,7 +212,6 @@ extension Database {
           title: "Take a walk"
         ),
         Reminder.Draft(
-          date: now,
           remindersListID: 1,
           title: "Buy concert tickets"
         ),

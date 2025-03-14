@@ -117,7 +117,7 @@ extension SnapshotTests {
             public typealias QueryValue = ReminderDate
             public let queryFragment: StructuredQueries.QueryFragment
             public init(
-              date: some StructuredQueries.QueryExpression<Date>
+              date: some StructuredQueries.QueryExpression<Date.ISO8601Representation>
             ) {
               self.queryFragment = "\(date.queryFragment)"
             }
@@ -167,7 +167,7 @@ extension SnapshotTests {
             public typealias QueryValue = ReminderDate
             public let queryFragment: StructuredQueries.QueryFragment
             public init(
-              date: some StructuredQueries.QueryExpression<Date>
+              date: some StructuredQueries.QueryExpression<Date.ISO8601Representation>
             ) {
               self.queryFragment = "\(date.queryFragment)"
             }
