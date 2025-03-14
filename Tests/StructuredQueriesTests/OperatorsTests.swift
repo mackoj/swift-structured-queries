@@ -351,7 +351,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        ("rows"."c" IN (1, 2, 3)
+        ("rows"."c" IN (1, 2, 3))
         """
       }
       assertInlineSnapshot(
@@ -367,7 +367,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        ("rows"."c" IN (1, 2, 3)
+        ("rows"."c" IN (1, 2, 3))
         """
       }
       assertInlineSnapshot(
@@ -430,6 +430,44 @@ extension SnapshotTests {
       ) {
         """
         SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool", "rows"."string" FROM "rows" WHERE ((CAST("rows"."c" AS NUMERIC) >= (SELECT coalesce(avg("rows"."c"), 0.0) FROM "rows")) AND (CAST("rows"."c" AS NUMERIC) > 1.0))
+        """
+      }
+    }
+
+    @Test func containsCollectionElement() throws {
+      try assertQuery(
+        Reminder.where { [1, 2].contains($0.id) }
+      ) {
+        """
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "reminders" WHERE ("reminders"."id" IN (1, 2))
+        """
+      }results: {
+        """
+        ┌─────────────────────────────────────────┐
+        │ Reminder(                               │
+        │   id: 1,                                │
+        │   assignedUserID: 1,                    │
+        │   date: Date(2001-01-01T00:00:00.000Z), │
+        │   isCompleted: false,                   │
+        │   isFlagged: false,                     │
+        │   notes: "Milk, Eggs, Apples",          │
+        │   priority: nil,                        │
+        │   remindersListID: 1,                   │
+        │   title: "Groceries"                    │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ Reminder(                               │
+        │   id: 2,                                │
+        │   assignedUserID: nil,                  │
+        │   date: Date(2000-12-30T00:00:00.000Z), │
+        │   isCompleted: false,                   │
+        │   isFlagged: true,                      │
+        │   notes: "",                            │
+        │   priority: nil,                        │
+        │   remindersListID: 1,                   │
+        │   title: "Haircut"                      │
+        │ )                                       │
+        └─────────────────────────────────────────┘
         """
       }
     }

@@ -7,7 +7,7 @@ public protocol QueryExpression<QueryValue>: Sendable {
 extension Array: QueryExpression where Element: QueryExpression {
   public typealias QueryValue = Self
   public var queryFragment: QueryFragment {
-    "(\(map(\.queryFragment).joined(separator: ", "))"
+    "(\(map(\.queryFragment).joined(separator: ", ")))"
   }
 }
 

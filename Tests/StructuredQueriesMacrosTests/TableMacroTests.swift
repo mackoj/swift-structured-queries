@@ -652,6 +652,18 @@ extension SnapshotTests {
       }
     }
 
+//    @Test func noType() {
+//      // TODO: This test is not yet correct
+//      assertMacro {
+//        """
+//        @Table struct SyncUp {
+//          let id: Int
+//          var seconds = 60 * 5
+//        }
+//        """
+//      }
+//    }
+
     @Suite
     struct PrimaryKeyTests {
       @Test func basics() {
