@@ -2,15 +2,10 @@
 public struct Outer<Base>: _OptionalPromotable, _OptionalProtocol {
   let base: Base?  // TODO: Should this be 'Base._Optionalized'?
 
+  // TODO: get more test coverage on joins to be sure we can remove this
 //  public subscript<Member>(dynamicMember keyPath: KeyPath<Base, Member>) -> Outer<Member> {
 //    guard let base else { return Outer<Member>(base: nil) }
 //    return Outer<Member>(base: base[keyPath: keyPath])
-//  }
-
-//  public subscript<Member>(dynamicMember keyPath: KeyPath<Base, Member>) -> Member? {
-//    fatalError()
-////    guard let base else { return Outer<Member>(base: nil) }
-////    return Outer<Member>(base: base[keyPath: keyPath])
 //  }
 
   fileprivate subscript<Member: QueryRepresentable>(
@@ -74,7 +69,7 @@ extension Outer: Table where Base: Table {
     }
 
     public typealias QueryValue = Outer
-//
+// TODO: get more test coverage on joins to be sure we can remove this
 //    public subscript<Member>(
 //      dynamicMember keyPath: KeyPath<Base.Columns, Column<Base, Member>>
 //    ) -> Column<Outer<Base>, Outer<Member>> {
