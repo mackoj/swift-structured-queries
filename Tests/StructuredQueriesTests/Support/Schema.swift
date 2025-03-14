@@ -20,6 +20,7 @@ struct Reminder: Equatable, Identifiable {
   static let incomplete = Self.where { !$0.isCompleted }
 
   let id: Int
+  var assignedUserID: User.ID?
   @Column(as: Date.ISO8601Representation?.self)
   var date: Date?
   var isCompleted = false
@@ -34,6 +35,12 @@ struct Reminder: Equatable, Identifiable {
       || $0.notes.collate(.nocase).contains(text)
     }
   }
+}
+
+@Table
+struct User: Equatable, Identifiable {
+  let id: Int
+  var name = ""
 }
 
 enum Priority: Int, QueryBindable {
@@ -80,6 +87,7 @@ extension Database {
       """
       CREATE TABLE "\(Reminder.tableName)" (
         "\(Reminder.columns.id.name)" INTEGER PRIMARY KEY AUTOINCREMENT,
+        "\(Reminder.columns.assignedUserID.name)" INTEGER,
         "\(Reminder.columns.date.name)" DATE,
         "\(Reminder.columns.isCompleted.name)" BOOLEAN NOT NULL DEFAULT 0,
         "\(Reminder.columns.isFlagged.name)" BOOLEAN NOT NULL DEFAULT 0,
@@ -89,6 +97,14 @@ extension Database {
         "\(Reminder.columns.notes.name)" TEXT NOT NULL DEFAULT '',
         "\(Reminder.columns.priority.name)" INTEGER,
         "\(Reminder.columns.title.name)" TEXT NOT NULL DEFAULT ''
+      )
+      """
+    )
+    try execute(
+      """
+      CREATE TABLE "\(User.tableName)" (
+        "\(User.columns.id.name)" INTEGER PRIMARY KEY AUTOINCREMENT,
+        "\(User.columns.name.name)" TEXT NOT NULL DEFAULT ''
       )
       """
     )
@@ -133,9 +149,22 @@ extension Database {
   }
 
   func createMockData() throws {
+    try createDebugUsers()
     try createDebugRemindersLists()
     try createDebugReminders()
     try createDebugTags()
+  }
+
+  func createDebugUsers() throws {
+    try execute(
+      User.insert {
+        $0.name
+      } values: {
+        "Blob"
+        "Blob Jr"
+        "Blob Sr"
+      }
+    )
   }
 
   func createDebugRemindersLists() throws {
@@ -155,6 +184,7 @@ extension Database {
     try execute(
       Reminder.insert([
         Reminder.Draft(
+          assignedUserID: 1,
           date: now,
           notes: """
             Milk, Eggs, Apples

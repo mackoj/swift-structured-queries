@@ -111,16 +111,17 @@ extension SnapshotTests {
         RemindersList.join(Reminder.all()) { $0.id == $1.remindersListID }
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "remindersLists" JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "remindersLists" JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         """
-      } results: {
+      }results: {
         #"""
         ┌────────────────────┬─────────────────────────────────────────┐
         │ RemindersList(     │ Reminder(                               │
         │   id: 1,           │   id: 1,                                │
-        │   color: 4889071,  │   date: Date(2001-01-01T00:00:00.000Z), │
-        │   name: "Personal" │   isCompleted: false,                   │
-        │ )                  │   isFlagged: false,                     │
+        │   color: 4889071,  │   assignedUserID: 1,                    │
+        │   name: "Personal" │   date: Date(2001-01-01T00:00:00.000Z), │
+        │ )                  │   isCompleted: false,                   │
+        │                    │   isFlagged: false,                     │
         │                    │   notes: "Milk, Eggs, Apples",          │
         │                    │   priority: nil,                        │
         │                    │   remindersListID: 1,                   │
@@ -129,9 +130,10 @@ extension SnapshotTests {
         ├────────────────────┼─────────────────────────────────────────┤
         │ RemindersList(     │ Reminder(                               │
         │   id: 1,           │   id: 2,                                │
-        │   color: 4889071,  │   date: Date(2000-12-30T00:00:00.000Z), │
-        │   name: "Personal" │   isCompleted: false,                   │
-        │ )                  │   isFlagged: true,                      │
+        │   color: 4889071,  │   assignedUserID: nil,                  │
+        │   name: "Personal" │   date: Date(2000-12-30T00:00:00.000Z), │
+        │ )                  │   isCompleted: false,                   │
+        │                    │   isFlagged: true,                      │
         │                    │   notes: "",                            │
         │                    │   priority: nil,                        │
         │                    │   remindersListID: 1,                   │
@@ -140,9 +142,10 @@ extension SnapshotTests {
         ├────────────────────┼─────────────────────────────────────────┤
         │ RemindersList(     │ Reminder(                               │
         │   id: 1,           │   id: 3,                                │
-        │   color: 4889071,  │   date: Date(2001-01-01T00:00:00.000Z), │
-        │   name: "Personal" │   isCompleted: false,                   │
-        │ )                  │   isFlagged: false,                     │
+        │   color: 4889071,  │   assignedUserID: nil,                  │
+        │   name: "Personal" │   date: Date(2001-01-01T00:00:00.000Z), │
+        │ )                  │   isCompleted: false,                   │
+        │                    │   isFlagged: false,                     │
         │                    │   notes: "Ask about diet",              │
         │                    │   priority: .high,                      │
         │                    │   remindersListID: 1,                   │
@@ -151,9 +154,10 @@ extension SnapshotTests {
         ├────────────────────┼─────────────────────────────────────────┤
         │ RemindersList(     │ Reminder(                               │
         │   id: 1,           │   id: 4,                                │
-        │   color: 4889071,  │   date: Date(2000-06-25T00:00:00.000Z), │
-        │   name: "Personal" │   isCompleted: true,                    │
-        │ )                  │   isFlagged: false,                     │
+        │   color: 4889071,  │   assignedUserID: nil,                  │
+        │   name: "Personal" │   date: Date(2000-06-25T00:00:00.000Z), │
+        │ )                  │   isCompleted: true,                    │
+        │                    │   isFlagged: false,                     │
         │                    │   notes: "",                            │
         │                    │   priority: nil,                        │
         │                    │   remindersListID: 1,                   │
@@ -162,9 +166,10 @@ extension SnapshotTests {
         ├────────────────────┼─────────────────────────────────────────┤
         │ RemindersList(     │ Reminder(                               │
         │   id: 1,           │   id: 5,                                │
-        │   color: 4889071,  │   date: Date(2001-01-01T00:00:00.000Z), │
-        │   name: "Personal" │   isCompleted: false,                   │
-        │ )                  │   isFlagged: false,                     │
+        │   color: 4889071,  │   assignedUserID: nil,                  │
+        │   name: "Personal" │   date: Date(2001-01-01T00:00:00.000Z), │
+        │ )                  │   isCompleted: false,                   │
+        │                    │   isFlagged: false,                     │
         │                    │   notes: "",                            │
         │                    │   priority: nil,                        │
         │                    │   remindersListID: 1,                   │
@@ -173,9 +178,10 @@ extension SnapshotTests {
         ├────────────────────┼─────────────────────────────────────────┤
         │ RemindersList(     │ Reminder(                               │
         │   id: 2,           │   id: 6,                                │
-        │   color: 15567157, │   date: Date(2001-01-03T00:00:00.000Z), │
-        │   name: "Family"   │   isCompleted: false,                   │
-        │ )                  │   isFlagged: true,                      │
+        │   color: 15567157, │   assignedUserID: nil,                  │
+        │   name: "Family"   │   date: Date(2001-01-03T00:00:00.000Z), │
+        │ )                  │   isCompleted: false,                   │
+        │                    │   isFlagged: true,                      │
         │                    │   notes: "",                            │
         │                    │   priority: .high,                      │
         │                    │   remindersListID: 2,                   │
@@ -184,9 +190,10 @@ extension SnapshotTests {
         ├────────────────────┼─────────────────────────────────────────┤
         │ RemindersList(     │ Reminder(                               │
         │   id: 2,           │   id: 7,                                │
-        │   color: 15567157, │   date: Date(2000-12-30T00:00:00.000Z), │
-        │   name: "Family"   │   isCompleted: true,                    │
-        │ )                  │   isFlagged: false,                     │
+        │   color: 15567157, │   assignedUserID: nil,                  │
+        │   name: "Family"   │   date: Date(2000-12-30T00:00:00.000Z), │
+        │ )                  │   isCompleted: true,                    │
+        │                    │   isFlagged: false,                     │
         │                    │   notes: "",                            │
         │                    │   priority: .low,                       │
         │                    │   remindersListID: 2,                   │
@@ -195,9 +202,10 @@ extension SnapshotTests {
         ├────────────────────┼─────────────────────────────────────────┤
         │ RemindersList(     │ Reminder(                               │
         │   id: 2,           │   id: 8,                                │
-        │   color: 15567157, │   date: Date(2001-01-05T00:00:00.000Z), │
-        │   name: "Family"   │   isCompleted: false,                   │
-        │ )                  │   isFlagged: false,                     │
+        │   color: 15567157, │   assignedUserID: nil,                  │
+        │   name: "Family"   │   date: Date(2001-01-05T00:00:00.000Z), │
+        │ )                  │   isCompleted: false,                   │
+        │                    │   isFlagged: false,                     │
         │                    │   notes: "",                            │
         │                    │   priority: .high,                      │
         │                    │   remindersListID: 2,                   │
@@ -206,9 +214,10 @@ extension SnapshotTests {
         ├────────────────────┼─────────────────────────────────────────┤
         │ RemindersList(     │ Reminder(                               │
         │   id: 3,           │   id: 9,                                │
-        │   color: 11689427, │   date: Date(2001-01-03T00:00:00.000Z), │
-        │   name: "Business" │   isCompleted: false,                   │
-        │ )                  │   isFlagged: false,                     │
+        │   color: 11689427, │   assignedUserID: nil,                  │
+        │   name: "Business" │   date: Date(2001-01-03T00:00:00.000Z), │
+        │ )                  │   isCompleted: false,                   │
+        │                    │   isFlagged: false,                     │
         │                    │   notes: """                            │
         │                    │     Status of tax return                │
         │                    │     Expenses for next year              │
@@ -221,9 +230,10 @@ extension SnapshotTests {
         ├────────────────────┼─────────────────────────────────────────┤
         │ RemindersList(     │ Reminder(                               │
         │   id: 3,           │   id: 10,                               │
-        │   color: 11689427, │   date: Date(2000-12-30T00:00:00.000Z), │
-        │   name: "Business" │   isCompleted: true,                    │
-        │ )                  │   isFlagged: false,                     │
+        │   color: 11689427, │   assignedUserID: nil,                  │
+        │   name: "Business" │   date: Date(2000-12-30T00:00:00.000Z), │
+        │ )                  │   isCompleted: true,                    │
+        │                    │   isFlagged: false,                     │
         │                    │   notes: "",                            │
         │                    │   priority: .medium,                    │
         │                    │   remindersListID: 3,                   │
@@ -238,7 +248,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "remindersLists" LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "remindersLists" LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         """
       }
       assertInlineSnapshot(
@@ -246,7 +256,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "remindersLists" RIGHT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "remindersLists" RIGHT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         """
       }
       assertInlineSnapshot(
@@ -254,7 +264,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "remindersLists" FULL JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "remindersLists" FULL JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         """
       }
 
@@ -289,13 +299,14 @@ extension SnapshotTests {
         Reminder.where(\.isCompleted)
       ) {
         """
-        SELECT "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "reminders" WHERE "reminders"."isCompleted"
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "reminders" WHERE "reminders"."isCompleted"
         """
-      } results: {
+      }results: {
         """
         ┌─────────────────────────────────────────┐
         │ Reminder(                               │
         │   id: 4,                                │
+        │   assignedUserID: nil,                  │
         │   date: Date(2000-06-25T00:00:00.000Z), │
         │   isCompleted: true,                    │
         │   isFlagged: false,                     │
@@ -307,6 +318,7 @@ extension SnapshotTests {
         ├─────────────────────────────────────────┤
         │ Reminder(                               │
         │   id: 7,                                │
+        │   assignedUserID: nil,                  │
         │   date: Date(2000-12-30T00:00:00.000Z), │
         │   isCompleted: true,                    │
         │   isFlagged: false,                     │
@@ -318,6 +330,7 @@ extension SnapshotTests {
         ├─────────────────────────────────────────┤
         │ Reminder(                               │
         │   id: 10,                               │
+        │   assignedUserID: nil,                  │
         │   date: Date(2000-12-30T00:00:00.000Z), │
         │   isCompleted: true,                    │
         │   isFlagged: false,                     │
@@ -336,13 +349,14 @@ extension SnapshotTests {
         Reminder.group(by: \.isCompleted)
       ) {
         """
-        SELECT "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "reminders" GROUP BY "reminders"."isCompleted"
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "reminders" GROUP BY "reminders"."isCompleted"
         """
-      } results: {
+      }results: {
         """
         ┌─────────────────────────────────────────┐
         │ Reminder(                               │
         │   id: 1,                                │
+        │   assignedUserID: 1,                    │
         │   date: Date(2001-01-01T00:00:00.000Z), │
         │   isCompleted: false,                   │
         │   isFlagged: false,                     │
@@ -354,6 +368,7 @@ extension SnapshotTests {
         ├─────────────────────────────────────────┤
         │ Reminder(                               │
         │   id: 4,                                │
+        │   assignedUserID: nil,                  │
         │   date: Date(2000-06-25T00:00:00.000Z), │
         │   isCompleted: true,                    │
         │   isFlagged: false,                     │
@@ -373,7 +388,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        SELECT "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "reminders" HAVING "reminders"."isCompleted"
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "reminders" HAVING "reminders"."isCompleted"
         """
       }
     }

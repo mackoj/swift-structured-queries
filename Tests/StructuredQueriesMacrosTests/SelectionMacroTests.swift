@@ -56,5 +56,41 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func optionalField() {
+      assertMacro {
+        """
+        @Selection 
+        struct ReminderTitleAndListTitle {
+          var reminderTitle: String 
+          var listTitle: String?
+        }
+        """
+      } expansion: {
+        #"""
+        struct ReminderTitleAndListTitle {
+          var reminderTitle: String 
+          var listTitle: String?
+        }
+
+        extension ReminderTitleAndListTitle: StructuredQueries.QueryRepresentable {
+          public struct Columns: StructuredQueries.QueryExpression {
+            public typealias QueryValue = ReminderTitleAndListTitle
+            public let queryFragment: QueryFragment
+            public init(
+              reminderTitle: some StructuredQueries.QueryExpression<String>,
+              listTitle: some StructuredQueries.QueryExpression<String?>
+            ) {
+              self.queryFragment = "\(reminderTitle.queryFragment), \(listTitle.queryFragment)"
+            }
+          }
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
+            self.reminderTitle = try decoder.decode(String.self)
+            self.listTitle = try decoder.decode(String?.self)
+          }
+        }
+        """#
+      }
+    }
   }
 }

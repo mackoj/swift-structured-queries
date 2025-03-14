@@ -5,98 +5,85 @@ import Testing
 
 extension SnapshotTests {
   @Suite struct SelectionTests {
-    @Test func attendeeNameAndSyncUpIsActive() {
-      assertInlineSnapshot(
-        of: Attendee
-          .join(SyncUp.all()) { $0.syncUpID == $1.id }
+    @Test func remindersListAndReminderCount() throws {
+      try assertQuery(
+        RemindersList
+          .group(by: \.id)
+          .limit(2)
+          .join(Reminder.all()) { $0.id.eq($1.remindersListID) }
           .select {
-            AttendeeNameAndSyncUpIsActive.Columns(
-              attendeeName: $0.name,
-              syncUpIsActive: $1.isActive
-            )
-          },
-        as: .sql
+            RemindersListAndReminderCount.Columns(remindersList: $0, remindersCount: $1.id.count())
+          }
       ) {
         """
-        SELECT "attendees"."name", "syncUps"."isActive" \
-        FROM "attendees" \
-        JOIN "syncUps" ON ("attendees"."syncUpID" = "syncUps"."id")
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", count("reminders"."id") FROM "remindersLists" JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID") GROUP BY "remindersLists"."id" LIMIT 2
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────┐
+        │ RemindersListAndReminderCount(  │
+        │   remindersList: RemindersList( │
+        │     id: 1,                      │
+        │     color: 4889071,             │
+        │     name: "Personal"            │
+        │   ),                            │
+        │   remindersCount: 5             │
+        │ )                               │
+        ├─────────────────────────────────┤
+        │ RemindersListAndReminderCount(  │
+        │   remindersList: RemindersList( │
+        │     id: 2,                      │
+        │     color: 15567157,            │
+        │     name: "Family"              │
+        │   ),                            │
+        │   remindersCount: 3             │
+        │ )                               │
+        └─────────────────────────────────┘
         """
       }
     }
 
-    @Test func syncUpWithAttendeeCount() {
-      assertInlineSnapshot(
-        of: SyncUp
-          .join(Attendee.all()) { $0.id == $1.syncUpID }
-          .select {
-            SyncUpWithAttendeeCount.Columns(
-              attendeeCount: $1.id.count(),
-              syncUp: $0
-            )
-          },
-        as: .sql
+    @Test func leftJoin() throws {
+      try assertQuery(
+      Reminder
+        .limit(2)
+        .leftJoin(User.all()) { $0.assignedUserID.eq($1.id) }
+        .select {
+          ReminderTitleAndAssignedUserName.Columns(
+            reminderTitle: $0.title,
+            assignedUserName: $1.name
+          )
+        }
       ) {
         """
-        SELECT count("attendees"."id"), \
-        "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt", "syncUps"."title" \
-        FROM "syncUps" JOIN "attendees" \
-        ON ("syncUps"."id" = "attendees"."syncUpID")
+        SELECT "reminders"."title", "users"."name" FROM "reminders" LEFT JOIN "users" ON ("reminders"."assignedUserID" = "users"."id") LIMIT 2
         """
-      }
-    }
-
-    @Test func attendeeAndSyncUp() {
-      assertInlineSnapshot(
-        of: Attendee
-          .join(SyncUp.all()) { $0.syncUpID == $1.id }
-          .select(AttendeeAndSyncUp.Columns.init(attendee:syncUp:)),
-        as: .sql
-      ) {
+      } results: {
         """
-        SELECT \
-        "attendees"."id", "attendees"."syncUpID", "attendees"."name", "attendees"."createdAt", \
-        "syncUps"."id", "syncUps"."isActive", "syncUps"."createdAt", "syncUps"."title" \
-        FROM "attendees" \
-        JOIN "syncUps" ON ("attendees"."syncUpID" = "syncUps"."id")
+        ┌───────────────────────────────────┐
+        │ ReminderTitleAndAssignedUserName( │
+        │   reminderTitle: "Groceries",     │
+        │   assignedUserName: "Blob"        │
+        │ )                                 │
+        ├───────────────────────────────────┤
+        │ ReminderTitleAndAssignedUserName( │
+        │   reminderTitle: "Haircut",       │
+        │   assignedUserName: nil           │
+        │ )                                 │
+        └───────────────────────────────────┘
         """
       }
     }
   }
 }
 
-@Table
-private struct SyncUp {
-  let id: Int
-  var isActive: Bool
-  @Column(as: Date.ISO8601Representation.self)
-  var createdAt: Date
-  var title = ""
-}
-
-@Table
-private struct Attendee {
-  let id: Int
-  var syncUpID: Int
-  var name: String
-  @Column(as: Date.ISO8601Representation.self)
-  var createdAt: Date
-}
-
 @Selection
-private struct AttendeeNameAndSyncUpIsActive {
-  var attendeeName: String
-  var syncUpIsActive: Bool
+struct ReminderTitleAndAssignedUserName {
+  let reminderTitle: String
+  let assignedUserName: String?
 }
 
-@Selection
-private struct SyncUpWithAttendeeCount {
-  var attendeeCount: Int
-  var syncUp: SyncUp
-}
-
-@Selection
-private struct AttendeeAndSyncUp {
-  var attendee: Attendee
-  var syncUp: SyncUp
+@Selection struct RemindersListAndReminderCount {
+  let remindersList: RemindersList
+  let remindersCount: Int
 }

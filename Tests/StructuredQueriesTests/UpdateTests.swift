@@ -64,13 +64,14 @@ extension SnapshotTests {
           .returning(\.self)
       ) {
         """
-        UPDATE "reminders" SET "date" = '2001-01-01 00:00:00.000', "isCompleted" = 1, "isFlagged" = 0, "notes" = 'Milk, Eggs, Apples', "priority" = NULL, "remindersListID" = 1, "title" = 'Groceries' WHERE ("reminders"."id" = 1) RETURNING "reminders"."id", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        UPDATE "reminders" SET "assignedUserID" = 1, "date" = '2001-01-01 00:00:00.000', "isCompleted" = 1, "isFlagged" = 0, "notes" = 'Milk, Eggs, Apples', "priority" = NULL, "remindersListID" = 1, "title" = 'Groceries' WHERE ("reminders"."id" = 1) RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
         """
-      } results: {
+      }results: {
         """
         ┌─────────────────────────────────────────┐
         │ Reminder(                               │
         │   id: 1,                                │
+        │   assignedUserID: 1,                    │
         │   date: Date(2001-01-01T00:00:00.000Z), │
         │   isCompleted: true,                    │
         │   isFlagged: false,                     │
