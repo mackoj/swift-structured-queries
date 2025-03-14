@@ -7,7 +7,7 @@ extension SnapshotTests {
   @Suite struct JoinTests {
     @Test func basics() {
       assertInlineSnapshot(
-        of: SyncUp.join(Attendee.all()) { $0.id == $1.syncUpID }
+        of: SyncUp.join(Attendee.all()) { $0.id.eq($1.syncUpID) }
           .order { syncUps, _ in syncUps.createdAt.desc() },
         as: .sql
       ) {
