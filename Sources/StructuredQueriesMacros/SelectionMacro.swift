@@ -1,95 +1,299 @@
 import SwiftDiagnostics
 import SwiftSyntax
-import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-public enum SelectionMacro {
-}
+public enum SelectionMacro {}
 
 extension SelectionMacro: ExtensionMacro {
-  public static func expansion(
+  public static func expansion<D: DeclGroupSyntax, T: TypeSyntaxProtocol, C: MacroExpansionContext>(
     of node: AttributeSyntax,
-    attachedTo declaration: some DeclGroupSyntax,
-    providingExtensionsOf type: some TypeSyntaxProtocol,
+    attachedTo declaration: D,
+    providingExtensionsOf type: T,
     conformingTo protocols: [TypeSyntax],
-    in context: some MacroExpansionContext
+    in context: C
   ) throws -> [ExtensionDeclSyntax] {
-    guard let declaration = declaration.as(StructDeclSyntax.self)
+    guard
+      let declaration = declaration.as(StructDeclSyntax.self)
     else {
       context.diagnose(
         Diagnostic(
           node: declaration.introducer,
-          message: MacroExpansionErrorMessage(
-            "'@Selection' can only be applied to struct types"
-          )
+          message: MacroExpansionErrorMessage("'@Selection' can only be applied to struct types")
         )
       )
       return []
     }
+    var allColumns: [(name: TokenSyntax, type: TypeSyntax?)] = []
+    var decodings: [ExprSyntax] = []
+    var diagnostics: [Diagnostic] = []
 
-    var conformances: [String] = []
+    let selfRewriter = SelfRewriter(
+      selfEquivalent: type.as(IdentifierTypeSyntax.self)?.name ?? "QueryValue"
+    )
+    for member in declaration.memberBlock.members {
+      guard
+        let property = member.decl.as(VariableDeclSyntax.self),
+        !property.isStatic,
+        !property.isComputed,
+        property.bindings.count == 1,
+        let binding = property.bindings.first,
+        let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmed
+      else { continue }
+
+      var columnName = ExprSyntax(
+        StringLiteralExprSyntax(content: identifier.text.trimmingBackticks())
+      )
+      var columnQueryValueType =
+        (binding.typeAnnotation?.type.trimmed
+        ?? binding.initializer?.value.literalType)
+        .map { selfRewriter.rewrite($0).cast(TypeSyntax.self) }
+      let columnQueryOutputType = columnQueryValueType
+
+      for attribute in property.attributes {
+        guard
+          let attribute = attribute.as(AttributeSyntax.self),
+          let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
+          attributeName == "Column",
+          case let .argumentList(arguments) = attribute.arguments
+        else { continue }
+
+        for argumentIndex in arguments.indices {
+          let argument = arguments[argumentIndex]
+
+          switch argument.label {
+          case nil:
+            var newArguments = arguments
+            newArguments.remove(at: argumentIndex)
+            diagnostics.append(
+              Diagnostic(
+                node: argument,
+                message: MacroExpansionErrorMessage(
+                  "'@Selection' column names are not supported"
+                ),
+                fixIt: .replace(
+                  message: MacroExpansionFixItMessage(
+                    "Remove '\(argument.trimmed)'"
+                  ),
+                  oldNode: Syntax(attribute),
+                  newNode: Syntax(attribute.with(\.arguments, .argumentList(newArguments)))
+                )
+              )
+            )
+
+          case let .some(label) where label.text == "as":
+            guard
+              let memberAccess = argument.expression.as(MemberAccessExprSyntax.self),
+              memberAccess.declName.baseName.tokenKind == .keyword(.self),
+              let base = memberAccess.base
+            else {
+              diagnostics.append(
+                Diagnostic(
+                  node: argument.expression,
+                  message: MacroExpansionErrorMessage("Argument 'as' must be a type literal")
+                )
+              )
+              continue
+            }
+
+            columnQueryValueType = "\(raw: base.trimmedDescription)"
+
+          case let .some(label) where label.text == "primaryKey":
+            var newArguments = arguments
+            newArguments.remove(at: argumentIndex)
+            diagnostics.append(
+              Diagnostic(
+                node: label,
+                message: MacroExpansionErrorMessage(
+                  "'@Selection' primary keys are not supported"
+                ),
+                fixIt: .replace(
+                  message: MacroExpansionFixItMessage(
+                    "Remove '\(argument.trimmed)'"
+                  ),
+                  oldNode: Syntax(attribute),
+                  newNode: Syntax(attribute.with(\.arguments, .argumentList(newArguments)))
+                )
+              )
+            )
+
+          case let argument?:
+            fatalError("Unexpected argument: \(argument)")
+          }
+        }
+      }
+
+      var assignedType: String? {
+        binding
+          .initializer?
+          .value
+          .as(FunctionCallExprSyntax.self)?
+          .calledExpression
+          .as(DeclReferenceExprSyntax.self)?
+          .baseName
+          .text
+      }
+      if columnQueryValueType == columnQueryOutputType,
+        let typeIdentifier = columnQueryValueType?.identifier ?? assignedType,
+        ["Date", "UUID"].contains(typeIdentifier)
+      {
+        var fixIts: [FixIt] = []
+        let optional = columnQueryValueType?.isOptionalType == true ? "?" : ""
+        if typeIdentifier.hasPrefix("Date") {
+          for representation in ["ISO8601", "UnixTime", "JulianDay"] {
+            var newProperty = property.with(\.leadingTrivia, "")
+            let attribute = "@Column(as: Date.\(representation)Representation\(optional).self)"
+            newProperty.attributes.insert(
+              AttributeListSyntax.Element("\(raw: attribute)")
+                .with(
+                  \.trailingTrivia,
+                  .newline.merging(property.leadingTrivia.indentation(isOnNewline: true))
+                ),
+              at: newProperty.attributes.startIndex
+            )
+            fixIts.append(
+              FixIt(
+                message: MacroExpansionFixItMessage("Insert '\(attribute)'"),
+                changes: [
+                  .replace(
+                    oldNode: Syntax(property),
+                    newNode: Syntax(newProperty.with(\.leadingTrivia, property.leadingTrivia))
+                  )
+                ]
+              )
+            )
+          }
+        } else if typeIdentifier.hasPrefix("UUID") {
+          for representation in ["Lowercased", "Uppercased", "Bytes"] {
+            var newProperty = property.with(\.leadingTrivia, "")
+            let attribute = "@Column(as: UUID.\(representation)Representation\(optional).self)"
+            newProperty.attributes.insert(
+              AttributeListSyntax.Element("\(raw: attribute)"),
+              at: newProperty.attributes.startIndex
+            )
+            fixIts.append(
+              FixIt(
+                message: MacroExpansionFixItMessage("Insert '\(attribute)'"),
+                changes: [
+                  .replace(
+                    oldNode: Syntax(property),
+                    newNode: Syntax(newProperty.with(\.leadingTrivia, property.leadingTrivia))
+                  )
+                ]
+              )
+            )
+          }
+        }
+        diagnostics.append(
+          Diagnostic(
+            node: property,
+            message: MacroExpansionErrorMessage(
+              "'\(typeIdentifier)' column requires a query representation"
+            ),
+            fixIts: fixIts
+          )
+        )
+      }
+
+      let defaultValue = (binding.initializer?.value).map {
+        ", default: \(selfRewriter.rewrite($0).trimmedDescription)"
+      }
+      allColumns.append((identifier, columnQueryOutputType))
+      decodings.append(
+        """
+        self.\(identifier) = try decoder.decode(\(columnQueryValueType.map { "\($0).self" } ?? ""))
+        """
+      )
+    }
+
+    var conformances: [TypeSyntax] = []
+    let protocolNames: [TokenSyntax] = ["QueryRepresentable"]
+    let schemaConformances: [ExprSyntax] = ["\(moduleName).QueryExpression"]
     if let inheritanceClause = declaration.inheritanceClause {
-      for type in ["QueryRepresentable"] {
-        if !inheritanceClause.inheritedTypes
-          .contains(where: { [type, type.qualified()].contains($0.type.trimmedDescription) })
-        {
+      for type in protocolNames {
+        if !inheritanceClause.inheritedTypes.contains(where: {
+          [type.text, "\(moduleName).\(type)"].contains($0.type.trimmedDescription)
+        }) {
           conformances.append("\(moduleName).\(type)")
         }
       }
     } else {
-      conformances = ["QueryRepresentable".qualified()]
+      conformances = protocolNames.map { "\(moduleName).\($0)" }
     }
 
-    var namesAndTypes: [(String, String)] = []
-    var decodings: [String] = []
-    let selfRewriter = SelfRewriter(selfEquivalent: declaration.name.trimmed)
-    let memberBlock = selfRewriter.rewrite(declaration.memberBlock).cast(MemberBlockSyntax.self)
-    for member in memberBlock.members {
-      guard
-        let property = member.decl.as(VariableDeclSyntax.self),
-        !property.isStatic,
-        !property.isComputed
-      else { continue }
-      for binding in property.bindings {
-        guard
-          let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier
-        else {
-          continue
-        }
-        let name = identifier.trimmedDescription
-        let typeGeneric =
-          (binding.typeAnnotation?.type ?? binding.initializer?.value.literalType)?
-          .trimmedDescription
-          ?? "_"
-        namesAndTypes.append((name, typeGeneric))
-        decodings.append("self.\(name) = try decoder.decode(\(typeGeneric).self)")
-      }
+    guard diagnostics.isEmpty else {
+      diagnostics.forEach(context.diagnose)
+      return []
     }
-    let initializer = """
-      public init(
-      \(namesAndTypes.map { "\($0): some \(moduleName).QueryExpression<\($1)>" }.joined(separator: ",\n"))
-      ) {
-      self.queryFragment = "\(namesAndTypes.map { name, _ in "\\(\(name).queryFragment)" }.joined(separator: ", "))"
-      }
-      """
-    let typeName = type.trimmed
+
+    /*
+     public struct Columns: StructuredQueries.QueryExpression {
+       public typealias QueryValue = ReminderTitleAndListTitle
+       public let queryFragment: QueryFragment
+       public init(
+         reminderTitle: some StructuredQueries.QueryExpression<String>,
+         listTitle: some StructuredQueries.QueryExpression<String?>
+       ) {
+         self.queryFragment = "\(reminderTitle.queryFragment), \(listTitle.queryFragment)"
+       }
+     }
+     public init(decoder: some StructuredQueries.QueryDecoder) throws {
+       self.reminderTitle = try decoder.decode(String.self)
+       self.listTitle = try decoder.decode(String?.self)
+     }
+
+     */
+    let initArguments = allColumns
+      .map { "\($0): some \(moduleName).QueryExpression\($1.map { "<\($0)>" } ?? "")" }
+      .joined(separator: ",\n")
+    let initAssignment: [ExprSyntax] = allColumns
+      .map { #"\(\#($0.name).queryFragment)"# as ExprSyntax }
     return [
       DeclSyntax(
         """
-        \(declaration.attributes.availability)extension \(typeName)\
-        \(conformances.isEmpty ? "" : ": \(raw: conformances.joined(separator: ", "))") {
-        public struct Columns: \(moduleName).QueryExpression {
-        public typealias QueryValue = \(typeName)
-        public let queryFragment: QueryFragment 
-        \(raw: initializer)
+        \(declaration.attributes.availability)extension \(type)\
+        \(conformances.isEmpty ? "" : ": \(conformances, separator: ", ")") {
+        public struct Columns: \(schemaConformances, separator: ", ") {
+        public typealias QueryValue = \(type.trimmed)
+        public let queryFragment: \(moduleName).QueryFragment
+        public init(
+        \(raw: initArguments)
+        ) {
+        self.queryFragment = "\(initAssignment, separator: ", ")"
+        }
         }
         public init(decoder: some \(moduleName).QueryDecoder) throws {
-        \(raw: decodings.joined(separator: "\n"))
+        \(decodings, separator: "\n")
         }
         }
         """
       )
-      .cast(ExtensionDeclSyntax.self)
+      .cast(ExtensionDeclSyntax.self),
+    ]
+  }
+}
+
+extension SelectionMacro: MemberAttributeMacro {
+  public static func expansion<D: DeclGroupSyntax, T: DeclSyntaxProtocol, C: MacroExpansionContext>(
+    of node: AttributeSyntax,
+    attachedTo declaration: D,
+    providingAttributesFor member: T,
+    in context: C
+  ) throws -> [AttributeSyntax] {
+    guard
+      declaration.is(StructDeclSyntax.self),
+      let property = member.as(VariableDeclSyntax.self),
+      !property.isStatic,
+      !property.isComputed,
+      !property.hasMacroApplication("Column"),
+      property.bindings.count == 1,
+      let binding = property.bindings.first,
+      let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text
+        .trimmingBackticks()
+    else { return [] }
+    return [
+      """
+      @Column
+      """
     ]
   }
 }

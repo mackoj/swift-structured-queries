@@ -105,4 +105,13 @@ struct DecodingTests {
       )
     )
   }
+
+  func compileTime() throws {
+    _ = try #require(
+      try db.execute(
+        SimpleSelect { #bind(Date(timeIntervalSince1970: 0), as: Date.ISO8601Representation.self) }
+      )
+      .first
+    )
+  }
 }

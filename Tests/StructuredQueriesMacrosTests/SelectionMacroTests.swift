@@ -17,14 +17,16 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct PlayerAndTeam {
+          @Column
           let player: Player 
+          @Column
           let team: Team
         }
 
         extension PlayerAndTeam: StructuredQueries.QueryRepresentable {
           public struct Columns: StructuredQueries.QueryExpression {
             public typealias QueryValue = PlayerAndTeam
-            public let queryFragment: QueryFragment
+            public let queryFragment: StructuredQueries.QueryFragment
             public init(
               player: some StructuredQueries.QueryExpression<Player>,
               team: some StructuredQueries.QueryExpression<Team>
@@ -69,14 +71,16 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct ReminderTitleAndListTitle {
+          @Column
           var reminderTitle: String 
+          @Column
           var listTitle: String?
         }
 
         extension ReminderTitleAndListTitle: StructuredQueries.QueryRepresentable {
           public struct Columns: StructuredQueries.QueryExpression {
             public typealias QueryValue = ReminderTitleAndListTitle
-            public let queryFragment: QueryFragment
+            public let queryFragment: StructuredQueries.QueryFragment
             public init(
               reminderTitle: some StructuredQueries.QueryExpression<String>,
               listTitle: some StructuredQueries.QueryExpression<String?>
@@ -101,6 +105,28 @@ extension SnapshotTests {
           var date: Date
         }
         """
+      } expansion: {
+        #"""
+        struct ReminderDate {
+          @Column(as: Date.ISO8601Representation.self)
+          var date: Date
+        }
+
+        extension ReminderDate: StructuredQueries.QueryRepresentable {
+          public struct Columns: StructuredQueries.QueryExpression {
+            public typealias QueryValue = ReminderDate
+            public let queryFragment: StructuredQueries.QueryFragment
+            public init(
+              date: some StructuredQueries.QueryExpression<Date>
+            ) {
+              self.queryFragment = "\(date.queryFragment)"
+            }
+          }
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
+            self.date = try decoder.decode(Date.ISO8601Representation.self)
+          }
+        }
+        """#
       }
     }
 
@@ -111,6 +137,46 @@ extension SnapshotTests {
           var date: Date
         }
         """
+      } diagnostics: {
+        """
+        @Selection struct ReminderDate {
+          var date: Date
+          ┬─────────────
+          ╰─ 🛑 'Date' column requires a query representation
+             ✏️ Insert '@Column(as: Date.ISO8601Representation.self)'
+             ✏️ Insert '@Column(as: Date.UnixTimeRepresentation.self)'
+             ✏️ Insert '@Column(as: Date.JulianDayRepresentation.self)'
+        }
+        """
+      } fixes: {
+        """
+        @Selection struct ReminderDate {
+          @Column(as: Date.ISO8601Representation.self)
+          var date: Date
+        }
+        """
+      } expansion: {
+        #"""
+        struct ReminderDate {
+          @Column(as: Date.ISO8601Representation.self)
+          var date: Date
+        }
+
+        extension ReminderDate: StructuredQueries.QueryRepresentable {
+          public struct Columns: StructuredQueries.QueryExpression {
+            public typealias QueryValue = ReminderDate
+            public let queryFragment: StructuredQueries.QueryFragment
+            public init(
+              date: some StructuredQueries.QueryExpression<Date>
+            ) {
+              self.queryFragment = "\(date.queryFragment)"
+            }
+          }
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
+            self.date = try decoder.decode(Date.ISO8601Representation.self)
+          }
+        }
+        """#
       }
     }
   }

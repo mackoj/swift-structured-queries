@@ -149,6 +149,42 @@ extension SnapshotTests {
         StructuredQueries.SQLQueryExpression(#""text" = 'hello?'"#)
         """
       }
+      assertMacro {
+        """
+        #sql(#""text" = 'hello?1'"#)
+        """
+      } expansion: {
+        """
+        StructuredQueries.SQLQueryExpression(#""text" = 'hello?1'"#)
+        """
+      }
+      assertMacro {
+        """
+        #sql(#""text" = 'hello:hi'"#)
+        """
+      } expansion: {
+        """
+        StructuredQueries.SQLQueryExpression(#""text" = 'hello:hi'"#)
+        """
+      }
+      assertMacro {
+        """
+        #sql(#""text" = 'hello@hi'"#)
+        """
+      } expansion: {
+        """
+        StructuredQueries.SQLQueryExpression(#""text" = 'hello@hi'"#)
+        """
+      }
+      assertMacro {
+        """
+        #sql(#""text" = 'hello$hi'"#)
+        """
+      } expansion: {
+        """
+        StructuredQueries.SQLQueryExpression(#""text" = 'hello$hi'"#)
+        """
+      }
     }
 
     @Test func invalidBind() {
