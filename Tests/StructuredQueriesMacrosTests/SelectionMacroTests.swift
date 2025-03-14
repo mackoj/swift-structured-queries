@@ -92,5 +92,26 @@ extension SnapshotTests {
         """#
       }
     }
+
+    @Test func date() {
+      assertMacro {
+        """
+        @Selection struct ReminderDate {
+          @Column(as: Date.ISO8601Representation.self)
+          var date: Date
+        }
+        """
+      }
+    }
+
+    @Test func dateDiagnostic() {
+      assertMacro {
+        """
+        @Selection struct ReminderDate {
+          var date: Date
+        }
+        """
+      }
+    }
   }
 }

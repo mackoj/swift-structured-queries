@@ -43,7 +43,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func leftJoin() throws {
+    @Test func outerJoin() throws {
       try assertQuery(
       Reminder
         .limit(2)
@@ -74,8 +74,23 @@ extension SnapshotTests {
         """
       }
     }
+
+    // TODO: This doesn't compile, but should...
+//    @Test func date() throws {
+//      try assertQuery(
+//        Reminder.select {
+//          ReminderDate.Columns(date: $0.date)
+//        }
+//      )
+//    }
   }
 }
+
+//@Selection
+//struct ReminderDate {
+//  @Column(as: Date.ISO8601Representation?.self)
+//  var date: Date?
+//}
 
 @Selection
 struct ReminderTitleAndAssignedUserName {
