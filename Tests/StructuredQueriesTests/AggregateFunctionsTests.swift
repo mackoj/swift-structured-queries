@@ -46,16 +46,16 @@ extension SnapshotTests {
       }
     }
 
-    @Test func maximum() {
-      assertInlineSnapshot(of: User.columns.id.maximum(), as: .sql) {
+    @Test func max() {
+      assertInlineSnapshot(of: User.columns.id.max(), as: .sql) {
         """
         max("users"."id")
         """
       }
     }
 
-    @Test func minimum() {
-      assertInlineSnapshot(of: User.columns.id.minimum(), as: .sql) {
+    @Test func min() {
+      assertInlineSnapshot(of: User.columns.id.min(), as: .sql) {
         """
         min("users"."id")
         """

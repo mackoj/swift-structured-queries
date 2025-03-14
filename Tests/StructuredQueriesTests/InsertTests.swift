@@ -247,22 +247,89 @@ extension SnapshotTests {
       }
     }
 
-    @Test func upsert() {
-      assertInlineSnapshot(
-        of: SyncUp.upsert(
-          SyncUp.Draft(id: 1, isActive: true, createdAt: Date(timeIntervalSinceReferenceDate: 0))
-        ),
-        as: .sql
+    @Test func upsertWithID() throws {
+      try assertQuery(Reminder.where { $0.id == 1 }) {
+        """
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "reminders" WHERE ("reminders"."id" = 1)
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────────┐
+        │ Reminder(                               │
+        │   id: 1,                                │
+        │   assignedUserID: 1,                    │
+        │   date: Date(2001-01-01T00:00:00.000Z), │
+        │   isCompleted: false,                   │
+        │   isFlagged: false,                     │
+        │   notes: "Milk, Eggs, Apples",          │
+        │   priority: nil,                        │
+        │   remindersListID: 1,                   │
+        │   title: "Groceries"                    │
+        │ )                                       │
+        └─────────────────────────────────────────┘
+        """
+      }
+      try assertQuery(
+        Reminder
+          .upsert(Reminder.Draft(id: 1, remindersListID: 1, title: "Cash check"))
+          .returning(\.self)
       ) {
         """
-        INSERT INTO "syncUps" \
-        ("id", "title", "isActive", "createdAt") \
-        VALUES \
-        (1, '', 1, '2001-01-01 00:00:00.000') \
-        ON CONFLICT DO UPDATE SET \
-        "title" = excluded."title", \
-        "isActive" = excluded."isActive", \
-        "createdAt" = excluded."createdAt"
+        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (1, NULL, NULL, 0, 0, '', NULL, 1, 'Cash check') ON CONFLICT DO UPDATE SET "assignedUserID" = excluded."assignedUserID", "date" = excluded."date", "isCompleted" = excluded."isCompleted", "isFlagged" = excluded."isFlagged", "notes" = excluded."notes", "priority" = excluded."priority", "remindersListID" = excluded."remindersListID", "title" = excluded."title" RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        """
+      } results: {
+        """
+        ┌────────────────────────┐
+        │ Reminder(              │
+        │   id: 1,               │
+        │   assignedUserID: nil, │
+        │   date: nil,           │
+        │   isCompleted: false,  │
+        │   isFlagged: false,    │
+        │   notes: "",           │
+        │   priority: nil,       │
+        │   remindersListID: 1,  │
+        │   title: "Cash check"  │
+        │ )                      │
+        └────────────────────────┘
+        """
+      }
+    }
+
+    @Test func upsertWithoutID() throws {
+      try assertQuery(Reminder.select { $0.id.max() }) {
+        """
+        SELECT max("reminders"."id") FROM "reminders"
+        """
+      }results: {
+        """
+        ┌────┐
+        │ 10 │
+        └────┘
+        """
+      }
+      try assertQuery(
+        Reminder.upsert(Reminder.Draft(remindersListID: 1))
+          .returning(\.self)
+      ) {
+        """
+        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (NULL, NULL, NULL, 0, 0, '', NULL, 1, '') ON CONFLICT DO UPDATE SET "assignedUserID" = excluded."assignedUserID", "date" = excluded."date", "isCompleted" = excluded."isCompleted", "isFlagged" = excluded."isFlagged", "notes" = excluded."notes", "priority" = excluded."priority", "remindersListID" = excluded."remindersListID", "title" = excluded."title" RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        """
+      } results: {
+        """
+        ┌────────────────────────┐
+        │ Reminder(              │
+        │   id: 11,              │
+        │   assignedUserID: nil, │
+        │   date: nil,           │
+        │   isCompleted: false,  │
+        │   isFlagged: false,    │
+        │   notes: "",           │
+        │   priority: nil,       │
+        │   remindersListID: 1,  │
+        │   title: ""            │
+        │ )                      │
+        └────────────────────────┘
         """
       }
     }

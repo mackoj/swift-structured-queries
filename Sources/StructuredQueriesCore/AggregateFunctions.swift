@@ -19,11 +19,11 @@ extension QueryExpression where QueryValue: QueryBindable {
 }
 
 extension QueryExpression where QueryValue: Comparable {
-  public func maximum(distinct isDistinct: Bool = false) -> some QueryExpression<Int?> {
+  public func max(distinct isDistinct: Bool = false) -> some QueryExpression<Int?> {
     AggregateFunction("max", self)
   }
 
-  public func minimum(distinct isDistinct: Bool = false) -> some QueryExpression<Int?> {
+  public func min(distinct isDistinct: Bool = false) -> some QueryExpression<Int?> {
     AggregateFunction("min", self)
   }
 }
