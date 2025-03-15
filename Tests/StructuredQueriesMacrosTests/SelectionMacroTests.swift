@@ -18,7 +18,7 @@ extension SnapshotTests {
         #"""
         struct PlayerAndTeam {
           @Column
-          let player: Player 
+          let player: Player
           @Column
           let team: Team
         }
