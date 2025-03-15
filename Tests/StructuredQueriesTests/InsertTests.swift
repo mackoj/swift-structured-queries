@@ -20,7 +20,7 @@ extension SnapshotTests {
         """
         INSERT INTO "reminders" ("remindersListID", "title", "isCompleted", "date", "priority") VALUES (1, 'Groceries', 1, '2001-01-01 00:00:00.000', 3), (2, 'Haircut', 0, '1970-01-01 00:00:00.000', 1) ON CONFLICT DO UPDATE SET "title" = ("reminders"."title" || ' Copy') RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
         """
-      }results: {
+      } results: {
         """
         ┌─────────────────────────────────────────┐
         │ Reminder(                               │
@@ -60,7 +60,7 @@ extension SnapshotTests {
         """
         INSERT INTO "reminders" ("remindersListID") VALUES (1) RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────────┐
         │ Reminder(              │
@@ -229,8 +229,8 @@ extension SnapshotTests {
             SyncUp.Draft(
               title: "Design",
               isActive: false,
-              createdAt: Date(timeIntervalSinceReferenceDate: 1234567890)
-            )
+              createdAt: Date(timeIntervalSinceReferenceDate: 1_234_567_890)
+            ),
           ]
         )
         .returning(\.self),
@@ -301,7 +301,7 @@ extension SnapshotTests {
         """
         SELECT max("reminders"."id") FROM "reminders"
         """
-      }results: {
+      } results: {
         """
         ┌────┐
         │ 10 │

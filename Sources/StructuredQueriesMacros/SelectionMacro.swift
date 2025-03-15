@@ -222,10 +222,12 @@ extension SelectionMacro: ExtensionMacro {
       return []
     }
 
-    let initArguments = allColumns
+    let initArguments =
+      allColumns
       .map { "\($0): some \(moduleName).QueryExpression\($1.map { "<\($0)>" } ?? "")" }
       .joined(separator: ",\n")
-    let initAssignment: [ExprSyntax] = allColumns
+    let initAssignment: [ExprSyntax] =
+      allColumns
       .map { #"\(\#($0.name).queryFragment)"# as ExprSyntax }
     return [
       DeclSyntax(
@@ -247,7 +249,7 @@ extension SelectionMacro: ExtensionMacro {
         }
         """
       )
-      .cast(ExtensionDeclSyntax.self),
+      .cast(ExtensionDeclSyntax.self)
     ]
   }
 }

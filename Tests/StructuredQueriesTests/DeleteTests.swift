@@ -11,7 +11,7 @@ extension SnapshotTests {
         """
         DELETE FROM "reminders" RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
         """
-      }results: {
+      } results: {
         #"""
         ┌─────────────────────────────────────────┐
         │ Reminder(                               │
@@ -158,7 +158,7 @@ extension SnapshotTests {
         """
         DELETE FROM "reminders" WHERE ("reminders"."id" = 1) RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
         """
-      }results: {
+      } results: {
         """
         ┌─────────────────────────────────────────┐
         │ Reminder(                               │

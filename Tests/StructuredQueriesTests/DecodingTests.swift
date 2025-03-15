@@ -31,14 +31,19 @@ struct DecodingTests {
       try db.execute(
         SimpleSelect { "deadbeef".unhex() }
       )
-      .first == ContiguousArray<UInt8>([
-        0xDE, 0xAD, 0xBE, 0xEF
-      ])
+      .first
+        == ContiguousArray<UInt8>([
+          0xDE, 0xAD, 0xBE, 0xEF,
+        ])
     )
   }
 
   @Test func rawRepresentable() throws {
-    enum Priority: Int, QueryBindable { case low = 1, medium, high }
+    enum Priority: Int, QueryBindable {
+      case low = 1
+      case medium,
+      case high
+    }
     #expect(
       try db.execute(
         SimpleSelect { #sql("3", as: Priority.self) }
@@ -64,7 +69,7 @@ struct DecodingTests {
       try db.execute(
         SimpleSelect { #sql("1234567890", as: Date.UnixTimeRepresentation.self) }
       )
-      .first == Date(timeIntervalSince1970: 1234567890)
+      .first == Date(timeIntervalSince1970: 1_234_567_890)
     )
     #expect(
       try db.execute(
@@ -94,15 +99,16 @@ struct DecodingTests {
           "deadbeef-dead-beef-dead-beefdeadbeef".unhex("-").cast(as: UUID.BytesRepresentation.self)
         }
       )
-      .first == UUID(
-        uuid: (
-          0xDE, 0xAD, 0xBE, 0xEF,
-          0xDE, 0xAD,
-          0xBE, 0xEF,
-          0xDE, 0xAD,
-          0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF
+      .first
+        == UUID(
+          uuid: (
+            0xDE, 0xAD, 0xBE, 0xEF,
+            0xDE, 0xAD,
+            0xBE, 0xEF,
+            0xDE, 0xAD,
+            0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF
+          )
         )
-      )
     )
   }
 

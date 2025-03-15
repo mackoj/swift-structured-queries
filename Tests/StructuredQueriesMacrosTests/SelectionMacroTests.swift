@@ -7,13 +7,13 @@ extension SnapshotTests {
   struct SelectionMacroTests {
     @Test func basics() {
       assertMacro {
-      """
-      @Selection
-      struct PlayerAndTeam {
-        let player: Player 
-        let team: Team
-      }
-      """
+        """
+        @Selection
+        struct PlayerAndTeam {
+          let player: Player
+          let team: Team
+        }
+        """
       } expansion: {
         #"""
         struct PlayerAndTeam {
@@ -45,10 +45,10 @@ extension SnapshotTests {
 
     @Test func `enum`() {
       assertMacro {
-      """
-      @Selection
-      public enum S {}
-      """
+        """
+        @Selection
+        public enum S {}
+        """
       } diagnostics: {
         """
         @Selection

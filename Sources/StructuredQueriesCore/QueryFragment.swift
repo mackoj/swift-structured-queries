@@ -115,11 +115,11 @@ extension QueryFragment: ExpressibleByStringInterpolation {
 
     @available(
       *,
-       deprecated,
-       renamed: "appendInterpolation(bind:)",
-       message: """
-         String interpolation produces a bind for a string value; did you mean to make this explicit? To append raw SQL, use "\\(raw: sqlString)".
-         """
+      deprecated,
+      renamed: "appendInterpolation(bind:)",
+      message: """
+        String interpolation produces a bind for a string value; did you mean to make this explicit? To append raw SQL, use "\\(raw: sqlString)".
+        """
     )
     public mutating func appendInterpolation(_ expression: String) {
       appendInterpolation(bind: expression)

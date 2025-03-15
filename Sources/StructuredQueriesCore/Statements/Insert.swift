@@ -302,7 +302,7 @@ extension Insert: Statement {
       }
       query.append(values.joined(separator: ", "))
     }
-    
+
     if let record {
       query.append(
         " ON CONFLICT DO \(record.updates.isEmpty ? "NOTHING" : "UPDATE \(bind: record)")"

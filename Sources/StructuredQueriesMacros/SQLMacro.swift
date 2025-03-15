@@ -53,10 +53,10 @@ public enum SQLMacro: ExpressionMacro {
         for (offset, byte) in segment.content.syntaxTextBytes.enumerated() {
           if let delimiter = currentDelimiter ?? parenStack.last {
             if byte == delimiters[delimiter.delimiter],
-               offset != delimiter.offset + 1,
-               segment.content.syntaxTextBytes.indices.contains(offset - 1)
-                 ? segment.content.syntaxTextBytes[offset - 1] != delimiters[byte]
-                 : true
+              offset != delimiter.offset + 1,
+              segment.content.syntaxTextBytes.indices.contains(offset - 1)
+                ? segment.content.syntaxTextBytes[offset - 1] != delimiters[byte]
+                : true
             {
               if currentDelimiter == nil {
                 parenStack.removeLast()
@@ -76,7 +76,7 @@ public enum SQLMacro: ExpressionMacro {
               }
             } else {
               let binds = [
-                UInt8(ascii: "?"), UInt8(ascii: ":"), UInt8(ascii: "@"), UInt8(ascii: "$")
+                UInt8(ascii: "?"), UInt8(ascii: ":"), UInt8(ascii: "@"), UInt8(ascii: "$"),
               ]
               if binds.contains(byte) {
                 unexpectedBind = (segment, offset)
@@ -87,7 +87,7 @@ public enum SQLMacro: ExpressionMacro {
 
         invalidBind = currentDelimiter?.segment == segment
       }
-      
+
       if let currentDelimiter = currentDelimiter ?? parenStack.last,
         let closingDelimiter = delimiters[currentDelimiter.delimiter]
       {

@@ -331,7 +331,8 @@ extension TableMacro: ExtensionMacro {
       )
       .compactMap(\.memberBlock.members.trimmed)
       let memberwiseArguments = draftBindings.map { $0.annotated() }
-      let memberwiseAssignments = memberwiseArguments
+      let memberwiseAssignments =
+        memberwiseArguments
         .map { $0.trimmed.pattern.cast(IdentifierPatternSyntax.self).identifier }
       let memberwiseInit: DeclSyntax = """
         public init(
@@ -341,7 +342,7 @@ extension TableMacro: ExtensionMacro {
         }
         """
       draft = """
-        
+
         public struct Draft: \(moduleName).Table {
         \(draftProperties, separator: "\n")
         \(memberBlocks, separator: "\n")
@@ -414,7 +415,7 @@ extension TableMacro: ExtensionMacro {
         }
         """
       )
-      .cast(ExtensionDeclSyntax.self),
+      .cast(ExtensionDeclSyntax.self)
     ]
   }
 }

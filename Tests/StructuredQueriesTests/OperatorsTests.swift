@@ -441,7 +441,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id" FROM "reminders" WHERE ("reminders"."id" IN (1, 2))
         """
-      }results: {
+      } results: {
         """
         ┌───┐
         │ 1 │

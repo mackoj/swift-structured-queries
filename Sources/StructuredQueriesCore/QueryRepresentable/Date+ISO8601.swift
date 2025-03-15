@@ -48,8 +48,8 @@ extension Date.ISO8601Representation: SQLiteType {
 }
 
 @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
-fileprivate extension Date.ISO8601FormatStyle {
-  func currentTimestamp(includingFractionalSeconds: Bool) -> Self {
+extension Date.ISO8601FormatStyle {
+  fileprivate func currentTimestamp(includingFractionalSeconds: Bool) -> Self {
     year().month().day()
       .dateTimeSeparator(.space)
       .time(includingFractionalSeconds: includingFractionalSeconds)

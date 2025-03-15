@@ -32,7 +32,7 @@ struct Reminder: Equatable, Identifiable {
   static func searching(_ text: String) -> Where<Reminder> {
     Self.where {
       $0.title.collate(.nocase).contains(text)
-      || $0.notes.collate(.nocase).contains(text)
+        || $0.notes.collate(.nocase).contains(text)
     }
   }
 }
@@ -44,7 +44,9 @@ struct User: Equatable, Identifiable {
 }
 
 enum Priority: Int, QueryBindable {
-  case low = 1, medium, high
+  case low = 1
+  case medium
+  case high
 }
 
 extension Reminder.Columns {
@@ -239,10 +241,10 @@ extension Database {
         Reminder.Draft(
           date: now.addingTimeInterval(60 * 60 * 24 * 2),
           notes: """
-          Status of tax return
-          Expenses for next year
-          Changing payroll company
-          """,
+            Status of tax return
+            Expenses for next year
+            Changing payroll company
+            """,
           remindersListID: 3,
           title: "Call accountant"
         ),
@@ -258,7 +260,14 @@ extension Database {
   }
 
   func createDebugTags() throws {
-    try execute(Tag.insert(\.name) { "car"; "kids"; "someday"; "optional" })
+    try execute(
+      Tag.insert(\.name) {
+        "car"
+        "kids"
+        "someday"
+        "optional"
+      }
+    )
     try execute(
       ReminderTag.insert {
         ($0.reminderID, $0.tagID)

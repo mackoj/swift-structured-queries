@@ -114,7 +114,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "remindersLists"."id", "remindersLists"."color", "remindersLists"."name" FROM "reminders" JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
         """
-      }results: {
+      } results: {
         #"""
         ┌─────────────────────────────────────────┬────────────────────┐
         │ Reminder(                               │ RemindersList(     │
@@ -302,7 +302,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "reminders" WHERE "reminders"."isCompleted"
         """
-      }results: {
+      } results: {
         """
         ┌─────────────────────────────────────────┐
         │ Reminder(                               │
@@ -352,7 +352,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."isCompleted", count("reminders"."id") FROM "reminders" GROUP BY "reminders"."isCompleted"
         """
-      }results: {
+      } results: {
         """
         ┌───────┬───┐
         │ false │ 7 │

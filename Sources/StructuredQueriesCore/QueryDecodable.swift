@@ -56,7 +56,6 @@ extension Int64: QueryDecodable {
   }
 }
 
-
 extension String: QueryDecodable {
   public init(decoder: some QueryDecoder) throws {
     self = try decoder.decode(String.self)

@@ -11,7 +11,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "reminders"
         """
-      }results: {
+      } results: {
         #"""
         ┌─────────────────────────────────────────┐
         │ Reminder(                               │
@@ -153,7 +153,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."title", "reminders"."priority", (SELECT avg(CAST("reminders"."priority" AS NUMERIC)) FROM "reminders") FROM "reminders" WHERE ((CAST("reminders"."priority" AS NUMERIC) < (SELECT avg(CAST("reminders"."priority" AS NUMERIC)) FROM "reminders")) OR ("reminders"."priority" IS NULL)) ORDER BY "reminders"."priority" DESC
         """
-      }results: {
+      } results: {
         """
         ┌───────────────────────┬─────────┬─────┐
         │ "Send weekly emails"  │ .medium │ 2.4 │
@@ -214,7 +214,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", group_concat("tags"."name") FROM "reminders" JOIN "remindersTags" ON ("reminders"."id" = "remindersTags"."reminderID") JOIN "tags" ON ("remindersTags"."tagID" = "tags"."id") GROUP BY "reminders"."id"
         """
-      }results: {
+      } results: {
         """
         ┌─────────────────────────────────────────┬────────────────────┐
         │ Reminder(                               │ "someday,optional" │

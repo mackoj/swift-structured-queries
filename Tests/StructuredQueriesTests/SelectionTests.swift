@@ -45,15 +45,15 @@ extension SnapshotTests {
 
     @Test func outerJoin() throws {
       try assertQuery(
-      Reminder
-        .limit(2)
-        .leftJoin(User.all()) { $0.assignedUserID.eq($1.id) }
-        .select {
-          ReminderTitleAndAssignedUserName.Columns(
-            reminderTitle: $0.title,
-            assignedUserName: $1.name
-          )
-        }
+        Reminder
+          .limit(2)
+          .leftJoin(User.all()) { $0.assignedUserID.eq($1.id) }
+          .select {
+            ReminderTitleAndAssignedUserName.Columns(
+              reminderTitle: $0.title,
+              assignedUserName: $1.name
+            )
+          }
       ) {
         """
         SELECT "reminders"."title", "users"."name" FROM "reminders" LEFT JOIN "users" ON ("reminders"."assignedUserID" = "users"."id") LIMIT 2

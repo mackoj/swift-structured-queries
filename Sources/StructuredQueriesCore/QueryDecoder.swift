@@ -23,4 +23,3 @@ extension QueryDecoder {
     try T(decoder: self).queryOutput
   }
 }
-

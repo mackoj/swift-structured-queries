@@ -6,7 +6,7 @@ extension TypeSyntax {
       || self.as(IdentifierTypeSyntax.self).map {
         ["Optional", "Swift.Optional"].contains($0.name.text)
       }
-      ?? false
+        ?? false
   }
 
   func asOptionalType() -> Self {

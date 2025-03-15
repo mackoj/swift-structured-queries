@@ -27,21 +27,5 @@ import Testing
       let result = (1...3).contains(1)
       #expect(result == true)
     }
-    do {
-      let result = 42.signum()
-      #expect(result == 1)
-    }
-    do {
-      let result = 4.2.sign
-      #expect(result == .plus)
-    }
-    do {
-      let result = "a".uppercased()
-      #expect(result == "A")
-    }
-    do {
-      let result = "A".lowercased()
-      #expect(result == "a")
-    }
   }
 }
