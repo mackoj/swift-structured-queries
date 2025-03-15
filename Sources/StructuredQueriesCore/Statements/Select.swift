@@ -281,7 +281,7 @@ extension Select {
     self.where = `where`
   }
 
-  #if compiler(>=6.1)
+  #if DEBUG && compiler(>=6.1)
     // NB: This can cause 'EXC_BAD_ACCESS' when 'C2' or 'J2' contain parameters.
     // TODO: Report issue to Swift team.
     @available(
