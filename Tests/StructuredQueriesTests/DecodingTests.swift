@@ -41,7 +41,7 @@ struct DecodingTests {
   @Test func rawRepresentable() throws {
     enum Priority: Int, QueryBindable {
       case low = 1
-      case medium,
+      case medium
       case high
     }
     #expect(
