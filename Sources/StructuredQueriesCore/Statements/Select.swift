@@ -1,5 +1,3 @@
-import Observation
-
 extension Table {
   public static func all() -> Select<(), Self, ()> {
     Select()
