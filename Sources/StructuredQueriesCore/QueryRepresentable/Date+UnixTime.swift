@@ -23,7 +23,7 @@ extension Date.UnixTimeRepresentation: QueryDecodable {
 }
 
 extension Date.UnixTimeRepresentation: SQLiteType {
-  public static var typeAffinity: String {
+  public static var typeAffinity: SQLiteTypeAffinity {
     Int.typeAffinity
   }
 }

@@ -42,7 +42,7 @@ extension Date.ISO8601Representation: QueryDecodable {
 
 @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
 extension Date.ISO8601Representation: SQLiteType {
-  public static var typeAffinity: String {
+  public static var typeAffinity: SQLiteTypeAffinity {
     String.typeAffinity
   }
 }

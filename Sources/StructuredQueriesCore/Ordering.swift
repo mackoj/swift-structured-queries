@@ -8,15 +8,14 @@ extension QueryExpression where QueryValue: QueryDecodable {
   }
 }
 
-public enum NullOrdering: Sendable {
-  case first
-  case last
+public struct NullOrdering: RawRepresentable, Sendable {
+  public static let first = Self(rawValue: "FIRST")
+  public static let last = Self(rawValue: "LAST")
 
-  fileprivate var rawValue: String {
-    switch self {
-    case .first: "FIRST"
-    case .last: "LAST"
-    }
+  public let rawValue: String
+
+  public init(rawValue: String) {
+    self.rawValue = rawValue
   }
 }
 

@@ -4,8 +4,10 @@ extension QueryExpression {
   ) -> some QueryExpression<Other> {
     Cast(base: self)
   }
+}
 
-  @available(*, deprecated, message: "TODO")
+extension QueryExpression where QueryValue: SQLiteType {
+  @available(*, deprecated, message: "Cast to same query value type always succeeds")
   public func cast(
     as _: QueryValue.Type = QueryValue.self
   ) -> some QueryExpression<QueryValue> {
@@ -15,12 +17,26 @@ extension QueryExpression {
 
 // TODO: Can we make automatically conforming to this easier? See 'UUID.LowercasedRepresentation'.
 public protocol SQLiteType: QueryBindable {
-  static var typeAffinity: String { get }
+  static var typeAffinity: SQLiteTypeAffinity { get }
+}
+
+public struct SQLiteTypeAffinity: RawRepresentable, Sendable {
+  public static let blob = Self(rawValue: "BLOB")
+  public static let integer = Self(rawValue: "INTEGER")
+  public static let numeric = Self(rawValue: "NUMERIC")
+  public static let real = Self(rawValue: "REAL")
+  public static let text = Self(rawValue: "TEXT")
+
+  public let rawValue: String
+
+  public init(rawValue: String) {
+    self.rawValue = rawValue
+  }
 }
 
 extension SQLiteType where Self: BinaryInteger {
   // Should this be 'INTEGER'?
-  public static var typeAffinity: String { "NUMERIC" }
+  public static var typeAffinity: SQLiteTypeAffinity { .numeric }
 }
 
 extension Int: SQLiteType {}
@@ -35,35 +51,35 @@ extension UInt32: SQLiteType {}
 
 extension SQLiteType where Self: FloatingPoint {
   // Should this be 'REAL'?
-  public static var typeAffinity: String { "NUMERIC" }
+  public static var typeAffinity: SQLiteTypeAffinity { .numeric }
 }
 
 extension Double: SQLiteType {}
 extension Float: SQLiteType {}
 
 extension Bool: SQLiteType {
-  public static var typeAffinity: String { Int.typeAffinity }
+  public static var typeAffinity: SQLiteTypeAffinity { Int.typeAffinity }
 }
 
 extension String: SQLiteType {
-  public static var typeAffinity: String { "TEXT" }
+  public static var typeAffinity: SQLiteTypeAffinity { .text }
 }
 
 extension ContiguousArray<UInt8>: SQLiteType {
-  public static var typeAffinity: String { "BLOB" }
+  public static var typeAffinity: SQLiteTypeAffinity { .blob }
 }
 
 extension Optional: SQLiteType where Wrapped: SQLiteType {
-  public static var typeAffinity: String { Wrapped.typeAffinity }
+  public static var typeAffinity: SQLiteTypeAffinity { Wrapped.typeAffinity }
 }
 
 private struct Cast<QueryValue: SQLiteType, Base: QueryExpression>: QueryExpression {
   let base: Base
   var queryFragment: QueryFragment {
-    "CAST(\(base.queryFragment) AS \(raw: QueryValue.typeAffinity))"
+    "CAST(\(base.queryFragment) AS \(raw: QueryValue.typeAffinity.rawValue))"
   }
 }
 
 extension RawRepresentable where RawValue: SQLiteType {
-  public static var typeAffinity: String { RawValue.typeAffinity }
+  public static var typeAffinity: SQLiteTypeAffinity { RawValue.typeAffinity }
 }

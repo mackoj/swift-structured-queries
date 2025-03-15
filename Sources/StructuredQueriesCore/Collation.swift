@@ -3,7 +3,7 @@ public struct Collation: RawRepresentable, Sendable {
   public static let nocase = Self(rawValue: "NOCASE")
   public static let rtrim = Self(rawValue: "RTRIM")
 
-  public var rawValue: String
+  public let rawValue: String
 
   public init(rawValue: String) {
     self.rawValue = rawValue

@@ -28,7 +28,7 @@ extension UUID.UppercasedRepresentation: QueryDecodable {
 }
 
 extension UUID.UppercasedRepresentation: SQLiteType {
-  public static var typeAffinity: String {
+  public static var typeAffinity: SQLiteTypeAffinity {
     String.typeAffinity
   }
 }

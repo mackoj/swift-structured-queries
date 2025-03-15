@@ -33,7 +33,7 @@ extension UUID.BytesRepresentation: QueryDecodable {
 }
 
 extension UUID.BytesRepresentation: SQLiteType {
-  public static var typeAffinity: String {
+  public static var typeAffinity: SQLiteTypeAffinity {
     ContiguousArray.typeAffinity
   }
 }
