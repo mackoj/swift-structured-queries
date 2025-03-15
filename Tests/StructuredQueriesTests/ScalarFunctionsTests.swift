@@ -81,15 +81,6 @@ extension SnapshotTests {
       }
     }
 
-    // TODO: Bring back?
-    // @Test func strftime() {
-    //   assertInlineSnapshot(of: User.columns.updatedAt.strftime("%Y.%m%d"), as: .sql) {
-    //     """
-    //     strftime('%Y.%m%d', "users"."updatedAt")
-    //     """
-    //   }
-    // }
-
     @Test func strings() {
       assertInlineSnapshot(of: "Jr".instr(User.columns.name), as: .sql) {
         """

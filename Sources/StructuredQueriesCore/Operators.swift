@@ -82,7 +82,7 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
   }
 
   public func neq(_ other: some QueryExpression<QueryValue.Wrapped>) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "=", rhs: other)
+    BinaryOperator(lhs: self, operator: "<>", rhs: other)
   }
 
   public func eq(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<Bool> {
@@ -90,7 +90,7 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
   }
 
   public func neq(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "=", rhs: other)
+    BinaryOperator(lhs: self, operator: "<>", rhs: other)
   }
 
   public func `is`(

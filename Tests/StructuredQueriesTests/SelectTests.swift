@@ -243,31 +243,6 @@ extension SnapshotTests {
         └─────────────────────────────────────────┴────────────────────┘
         """#
       }
-      // TODO: Get coverage on optional relations.
-      assertInlineSnapshot(
-        of: RemindersList.leftJoin(Reminder.all()) { $0.id.eq($1.remindersListID) },
-        as: .sql
-      ) {
-        """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "remindersLists" LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
-        """
-      }
-      assertInlineSnapshot(
-        of: RemindersList.rightJoin(Reminder.all()) { $0.id.eq($1.remindersListID) },
-        as: .sql
-      ) {
-        """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "remindersLists" RIGHT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
-        """
-      }
-      assertInlineSnapshot(
-        of: RemindersList.fullJoin(Reminder.all()) { $0.id.eq($1.remindersListID) },
-        as: .sql
-      ) {
-        """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "remindersLists" FULL JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
-        """
-      }
 
       try assertQuery(
         RemindersList
@@ -291,6 +266,78 @@ extension SnapshotTests {
         │ "Business" │ "Call accountant"          │
         │ "Business" │ "Send weekly emails"       │
         └────────────┴────────────────────────────┘
+        """
+      }
+
+      try assertQuery(
+        Reminder.all()
+          .leftJoin(User.all()) { $0.assignedUserID.eq($1.id) }
+          .select { ($0.title, $1.name)}
+          .limit(2)
+      ) {
+        """
+        SELECT "reminders"."title", "users"."name" FROM "reminders" LEFT JOIN "users" ON ("reminders"."assignedUserID" = "users"."id") LIMIT 2
+        """
+      } results: {
+        """
+        ┌─────────────┬────────┐
+        │ "Groceries" │ "Blob" │
+        │ "Haircut"   │ nil    │
+        └─────────────┴────────┘
+        """
+      }
+
+      try assertQuery(
+        User.all()
+          .rightJoin(Reminder.all()) { $0.id.is($1.assignedUserID) }
+          .select { ($1.title, $0.name)}
+          .limit(2)
+      ) {
+        """
+        SELECT "reminders"."title", "users"."name" FROM "users" RIGHT JOIN "reminders" ON ("users"."id" IS "reminders"."assignedUserID") LIMIT 2
+        """
+      } results: {
+        """
+        ┌─────────────┬────────┐
+        │ "Groceries" │ "Blob" │
+        │ "Haircut"   │ nil    │
+        └─────────────┴────────┘
+        """
+      }
+
+      try assertQuery(
+        User.all()
+          .rightJoin(Reminder.all()) { $0.id.is($1.assignedUserID) }
+          .select { ($1.title, $0.name)}
+          .limit(2)
+      ) {
+        """
+        SELECT "reminders"."title", "users"."name" FROM "users" RIGHT JOIN "reminders" ON ("users"."id" IS "reminders"."assignedUserID") LIMIT 2
+        """
+      } results: {
+        """
+        ┌─────────────┬────────┐
+        │ "Groceries" │ "Blob" │
+        │ "Haircut"   │ nil    │
+        └─────────────┴────────┘
+        """
+      }
+
+      try assertQuery(
+        Reminder.all()
+          .fullJoin(User.all()) { $0.assignedUserID.eq($1.id) }
+          .select { ($0.title, $1.name)}
+          .limit(2)
+      ) {
+        """
+        SELECT "reminders"."title", "users"."name" FROM "reminders" FULL JOIN "users" ON ("reminders"."assignedUserID" = "users"."id") LIMIT 2
+        """
+      }results: {
+        """
+        ┌─────────────┬────────┐
+        │ "Groceries" │ "Blob" │
+        │ "Haircut"   │ nil    │
+        └─────────────┴────────┘
         """
       }
     }
