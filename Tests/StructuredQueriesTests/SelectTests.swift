@@ -272,7 +272,7 @@ extension SnapshotTests {
       try assertQuery(
         Reminder.all()
           .leftJoin(User.all()) { $0.assignedUserID.eq($1.id) }
-          .select { ($0.title, $1.name)}
+          .select { ($0.title, $1.name) }
           .limit(2)
       ) {
         """
@@ -290,7 +290,7 @@ extension SnapshotTests {
       try assertQuery(
         User.all()
           .rightJoin(Reminder.all()) { $0.id.is($1.assignedUserID) }
-          .select { ($1.title, $0.name)}
+          .select { ($1.title, $0.name) }
           .limit(2)
       ) {
         """
@@ -308,7 +308,7 @@ extension SnapshotTests {
       try assertQuery(
         User.all()
           .rightJoin(Reminder.all()) { $0.id.is($1.assignedUserID) }
-          .select { ($1.title, $0.name)}
+          .select { ($1.title, $0.name) }
           .limit(2)
       ) {
         """
@@ -326,13 +326,13 @@ extension SnapshotTests {
       try assertQuery(
         Reminder.all()
           .fullJoin(User.all()) { $0.assignedUserID.eq($1.id) }
-          .select { ($0.title, $1.name)}
+          .select { ($0.title, $1.name) }
           .limit(2)
       ) {
         """
         SELECT "reminders"."title", "users"."name" FROM "reminders" FULL JOIN "users" ON ("reminders"."assignedUserID" = "users"."id") LIMIT 2
         """
-      }results: {
+      } results: {
         """
         ┌─────────────┬────────┐
         │ "Groceries" │ "Blob" │

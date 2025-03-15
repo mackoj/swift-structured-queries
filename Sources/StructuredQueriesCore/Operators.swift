@@ -511,7 +511,7 @@ private struct LikeOperator<
 
   let string: LHS
   let pattern: RHS
-  let escape: Character?  // TODO: 'QueryExpression<Character>?'
+  let escape: Character?
 
   var queryFragment: QueryFragment {
     var query: QueryFragment = "(\(string.queryFragment) LIKE \(pattern.queryFragment)"
