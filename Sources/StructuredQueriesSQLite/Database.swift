@@ -160,10 +160,9 @@ public final class Database {
       let code = sqlite3_step(statement)
       switch code {
       case SQLITE_ROW:
-        try results
-          .append(
-            (S.From(decoder: decoder).queryOutput, repeat (each J)(decoder: decoder).queryOutput)
-          )
+        try results.append(
+          (S.From(decoder: decoder).queryOutput, repeat (each J)(decoder: decoder).queryOutput)
+        )
         decoder.next()
       case SQLITE_DONE:
         break loop

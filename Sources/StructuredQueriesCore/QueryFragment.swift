@@ -95,6 +95,10 @@ extension QueryFragment: ExpressibleByStringInterpolation {
       string.append(sql)
     }
 
+    public mutating func appendInterpolation(raw sql: some LosslessStringConvertible) {
+      string.append(sql.description)
+    }
+
     public mutating func appendInterpolation(_ binding: QueryBinding) {
       string.append("?")
       bindings.append(binding)

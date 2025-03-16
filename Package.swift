@@ -37,14 +37,6 @@ let package = Package(
       dependencies: [
         "StructuredQueriesCore",
         "StructuredQueriesMacros",
-      ],
-      swiftSettings: [
-        .unsafeFlags([
-          "-Xfrontend",
-          "-warn-long-function-bodies=50",
-          "-Xfrontend",
-          "-warn-long-expression-type-checking=50",
-        ])
       ]
     ),
     .macro(

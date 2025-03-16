@@ -200,5 +200,29 @@ extension SnapshotTests {
         """#
       }
     }
+
+    @Test func validRawBind() {
+      assertMacro {
+        #"""
+        #sql("'\(raw: 42)'")
+        """#
+      } expansion: {
+        #"""
+        StructuredQueries.SQLQueryExpression("'\(raw: 42)'")
+        """#
+      }
+    }
+
+    @Test func complexValidRawBind() {
+      assertMacro {
+        #"""
+        #sql("\($0.date) < date('now', '-\(raw: monthsAgo) months')")
+        """#
+      } expansion: {
+        #"""
+        StructuredQueries.SQLQueryExpression("\($0.date) < date('now', '-\(raw: monthsAgo) months')")
+        """#
+      }
+    }
   }
 }

@@ -23,29 +23,45 @@ public enum SQLMacro: ExpressionMacro {
       for segment in string.segments {
         guard let segment = segment.as(StringSegmentSyntax.self)
         else {
-          if invalidBind, let currentDelimiter {
-            let openingDelimiter = UnicodeScalar(currentDelimiter.delimiter)
-            let q = openingDelimiter == "'" ? #"""# : "'"
-            context.diagnose(
-              Diagnostic(
-                node: segment,
-                message: MacroExpansionErrorMessage(
-                  """
-                  Bind after opening \(q)\(openingDelimiter)\(q) in SQL string produces invalid \
-                  fragment
-                  """
-                ),
-                notes: [
-                  Note(
-                    node: Syntax(string),
-                    position: currentDelimiter.segment.position.advanced(
-                      by: currentDelimiter.offset
-                    ),
-                    message: MacroExpansionNoteMessage("Opening \(q)\(openingDelimiter)\(q)")
+          if
+            invalidBind,
+            let currentDelimiter,
+            let segment = segment.as(ExpressionSegmentSyntax.self),
+            let expression = segment.expressions.first
+          {
+            guard expression.label?.text == "raw" else {
+              let openingDelimiter = UnicodeScalar(currentDelimiter.delimiter)
+              let q = openingDelimiter == "'" ? #"""# : "'"
+              context.diagnose(
+                Diagnostic(
+                  node: segment,
+                  message: MacroExpansionErrorMessage(
+                    """
+                    Bind after opening \(q)\(openingDelimiter)\(q) in SQL string produces \
+                    invalid fragment; did you mean to make this explicit? To interpolate raw SQL, \
+                    use '\\(raw:)'.
+                    """
+                  ),
+                  notes: [
+                    Note(
+                      node: Syntax(string),
+                      position: currentDelimiter.segment.position.advanced(
+                        by: currentDelimiter.offset
+                      ),
+                      message: MacroExpansionNoteMessage("Opening \(q)\(openingDelimiter)\(q)")
+                    )
+                  ],
+                  fixIt: .replace(
+                    message: MacroExpansionFixItMessage("Insert 'raw: '"),
+                    oldNode: expression,
+                    newNode: expression
+                      .with(\.label, .identifier("raw"))
+                      .with(\.colon, .colonToken(trailingTrivia: " "))
                   )
-                ]
+                )
               )
-            )
+              continue
+            }
           }
           continue
         }
@@ -53,7 +69,7 @@ public enum SQLMacro: ExpressionMacro {
         for (offset, byte) in segment.content.syntaxTextBytes.enumerated() {
           if let delimiter = currentDelimiter ?? parenStack.last {
             if byte == delimiters[delimiter.delimiter],
-              offset != delimiter.offset + 1,
+              delimiter.segment == segment ? offset != delimiter.offset + 1 : true,
               segment.content.syntaxTextBytes.indices.contains(offset - 1)
                 ? segment.content.syntaxTextBytes[offset - 1] != delimiters[byte]
                 : true
