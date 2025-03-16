@@ -119,6 +119,14 @@ final class SQLiteQueryDecoder: QueryDecoder {
 
   @inlinable
   @inline(__always)
+  func decodeNil() throws -> Bool {
+    let isNil = sqlite3_column_type(statement, currentIndex) == SQLITE_NULL
+    if isNil { currentIndex += 1 }
+    return isNil
+  }
+
+  @inlinable
+  @inline(__always)
   func decode(_ type: Bool?.Type) throws -> Bool? {
     try decode(Int?.self).map { $0 != 0 }
   }

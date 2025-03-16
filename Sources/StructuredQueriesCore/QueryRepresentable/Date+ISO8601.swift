@@ -1,5 +1,7 @@
 import Foundation
 
+// TODO: iOS <15 support
+
 extension Date {
   @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
   public struct ISO8601Representation: QueryRepresentable {

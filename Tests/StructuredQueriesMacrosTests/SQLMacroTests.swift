@@ -196,7 +196,16 @@ extension SnapshotTests {
         #"""
         #sql("'\(42)'")
                ┬────
-               ╰─ 🛑 Bind after opening "'" in SQL string produces invalid fragment
+               ╰─ 🛑 Bind after opening "'" in SQL string produces invalid fragment; did you mean to make this explicit? To interpolate raw SQL, use '\(raw:)'.
+                  ✏️ Insert 'raw: '
+        """#
+      } fixes: {
+        #"""
+        #sql("'\(raw: 42)'")
+        """#
+      } expansion: {
+        #"""
+        StructuredQueries.SQLQueryExpression("'\(raw: 42)'")
         """#
       }
     }

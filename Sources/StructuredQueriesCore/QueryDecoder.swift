@@ -29,6 +29,8 @@ public protocol QueryDecoder {
 
   func decode(_ type: UInt64.Type) throws -> UInt64
 
+  func decodeNil() throws -> Bool
+
   func decode(_ type: Bool?.Type) throws -> Bool?
 
   func decode(_ type: ContiguousArray<UInt8>?.Type) throws -> ContiguousArray<UInt8>?

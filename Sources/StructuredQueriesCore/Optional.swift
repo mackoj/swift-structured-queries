@@ -27,7 +27,11 @@ extension Optional: QueryDecodable where Wrapped: QueryDecodable {
   @inlinable
   @inline(__always)
   public init(decoder: some QueryDecoder) throws {
-    self = try decoder.decode(Outer<Wrapped>.self)._wrapped
+    if try decoder.decodeNil() {
+      self = .none
+    } else {
+      self = try decoder.decode(Wrapped.self)
+    }
   }
 }
 
