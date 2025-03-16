@@ -7,10 +7,14 @@ public protocol QueryRepresentable<QueryOutput>: QueryDecodable {
 }
 
 extension QueryRepresentable where Self: QueryDecodable, Self == QueryOutput {
+  @inlinable
+  @inline(__always)
   public init(queryOutput: QueryOutput) {
     self = queryOutput
   }
 
+  @inlinable
+  @inline(__always)
   public var queryOutput: QueryOutput {
     self
   }
