@@ -7,9 +7,24 @@ import Testing
 extension SnapshotTests {
   @Suite struct DeleteTests {
     @Test func deleteAll() throws {
-      try assertQuery(Reminder.delete().returning(\.self)) {
+      try assertQuery(Reminder.delete().returning(\.id)) {
         """
-        DELETE FROM "reminders" RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        DELETE FROM "reminders" RETURNING "reminders"."id"
+        """
+      }results: {
+        """
+        ┌────┐
+        │ 1  │
+        │ 2  │
+        │ 3  │
+        │ 4  │
+        │ 5  │
+        │ 6  │
+        │ 7  │
+        │ 8  │
+        │ 9  │
+        │ 10 │
+        └────┘
         """
       } results: {
         #"""
