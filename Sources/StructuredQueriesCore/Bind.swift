@@ -1,3 +1,7 @@
+/// A query expression of a statement binding.
+///
+/// It is not common to interact with this type directly. A value of this type is returned from the
+/// `#bind` macro.
 public struct BindQueryExpression<QueryValue: QueryBindable>: QueryExpression {
   public let base: QueryValue
 

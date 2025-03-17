@@ -26,7 +26,7 @@ extension SnapshotTests {
         """
         #sql("date('now)")
              ──────┬─────
-                   ╰─ ⚠️ Cannot find "'" to match opening "'" in SQL string produces incomplete fragment; did you mean to make this explicit?
+                   ╰─ ⚠️ Cannot find "'" to match opening "'" in SQL string, producing incomplete fragment; did you mean to make this explicit?
                       ✏️ Use 'SQLQueryExpression.init(_:)' to silence this warning
         """
       } fixes: {
@@ -46,7 +46,7 @@ extension SnapshotTests {
         #"""
         #sql("(\($0.id) = \($1.id)")
              ─┬────────────────────
-              ╰─ ⚠️ Cannot find ')' to match opening '(' in SQL string produces incomplete fragment; did you mean to make this explicit?
+              ╰─ ⚠️ Cannot find ')' to match opening '(' in SQL string, producing incomplete fragment; did you mean to make this explicit?
                  ✏️ Use 'SQLQueryExpression.init(_:)' to silence this warning
         """#
       } fixes: {
@@ -57,6 +57,29 @@ extension SnapshotTests {
         #"""
         SQLQueryExpression("(\($0.id) = \($1.id)")
         """#
+      }
+    }
+
+    @Test func unmatchedOpenDelimiters() {
+      assertMacro {
+        """
+        #sql("(1 + 2))")
+        """
+      } diagnostics: {
+        """
+        #sql("(1 + 2))")
+             ────────┬─
+                     ╰─ 🛑 Cannot find '(' to match closing ')' in SQL string, producing incomplete fragment; did you mean to make this explicit?
+                        ✏️ Use 'SQLQueryExpression.init(_:)' to silence this warning
+        """
+      } fixes: {
+        """
+        SQLQueryExpression("(1 + 2))")
+        """
+      } expansion: {
+        """
+        SQLQueryExpression("(1 + 2))")
+        """
       }
     }
 
@@ -196,7 +219,7 @@ extension SnapshotTests {
         #"""
         #sql("'\(42)'")
                ┬────
-               ╰─ 🛑 Bind after opening "'" in SQL string produces invalid fragment; did you mean to make this explicit? To interpolate raw SQL, use '\(raw:)'.
+               ╰─ 🛑 Bind after opening "'" in SQL string, producing invalid fragment; did you mean to make this explicit? To interpolate raw SQL, use '\(raw:)'.
                   ✏️ Insert 'raw: '
         """#
       } fixes: {

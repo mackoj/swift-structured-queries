@@ -8,6 +8,9 @@ public enum SQLMacro: ExpressionMacro {
     in context: C
   ) -> ExprSyntax {
     guard let argument = node.arguments.first?.expression else { fatalError() }
+    let binds = [
+      UInt8(ascii: "?"), UInt8(ascii: ":"), UInt8(ascii: "@"), UInt8(ascii: "$"),
+    ]
     let delimiters: [UInt8: UInt8] = [
       UInt8(ascii: #"""#): UInt8(ascii: #"""#),
       UInt8(ascii: "'"): UInt8(ascii: "'"),
@@ -18,6 +21,7 @@ public enum SQLMacro: ExpressionMacro {
     var parenStack: [(delimiter: UInt8, segment: StringSegmentSyntax, offset: Int)] = []
     var currentDelimiter: (delimiter: UInt8, segment: StringSegmentSyntax, offset: Int)?
     var unexpectedBind: (segment: StringSegmentSyntax, offset: Int)?
+    var unexpectedClose: (delimiter: UInt8, segment: StringSegmentSyntax, offset: Int)?
     var invalidBind = false
     if let string = argument.as(StringLiteralExprSyntax.self) {
       for segment in string.segments {
@@ -37,7 +41,7 @@ public enum SQLMacro: ExpressionMacro {
                   node: segment,
                   message: MacroExpansionErrorMessage(
                     """
-                    Bind after opening \(q)\(openingDelimiter)\(q) in SQL string produces \
+                    Bind after opening \(q)\(openingDelimiter)\(q) in SQL string, producing \
                     invalid fragment; did you mean to make this explicit? To interpolate raw SQL, \
                     use '\\(raw:)'.
                     """
@@ -90,13 +94,10 @@ public enum SQLMacro: ExpressionMacro {
               } else {
                 currentDelimiter = (byte, segment, offset)
               }
-            } else {
-              let binds = [
-                UInt8(ascii: "?"), UInt8(ascii: ":"), UInt8(ascii: "@"), UInt8(ascii: "$"),
-              ]
-              if binds.contains(byte) {
-                unexpectedBind = (segment, offset)
-              }
+            } else if delimiters.values.contains(byte) {
+              unexpectedClose = (byte, segment, offset)
+            } else if binds.contains(byte) {
+              unexpectedBind = (segment, offset)
             }
           }
         }
@@ -117,7 +118,7 @@ public enum SQLMacro: ExpressionMacro {
             message: MacroExpansionWarningMessage(
               """
               Cannot find \(q)\(closingDelimiter)\(q) to match opening \(q)\(openingDelimiter)\(q) \
-              in SQL string produces incomplete fragment; did you mean to make this explicit?
+              in SQL string, producing incomplete fragment; did you mean to make this explicit?
               """
             ),
             fixIt: .replace(
@@ -146,6 +147,44 @@ public enum SQLMacro: ExpressionMacro {
               """
               Invalid bind parameter in literal; use interpolation to bind values into SQL
               """
+            )
+          )
+        )
+      }
+      if let unexpectedClose {
+        let delimiters: [UInt8: UInt8] = [
+          UInt8(ascii: "]"): UInt8(ascii: "["),
+          UInt8(ascii: ")"): UInt8(ascii: "("),
+        ]
+        let closingDelimiter = UnicodeScalar(unexpectedClose.delimiter)
+        let openingDelimiter = UnicodeScalar(
+          delimiters[unexpectedClose.delimiter] ?? unexpectedClose.delimiter
+        )
+        let q = openingDelimiter == "'" ? #"""# : "'"
+
+        context.diagnose(
+          Diagnostic(
+            node: string,
+            position: unexpectedClose.segment.position.advanced(by: unexpectedClose.offset),
+            message: MacroExpansionErrorMessage(
+              """
+              Cannot find \(q)\(openingDelimiter)\(q) to match closing \(q)\(closingDelimiter)\(q) \
+              in SQL string, producing incomplete fragment; did you mean to make this explicit?
+              """
+            ),
+            fixIt: .replace(
+              message: MacroExpansionFixItMessage(
+                "Use 'SQLQueryExpression.init(_:)' to silence this warning"
+              ),
+              oldNode: node,
+              newNode: FunctionCallExprSyntax(
+                calledExpression: DeclReferenceExprSyntax(
+                  baseName: .identifier("SQLQueryExpression")
+                ),
+                leftParen: .leftParenToken(),
+                arguments: node.arguments,
+                rightParen: .rightParenToken()
+              )
             )
           )
         )
