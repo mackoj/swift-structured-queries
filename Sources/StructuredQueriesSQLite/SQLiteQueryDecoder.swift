@@ -119,6 +119,12 @@ final class SQLiteQueryDecoder: QueryDecoder {
 
   @inlinable
   @inline(__always)
+  public func decodeColumns<T: Table>(_ type: T.Type = T.self) throws -> T {
+    try T(decoder: self)
+  }
+
+  @inlinable
+  @inline(__always)
   func decodeNil() throws -> Bool {
     let isNil = sqlite3_column_type(statement, currentIndex) == SQLITE_NULL
     if isNil { currentIndex += 1 }
@@ -228,5 +234,14 @@ final class SQLiteQueryDecoder: QueryDecoder {
   @inline(__always)
   func decode(_ type: UInt64?.Type) throws -> UInt64? {
     try decode(Int64?.self).map(UInt64.init)
+  }
+
+  @inlinable
+  @inline(__always)
+  public func decodeColumns<T: Table>(_ type: T?.Type = T?.self) throws -> T? {
+    let index = currentIndex
+    let result = try T?(decoder: self)
+    currentIndex = index.advanced(by: T.Columns.count)
+    return result
   }
 }

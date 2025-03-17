@@ -7,7 +7,10 @@ public protocol Table: QueryRepresentable where Columns.QueryValue == Self {
 extension Never: Table {
   public struct Columns: Schema {
     public typealias QueryValue = Never
+
     public var allColumns: [any ColumnExpression] { [] }
+
+    public static var count: Int { 0 }
   }
 
   public static var columns: Columns {

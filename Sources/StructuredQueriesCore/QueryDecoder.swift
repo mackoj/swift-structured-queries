@@ -1,3 +1,5 @@
+// TODO: Simplify some of this?
+
 public protocol QueryDecoder {
   func decode(_ type: Bool.Type) throws -> Bool
 
@@ -28,6 +30,8 @@ public protocol QueryDecoder {
   func decode(_ type: UInt32.Type) throws -> UInt32
 
   func decode(_ type: UInt64.Type) throws -> UInt64
+
+  func decodeColumns<T: Table>(_ type: T.Type) throws -> T
 
   func decodeNil() throws -> Bool
 
@@ -60,6 +64,8 @@ public protocol QueryDecoder {
   func decode(_ type: UInt32?.Type) throws -> UInt32?
 
   func decode(_ type: UInt64?.Type) throws -> UInt64?
+
+  func decodeColumns<T: Table>(_ type: T?.Type) throws -> T?
 
   func decode<T: QueryDecodable>(_ type: T.Type) throws -> T
 

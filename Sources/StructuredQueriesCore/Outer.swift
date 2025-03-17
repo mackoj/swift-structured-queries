@@ -1,15 +1,45 @@
-public struct Outer<Base>: _OptionalPromotable {
+public struct Outer<Base: Table>: _OptionalPromotable, Table {
+  public static var tableName: String {
+    Base.tableName
+  }
+
+  public static var columns: Columns {
+    Columns()
+  }
+
   let base: Base?
+
+  public var _wrapped: Base? { base }
 
   fileprivate subscript<Member: QueryRepresentable>(
     member _: KeyPath<Member, Member> & Sendable,
     column keyPath: KeyPath<Base, Member.QueryOutput> & Sendable
-  ) -> Outer<Member>.QueryOutput {
-    guard let base else { return nil }
-    return base[keyPath: keyPath]
+  ) -> Member.QueryOutput? {
+    base?[keyPath: keyPath]
   }
 
-  public var _wrapped: Base? { base }
+  @dynamicMemberLookup
+  public struct Columns: Schema {
+    public var allColumns: [any ColumnExpression] {
+      Base.columns.allColumns
+    }
+
+    public static var count: Int {
+      Base.Columns.count
+    }
+
+    public typealias QueryValue = Outer
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Base.Columns, Column<Base, Member>>
+    ) -> Column<Outer<Base>, Member?> {
+      let column = Base.columns[keyPath: keyPath]
+      return Column<Outer<Base>, Member?>(
+        column.name,
+        keyPath: \Outer<Base>.[member: \Member.self, column: column._keyPath]
+      )
+    }
+  }
 }
 
 extension Outer: QueryExpression where Base: QueryExpression {
@@ -28,7 +58,7 @@ extension Outer: QueryBindable where Base: QueryBindable {
 
 extension Outer: QueryDecodable where Base: QueryDecodable {
   public init(decoder: some QueryDecoder) throws {
-    self.init(base: try decoder.decode(Base?.self))
+    self.init(base: try decoder.decodeColumns(Base?.self))
   }
 }
 
@@ -45,32 +75,3 @@ extension Outer: QueryRepresentable where Base: QueryRepresentable {
 }
 
 extension Outer: Sendable where Base: Sendable {}
-
-extension Outer: Table where Base: Table {
-  public static var tableName: String {
-    Base.tableName
-  }
-
-  public static var columns: Columns {
-    Columns()
-  }
-
-  @dynamicMemberLookup
-  public struct Columns: Schema {
-    public var allColumns: [any ColumnExpression] {
-      Base.columns.allColumns
-    }
-
-    public typealias QueryValue = Outer
-
-    public subscript<Member>(
-      dynamicMember keyPath: KeyPath<Base.Columns, Column<Base, Member>>
-    ) -> Column<Outer<Base>, Member?> {
-      let column = Base.columns[keyPath: keyPath]
-      return Column<Outer<Base>, Member?>(
-        column.name,
-        keyPath: \Outer<Base>.[member: \Member.self, column: column._keyPath]
-      )
-    }
-  }
-}

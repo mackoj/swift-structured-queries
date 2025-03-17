@@ -161,7 +161,10 @@ public final class Database {
       switch code {
       case SQLITE_ROW:
         try results.append(
-          (S.From(decoder: decoder).queryOutput, repeat (each J)(decoder: decoder).queryOutput)
+          (
+            decoder.decodeColumns(S.From.self).queryOutput,
+            repeat decoder.decodeColumns((each J).self).queryOutput
+          )
         )
         decoder.next()
       case SQLITE_DONE:

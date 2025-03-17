@@ -295,6 +295,73 @@ extension SnapshotTests {
         """
         SELECT "users"."id", "users"."name", "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "users" RIGHT JOIN "reminders" ON ("users"."id" IS "reminders"."assignedUserID") LIMIT 2
         """
+      } results: {
+        """
+        ┌────────────────┬─────────────────────────────────────────┐
+        │ User(          │ Reminder(                               │
+        │   id: 1,       │   id: 1,                                │
+        │   name: "Blob" │   assignedUserID: 1,                    │
+        │ )              │   date: Date(2001-01-01T00:00:00.000Z), │
+        │                │   isCompleted: false,                   │
+        │                │   isFlagged: false,                     │
+        │                │   notes: "Milk, Eggs, Apples",          │
+        │                │   priority: nil,                        │
+        │                │   remindersListID: 1,                   │
+        │                │   title: "Groceries"                    │
+        │                │ )                                       │
+        ├────────────────┼─────────────────────────────────────────┤
+        │ nil            │ Reminder(                               │
+        │                │   id: 2,                                │
+        │                │   assignedUserID: nil,                  │
+        │                │   date: Date(2000-12-30T00:00:00.000Z), │
+        │                │   isCompleted: false,                   │
+        │                │   isFlagged: true,                      │
+        │                │   notes: "",                            │
+        │                │   priority: nil,                        │
+        │                │   remindersListID: 1,                   │
+        │                │   title: "Haircut"                      │
+        │                │ )                                       │
+        └────────────────┴─────────────────────────────────────────┘
+        """
+      }
+
+      try assertQuery(
+        User.all()
+          .rightJoin(Reminder.all()) { $0.id.is($1.assignedUserID) }
+          .limit(2)
+          .select { ($0, $1) }
+      ) {
+        """
+        SELECT "users"."id", "users"."name", "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "users" RIGHT JOIN "reminders" ON ("users"."id" IS "reminders"."assignedUserID") LIMIT 2
+        """
+      } results: {
+        """
+        ┌────────────────┬─────────────────────────────────────────┐
+        │ User(          │ Reminder(                               │
+        │   id: 1,       │   id: 1,                                │
+        │   name: "Blob" │   assignedUserID: 1,                    │
+        │ )              │   date: Date(2001-01-01T00:00:00.000Z), │
+        │                │   isCompleted: false,                   │
+        │                │   isFlagged: false,                     │
+        │                │   notes: "Milk, Eggs, Apples",          │
+        │                │   priority: nil,                        │
+        │                │   remindersListID: 1,                   │
+        │                │   title: "Groceries"                    │
+        │                │ )                                       │
+        ├────────────────┼─────────────────────────────────────────┤
+        │ nil            │ Reminder(                               │
+        │                │   id: 2,                                │
+        │                │   assignedUserID: nil,                  │
+        │                │   date: Date(2000-12-30T00:00:00.000Z), │
+        │                │   isCompleted: false,                   │
+        │                │   isFlagged: true,                      │
+        │                │   notes: "",                            │
+        │                │   priority: nil,                        │
+        │                │   remindersListID: 1,                   │
+        │                │   title: "Haircut"                      │
+        │                │ )                                       │
+        └────────────────┴─────────────────────────────────────────┘
+        """
       }
 
       try assertQuery(
