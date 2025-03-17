@@ -11,3 +11,9 @@ public protocol PrimaryKeyedSchema<PrimaryKey>: Schema where QueryValue: Primary
 
   var primaryKey: PrimaryKey { get }
 }
+
+extension PrimaryKeyedSchema {
+  public func count() -> some QueryExpression<Int> {
+    primaryKey.count()
+  }
+}
