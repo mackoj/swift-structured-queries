@@ -20,6 +20,10 @@ let package = Package(
       name: "StructuredQueriesCore",
       targets: ["StructuredQueriesCore"]
     ),
+    .library(
+      name: "_StructuredQueriesSQLite",
+      targets: ["StructuredQueriesSQLite"]
+    ),
   ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.3"),

@@ -2,33 +2,30 @@ import Foundation
 import SQLite3
 import StructuredQueries
 
-public final class Database {
-  private var handle: OpaquePointer?
+public struct Database {
+  private let storage: Storage
 
-  public init(path: String = ":memory:") throws {
-    guard
-      sqlite3_open_v2(
-        path,
-        &handle,
-        SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
-        nil
-      ) == SQLITE_OK
-    else {
-      throw SQLiteError(handle)
-    }
+  public init(_ ptr: OpaquePointer) {
+    self.storage = .unowned(ptr)
   }
 
-  deinit {
-    sqlite3_close_v2(handle)
+  public init(path: String = ":memory:") throws {
+    var handle: OpaquePointer?
+    let code = sqlite3_open_v2(
+      path,
+      &handle,
+      SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
+      nil
+    )
+    guard code == SQLITE_OK, let handle else { throw SQLiteError(code: code) }
+    self.storage = .owned(Storage.Autoreleasing(handle))
   }
 
   public func execute(
     _ sql: String
   ) throws {
-    guard sqlite3_exec(handle, sql, nil, nil, nil) == SQLITE_OK
-    else {
-      throw SQLiteError(handle)
-    }
+    guard sqlite3_exec(storage.handle, sql, nil, nil, nil) == SQLITE_OK
+    else { throw SQLiteError(db: storage.handle) }
   }
 
   public func execute(_ query: some Statement<()>) throws {
@@ -40,7 +37,7 @@ public final class Database {
   ) throws -> [QueryValue.QueryOutput] {
     try withStatement(query) { statement in
       var results: [QueryValue.QueryOutput] = []
-      let decoder = SQLiteQueryDecoder(database: handle, statement: statement)
+      let decoder = SQLiteQueryDecoder(database: storage.handle, statement: statement)
       loop: while true {
         let code = sqlite3_step(statement)
         switch code {
@@ -50,7 +47,7 @@ public final class Database {
         case SQLITE_DONE:
           break loop
         default:
-          throw SQLiteError(handle)
+          throw SQLiteError(db: storage.handle)
         }
       }
       return results
@@ -62,7 +59,7 @@ public final class Database {
   ) throws -> [(repeat (each V).QueryOutput)] {
     try withStatement(query) { statement in
       var results: [(repeat (each V).QueryOutput)] = []
-      let decoder = SQLiteQueryDecoder(database: handle, statement: statement)
+      let decoder = SQLiteQueryDecoder(database: storage.handle, statement: statement)
       loop: while true {
         let code = sqlite3_step(statement)
         switch code {
@@ -72,7 +69,7 @@ public final class Database {
         case SQLITE_DONE:
           break loop
         default:
-          throw SQLiteError(handle)
+          throw SQLiteError(db: storage.handle)
         }
       }
       return results
@@ -83,28 +80,7 @@ public final class Database {
     _ query: S
   ) throws -> [(S.From.QueryOutput, repeat (each J).QueryOutput)]
   where S.QueryValue == (), S.Joins == (repeat each J) {
-    try withStatement(query) { statement in
-      var results: [(S.From.QueryOutput, repeat (each J).QueryOutput)] = []
-      let decoder = SQLiteQueryDecoder(database: handle, statement: statement)
-      loop: while true {
-        let code = sqlite3_step(statement)
-        switch code {
-        case SQLITE_ROW:
-          try results.append(
-            (
-              decoder.decodeColumns(S.From.self).queryOutput,
-              repeat decoder.decodeColumns((each J).self).queryOutput
-            )
-          )
-          decoder.next()
-        case SQLITE_DONE:
-          break loop
-        default:
-          throw SQLiteError(handle)
-        }
-      }
-      return results
-    }
+    try execute(query.selectStar())
   }
 
   private func withStatement<R>(
@@ -112,12 +88,9 @@ public final class Database {
   ) throws -> R {
     var statement: OpaquePointer?
     let sql = query.query
-    guard
-      sqlite3_prepare_v2(handle, sql.string, -1, &statement, nil) == SQLITE_OK,
-      let statement
-    else {
-      throw SQLiteError(handle)
-    }
+    let code = sqlite3_prepare_v2(storage.handle, sql.string, -1, &statement, nil)
+    guard code == SQLITE_OK, let statement
+    else { throw SQLiteError(code: code) }
     defer { sqlite3_finalize(statement) }
     for (index, binding) in zip(Int32(1)..., sql.bindings) {
       let result =
@@ -133,9 +106,35 @@ public final class Database {
         case let .text(text):
           sqlite3_bind_text(statement, index, text, -1, SQLITE_TRANSIENT)
         }
-      guard result == SQLITE_OK else { throw SQLiteError(handle) }
+      guard result == SQLITE_OK else { throw SQLiteError(code: result) }
     }
     return try body(statement)
+  }
+
+  private enum Storage {
+    case owned(Autoreleasing)
+    case unowned(OpaquePointer)
+
+    var handle: OpaquePointer {
+      switch self {
+      case let .owned(storage):
+        return storage.handle
+      case let .unowned(handle):
+        return handle
+      }
+    }
+
+    final class Autoreleasing {
+      fileprivate var handle: OpaquePointer
+
+      init(_ handle: OpaquePointer) {
+        self.handle = handle
+      }
+
+      deinit {
+        sqlite3_close_v2(handle)
+      }
+    }
   }
 }
 
@@ -144,7 +143,11 @@ private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.sel
 struct SQLiteError: Error {
   let message: String
 
-  init(_ handle: OpaquePointer?) {
+  init(db handle: OpaquePointer?) {
     self.message = String(cString: sqlite3_errmsg(handle))
+  }
+
+  init(code: Int32) {
+    self.message = String(cString: sqlite3_errstr(code))
   }
 }
