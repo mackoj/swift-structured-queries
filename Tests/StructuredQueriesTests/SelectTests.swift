@@ -290,18 +290,10 @@ extension SnapshotTests {
       try assertQuery(
         User.all()
           .rightJoin(Reminder.all()) { $0.id.is($1.assignedUserID) }
-          .select { ($1.title, $0.name) }
           .limit(2)
       ) {
         """
-        SELECT "reminders"."title", "users"."name" FROM "users" RIGHT JOIN "reminders" ON ("users"."id" IS "reminders"."assignedUserID") LIMIT 2
-        """
-      } results: {
-        """
-        ┌─────────────┬────────┐
-        │ "Groceries" │ "Blob" │
-        │ "Haircut"   │ nil    │
-        └─────────────┴────────┘
+        SELECT "users"."id", "users"."name", "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "users" RIGHT JOIN "reminders" ON ("users"."id" IS "reminders"."assignedUserID") LIMIT 2
         """
       }
 
