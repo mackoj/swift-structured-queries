@@ -40,9 +40,6 @@ extension SelectionMacro: ExtensionMacro {
         let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmed
       else { continue }
 
-      var columnName = ExprSyntax(
-        StringLiteralExprSyntax(content: identifier.text.trimmingBackticks())
-      )
       var columnQueryValueType =
         (binding.typeAnnotation?.type.trimmed
         ?? binding.initializer?.value.literalType)
@@ -267,10 +264,7 @@ extension SelectionMacro: MemberAttributeMacro {
       !property.isStatic,
       !property.isComputed,
       !property.hasMacroApplication("Column"),
-      property.bindings.count == 1,
-      let binding = property.bindings.first,
-      let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text
-        .trimmingBackticks()
+      property.bindings.count == 1
     else { return [] }
     return [
       """
