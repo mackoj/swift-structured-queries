@@ -12,6 +12,9 @@ extension TypeSyntax {
   func asOptionalType() -> Self {
     guard !isOptionalType
     else { return self }
-    return TypeSyntax(OptionalTypeSyntax(wrappedType: self))
+    return TypeSyntax(
+      OptionalTypeSyntax(wrappedType: with(\.trailingTrivia, ""))
+        .with(\.trailingTrivia, trailingTrivia)
+    )
   }
 }

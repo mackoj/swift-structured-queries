@@ -15,7 +15,6 @@ your queries.
 
 ### The problem
 
-
 ```swift
 @Table struct Reminder {
   let id: Int 

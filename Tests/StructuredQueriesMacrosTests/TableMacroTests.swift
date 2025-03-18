@@ -821,8 +821,7 @@ extension SnapshotTests {
             }
           }
           public struct Draft: StructuredQueries.Table {
-            @Column(primaryKey: false)
-            public var id: Int?
+            @Column(primaryKey: false) let id: Int?
             public struct TableColumns: StructuredQueries.Schema {
               public typealias QueryValue = Foo.Draft
               public static var count: Int {
@@ -978,7 +977,7 @@ extension SnapshotTests {
           }
           public struct Draft: StructuredQueries.Table {
             @Column(primaryKey: false)
-            public var id: Int?
+            var id: Int?
             var name: String
             public struct TableColumns: StructuredQueries.Schema {
               public typealias QueryValue = Foo.Draft
@@ -1066,8 +1065,7 @@ extension SnapshotTests {
             }
           }
           public struct Draft: StructuredQueries.Table {
-            @Column(primaryKey: false)
-            public var id: Int?
+            @Column(primaryKey: false) let id: Int?
             var title = ""
             @Column(as: Date.UnixTimeRepresentation?.self) var date: Date?
             var priority: Priority?
@@ -1126,6 +1124,77 @@ extension SnapshotTests {
             self.title = other.title
             self.date = other.date
             self.priority = other.priority
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func uuid() {
+      assertMacro {
+        """
+        @Table
+        struct Reminder {
+          @Column(as: UUID.BytesRepresentation.self)
+          let id: UUID
+        }
+        """
+      } expansion: {
+        #"""
+        struct Reminder {
+          let id: UUID
+        }
+
+        extension Reminder: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
+          public struct TableColumns: StructuredQueries.Schema, StructuredQueries.PrimaryKeyedSchema {
+            public typealias QueryValue = Reminder
+            public static var count: Int {
+              1
+            }
+            public let id = StructuredQueries.TableColumn<QueryValue, UUID.BytesRepresentation>("id", keyPath: \QueryValue.id)
+            public var primaryKey: StructuredQueries.TableColumn<QueryValue, UUID.BytesRepresentation> {
+              self.id
+            }
+            public var allColumns: [any StructuredQueries.TableColumnExpression] {
+              [self.id]
+            }
+          }
+          public struct Draft: StructuredQueries.Table {
+            @Column(as: UUID.BytesRepresentation?.self, primaryKey: false) let id: UUID?
+            public struct TableColumns: StructuredQueries.Schema {
+              public typealias QueryValue = Reminder.Draft
+              public static var count: Int {
+                1
+              }
+              public let id = StructuredQueries.TableColumn<QueryValue, UUID.BytesRepresentation?>("id", keyPath: \QueryValue.id)
+              public var allColumns: [any StructuredQueries.TableColumnExpression] {
+                [self.id]
+              }
+            }
+            public static let columns = TableColumns()
+            public static let tableName = Reminder.tableName
+            public init(decoder: some StructuredQueries.QueryDecoder) throws {
+              self.id = try decoder.decode(UUID.BytesRepresentation?.self)
+            }
+            public init(_ other: Reminder) {
+              self.id = other.id
+            }
+            public init(
+              id: UUID? = nil
+            ) {
+              self.id = id
+            }
+          }
+          public static let columns = TableColumns()
+          public static let tableName = "reminders"
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
+            self.id = try decoder.decode(UUID.BytesRepresentation.self)
+          }
+          public init?(_ other: Draft) {
+            guard let id = other.id else {
+              return nil
+            }
+            self.id = id
           }
         }
         """#

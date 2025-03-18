@@ -34,7 +34,12 @@ extension TableMacro: ExtensionMacro {
 
     var draftProperties: [DeclSyntax] = []
     var draftTableType: TypeSyntax?
-    var primaryKey: (identifier: TokenSyntax, type: TypeSyntax?, label: TokenSyntax?)?
+    var primaryKey: (
+      identifier: TokenSyntax,
+      label: TokenSyntax?,
+      queryOutputType: TypeSyntax?,
+      queryValueType: TypeSyntax?
+    )?
     let selfRewriter = SelfRewriter(
       selfEquivalent: type.as(IdentifierTypeSyntax.self)?.name ?? "QueryValue"
     )
@@ -165,8 +170,9 @@ extension TableMacro: ExtensionMacro {
             }
             primaryKey = (
               identifier: identifier,
-              type: columnQueryValueType,
-              label: label
+              label: label,
+              queryOutputType: columnQueryOutputType,
+              queryValueType: columnQueryValueType
             )
 
           case let argument?:
@@ -180,8 +186,9 @@ extension TableMacro: ExtensionMacro {
       if isPrimaryKey {
         primaryKey = (
           identifier: identifier,
-          type: columnQueryValueType,
-          label: nil
+          label: nil,
+          queryOutputType: columnQueryOutputType,
+          queryValueType: columnQueryValueType
         )
       }
 
@@ -236,7 +243,7 @@ extension TableMacro: ExtensionMacro {
         } else if typeIdentifier.hasPrefix("UUID") {
           for representation in ["Lowercased", "Uppercased", "Bytes"] {
             var newProperty = property.with(\.leadingTrivia, "")
-            let attribute = "@Column(as: UUID.\(representation)Representation\(optional).self)"
+            let attribute = "@Column(as: UUID.\(representation)Representation\(optional).self)\n"
             newProperty.attributes.insert(
               AttributeListSyntax.Element("\(raw: attribute)"),
               at: newProperty.attributes.startIndex
@@ -285,12 +292,68 @@ extension TableMacro: ExtensionMacro {
         self.\(identifier) = try decoder.decode(\(columnQueryValueType.map { "\($0).self" } ?? ""))
         """
       )
+
       if let primaryKey, primaryKey.identifier == identifier {
+        var hasColumnAttribute = false
+        var property = property
+        for attributeIndex in property.attributes.indices {
+          guard
+            var attribute = property.attributes[attributeIndex].as(AttributeSyntax.self),
+            let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
+            attributeName == "Column",
+            case var .argumentList(arguments) = attribute.arguments
+          else { continue }
+          hasColumnAttribute = true
+          var hasPrimaryKeyArgument = false
+          for argumentIndex in arguments.indices {
+            var argument = arguments[argumentIndex]
+            defer { arguments[argumentIndex] = argument }
+            switch argument.label?.text {
+            case "as":
+              if var expression = argument.expression.as(MemberAccessExprSyntax.self) {
+                expression.base = "\(expression.base)?"
+                argument.expression = ExprSyntax(expression)
+              }
+
+            case "primaryKey":
+              hasPrimaryKeyArgument = true
+              argument.expression = ExprSyntax(BooleanLiteralExprSyntax(false))
+
+            default:
+              break
+            }
+          }
+          if !hasPrimaryKeyArgument {
+            arguments[arguments.index(before: arguments.endIndex)] .trailingComma = .commaToken(
+              trailingTrivia: .space
+            )
+            arguments.append(
+              LabeledExprSyntax(
+                label: "primaryKey", expression: BooleanLiteralExprSyntax(false)
+              )
+            )
+          }
+          attribute.arguments = .argumentList(arguments)
+          property.attributes[attributeIndex] = .attribute(attribute)
+        }
+        if !hasColumnAttribute {
+          let attribute = "@Column(primaryKey: false)\n"
+          property.attributes.insert(
+            AttributeListSyntax.Element("\(raw: attribute)"),
+            at: property.attributes.startIndex
+          )
+        }
+        var binding = binding
+        if let type = binding.typeAnnotation?.type.asOptionalType() {
+          binding.typeAnnotation?.type = type
+        }
+        property.bindings = [binding]
         draftProperties.append(
-          """
-          @Column(primaryKey: false)
-          public var \(identifier): \(primaryKey.type?.asOptionalType())
-          """
+          DeclSyntax(
+            property.trimmed
+              .with(\.bindingSpecifier.leadingTrivia, "")
+              .removingAccessors()
+          )
         )
       } else {
         draftProperties.append(
@@ -315,9 +378,8 @@ extension TableMacro: ExtensionMacro {
     } else if let primaryKey {
       columnsProperties.append(
         """
-        public var primaryKey: \(moduleName).TableColumn<QueryValue, \(primaryKey.type)> {\
-        self.\(primaryKey.identifier)
-        }
+        public var primaryKey: \(moduleName).TableColumn<QueryValue, \(primaryKey.queryValueType)> \
+        { self.\(primaryKey.identifier) }
         """
       )
       draft = """

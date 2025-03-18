@@ -1,10 +1,28 @@
 extension QueryExpression {
+  /// Returns a predicate expression indicating whether two query expressions are equal.
+  ///
+  /// > Important: Overloaded operators can strain the Swift compiler's type checking ability.
+  /// > Consider using ``eq``, instead.
+  ///
+  /// - Parameters:
+  ///   - lhs: An expression to compare.
+  ///   - rhs: Another expression to compare.
+  /// - Returns: A predicate expression.
   public static func == (
     lhs: Self, rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
     lhs.eq(rhs)
   }
 
+  /// Returns a predicate expression indicating whether two query expressions are not equal.
+  ///
+  /// > Important: Overloaded operators can strain the Swift compiler's type checking ability.
+  /// > Consider using ``neq``, instead.
+  ///
+  /// - Parameters:
+  ///   - lhs: An expression to compare.
+  ///   - rhs: Another expression to compare.
+  /// - Returns: A predicate expression.
   public static func != (
     lhs: Self, rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
@@ -41,6 +59,7 @@ extension QueryExpression where QueryValue: _OptionalPromotable {
     BinaryOperator(lhs: self, operator: "IS", rhs: other)
   }
 
+  // TODO: Should this be 'isnt' (or aliased to it) for similar brevity to 'neq'?
   public func isNot(
     _ other: some QueryExpression<QueryValue._Optionalized>
   ) -> some QueryExpression<Bool> {
