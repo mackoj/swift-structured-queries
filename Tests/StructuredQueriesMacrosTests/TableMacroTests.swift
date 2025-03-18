@@ -681,7 +681,7 @@ extension SnapshotTests {
       assertMacro {
         """
         @Table struct SyncUp {
-          let id: Int
+          var name: String
           @Ephemeral
           var computed: Int
         }
@@ -689,13 +689,126 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct SyncUp {
-          let id: Int
+          var name: String
           var computed: Int
         }
 
-        extension SyncUp: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
-          public struct TableColumns: StructuredQueries.Schema, StructuredQueries.PrimaryKeyedSchema {
+        extension SyncUp: StructuredQueries.Table {
+          public struct TableColumns: StructuredQueries.Schema {
             public typealias QueryValue = SyncUp
+            public static var count: Int {
+              1
+            }
+            public let name = StructuredQueries.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
+            public var allColumns: [any StructuredQueries.TableColumnExpression] {
+              [self.name]
+            }
+          }
+          public static let columns = TableColumns()
+          public static let tableName = "syncUps"
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
+            self.name = try decoder.decode(String.self)
+          }
+        }
+        """#
+      }
+    }
+
+    // NB: This test shows that invalid Swift code is generated when providing a default with an
+    //     expression and not specifying a type.
+    @Test func noType() {
+      assertMacro {
+        """
+        @Table struct SyncUp {
+          var seconds = 60 * 5
+        }
+        """
+      } expansion: {
+        #"""
+        struct SyncUp {
+          var seconds = 60 * 5
+        }
+
+        extension SyncUp: StructuredQueries.Table {
+          public struct TableColumns: StructuredQueries.Schema {
+            public typealias QueryValue = SyncUp
+            public static var count: Int {
+              1
+            }
+            public let seconds = StructuredQueries.TableColumn<QueryValue, _>("seconds", keyPath: \QueryValue.seconds, default: 60 * 5)
+            public var allColumns: [any StructuredQueries.TableColumnExpression] {
+              [self.seconds]
+            }
+          }
+          public static let columns = TableColumns()
+          public static let tableName = "syncUps"
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
+            self.seconds = try decoder.decode()
+          }
+        }
+        """#
+      }
+    }
+  }
+
+  @Test func willSet() {
+    assertMacro {
+      """
+      @Table
+      struct Foo {
+        var name: String {
+          willSet { print(newValue) }
+        }
+      }
+      """
+    } expansion: {
+      #"""
+      struct Foo {
+        var name: String {
+          willSet { print(newValue) }
+        }
+      }
+
+      extension Foo: StructuredQueries.Table {
+        public struct TableColumns: StructuredQueries.Schema {
+          public typealias QueryValue = Foo
+          public static var count: Int {
+            1
+          }
+          public let name = StructuredQueries.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
+          public var allColumns: [any StructuredQueries.TableColumnExpression] {
+            [self.name]
+          }
+        }
+        public static let columns = TableColumns()
+        public static let tableName = "foos"
+        public init(decoder: some StructuredQueries.QueryDecoder) throws {
+          self.name = try decoder.decode(String.self)
+        }
+      }
+      """#
+    }
+  }
+
+  @MainActor
+  @Suite struct PrimaryKeyTests {
+    @Test func basics() {
+      assertMacro {
+        """
+        @Table
+        struct Foo {
+          let id: Int
+        }
+        """
+      } expansion: {
+        #"""
+        struct Foo {
+          let id: Int
+        }
+
+        extension Foo: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
+          public struct TableColumns: StructuredQueries.Schema, StructuredQueries.PrimaryKeyedSchema {
+            public typealias QueryValue = Foo
             public static var count: Int {
               1
             }
@@ -711,7 +824,7 @@ extension SnapshotTests {
             @Column(primaryKey: false)
             public var id: Int?
             public struct TableColumns: StructuredQueries.Schema {
-              public typealias QueryValue = SyncUp.Draft
+              public typealias QueryValue = Foo.Draft
               public static var count: Int {
                 1
               }
@@ -721,11 +834,11 @@ extension SnapshotTests {
               }
             }
             public static let columns = TableColumns()
-            public static let tableName = SyncUp.tableName
+            public static let tableName = Foo.tableName
             public init(decoder: some StructuredQueries.QueryDecoder) throws {
               self.id = try decoder.decode(Int?.self)
             }
-            public init(_ other: SyncUp) {
+            public init(_ other: Foo) {
               self.id = other.id
             }
             public init(
@@ -735,7 +848,7 @@ extension SnapshotTests {
             }
           }
           public static let columns = TableColumns()
-          public static let tableName = "syncUps"
+          public static let tableName = "foos"
           public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.id = try decoder.decode(Int.self)
           }
@@ -748,341 +861,274 @@ extension SnapshotTests {
         }
         """#
       }
+
+      assertMacro {
+        #"""
+        struct Foo {
+          @Column("id", primaryKey: true)
+          let id: Int
+        }
+
+        extension Foo: StructuredQueries.Table {
+          public struct Columns: StructuredQueries.Schema {
+            public typealias QueryValue = Foo
+            public let id = StructuredQueries.Column<QueryValue, Int>("id", keyPath: \QueryValue.id)
+            public var allColumns: [any StructuredQueries.ColumnExpression] {
+              [self.id]
+            }
+          }
+          @_Draft(Foo.self)
+          public struct Draft {
+            @Column(primaryKey: false)
+            let id: Int
+          }
+          public static let columns = Columns()
+          public static let tableName = "foos"
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
+            self.id = try decoder.decode(Int.self)
+          }
+        }
+        """#
+      } expansion: {
+        #"""
+        struct Foo {
+          let id: Int
+        }
+
+        extension Foo: StructuredQueries.Table {
+          public struct Columns: StructuredQueries.Schema {
+            public typealias QueryValue = Foo
+            public let id = StructuredQueries.Column<QueryValue, Int>("id", keyPath: \QueryValue.id)
+            public var allColumns: [any StructuredQueries.ColumnExpression] {
+              [self.id]
+            }
+          }
+          public struct Draft {
+            let id: Int
+          }
+          public static let columns = Columns()
+          public static let tableName = "foos"
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
+            self.id = try decoder.decode(Int.self)
+          }
+        }
+
+        extension Foo.Draft: StructuredQueries.Table {
+          public struct TableColumns: StructuredQueries.Schema {
+            public typealias QueryValue = Foo.Draft
+            public static var count: Int {
+              1
+            }
+            public let id = StructuredQueries.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
+            public var allColumns: [any StructuredQueries.TableColumnExpression] {
+              [self.id]
+            }
+          }
+          public static let columns = TableColumns()
+          public static let tableName = Foo.tableName
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
+            self.id = try decoder.decode(Int.self)
+          }
+          public init(_ other: Foo) {
+            self.id = other.id
+          }
+        }
+        """#
+      }
     }
 
-    // NB: This test shows that invalid Swift code is generated when providing a default with an
-    //     expression and not specifying a type.
-    @Test func noType() {
+    @Test func willSet() {
       assertMacro {
         """
-        @Table struct SyncUp {
-          let id: Int
-          var seconds = 60 * 5
+        @Table
+        struct Foo {
+          var id: Int {
+            willSet { print(newValue) }
+          }
+          var name: String {
+            willSet { print(newValue) }
+          }
         }
         """
       } expansion: {
         #"""
-        struct SyncUp {
-          let id: Int
-          var seconds = 60 * 5
+        struct Foo {
+          var id: Int {
+            willSet { print(newValue) }
+          }
+          var name: String {
+            willSet { print(newValue) }
+          }
         }
 
-        extension SyncUp: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
+        extension Foo: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
           public struct TableColumns: StructuredQueries.Schema, StructuredQueries.PrimaryKeyedSchema {
-            public typealias QueryValue = SyncUp
+            public typealias QueryValue = Foo
             public static var count: Int {
               2
             }
             public let id = StructuredQueries.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
-            public let seconds = StructuredQueries.TableColumn<QueryValue, _>("seconds", keyPath: \QueryValue.seconds, default: 60 * 5)
+            public let name = StructuredQueries.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
             public var primaryKey: StructuredQueries.TableColumn<QueryValue, Int> {
               self.id
             }
             public var allColumns: [any StructuredQueries.TableColumnExpression] {
-              [self.id, self.seconds]
+              [self.id, self.name]
             }
           }
           public struct Draft: StructuredQueries.Table {
             @Column(primaryKey: false)
             public var id: Int?
-            var seconds = 60 * 5
+            var name: String
             public struct TableColumns: StructuredQueries.Schema {
-              public typealias QueryValue = SyncUp.Draft
+              public typealias QueryValue = Foo.Draft
               public static var count: Int {
                 2
               }
               public let id = StructuredQueries.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
-              public let seconds = StructuredQueries.TableColumn<QueryValue, _>("seconds", keyPath: \QueryValue.seconds, default: 60 * 5)
+              public let name = StructuredQueries.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
               public var allColumns: [any StructuredQueries.TableColumnExpression] {
-                [self.id, self.seconds]
+                [self.id, self.name]
               }
             }
             public static let columns = TableColumns()
-            public static let tableName = SyncUp.tableName
+            public static let tableName = Foo.tableName
             public init(decoder: some StructuredQueries.QueryDecoder) throws {
               self.id = try decoder.decode(Int?.self)
-              self.seconds = try decoder.decode()
+              self.name = try decoder.decode(String.self)
             }
-            public init(_ other: SyncUp) {
+            public init(_ other: Foo) {
               self.id = other.id
-              self.seconds = other.seconds
+              self.name = other.name
             }
             public init(
               id: Int? = nil,
-              seconds = 60 * 5
+              name: String
             ) {
               self.id = id
-              self.seconds = seconds
+              self.name = name
             }
           }
           public static let columns = TableColumns()
-          public static let tableName = "syncUps"
+          public static let tableName = "foos"
           public init(decoder: some StructuredQueries.QueryDecoder) throws {
             self.id = try decoder.decode(Int.self)
-            self.seconds = try decoder.decode()
+            self.name = try decoder.decode(String.self)
           }
           public init?(_ other: Draft) {
             guard let id = other.id else {
               return nil
             }
             self.id = id
-            self.seconds = other.seconds
+            self.name = other.name
           }
         }
         """#
       }
     }
-  }
-
-  @MainActor
-  @Suite struct PrimaryKeyTests {
-    @Test func basics() {
-      assertMacro {
-          """
-          @Table
-          struct Foo {
-            let id: Int
-          }
-          """
-      } expansion: {
-          #"""
-          struct Foo {
-            let id: Int
-          }
-          
-          extension Foo: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
-            public struct TableColumns: StructuredQueries.Schema, StructuredQueries.PrimaryKeyedSchema {
-              public typealias QueryValue = Foo
-              public static var count: Int {
-                1
-              }
-              public let id = StructuredQueries.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
-              public var primaryKey: StructuredQueries.TableColumn<QueryValue, Int> {
-                self.id
-              }
-              public var allColumns: [any StructuredQueries.TableColumnExpression] {
-                [self.id]
-              }
-            }
-            public struct Draft: StructuredQueries.Table {
-              @Column(primaryKey: false)
-              public var id: Int?
-              public struct TableColumns: StructuredQueries.Schema {
-                public typealias QueryValue = Foo.Draft
-                public static var count: Int {
-                  1
-                }
-                public let id = StructuredQueries.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
-                public var allColumns: [any StructuredQueries.TableColumnExpression] {
-                  [self.id]
-                }
-              }
-              public static let columns = TableColumns()
-              public static let tableName = Foo.tableName
-              public init(decoder: some StructuredQueries.QueryDecoder) throws {
-                self.id = try decoder.decode(Int?.self)
-              }
-              public init(_ other: Foo) {
-                self.id = other.id
-              }
-              public init(
-                id: Int? = nil
-              ) {
-                self.id = id
-              }
-            }
-            public static let columns = TableColumns()
-            public static let tableName = "foos"
-            public init(decoder: some StructuredQueries.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
-            }
-            public init?(_ other: Draft) {
-              guard let id = other.id else {
-                return nil
-              }
-              self.id = id
-            }
-          }
-          """#
-      }
-
-      assertMacro {
-          #"""
-          struct Foo {
-            @Column("id", primaryKey: true)
-            let id: Int
-          }
-          
-          extension Foo: StructuredQueries.Table {
-            public struct Columns: StructuredQueries.Schema {
-              public typealias QueryValue = Foo
-              public let id = StructuredQueries.Column<QueryValue, Int>("id", keyPath: \QueryValue.id)
-              public var allColumns: [any StructuredQueries.ColumnExpression] {
-                [self.id]
-              }
-            }
-            @_Draft(Foo.self)
-            public struct Draft {
-              @Column(primaryKey: false)
-              let id: Int
-            }
-            public static let columns = Columns()
-            public static let tableName = "foos"
-            public init(decoder: some StructuredQueries.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
-            }
-          }
-          """#
-      } expansion: {
-          #"""
-          struct Foo {
-            let id: Int
-          }
-          
-          extension Foo: StructuredQueries.Table {
-            public struct Columns: StructuredQueries.Schema {
-              public typealias QueryValue = Foo
-              public let id = StructuredQueries.Column<QueryValue, Int>("id", keyPath: \QueryValue.id)
-              public var allColumns: [any StructuredQueries.ColumnExpression] {
-                [self.id]
-              }
-            }
-            public struct Draft {
-              let id: Int
-            }
-            public static let columns = Columns()
-            public static let tableName = "foos"
-            public init(decoder: some StructuredQueries.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
-            }
-          }
-          
-          extension Foo.Draft: StructuredQueries.Table {
-            public struct TableColumns: StructuredQueries.Schema {
-              public typealias QueryValue = Foo.Draft
-              public static var count: Int {
-                1
-              }
-              public let id = StructuredQueries.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
-              public var allColumns: [any StructuredQueries.TableColumnExpression] {
-                [self.id]
-              }
-            }
-            public static let columns = TableColumns()
-            public static let tableName = Foo.tableName
-            public init(decoder: some StructuredQueries.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
-            }
-            public init(_ other: Foo) {
-              self.id = other.id
-            }
-          }
-          """#
-      }
-    }
 
     @Test func advanced() {
       assertMacro {
-          """
-          @Table
-          struct Reminder {
-            let id: Int
-            var title = ""
-            @Column(as: Date.UnixTimeRepresentation?.self)
-            var date: Date?
-            var priority: Priority?
-          }
-          """
+        """
+        @Table
+        struct Reminder {
+          let id: Int
+          var title = ""
+          @Column(as: Date.UnixTimeRepresentation?.self)
+          var date: Date?
+          var priority: Priority?
+        }
+        """
       } expansion: {
-          #"""
-          struct Reminder {
-            let id: Int
-            var title = ""
-            var date: Date?
-            var priority: Priority?
+        #"""
+        struct Reminder {
+          let id: Int
+          var title = ""
+          var date: Date?
+          var priority: Priority?
+        }
+
+        extension Reminder: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
+          public struct TableColumns: StructuredQueries.Schema, StructuredQueries.PrimaryKeyedSchema {
+            public typealias QueryValue = Reminder
+            public static var count: Int {
+              4
+            }
+            public let id = StructuredQueries.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
+            public let title = StructuredQueries.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
+            public let date = StructuredQueries.TableColumn<QueryValue, Date.UnixTimeRepresentation?>("date", keyPath: \QueryValue.date)
+            public let priority = StructuredQueries.TableColumn<QueryValue, Priority?>("priority", keyPath: \QueryValue.priority)
+            public var primaryKey: StructuredQueries.TableColumn<QueryValue, Int> {
+              self.id
+            }
+            public var allColumns: [any StructuredQueries.TableColumnExpression] {
+              [self.id, self.title, self.date, self.priority]
+            }
           }
-          
-          extension Reminder: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
-            public struct TableColumns: StructuredQueries.Schema, StructuredQueries.PrimaryKeyedSchema {
-              public typealias QueryValue = Reminder
+          public struct Draft: StructuredQueries.Table {
+            @Column(primaryKey: false)
+            public var id: Int?
+            var title = ""
+            @Column(as: Date.UnixTimeRepresentation?.self) var date: Date?
+            var priority: Priority?
+            public struct TableColumns: StructuredQueries.Schema {
+              public typealias QueryValue = Reminder.Draft
               public static var count: Int {
                 4
               }
-              public let id = StructuredQueries.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
+              public let id = StructuredQueries.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
               public let title = StructuredQueries.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
               public let date = StructuredQueries.TableColumn<QueryValue, Date.UnixTimeRepresentation?>("date", keyPath: \QueryValue.date)
               public let priority = StructuredQueries.TableColumn<QueryValue, Priority?>("priority", keyPath: \QueryValue.priority)
-              public var primaryKey: StructuredQueries.TableColumn<QueryValue, Int> {
-                self.id
-              }
               public var allColumns: [any StructuredQueries.TableColumnExpression] {
                 [self.id, self.title, self.date, self.priority]
               }
             }
-            public struct Draft: StructuredQueries.Table {
-              @Column(primaryKey: false)
-              public var id: Int?
-              var title = ""
-              @Column(as: Date.UnixTimeRepresentation?.self) var date: Date?
-              var priority: Priority?
-              public struct TableColumns: StructuredQueries.Schema {
-                public typealias QueryValue = Reminder.Draft
-                public static var count: Int {
-                  4
-                }
-                public let id = StructuredQueries.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
-                public let title = StructuredQueries.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
-                public let date = StructuredQueries.TableColumn<QueryValue, Date.UnixTimeRepresentation?>("date", keyPath: \QueryValue.date)
-                public let priority = StructuredQueries.TableColumn<QueryValue, Priority?>("priority", keyPath: \QueryValue.priority)
-                public var allColumns: [any StructuredQueries.TableColumnExpression] {
-                  [self.id, self.title, self.date, self.priority]
-                }
-              }
-              public static let columns = TableColumns()
-              public static let tableName = Reminder.tableName
-              public init(decoder: some StructuredQueries.QueryDecoder) throws {
-                self.id = try decoder.decode(Int?.self)
-                self.title = try decoder.decode(Swift.String.self)
-                self.date = try decoder.decode(Date.UnixTimeRepresentation?.self)
-                self.priority = try decoder.decode(Priority?.self)
-              }
-              public init(_ other: Reminder) {
-                self.id = other.id
-                self.title = other.title
-                self.date = other.date
-                self.priority = other.priority
-              }
-              public init(
-                id: Int? = nil,
-                title: Swift.String = "",
-                date: Date? = nil,
-                priority: Priority? = nil
-              ) {
-                self.id = id
-                self.title = title
-                self.date = date
-                self.priority = priority
-              }
-            }
             public static let columns = TableColumns()
-            public static let tableName = "reminders"
+            public static let tableName = Reminder.tableName
             public init(decoder: some StructuredQueries.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
+              self.id = try decoder.decode(Int?.self)
               self.title = try decoder.decode(Swift.String.self)
               self.date = try decoder.decode(Date.UnixTimeRepresentation?.self)
               self.priority = try decoder.decode(Priority?.self)
             }
-            public init?(_ other: Draft) {
-              guard let id = other.id else {
-                return nil
-              }
-              self.id = id
+            public init(_ other: Reminder) {
+              self.id = other.id
               self.title = other.title
               self.date = other.date
               self.priority = other.priority
             }
+            public init(
+              id: Int? = nil,
+              title: Swift.String = "",
+              date: Date? = nil,
+              priority: Priority? = nil
+            ) {
+              self.id = id
+              self.title = title
+              self.date = date
+              self.priority = priority
+            }
           }
-          """#
+          public static let columns = TableColumns()
+          public static let tableName = "reminders"
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
+            self.id = try decoder.decode(Int.self)
+            self.title = try decoder.decode(Swift.String.self)
+            self.date = try decoder.decode(Date.UnixTimeRepresentation?.self)
+            self.priority = try decoder.decode(Priority?.self)
+          }
+          public init?(_ other: Draft) {
+            guard let id = other.id else {
+              return nil
+            }
+            self.id = id
+            self.title = other.title
+            self.date = other.date
+            self.priority = other.priority
+          }
+        }
+        """#
       }
     }
   }

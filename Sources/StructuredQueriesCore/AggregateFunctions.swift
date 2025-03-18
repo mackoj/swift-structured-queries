@@ -18,7 +18,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   }
 }
 
-extension QueryExpression where QueryValue: Comparable {
+extension QueryExpression {
   public func max(distinct isDistinct: Bool = false) -> some QueryExpression<Int?> {
     AggregateFunction("max", self)
   }

@@ -297,6 +297,7 @@ extension TableMacro: ExtensionMacro {
           DeclSyntax(
             property.trimmed
               .with(\.bindingSpecifier.leadingTrivia, "")
+              .removingAccessors()
           )
         )
       }

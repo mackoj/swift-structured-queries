@@ -12,8 +12,11 @@ extension PatternBindingSyntax {
             )
           }
       )
+    annotated.accessorBlock = nil
     guard annotated.typeAnnotation?.type.isOptionalType == true
-    else { return annotated }
+    else {
+      return annotated.trimmed
+    }
 
     annotated.initializer =
       annotated.initializer

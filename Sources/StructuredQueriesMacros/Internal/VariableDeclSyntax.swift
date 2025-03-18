@@ -38,4 +38,14 @@ extension VariableDeclSyntax {
       modifier.name.tokenKind == .keyword(.static)
     }
   }
+
+  func removingAccessors() -> Self {
+    var variable = self
+    variable.bindings = PatternBindingListSyntax(variable.bindings.map {
+      var binding = $0
+      binding.accessorBlock = nil
+      return binding
+    })
+    return variable
+  }
 }
