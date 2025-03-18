@@ -821,7 +821,8 @@ extension SnapshotTests {
             }
           }
           public struct Draft: StructuredQueries.Table {
-            @Column(primaryKey: false) let id: Int?
+            @Column(primaryKey: false)
+            let id: Int?
             public struct TableColumns: StructuredQueries.Schema {
               public typealias QueryValue = Foo.Draft
               public static var count: Int {
@@ -1065,7 +1066,8 @@ extension SnapshotTests {
             }
           }
           public struct Draft: StructuredQueries.Table {
-            @Column(primaryKey: false) let id: Int?
+            @Column(primaryKey: false)
+            let id: Int?
             var title = ""
             @Column(as: Date.UnixTimeRepresentation?.self) var date: Date?
             var priority: Priority?

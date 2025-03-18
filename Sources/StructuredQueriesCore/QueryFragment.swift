@@ -1,3 +1,7 @@
+/// A type representing a SQL statement and its bindings.
+///
+/// You will typically create instances of this type using string literals, where bindings are
+/// directly interpolated into the string.
 public struct QueryFragment: Hashable, Sendable, CustomDebugStringConvertible {
   public var string: String
   public var bindings: [QueryBinding]
