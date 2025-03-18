@@ -15,6 +15,8 @@ your queries.
 
 ### The problem
 
+TODO: finish
+
 ```swift
 @Table struct Reminder {
   let id: Int 
@@ -57,11 +59,20 @@ just a few operators to get a big boost, and we recommend starting with `==`.
 
 The library ships with an "escape hatch" into a SQL string via the `#sql` macro. Importantly, this
 is not an unsafe escape hatch. You can still use your data type's structure to refer to its columns,
-and any value interpolated into
+and any value interpolated into the string will be properly prepared and will not be a vector
+for SQL injection.
+
+However, because only a simple string is involved, much of the overload resolution and type checking
+is avoided by the compiler. This allows you to construct complex statements with no compilation
+costs, such as querying for reminders whose date is earlier than the current date or whose 
+date is `NULL`
 
 ```swift
 Reminder
   .where { 
-    #sql("coalesce(\($0.date), date('now')) < date('now')")
+    #sql("coalesce(\($0.date), date('now')) <= date('now')")
   }
 ```
+
+Note that interpolating `$0.date` allows you to statically reference the column for the table 
+instead of using a literal string in the SQl.

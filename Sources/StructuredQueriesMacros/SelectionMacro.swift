@@ -226,6 +226,12 @@ extension SelectionMacro: ExtensionMacro {
     let initAssignment: [ExprSyntax] =
       allColumns
       .map { #"\(\#($0.name).queryFragment)"# as ExprSyntax }
+
+    let initDecoder: DeclSyntax? = declaration.hasMacroApplication("Table") ? nil : """
+      public init(decoder: some \(moduleName).QueryDecoder) throws {
+      \(decodings, separator: "\n")
+      }
+      """
     return [
       DeclSyntax(
         """
@@ -239,10 +245,7 @@ extension SelectionMacro: ExtensionMacro {
         ) {
         self.queryFragment = "\(initAssignment, separator: ", ")"
         }
-        }
-        public init(decoder: some \(moduleName).QueryDecoder) throws {
-        \(decodings, separator: "\n")
-        }
+        }\(initDecoder)
         }
         """
       )

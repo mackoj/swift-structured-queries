@@ -146,3 +146,62 @@ public macro sql<QueryValue>(
 //   as queryValueType: QueryValue.Type = QueryValue.self
 // ) -> SQLQueryExpression<QueryValue> =
 //   #externalMacro(module: "StructuredQueriesMacros", type: "SQLMacro")
+
+import StructuredQueriesCore
+
+func foo() {
+  let stmt: Select<Foo, Reminder, ()> = Reminder.select { Foo.Columns(bar: $0.priority, baz: $0.name) }
+  //Select<Foo, Foo, ()>
+
+  let tmp = with(
+    Reminder.select { Foo.Columns(bar: $0.priority, baz: $0.name) }
+  )
+    .select { $0.bar }
+}
+
+@Table struct Reminder {
+  var name = ""
+  var priority = 0
+}
+
+@Table @Selection
+struct Foo {
+  let bar: Int
+  let baz: String
+}
+
+//extension Foo: StructuredQueries.QueryRepresentable, Table {
+//  static var columns: TableColumns {
+//    TableColumns()
+//  }
+//  
+//  struct TableColumns: Schema {
+//    var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+//      [bar, baz]
+//    }
+//    static let count = 2
+//    typealias QueryValue = Foo
+//    let bar = TableColumn<Foo, Int>("bar", keyPath: \.bar)
+//    let baz = TableColumn<Foo, String>("baz", keyPath: \.baz)
+//  }
+//
+//  static var tableName: String {
+//    "foos"
+//  }
+//
+//  public struct Columns: StructuredQueries.QueryExpression {
+//    public typealias QueryValue = Foo
+//    public let queryFragment: StructuredQueries.QueryFragment
+//    public init(
+//      bar: some StructuredQueries.QueryExpression<Int>,
+//      baz: some StructuredQueries.QueryExpression<String>
+//    ) {
+//      self.queryFragment = "\(bar.queryFragment), \(baz.queryFragment)"
+//    }
+//  }
+//  public init(decoder: some StructuredQueries.QueryDecoder) throws {
+//    self.bar = try decoder.decode(Int.self)
+//    self.baz = try decoder.decode(String.self)
+//  }
+//}
+//

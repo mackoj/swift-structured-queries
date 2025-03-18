@@ -10,5 +10,6 @@ A library for building SQL statements in a type-safe, expressive and composable 
 
 ### Essentials
 
+- <doc:GettingStarted>
 - <doc:CompilerPerformance>
 - <doc:AdvancedQueries>

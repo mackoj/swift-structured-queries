@@ -101,3 +101,27 @@ private struct AggregateFunction<QueryValue>: QueryExpression {
     return query
   }
 }
+
+import SwiftUI
+extension Color {
+  var hexString: String { "" }
+  init(hex: String) { fatalError() }
+}
+extension Color {
+  @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
+  public struct ColorHexRepresentation: SQLiteType {
+    public var queryOutput: Color
+    public init(queryOutput: Color) {
+      self.queryOutput = queryOutput
+    }
+    public init(decoder: some QueryDecoder) throws {
+      try self.init(queryOutput: Color(hex: decoder.decode(String.self)))
+    }
+    public var queryBinding: QueryBinding {
+      .text(queryOutput.hexString)
+    }
+    public static var typeAffinity: SQLiteTypeAffinity {
+      .text
+    }
+  }
+}

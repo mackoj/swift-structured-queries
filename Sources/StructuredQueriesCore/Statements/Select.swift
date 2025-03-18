@@ -198,12 +198,36 @@ extension Table {
   }
 }
 
+// TODO: Make builder variant:
+//   with {
+//     Reminder.all().…
+//     Reminder.all().…
+//     Reminder.all().…
+//   }
+//   .select { … }
+public func with<CTE: Table, From: Table, Joins>(
+  _ select: Select<CTE, From, Joins>
+) -> Select<(), CTE, ()> {
+  Select<(), CTE, ()>(
+    ctes: [select],
+    distinct: false,
+    columns: [],
+    joins: [],
+    where: [],
+    group: [],
+    having: [],
+    order: [],
+    limit: nil
+  )
+}
+
 #if compiler(>=6.1)
   @dynamicMemberLookup
 #endif
 public struct Select<Columns, From: Table, Joins> {
   // NB: A parameter pack compiler crash forces us to heap-allocate this storage.
   private struct Clauses {
+    var cte: [any SelectStatement] = []
     var distinct = false
     var columns: [any QueryExpression] = []
     var joins: [JoinClause] = []
@@ -215,6 +239,11 @@ public struct Select<Columns, From: Table, Joins> {
   }
   @CopyOnWrite private var clauses = Clauses()
 
+  fileprivate var ctes: [any SelectStatement] {
+    get { clauses.cte }
+    set { clauses.cte = newValue }
+    _modify { yield &clauses.cte }
+  }
   fileprivate var distinct: Bool {
     get { clauses.distinct }
     set { clauses.distinct = newValue }
@@ -257,6 +286,7 @@ public struct Select<Columns, From: Table, Joins> {
   }
 
   fileprivate init(
+    ctes: [any SelectStatement],
     distinct: Bool,
     columns: [any QueryExpression],
     joins: [JoinClause],
@@ -267,6 +297,8 @@ public struct Select<Columns, From: Table, Joins> {
     limit: LimitClause?
   ) {
     self.columns = columns
+    self.ctes = ctes
+    self.distinct = distinct // TODO: make sure we have tests on 'SELECT DISTINCT'
     self.joins = joins
     self.where = `where`
     self.group = group
@@ -393,6 +425,7 @@ extension Select {
     Joins == (repeat each J)
   {
     Select<(repeat each C1, repeat (each C2).QueryValue), From, (repeat each J)>(
+      ctes: ctes,
       distinct: distinct,
       columns: columns + Array(repeat each selection((From.columns, repeat (each J).columns))),
       joins: joins,
@@ -433,6 +466,7 @@ extension Select {
       )
     )
     return Select<(repeat each C1, repeat each C2), From, (repeat each J1, F, repeat each J2)>(
+      ctes: ctes + other.ctes, // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -463,6 +497,7 @@ extension Select {
       )
     )
     return Select<(repeat each C1, repeat each C2), From, (repeat each J, F)>(
+      ctes: ctes + other.ctes, // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -505,6 +540,7 @@ extension Select {
       From,
       (repeat each J1, Outer<F>, repeat Outer<(each J2)>)
     >(
+      ctes: ctes + other.ctes, // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -543,6 +579,7 @@ extension Select {
       From,
       (repeat each J, Outer<F>)
     >(
+      ctes: ctes + other.ctes, // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -585,6 +622,7 @@ extension Select {
       Outer<From>,
       (repeat Outer<each J1>, F, repeat each J2)
     >(
+      ctes: ctes + other.ctes, // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -623,6 +661,7 @@ extension Select {
       Outer<From>,
       (repeat Outer<each J>, F)
     >(
+      ctes: ctes + other.ctes, // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -665,6 +704,7 @@ extension Select {
       Outer<From>,
       (repeat Outer<each J1>, Outer<F>, repeat Outer<each J2>)
     >(
+      ctes: ctes + other.ctes, // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -703,6 +743,7 @@ extension Select {
       Outer<From>,
       (repeat Outer<each J>, Outer<F>)
     >(
+      ctes: ctes + other.ctes, // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -836,6 +877,7 @@ public func + <
   return Select<
     (repeat each C1, repeat each C2), From, (repeat each J1, repeat each J2)
   >(
+    ctes: lhs.ctes + rhs.ctes, // TODO: get test coverage
     distinct: lhs.distinct || rhs.distinct,
     columns: lhs.columns + rhs.columns,
     joins: lhs.joins + rhs.joins,
@@ -855,11 +897,30 @@ extension Select: SelectStatement {
   }
 
   public var query: QueryFragment {
+    var query: QueryFragment = ""
+    if !ctes.isEmpty {
+      query.append("WITH")
+      for (index, cte) in ctes.enumerated() {
+        func tableName<S: SelectStatement>(_: S) -> String {
+          if let columns = S.QueryValue.self as? any Table.Type {
+            return columns.tableName
+          } else {
+            fatalError("TODO: better way to handle this case")
+          }
+        }
+        query.append(" \(raw: tableName(cte).quoted())")
+        query.append(" AS \(cte)")
+        if index < ctes.count - 1 {
+          query.append(", ")
+        }
+      }
+      query.append(" ")
+    }
     let columns =
       columns.isEmpty
       ? (From.columns.allColumns + joins.flatMap { $0.table.columns.allColumns })
       : columns
-    var query: QueryFragment = "SELECT"
+    query.append("SELECT")
     if distinct {
       query.append(" DISTINCT")
     }
