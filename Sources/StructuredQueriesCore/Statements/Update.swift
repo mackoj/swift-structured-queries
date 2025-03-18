@@ -16,7 +16,7 @@ extension PrimaryKeyedTable {
   ) -> Update<Self, ()> {
     update(or: conflictResolution) { record in
       for column in columns.allColumns where column.name != columns.primaryKey.name {
-        func open<Root, Value>(_ column: some ColumnExpression<Root, Value>) {
+        func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) {
           record.updates.append(
             (
               column.name,
@@ -28,7 +28,7 @@ extension PrimaryKeyedTable {
       }
     }
     .where {
-      func open<C: ColumnExpression>(_ column: C) -> BinaryOperator<Bool, C, C.Value>
+      func open<C: TableColumnExpression>(_ column: C) -> BinaryOperator<Bool, C, C.Value>
       where
         C.Root == Self,
         C.QueryValue.QueryValue == C.QueryValue
@@ -50,14 +50,14 @@ public struct Update<From: Table, Returning> {
   var `where`: [any QueryExpression] = []
   var returning: [any QueryExpression] = []
 
-  public func `where`(_ predicate: (From.Columns) -> some QueryExpression<Bool>) -> Self {
+  public func `where`(_ predicate: (From.TableColumns) -> some QueryExpression<Bool>) -> Self {
     var update = self
     update.where.append(predicate(From.columns))
     return update
   }
 
   public func returning<each ResultColumn: QueryExpression>(
-    _ selection: (From.Columns) -> (repeat each ResultColumn)
+    _ selection: (From.TableColumns) -> (repeat each ResultColumn)
   ) -> Update<From, (repeat (each ResultColumn).QueryValue)>
   where repeat (each ResultColumn).QueryValue: QueryDecodable {
     Update<From, (repeat (each ResultColumn).QueryValue)>(

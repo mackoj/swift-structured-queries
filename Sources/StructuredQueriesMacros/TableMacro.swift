@@ -264,7 +264,7 @@ extension TableMacro: ExtensionMacro {
       }
       columnsProperties.append(
         """
-        public let \(identifier) = \(moduleName).Column<\
+        public let \(identifier) = \(moduleName).TableColumn<\
         QueryValue, \
         \(columnQueryValueType ?? "_")\
         >(\
@@ -308,7 +308,7 @@ extension TableMacro: ExtensionMacro {
     } else if let primaryKey {
       columnsProperties.append(
         """
-        public var primaryKey: \(moduleName).Column<QueryValue, \(primaryKey.type)> {\
+        public var primaryKey: \(moduleName).TableColumn<QueryValue, \(primaryKey.type)> {\
         self.\(primaryKey.identifier)
         }
         """
@@ -400,17 +400,17 @@ extension TableMacro: ExtensionMacro {
         """
         \(declaration.attributes.availability)extension \(type)\
         \(conformances.isEmpty ? "" : ": \(conformances, separator: ", ")") {
-        public struct Columns: \(schemaConformances, separator: ", ") {
+        public struct TableColumns: \(schemaConformances, separator: ", ") {
         public typealias QueryValue = \(type.trimmed)
         public static var count: Int {\
         \(IntegerLiteralExprSyntax(integerLiteral: allColumns.count))\
         }
         \(columnsProperties, separator: "\n")
-        public var allColumns: [any \(moduleName).ColumnExpression] { \
+        public var allColumns: [any \(moduleName).TableColumnExpression] { \
         [\(allColumns.map { "self.\($0)" as ExprSyntax }, separator: ", ")]
         }
         }\(draft)
-        public static let columns = Columns()
+        public static let columns = TableColumns()
         public static let tableName = \(tableName)
         public init(decoder: some \(moduleName).QueryDecoder) throws {
         \(decodings, separator: "\n")

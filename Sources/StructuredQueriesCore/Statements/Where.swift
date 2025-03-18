@@ -26,7 +26,7 @@ extension Table {
   /// - Parameter predicate: A predicate used to generate the `WHERE` clause.
   /// - Returns: A `WHERE` clause.
   public static func `where`(
-    _ predicate: (Columns) -> some QueryExpression<Bool>
+    _ predicate: (TableColumns) -> some QueryExpression<Bool>
   ) -> Where<Self> {
     Where(predicates: [predicate(columns)])
   }
@@ -66,21 +66,21 @@ extension Where: SelectStatement {
   }
 
   public func select<C: QueryExpression>(
-    _ selection: KeyPath<From.Columns, C>
+    _ selection: KeyPath<From.TableColumns, C>
   ) -> Select<C.QueryValue, From, ()>
   where C.QueryValue: QueryRepresentable {
     all().select(selection)
   }
 
   public func select<C: QueryExpression>(
-    _ selection: (From.Columns) -> C
+    _ selection: (From.TableColumns) -> C
   ) -> Select<C.QueryValue, From, ()>
   where C.QueryValue: QueryRepresentable {
     all().select(selection)
   }
 
   public func select<C1: QueryExpression, C2: QueryExpression, each C3: QueryExpression>(
-    _ selection: (From.Columns) -> (C1, C2, repeat each C3)
+    _ selection: (From.TableColumns) -> (C1, C2, repeat each C3)
   ) -> Select<(C1.QueryValue, C2.QueryValue, repeat (each C3).QueryValue), From, ()>
   where
     C1.QueryValue: QueryRepresentable,
@@ -97,7 +97,7 @@ extension Where: SelectStatement {
   public func join<each C: QueryDecodable, F: Table, each J: Table>(
     _ other: any SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
-      (From.Columns, F.Columns, repeat (each J).Columns)
+      (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C), From, (F, repeat each J)> {
     all().join(other, on: constraint)
@@ -107,7 +107,7 @@ extension Where: SelectStatement {
   @_documentation(visibility: private)
   public func join<each C: QueryDecodable, F: Table>(
     _ other: any SelectStatement<(repeat each C), F, ()>,
-    on constraint: ((From.Columns, F.Columns)) -> some QueryExpression<Bool>
+    on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C), From, F> {
     all().join(other, on: constraint)
   }
@@ -115,7 +115,7 @@ extension Where: SelectStatement {
   public func leftJoin<each C: QueryDecodable, F: Table, each J: Table>(
     _ other: any SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
-      (From.Columns, F.Columns, repeat (each J).Columns)
+      (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat (each C)._Optionalized), From, (Outer<F>, repeat Outer<each J>)> {
     let joined = all().leftJoin(other, on: constraint)
@@ -126,7 +126,7 @@ extension Where: SelectStatement {
   @_documentation(visibility: private)
   public func leftJoin<each C: QueryDecodable, F: Table>(
     _ other: any SelectStatement<(repeat each C), F, ()>,
-    on constraint: ((From.Columns, F.Columns)) -> some QueryExpression<Bool>
+    on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
   ) -> Select<(repeat (each C)._Optionalized), From, (Outer<F>)> {
     all().leftJoin(other, on: constraint)
   }
@@ -134,7 +134,7 @@ extension Where: SelectStatement {
   public func rightJoin<each C: QueryDecodable, F: Table, each J: Table>(
     _ other: any SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
-      (From.Columns, F.Columns, repeat (each J).Columns)
+      (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C), Outer<From>, (F, repeat each J)> {
     let joined = all().rightJoin(other, on: constraint)
@@ -145,7 +145,7 @@ extension Where: SelectStatement {
   @_documentation(visibility: private)
   public func rightJoin<each C: QueryDecodable, F: Table>(
     _ other: any SelectStatement<(repeat each C), F, ()>,
-    on constraint: ((From.Columns, F.Columns)) -> some QueryExpression<Bool>
+    on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C), Outer<From>, F> {
     all().rightJoin(other, on: constraint)
   }
@@ -153,7 +153,7 @@ extension Where: SelectStatement {
   public func fullJoin<each C: QueryDecodable, F: Table, each J: Table>(
     _ other: any SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
-      (From.Columns, F.Columns, repeat (each J).Columns)
+      (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat (each C)._Optionalized), Outer<From>, (Outer<F>, repeat Outer<each J>)> {
     let joined = all().fullJoin(other, on: constraint)
@@ -164,24 +164,24 @@ extension Where: SelectStatement {
   @_documentation(visibility: private)
   public func fullJoin<each C: QueryDecodable, F: Table>(
     _ other: any SelectStatement<(repeat each C), F, ()>,
-    on constraint: ((From.Columns, F.Columns)) -> some QueryExpression<Bool>
+    on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
   ) -> Select<(repeat (each C)._Optionalized), Outer<From>, Outer<F>> {
     all().fullJoin(other, on: constraint)
   }
 
-  public func `where`(_ predicate: (From.Columns) -> some QueryExpression<Bool>) -> Self {
+  public func `where`(_ predicate: (From.TableColumns) -> some QueryExpression<Bool>) -> Self {
     var `where` = self
     `where`.predicates.append(predicate(From.columns))
     return `where`
   }
 
-  public func group<C: QueryExpression>(by grouping: (From.Columns) -> C) -> Select<(), From, ()>
+  public func group<C: QueryExpression>(by grouping: (From.TableColumns) -> C) -> Select<(), From, ()>
   where C.QueryValue: QueryDecodable {
     all().group(by: grouping)
   }
 
   public func group<C1: QueryExpression, C2: QueryExpression, each C3: QueryExpression>(
-    by grouping: (From.Columns) -> (C1, C2, repeat each C3)
+    by grouping: (From.TableColumns) -> (C1, C2, repeat each C3)
   ) -> Select<(), From, ()>
   where
     C1.QueryValue: QueryDecodable,
@@ -192,27 +192,27 @@ extension Where: SelectStatement {
   }
 
   public func having(
-    _ predicate: (From.Columns) -> some QueryExpression<Bool>
+    _ predicate: (From.TableColumns) -> some QueryExpression<Bool>
   ) -> Select<(), From, ()> {
     all().having(predicate)
   }
 
   public func order(
-    by ordering: KeyPath<From.Columns, some QueryExpression>
+    by ordering: KeyPath<From.TableColumns, some QueryExpression>
   ) -> Select<(), From, ()> {
     all().order(by: ordering)
   }
 
   public func order(
     @AnyQueryExpressionBuilder
-    by ordering: (From.Columns) -> [any QueryExpression]
+    by ordering: (From.TableColumns) -> [any QueryExpression]
   ) -> Select<(), From, ()> {
     all().order(by: ordering)
   }
 
   public func limit(
-    _ maxLength: (From.Columns) -> some QueryExpression<Int>,
-    offset: ((From.Columns) -> some QueryExpression<Int>)? = nil
+    _ maxLength: (From.TableColumns) -> some QueryExpression<Int>,
+    offset: ((From.TableColumns) -> some QueryExpression<Int>)? = nil
   ) -> Select<(), From, ()> {
     all().limit(maxLength, offset: offset)
   }

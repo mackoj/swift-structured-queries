@@ -81,7 +81,7 @@ extension DefaultStringInterpolation {
       Use '+' to concatenate SQL expressions, instead."
       """
   )
-  public mutating func appendInterpolation<T, V>(_ value: Column<T, V>) {
+  public mutating func appendInterpolation<T, V>(_ value: TableColumn<T, V>) {
     self.appendInterpolation(value as Any)
   }
 }

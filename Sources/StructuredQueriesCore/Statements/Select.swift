@@ -4,14 +4,14 @@ extension Table {
   }
 
   public static func select<ResultColumn: QueryExpression>(
-    _ selection: KeyPath<Columns, ResultColumn>
+    _ selection: KeyPath<TableColumns, ResultColumn>
   ) -> Select<ResultColumn.QueryValue, Self, ()>
   where ResultColumn.QueryValue: QueryRepresentable {
     all().select(selection)
   }
 
   public static func select<ResultColumn: QueryExpression>(
-    _ selection: (Columns) -> ResultColumn
+    _ selection: (TableColumns) -> ResultColumn
   ) -> Select<ResultColumn.QueryValue, Self, ()>
   where ResultColumn.QueryValue: QueryRepresentable {
     all().select(selection)
@@ -22,7 +22,7 @@ extension Table {
     C2: QueryExpression,
     each C3: QueryExpression
   >(
-    _ selection: (Columns) -> (C1, C2, repeat each C3)
+    _ selection: (TableColumns) -> (C1, C2, repeat each C3)
   ) -> Select<(C1.QueryValue, C2.QueryValue, repeat (each C3).QueryValue), Self, ()>
   where
     C1.QueryValue: QueryRepresentable,
@@ -43,7 +43,7 @@ extension Table {
   >(
     _ other: Select<(repeat each C), F, (repeat each J)>,
     on constraint: (
-      (Columns, F.Columns, repeat (each J).Columns)
+      (TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C), Self, (F, repeat each J)> {
     all().join(other, on: constraint)
@@ -54,7 +54,7 @@ extension Table {
   public static func join<each C: QueryDecodable, F: Table>(
     _ other: Select<(repeat each C), F, ()>,
     on constraint: (
-      (Columns, F.Columns)
+      (TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C), Self, F> {
     all().join(other, on: constraint)
@@ -67,7 +67,7 @@ extension Table {
   >(
     _ other: Select<(repeat each C), F, (repeat each J)>,
     on constraint: (
-      (Columns, F.Columns, repeat (each J).Columns)
+      (TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat (each C)._Optionalized), Self, (Outer<F>, repeat Outer<each J>)> {
     let select = all().leftJoin(other, on: constraint)
@@ -79,7 +79,7 @@ extension Table {
   public static func leftJoin<each C: QueryDecodable, F: Table>(
     _ other: Select<(repeat each C), F, ()>,
     on constraint: (
-      (Columns, F.Columns)
+      (TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat (each C)._Optionalized), Self, Outer<F>> {
     let select = all().leftJoin(other, on: constraint)
@@ -93,7 +93,7 @@ extension Table {
   >(
     _ other: Select<(repeat each C), F, (repeat each J)>,
     on constraint: (
-      (Columns, F.Columns, repeat (each J).Columns)
+      (TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C), Outer<Self>, (F, repeat each J)> {
     let select = all().rightJoin(other, on: constraint)
@@ -105,7 +105,7 @@ extension Table {
   public static func rightJoin<each C: QueryDecodable, F: Table>(
     _ other: Select<(repeat each C), F, ()>,
     on constraint: (
-      (Columns, F.Columns)
+      (TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C), Outer<Self>, F> {
     let select = all().rightJoin(other, on: constraint)
@@ -119,7 +119,7 @@ extension Table {
   >(
     _ other: Select<(repeat each C), F, (repeat each J)>,
     on constraint: (
-      (Columns, F.Columns, repeat (each J).Columns)
+      (TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<
     (repeat (each C)._Optionalized),
@@ -135,7 +135,7 @@ extension Table {
   public static func fullJoin<each C: QueryDecodable, F: Table>(
     _ other: Select<(repeat each C), F, ()>,
     on constraint: (
-      (Columns, F.Columns)
+      (TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat (each C)._Optionalized), Outer<Self>, Outer<F>> {
     let select = all().fullJoin(other, on: constraint)
@@ -143,7 +143,7 @@ extension Table {
   }
 
   public static func group<C: QueryExpression>(
-    by grouping: (Columns) -> C
+    by grouping: (TableColumns) -> C
   ) -> Select<(), Self, ()> where C.QueryValue: QueryDecodable {
     all().group(by: grouping)
   }
@@ -153,7 +153,7 @@ extension Table {
     C2: QueryExpression,
     each C3: QueryExpression
   >(
-    by grouping: (Columns) -> (C1, C2, repeat each C3)
+    by grouping: (TableColumns) -> (C1, C2, repeat each C3)
   ) -> Select<(), Self, ()>
   where
     C1.QueryValue: QueryDecodable,
@@ -164,27 +164,27 @@ extension Table {
   }
 
   public static func having(
-    _ predicate: (Columns) -> some QueryExpression<Bool>
+    _ predicate: (TableColumns) -> some QueryExpression<Bool>
   ) -> Select<(), Self, ()> {
     all().having(predicate)
   }
 
   public static func order(
-    by ordering: KeyPath<Columns, some QueryExpression>
+    by ordering: KeyPath<TableColumns, some QueryExpression>
   ) -> Select<(), Self, ()> {
     all().order(by: ordering)
   }
 
   public static func order(
     @AnyQueryExpressionBuilder
-    by ordering: (Columns) -> [any QueryExpression]
+    by ordering: (TableColumns) -> [any QueryExpression]
   ) -> Select<(), Self, ()> {
     all().order(by: ordering)
   }
 
   public static func limit(
-    _ maxLength: (Columns) -> some QueryExpression<Int>,
-    offset: ((Columns) -> some QueryExpression<Int>)? = nil
+    _ maxLength: (TableColumns) -> some QueryExpression<Int>,
+    offset: ((TableColumns) -> some QueryExpression<Int>)? = nil
   ) -> Select<(), Self, ()> {
     all().limit(maxLength, offset: offset)
   }
@@ -305,21 +305,21 @@ extension Select {
   #endif
 
   public func select<each C1: QueryRepresentable, C2: QueryExpression>(
-    _ selection: KeyPath<From.Columns, C2>
+    _ selection: KeyPath<From.TableColumns, C2>
   ) -> Select<(repeat each C1, C2.QueryValue), From, ()>
   where Columns == (repeat each C1), C2.QueryValue: QueryRepresentable, Joins == () {
     select { $0[keyPath: selection] }
   }
 
   public func select<each C1: QueryRepresentable, C2: QueryExpression>(
-    _ selection: (From.Columns) -> C2
+    _ selection: (From.TableColumns) -> C2
   ) -> Select<(repeat each C1, C2.QueryValue), From, ()>
   where Columns == (repeat each C1), C2.QueryValue: QueryRepresentable, Joins == () {
     _select(selection)
   }
 
   public func select<each C1: QueryRepresentable, C2: QueryExpression, each J: Table>(
-    _ selection: ((From.Columns, repeat (each J).Columns)) -> C2
+    _ selection: ((From.TableColumns, repeat (each J).TableColumns)) -> C2
   ) -> Select<(repeat each C1, C2.QueryValue), From, (repeat each J)>
   where Columns == (repeat each C1), C2.QueryValue: QueryRepresentable, Joins == (repeat each J) {
     _select(selection)
@@ -327,7 +327,7 @@ extension Select {
 
   @_disfavoredOverload
   public func select<each C1: QueryRepresentable, C2: QueryExpression, each J: Table>(
-    _ selection: (From.Columns, repeat (each J).Columns) -> C2
+    _ selection: (From.TableColumns, repeat (each J).TableColumns) -> C2
   ) -> Select<(repeat each C1, C2.QueryValue), From, (repeat each J)>
   where Columns == (repeat each C1), C2.QueryValue: QueryRepresentable, Joins == (repeat each J) {
     _select(selection)
@@ -340,7 +340,7 @@ extension Select {
     each C4: QueryExpression,
     each J: Table
   >(
-    _ selection: ((From.Columns, repeat (each J).Columns)) -> (C2, C3, repeat each C4)
+    _ selection: ((From.TableColumns, repeat (each J).TableColumns)) -> (C2, C3, repeat each C4)
   ) -> Select<
     (repeat each C1, C2.QueryValue, C3.QueryValue, repeat (each C4).QueryValue),
     From,
@@ -364,7 +364,7 @@ extension Select {
     each C4: QueryExpression,
     each J: Table
   >(
-    _ selection: (From.Columns, repeat (each J).Columns) -> (C2, C3, repeat each C4)
+    _ selection: (From.TableColumns, repeat (each J).TableColumns) -> (C2, C3, repeat each C4)
   ) -> Select<
     (repeat each C1, C2.QueryValue, C3.QueryValue, repeat (each C4).QueryValue),
     From,
@@ -385,7 +385,7 @@ extension Select {
     each C2: QueryExpression,
     each J: Table
   >(
-    _ selection: ((From.Columns, repeat (each J).Columns)) -> (repeat each C2)
+    _ selection: ((From.TableColumns, repeat (each J).TableColumns)) -> (repeat each C2)
   ) -> Select<(repeat each C1, repeat (each C2).QueryValue), From, (repeat each J)>
   where
     Columns == (repeat each C1),
@@ -420,7 +420,7 @@ extension Select {
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(repeat each C2), F, (repeat each J2)>,
     on constraint: (
-      (From.Columns, repeat (each J1).Columns, F.Columns, repeat (each J2).Columns)
+      (From.TableColumns, repeat (each J1).TableColumns, F.TableColumns, repeat (each J2).TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C1, repeat each C2), From, (repeat each J1, F, repeat each J2)>
   where Columns == (repeat each C1), Joins == (repeat each J1) {
@@ -450,7 +450,7 @@ extension Select {
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(repeat each C2), F, ()>,
     on constraint: (
-      (From.Columns, repeat (each J).Columns, F.Columns)
+      (From.TableColumns, repeat (each J).TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C1, repeat each C2), From, (repeat each J, F)>
   where Columns == (repeat each C1), Joins == (repeat each J) {
@@ -484,7 +484,7 @@ extension Select {
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(repeat each C2), F, (repeat each J2)>,
     on constraint: (
-      (From.Columns, repeat (each J1).Columns, F.Columns, repeat (each J2).Columns)
+      (From.TableColumns, repeat (each J1).TableColumns, F.TableColumns, repeat (each J2).TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<
     (repeat each C1, repeat (each C2)._Optionalized),
@@ -522,7 +522,7 @@ extension Select {
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(repeat each C2), F, ()>,
     on constraint: (
-      (From.Columns, repeat (each J).Columns, F.Columns)
+      (From.TableColumns, repeat (each J).TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<
     (repeat each C1, repeat (each C2)._Optionalized),
@@ -564,7 +564,7 @@ extension Select {
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(repeat each C2), F, (repeat each J2)>,
     on constraint: (
-      (From.Columns, repeat (each J1).Columns, F.Columns, repeat (each J2).Columns)
+      (From.TableColumns, repeat (each J1).TableColumns, F.TableColumns, repeat (each J2).TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<
     (repeat (each C1)._Optionalized, repeat each C2),
@@ -602,7 +602,7 @@ extension Select {
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(repeat each C2), F, ()>,
     on constraint: (
-      (From.Columns, repeat (each J).Columns, F.Columns)
+      (From.TableColumns, repeat (each J).TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<
     (repeat (each C1)._Optionalized, repeat each C2),
@@ -644,7 +644,7 @@ extension Select {
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(repeat each C2), F, (repeat each J2)>,
     on constraint: (
-      (From.Columns, repeat (each J1).Columns, F.Columns, repeat (each J2).Columns)
+      (From.TableColumns, repeat (each J1).TableColumns, F.TableColumns, repeat (each J2).TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<
     (repeat (each C1)._Optionalized, repeat (each C2)._Optionalized),
@@ -682,7 +682,7 @@ extension Select {
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(repeat each C2), F, ()>,
     on constraint: (
-      (From.Columns, repeat (each J).Columns, F.Columns)
+      (From.TableColumns, repeat (each J).TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<
     (repeat (each C1)._Optionalized, repeat (each C2)._Optionalized),
@@ -715,7 +715,7 @@ extension Select {
   }
 
   public func `where`<each J: Table>(
-    _ predicate: (From.Columns, repeat (each J).Columns) -> some QueryExpression<Bool>
+    _ predicate: (From.TableColumns, repeat (each J).TableColumns) -> some QueryExpression<Bool>
   ) -> Self
   where Joins == (repeat each J) {
     var select = self
@@ -724,7 +724,7 @@ extension Select {
   }
 
   public func group<C: QueryExpression, each J: Table>(
-    by grouping: (From.Columns, repeat (each J).Columns) -> C
+    by grouping: (From.TableColumns, repeat (each J).TableColumns) -> C
   ) -> Self
   where C.QueryValue: QueryDecodable, Joins == (repeat each J) {
     _group(by: grouping)
@@ -736,7 +736,7 @@ extension Select {
     each C3: QueryExpression,
     each J: Table
   >(
-    by grouping: (From.Columns, repeat (each J).Columns) -> (C1, C2, repeat each C3)
+    by grouping: (From.TableColumns, repeat (each J).TableColumns) -> (C1, C2, repeat each C3)
   ) -> Self
   where
     C1.QueryValue: QueryDecodable,
@@ -751,7 +751,7 @@ extension Select {
     each C: QueryExpression,
     each J: Table
   >(
-    by grouping: (From.Columns, repeat (each J).Columns) -> (repeat each C)
+    by grouping: (From.TableColumns, repeat (each J).TableColumns) -> (repeat each C)
   ) -> Self
   where
     repeat (each C).QueryValue: QueryDecodable,
@@ -766,7 +766,7 @@ extension Select {
   }
 
   public func having<each J: Table>(
-    _ predicate: (From.Columns, repeat (each J).Columns) -> some QueryExpression<Bool>
+    _ predicate: (From.TableColumns, repeat (each J).TableColumns) -> some QueryExpression<Bool>
   ) -> Self
   where Joins == (repeat each J) {
     var select = self
@@ -774,7 +774,7 @@ extension Select {
     return select
   }
 
-  public func order(by ordering: KeyPath<From.Columns, some QueryExpression>) -> Self {
+  public func order(by ordering: KeyPath<From.TableColumns, some QueryExpression>) -> Self {
     var select = self
     select.order.append(From.columns[keyPath: ordering])
     return select
@@ -782,7 +782,7 @@ extension Select {
 
   public func order<each J: Table>(
     @AnyQueryExpressionBuilder
-    by ordering: (From.Columns, repeat (each J).Columns) -> [any QueryExpression]
+    by ordering: (From.TableColumns, repeat (each J).TableColumns) -> [any QueryExpression]
   ) -> Self
   where Joins == (repeat each J) {
     var select = self
@@ -791,8 +791,8 @@ extension Select {
   }
 
   public func limit<each J: Table>(
-    _ maxLength: (From.Columns, repeat (each J).Columns) -> some QueryExpression<Int>,
-    offset: ((From.Columns, repeat (each J).Columns) -> some QueryExpression<Int>)? = nil
+    _ maxLength: (From.TableColumns, repeat (each J).TableColumns) -> some QueryExpression<Int>,
+    offset: ((From.TableColumns, repeat (each J).TableColumns) -> some QueryExpression<Int>)? = nil
   ) -> Self
   where Joins == (repeat each J) {
     var select = self

@@ -3,8 +3,8 @@ public struct Outer<Base: Table>: _OptionalPromotable, Table {
     Base.tableName
   }
 
-  public static var columns: Columns {
-    Columns()
+  public static var columns: TableColumns {
+    TableColumns()
   }
 
   let base: Base?
@@ -19,22 +19,22 @@ public struct Outer<Base: Table>: _OptionalPromotable, Table {
   }
 
   @dynamicMemberLookup
-  public struct Columns: Schema {
-    public var allColumns: [any ColumnExpression] {
+  public struct TableColumns: Schema {
+    public var allColumns: [any TableColumnExpression] {
       Base.columns.allColumns
     }
 
     public static var count: Int {
-      Base.Columns.count
+      Base.TableColumns.count
     }
 
     public typealias QueryValue = Outer
 
     public subscript<Member>(
-      dynamicMember keyPath: KeyPath<Base.Columns, Column<Base, Member>>
-    ) -> Column<Outer<Base>, Member?> {
+      dynamicMember keyPath: KeyPath<Base.TableColumns, TableColumn<Base, Member>>
+    ) -> TableColumn<Outer<Base>, Member?> {
       let column = Base.columns[keyPath: keyPath]
-      return Column<Outer<Base>, Member?>(
+      return TableColumn<Outer<Base>, Member?>(
         column.name,
         keyPath: \Outer<Base>.[member: \Member.self, column: column._keyPath]
       )

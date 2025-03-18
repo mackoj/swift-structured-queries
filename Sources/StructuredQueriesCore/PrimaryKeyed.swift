@@ -1,9 +1,9 @@
-public protocol PrimaryKeyedTable: Table where Columns: PrimaryKeyedSchema {
+public protocol PrimaryKeyedTable: Table where TableColumns: PrimaryKeyedSchema {
   associatedtype Draft: Table
 }
 
 public protocol PrimaryKeyedSchema<PrimaryKey>: Schema where QueryValue: PrimaryKeyedTable {
-  associatedtype PrimaryKey: ColumnExpression
+  associatedtype PrimaryKey: TableColumnExpression
   where
     PrimaryKey.Root == QueryValue,
     PrimaryKey.QueryValue: QueryBindable,

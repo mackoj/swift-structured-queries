@@ -6,7 +6,7 @@
   extension,
   conformances: Table,
   PrimaryKeyedTable,
-  names: named(Columns),
+  names: named(TableColumns),
   named(Draft),
   named(columns),
   named(init(_:)),
@@ -46,7 +46,7 @@ public macro Column(
 @attached(
   extension,
   conformances: Table,
-  names: named(Columns),
+  names: named(TableColumns),
   named(columns),
   named(init(_:)),
   named(init(decoder:)),

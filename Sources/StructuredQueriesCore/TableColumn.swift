@@ -1,4 +1,4 @@
-public protocol ColumnExpression<Root, Value>: QueryExpression where Value == QueryValue {
+public protocol TableColumnExpression<Root, Value>: QueryExpression where Value == QueryValue {
   associatedtype Root: Table
   associatedtype Value: QueryRepresentable & QueryBindable
 
@@ -6,8 +6,8 @@ public protocol ColumnExpression<Root, Value>: QueryExpression where Value == Qu
   var keyPath: KeyPath<Root, Value.QueryOutput> { get }
 }
 
-public struct Column<Root: Table, Value: QueryRepresentable & QueryBindable>:
-  ColumnExpression,
+public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
+  TableColumnExpression,
   Sendable
 {
   public typealias QueryValue = Value

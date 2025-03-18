@@ -25,7 +25,7 @@ extension Table {
 
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
-    _ columns: (Columns) -> (Columns) = { $0 },
+    _ columns: (TableColumns) -> (TableColumns) = { $0 },
     @InsertValuesBuilder<Self>
     values rows: () -> [Self],
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
@@ -38,7 +38,7 @@ extension Table {
     for row in rows() {
       var value: [QueryFragment] = []
       for column in Self.columns.allColumns {
-        func open<Root, Value>(_ column: some ColumnExpression<Root, Value>) -> QueryFragment {
+        func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
           Value(queryOutput: (row as! Root)[keyPath: column.keyPath]).queryFragment
         }
         value.append(open(column))
@@ -61,7 +61,7 @@ extension Table {
 
   public static func insert<V1: QueryBindable, each V2: QueryBindable>(
     or conflictResolution: ConflictResolution? = nil,
-    _ columns: (Columns) -> (Column<Self, V1>, repeat Column<Self, each V2>),
+    _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     @InsertValuesBuilder<(V1.QueryOutput, repeat (each V2).QueryOutput)>
     values rows: () -> [(V1.QueryOutput, repeat (each V2).QueryOutput)],
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
@@ -76,7 +76,7 @@ extension Table {
 
   private static func _insert<each Value: QueryBindable>(
     or conflictResolution: ConflictResolution? = nil,
-    _ columns: (Columns) -> (repeat Column<Self, each Value>),
+    _ columns: (TableColumns) -> (repeat TableColumn<Self, each Value>),
     @InsertValuesBuilder<(repeat (each Value).QueryOutput)>
     values rows: () -> [(repeat (each Value).QueryOutput)],
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
@@ -116,7 +116,7 @@ extension Table {
     Joins
   >(
     or conflictResolution: ConflictResolution? = nil,
-    _ columns: (Columns) -> (Column<Self, V1>, repeat Column<Self, each V2>),
+    _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     select selection: () -> Select<(C1, repeat each C2), From, Joins>,
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
   ) -> Insert<Self, ()>
@@ -136,7 +136,7 @@ extension Table {
     Joins
   >(
     or conflictResolution: ConflictResolution? = nil,
-    _ columns: (Columns) -> (repeat Column<Self, each Value>),
+    _ columns: (TableColumns) -> (repeat TableColumn<Self, each Value>),
     select selection: () -> Select<(repeat each ResultColumn), From, Joins>,
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
   ) -> Insert<Self, ()>
@@ -209,7 +209,7 @@ extension PrimaryKeyedTable {
 
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
-    _ columns: (Draft.Columns) -> (Draft.Columns) = { $0 },
+    _ columns: (Draft.TableColumns) -> (Draft.TableColumns) = { $0 },
     @InsertValuesBuilder<Draft>
     values rows: () -> [Draft],
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
@@ -222,7 +222,7 @@ extension PrimaryKeyedTable {
     for row in rows() {
       var value: [QueryFragment] = []
       for column in Draft.columns.allColumns {
-        func open<Root, Value>(_ column: some ColumnExpression<Root, Value>) -> QueryFragment {
+        func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
           Value(queryOutput: (row as! Root)[keyPath: column.keyPath]).queryFragment
         }
         value.append(open(column))
@@ -252,7 +252,7 @@ public struct Insert<Into: Table, Returning> {
   var returning: [any QueryExpression] = []
 
   public func returning<each ResultColumn: QueryExpression>(
-    _ selection: (Into.Columns) -> (repeat each ResultColumn)
+    _ selection: (Into.TableColumns) -> (repeat each ResultColumn)
   ) -> Insert<Into, (repeat (each ResultColumn).QueryValue)>
   where repeat (each ResultColumn).QueryValue: QueryDecodable {
     Insert<Into, (repeat (each ResultColumn).QueryValue)>(

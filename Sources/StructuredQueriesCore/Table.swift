@@ -1,20 +1,20 @@
-public protocol Table: QueryRepresentable where Columns.QueryValue == Self {
-  associatedtype Columns: Schema
-  static var columns: Columns { get }
+public protocol Table: QueryRepresentable where TableColumns.QueryValue == Self {
+  associatedtype TableColumns: Schema
+  static var columns: TableColumns { get }
   static var tableName: String { get }
 }
 
 extension Never: Table {
-  public struct Columns: Schema {
+  public struct TableColumns: Schema {
     public typealias QueryValue = Never
 
-    public var allColumns: [any ColumnExpression] { [] }
+    public var allColumns: [any TableColumnExpression] { [] }
 
     public static var count: Int { 0 }
   }
 
-  public static var columns: Columns {
-    Columns()
+  public static var columns: TableColumns {
+    TableColumns()
   }
 
   public static var tableName: String { "nevers" }
@@ -30,7 +30,7 @@ extension Never: Table {
 // @dynamicMemberLookup
 // struct TableColumns<Base: Table> {
 //   subscript<Member: QueryExpression>(
-//     dynamicMember keyPath: KeyPath<Base.Columns, Member>
+//     dynamicMember keyPath: KeyPath<Base.TableColumns, Member>
 //   ) -> some QueryExpression<Member.QueryValue> {
 //     Base.columns[keyPath: keyPath]
 //   }

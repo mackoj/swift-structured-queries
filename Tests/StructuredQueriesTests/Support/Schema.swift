@@ -49,7 +49,7 @@ enum Priority: Int, QueryBindable {
   case high
 }
 
-extension Reminder.Columns {
+extension Reminder.TableColumns {
   var isPastDue: some QueryExpression<Bool> {
     !isCompleted && #sql("coalesce(\(date), date('now')) < date('now')")
   }

@@ -8,7 +8,7 @@ extension PrimaryKeyedTable {
   public static func delete(_ row: Self) -> Delete<Self, Void> {
     Delete()
       .where {
-        func open<C: ColumnExpression>(_ column: C) -> BinaryOperator<Bool, C, C.Value>
+        func open<C: TableColumnExpression>(_ column: C) -> BinaryOperator<Bool, C, C.Value>
         where
           C.Root == Self,
           C.QueryValue.QueryValue == C.QueryValue
@@ -28,14 +28,14 @@ public struct Delete<From: Table, Returning> {
   var `where`: [any QueryExpression] = []
   var returning: [any QueryExpression] = []
 
-  public func `where`(_ predicate: (From.Columns) -> some QueryExpression<Bool>) -> Self {
+  public func `where`(_ predicate: (From.TableColumns) -> some QueryExpression<Bool>) -> Self {
     var update = self
     update.where.append(predicate(From.columns))
     return update
   }
 
   public func returning<each ResultColumn: QueryExpression>(
-    _ selection: (From.Columns) -> (repeat each ResultColumn)
+    _ selection: (From.TableColumns) -> (repeat each ResultColumn)
   ) -> Delete<From, (repeat (each ResultColumn).QueryValue)>
   where repeat (each ResultColumn).QueryValue: QueryDecodable {
     Delete<From, (repeat (each ResultColumn).QueryValue)>(
