@@ -209,7 +209,7 @@ public func with<CTE: Table, From: Table, Joins>(
   _ select: Select<CTE, From, Joins>
 ) -> Select<(), CTE, ()> {
   Select<(), CTE, ()>(
-    ctes: [select],
+    ctes: [CommonTableExpressionClause(tableName: CTE.tableName, select: select)],
     distinct: false,
     columns: [],
     joins: [],
@@ -227,7 +227,7 @@ public func with<CTE: Table, From: Table, Joins>(
 public struct Select<Columns, From: Table, Joins> {
   // NB: A parameter pack compiler crash forces us to heap-allocate this storage.
   private struct Clauses {
-    var cte: [any SelectStatement] = []
+    var cte: [CommonTableExpressionClause] = []
     var distinct = false
     var columns: [any QueryExpression] = []
     var joins: [JoinClause] = []
@@ -239,7 +239,7 @@ public struct Select<Columns, From: Table, Joins> {
   }
   @CopyOnWrite private var clauses = Clauses()
 
-  fileprivate var ctes: [any SelectStatement] {
+  fileprivate var ctes: [CommonTableExpressionClause] {
     get { clauses.cte }
     set { clauses.cte = newValue }
     _modify { yield &clauses.cte }
@@ -286,7 +286,7 @@ public struct Select<Columns, From: Table, Joins> {
   }
 
   fileprivate init(
-    ctes: [any SelectStatement],
+    ctes: [CommonTableExpressionClause],
     distinct: Bool,
     columns: [any QueryExpression],
     joins: [JoinClause],
@@ -899,21 +899,8 @@ extension Select: SelectStatement {
   public var query: QueryFragment {
     var query: QueryFragment = ""
     if !ctes.isEmpty {
-      query.append("WITH")
-      for (index, cte) in ctes.enumerated() {
-        func tableName<S: SelectStatement>(_: S) -> String {
-          if let columns = S.QueryValue.self as? any Table.Type {
-            return columns.tableName
-          } else {
-            fatalError("TODO: better way to handle this case")
-          }
-        }
-        query.append(" \(raw: tableName(cte).quoted())")
-        query.append(" AS \(cte)")
-        if index < ctes.count - 1 {
-          query.append(", ")
-        }
-      }
+      query.append("WITH ")
+      query.append(ctes.map(\.queryFragment).joined(separator: ", "))
       query.append(" ")
     }
     let columns =
@@ -950,6 +937,15 @@ extension Select: SelectStatement {
 
 public typealias SelectOf<From: Table, each Join: Table> =
   Select<(), From, (repeat each Join)>
+
+private struct CommonTableExpressionClause: QueryExpression {
+  typealias QueryValue = ()
+  let tableName: String
+  let select: any QueryExpression
+  var queryFragment: QueryFragment {
+    "\(raw: tableName.quoted()) AS \(select)"
+  }
+}
 
 private struct JoinClause: QueryExpression {
   typealias QueryValue = Void
