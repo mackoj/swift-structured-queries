@@ -84,12 +84,16 @@ extension TableMacro: ExtensionMacro {
         .map { selfRewriter.rewrite($0).cast(TypeSyntax.self) }
       let columnQueryOutputType = columnQueryValueType
       var isPrimaryKey = primaryKey == nil && identifier.text == "id"
+      var isEphemeral = false
 
       for attribute in property.attributes {
         guard
           let attribute = attribute.as(AttributeSyntax.self),
-          let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
-          attributeName == "Column",
+          let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text
+        else { continue }
+        isEphemeral = isEphemeral || attributeName == "Ephemeral"
+        guard
+          attributeName == "Column" || isEphemeral,
           case let .argumentList(arguments) = attribute.arguments
         else { continue }
 
@@ -170,6 +174,8 @@ extension TableMacro: ExtensionMacro {
           }
         }
       }
+      guard !isEphemeral
+      else { continue }
 
       if isPrimaryKey {
         primaryKey = (

@@ -40,6 +40,13 @@ public macro Column(
     type: "ColumnMacro"
   )
 
+@attached(accessor, names: named(willSet))
+public macro Ephemeral() =
+#externalMacro(
+  module: "StructuredQueriesMacros",
+  type: "EphemeralMacro"
+)
+
 @attached(
   memberAttribute
 )

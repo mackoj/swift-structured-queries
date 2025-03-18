@@ -1,7 +1,7 @@
 import SwiftSyntax
 import SwiftSyntaxMacros
 
-public enum ColumnMacro: AccessorMacro {
+public enum EphemeralMacro: AccessorMacro {
   public static func expansion<
     Context: MacroExpansionContext,
     Declaration: DeclSyntaxProtocol

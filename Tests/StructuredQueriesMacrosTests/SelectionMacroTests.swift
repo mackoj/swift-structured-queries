@@ -17,9 +17,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct PlayerAndTeam {
-          @Column
           let player: Player
-          @Column
           let team: Team
         }
 
@@ -71,9 +69,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct ReminderTitleAndListTitle {
-          @Column
           var reminderTitle: String 
-          @Column
           var listTitle: String?
         }
 
@@ -108,7 +104,6 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct ReminderDate {
-          @Column(as: Date.ISO8601Representation.self)
           var date: Date
         }
 
@@ -158,7 +153,6 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct ReminderDate {
-          @Column(as: Date.ISO8601Representation.self)
           var date: Date
         }
 

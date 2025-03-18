@@ -10,6 +10,8 @@ import Testing
     record: .failed,
     macros: [
       "_Draft": TableMacro.self,
+      "Column": ColumnMacro.self,
+      "Ephemeral": EphemeralMacro.self,
       "Table": TableMacro.self,
       "Selection": SelectionMacro.self,
     ]
