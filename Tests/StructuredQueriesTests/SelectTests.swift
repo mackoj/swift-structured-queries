@@ -106,6 +106,33 @@ extension SnapshotTests {
       }
     }
 
+    @Test func selectChainingWithJoin() {
+      assertQuery(
+        Reminder
+          .select(\.id)
+          .join(RemindersList.select(\.id)) { $0.remindersListID.eq($1.id) }
+      ) {
+        """
+        SELECT "reminders"."id", "remindersLists"."id" FROM "reminders" JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
+        """
+      }results: {
+        """
+        ┌────┬───┐
+        │ 1  │ 1 │
+        │ 2  │ 1 │
+        │ 3  │ 1 │
+        │ 4  │ 1 │
+        │ 5  │ 1 │
+        │ 6  │ 2 │
+        │ 7  │ 2 │
+        │ 8  │ 2 │
+        │ 9  │ 3 │
+        │ 10 │ 3 │
+        └────┴───┘
+        """
+      }
+    }
+
     @Test func join() {
       assertQuery(
         Reminder

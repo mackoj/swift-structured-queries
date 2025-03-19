@@ -4,6 +4,7 @@ import StructuredQueries
 import Testing
 
 extension SnapshotTests {
+  @MainActor
   @Suite struct AggregateFunctionsTests {
     @Table
     fileprivate struct User {
@@ -134,7 +135,7 @@ extension SnapshotTests {
         sum(DISTINCT "users"."id")
         """
       }
-      assertQuery(Reminder.select { $0.id.sum() }) {
+      assertQuery(Reminder.select { #sql("sum(\($0.id))", as: Int?.self) }) {
         """
         SELECT sum("reminders"."id") FROM "reminders"
         """
