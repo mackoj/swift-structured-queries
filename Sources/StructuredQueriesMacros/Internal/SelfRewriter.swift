@@ -1,5 +1,11 @@
 import SwiftSyntax
 
+extension SyntaxProtocol {
+  func rewritten(_ rewriter: SyntaxRewriter) -> Self {
+    rewriter.rewrite(self).cast(Self.self)
+  }
+}
+
 final class SelfRewriter: SyntaxRewriter {
   let selfEquivalent: TokenSyntax
 

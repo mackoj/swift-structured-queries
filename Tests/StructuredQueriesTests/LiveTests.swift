@@ -153,7 +153,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."title", "reminders"."priority", (SELECT avg(CAST("reminders"."priority" AS NUMERIC)) FROM "reminders") FROM "reminders" WHERE ("reminders"."priority" < (SELECT avg(CAST("reminders"."priority" AS NUMERIC)) FROM "reminders") OR ("reminders"."priority" IS NULL)) ORDER BY "reminders"."priority" DESC
         """
-      }results: {
+      } results: {
         """
         ┌───────────────────────┬─────────┬─────┐
         │ "Send weekly emails"  │ .medium │ 2.4 │

@@ -7,13 +7,12 @@ import Testing
 extension SnapshotTests {
   @Suite struct SQLMacroTests {
     @Test func rawSelect() {
-      // TODO: \(quoted:) or \(identifier:)
       assertQuery(
         #sql(
           """
           SELECT \(Reminder.columns) 
-          FROM \(raw: Reminder.tableName)
-          ORDER BY \(Reminder.columns.id)
+          FROM \(Reminder.self)
+          ORDER BY \(Reminder.id)
           LIMIT 1
           """,
           as: Reminder.self
@@ -21,7 +20,7 @@ extension SnapshotTests {
       ) {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" 
-        FROM reminders
+        FROM "reminders"
         ORDER BY "reminders"."id"
         LIMIT 1
         """
@@ -48,20 +47,27 @@ extension SnapshotTests {
       assertQuery(
         #sql(
           """
-          SELECT \(Reminder.columns), \(RemindersList.columns) 
-          FROM \(raw: Reminder.tableName) \
-          JOIN \(raw: RemindersList.tableName) \
-            ON \(Reminder.columns.remindersListID) = \(RemindersList.columns.id) \
+          SELECT
+            \(Reminder.columns),
+            \(RemindersList.columns)
+          FROM \(Reminder.self)
+          JOIN \(RemindersList.self)
+            ON \(Reminder.remindersListID) = \(RemindersList.id)
           LIMIT 1
           """,
           as: (Reminder, RemindersList).self
         )
       ) {
         """
-        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "remindersLists"."id", "remindersLists"."color", "remindersLists"."name" 
-        FROM reminders JOIN remindersLists   ON "reminders"."remindersListID" = "remindersLists"."id" LIMIT 1
+        SELECT
+          "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title",
+          "remindersLists"."id", "remindersLists"."color", "remindersLists"."name"
+        FROM "reminders"
+        JOIN "remindersLists"
+          ON "reminders"."remindersListID" = "remindersLists"."id"
+        LIMIT 1
         """
-      }results: {
+      } results: {
         """
         ┌─────────────────────────────────────────┬────────────────────┐
         │ Reminder(                               │ RemindersList(     │
@@ -85,9 +91,9 @@ extension SnapshotTests {
         #sql(
           """
           SELECT \(Reminder.columns), \(RemindersList.columns) 
-          FROM \(raw: Reminder.tableName) \
-          JOIN \(raw: RemindersList.tableName) \
-          ON \(Reminder.columns.remindersListID) = \(RemindersList.columns.id) \
+          FROM \(Reminder.self) \
+          JOIN \(RemindersList.self) \
+          ON \(Reminder.remindersListID) = \(RemindersList.id) \
           LIMIT 1
           """,
           as: ReminderWithList.self
@@ -95,9 +101,9 @@ extension SnapshotTests {
       ) {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "remindersLists"."id", "remindersLists"."color", "remindersLists"."name" 
-        FROM reminders JOIN remindersLists ON "reminders"."remindersListID" = "remindersLists"."id" LIMIT 1
+        FROM "reminders" JOIN "remindersLists" ON "reminders"."remindersListID" = "remindersLists"."id" LIMIT 1
         """
-      }results: {
+      } results: {
         """
         ┌───────────────────────────────────────────┐
         │ ReminderWithList(                         │

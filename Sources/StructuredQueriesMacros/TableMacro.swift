@@ -87,7 +87,7 @@ extension TableMacro: ExtensionMacro {
       var columnQueryValueType =
         (binding.typeAnnotation?.type.trimmed
         ?? binding.initializer?.value.literalType)
-        .map { selfRewriter.rewrite($0).cast(TypeSyntax.self) }
+        .map { $0.rewritten(selfRewriter) }
       let columnQueryOutputType = columnQueryValueType
       var isPrimaryKey = primaryKey == nil && identifier.text == "id"
       var isEphemeral = false
@@ -354,6 +354,7 @@ extension TableMacro: ExtensionMacro {
             property.trimmed
               .with(\.bindingSpecifier.leadingTrivia, "")
               .removingAccessors()
+              .rewritten(selfRewriter)
           )
         )
       } else {
@@ -362,6 +363,7 @@ extension TableMacro: ExtensionMacro {
             property.trimmed
               .with(\.bindingSpecifier.leadingTrivia, "")
               .removingAccessors()
+              .rewritten(selfRewriter)
           )
         )
       }
@@ -400,7 +402,7 @@ extension TableMacro: ExtensionMacro {
         in: context
       )
       .compactMap(\.memberBlock.members.trimmed)
-      let memberwiseArguments = draftBindings.map { $0.annotated() }
+      let memberwiseArguments = draftBindings.map { $0.annotated().rewritten(selfRewriter) }
       let memberwiseAssignments =
         memberwiseArguments
         .map { $0.trimmed.pattern.cast(IdentifierPatternSyntax.self).identifier }

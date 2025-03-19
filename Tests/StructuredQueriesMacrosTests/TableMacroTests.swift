@@ -677,6 +677,88 @@ extension SnapshotTests {
       }
     }
 
+    @Test func capitalSelfPrimaryKey() {
+      assertMacro {
+        """
+        @Table
+        struct User {
+          let id: ID<Self>
+          var referrerID: ID<Self>?
+        }
+        """
+      } expansion: {
+        #"""
+        struct User {
+          let id: ID<Self>
+          var referrerID: ID<Self>?
+        }
+
+        extension User: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
+          public struct TableColumns: StructuredQueries.Schema, StructuredQueries.PrimaryKeyedSchema {
+            public typealias QueryValue = User
+            public static var count: Int {
+              2
+            }
+            public let id = StructuredQueries.TableColumn<QueryValue, ID<User>>("id", keyPath: \QueryValue.id)
+            public let referrerID = StructuredQueries.TableColumn<QueryValue, ID<User>?>("referrerID", keyPath: \QueryValue.referrerID)
+            public var primaryKey: StructuredQueries.TableColumn<QueryValue, ID<User>> {
+              self.id
+            }
+            public var allColumns: [any StructuredQueries.TableColumnExpression] {
+              [self.id, self.referrerID]
+            }
+          }
+          public struct Draft: StructuredQueries.Table {
+            @Column(primaryKey: false)
+            let id: ID<User>?
+            var referrerID: ID<User>?
+            public struct TableColumns: StructuredQueries.Schema {
+              public typealias QueryValue = User.Draft
+              public static var count: Int {
+                2
+              }
+              public let id = StructuredQueries.TableColumn<QueryValue, ID<User>?>("id", keyPath: \QueryValue.id)
+              public let referrerID = StructuredQueries.TableColumn<QueryValue, ID<User>?>("referrerID", keyPath: \QueryValue.referrerID)
+              public var allColumns: [any StructuredQueries.TableColumnExpression] {
+                [self.id, self.referrerID]
+              }
+            }
+            public static let columns = TableColumns()
+            public static let tableName = User.tableName
+            public init(decoder: some StructuredQueries.QueryDecoder) throws {
+              self.id = try decoder.decode(ID<User>?.self)
+              self.referrerID = try decoder.decode(ID<User>?.self)
+            }
+            public init(_ other: User) {
+              self.id = other.id
+              self.referrerID = other.referrerID
+            }
+            public init(
+              id: ID<User>? = nil,
+              referrerID: ID<User>? = nil
+            ) {
+              self.id = id
+              self.referrerID = referrerID
+            }
+          }
+          public static let columns = TableColumns()
+          public static let tableName = "users"
+          public init(decoder: some StructuredQueries.QueryDecoder) throws {
+            self.id = try decoder.decode(ID<User>.self)
+            self.referrerID = try decoder.decode(ID<User>?.self)
+          }
+          public init?(_ other: Draft) {
+            guard let id = other.id else {
+              return nil
+            }
+            self.id = id
+            self.referrerID = other.referrerID
+          }
+        }
+        """#
+      }
+    }
+
     @Test func ephemeralField() {
       assertMacro {
         """

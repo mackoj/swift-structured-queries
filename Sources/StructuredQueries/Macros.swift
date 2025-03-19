@@ -140,11 +140,3 @@ public macro sql<QueryValue>(
   as queryValueType: QueryValue.Type = QueryValue.self
 ) -> SQLQueryExpression<QueryValue> =
   #externalMacro(module: "StructuredQueriesMacros", type: "SQLMacro")
-
-// TODO: Do we want to expose this functionality?
-// @freestanding(expression)
-// public macro sql<QueryValue>(
-//   raw queryFragment: String,
-//   as queryValueType: QueryValue.Type = QueryValue.self
-// ) -> SQLQueryExpression<QueryValue> =
-//   #externalMacro(module: "StructuredQueriesMacros", type: "SQLMacro")
