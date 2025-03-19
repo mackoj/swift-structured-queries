@@ -639,12 +639,15 @@ extension SnapshotTests {
     @Test func rawSelect() {
       // TODO: \(quoted:) or \(identifier:)
       assertQuery(
-        #sql("SELECT \(Reminder.columns) FROM \(raw: Reminder.tableName) LIMIT 2", as: Reminder.self),
+        #sql(
+          "SELECT \(Reminder.columns) FROM \(raw: Reminder.tableName) LIMIT 2",
+          as: Reminder.self
+        ),
       ) {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM reminders LIMIT 2
         """
-      }results: {
+      } results: {
         """
         ┌─────────────────────────────────────────┐
         │ Reminder(                               │
@@ -716,6 +719,69 @@ extension SnapshotTests {
         └─────────────────────────────────────────┴────────────────────┘
         """
       }
+      assertQuery(
+        #sql(
+          """
+          SELECT \(Reminder.columns), \(RemindersList.columns) FROM \(raw: Reminder.tableName) \
+          JOIN \(raw: RemindersList.tableName) \
+          ON \(Reminder.columns.remindersListID) = \(RemindersList.columns.id) \
+          LIMIT 2
+          """,
+          as: ReminderWithList.self
+        )
+      ) {
+        """
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "remindersLists"."id", "remindersLists"."color", "remindersLists"."name" FROM reminders JOIN remindersLists ON "reminders"."remindersListID" = "remindersLists"."id" LIMIT 2
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────────────┐
+        │ SnapshotTests.SelectTests.ReminderWithList( │
+        │   reminder: Reminder(                       │
+        │     id: 1,                                  │
+        │     assignedUserID: 1,                      │
+        │     date: Date(2001-01-01T00:00:00.000Z),   │
+        │     isCompleted: false,                     │
+        │     isFlagged: false,                       │
+        │     notes: "Milk, Eggs, Apples",            │
+        │     priority: nil,                          │
+        │     remindersListID: 1,                     │
+        │     title: "Groceries"                      │
+        │   ),                                        │
+        │   list: RemindersList(                      │
+        │     id: 1,                                  │
+        │     color: 4889071,                         │
+        │     name: "Personal"                        │
+        │   )                                         │
+        │ )                                           │
+        ├─────────────────────────────────────────────┤
+        │ SnapshotTests.SelectTests.ReminderWithList( │
+        │   reminder: Reminder(                       │
+        │     id: 2,                                  │
+        │     assignedUserID: nil,                    │
+        │     date: Date(2000-12-30T00:00:00.000Z),   │
+        │     isCompleted: false,                     │
+        │     isFlagged: true,                        │
+        │     notes: "",                              │
+        │     priority: nil,                          │
+        │     remindersListID: 1,                     │
+        │     title: "Haircut"                        │
+        │   ),                                        │
+        │   list: RemindersList(                      │
+        │     id: 1,                                  │
+        │     color: 4889071,                         │
+        │     name: "Personal"                        │
+        │   )                                         │
+        │ )                                           │
+        └─────────────────────────────────────────────┘
+        """
+      }
+    }
+
+    @Selection
+    struct ReminderWithList {
+      let reminder: Reminder
+      let list: RemindersList
     }
   }
 }

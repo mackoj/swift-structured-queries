@@ -12,7 +12,11 @@ extension QueryBinding: CustomDebugStringConvertible {
   public var debugDescription: String {
     switch self {
     case let .blob(data):
-      return String(decoding: data, as: UTF8.self).quoted("'")
+      return String(decoding: data, as: UTF8.self)
+        .debugDescription
+        .dropLast()
+        .dropFirst()
+        .quoted("'")
     case let .double(value):
       return "\(value)"
     case let .int(value):
