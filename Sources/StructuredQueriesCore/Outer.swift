@@ -42,6 +42,18 @@ public struct Outer<Base: Table>: _OptionalPromotable, Table {
   }
 }
 
+extension Outer: PrimaryKeyedTable where Base: PrimaryKeyedTable {
+  public typealias Draft = Outer<Base.Draft>
+}
+
+extension Outer.TableColumns: PrimaryKeyedSchema where Base.TableColumns: PrimaryKeyedSchema {
+  public typealias PrimaryKey = Base.TableColumns.PrimaryKey?
+
+  public var primaryKey: TableColumn<Outer<Base>, Base.TableColumns.PrimaryKey.QueryValue?> {
+    self[dynamicMember: \Base.TableColumns.primaryKey]
+  }
+}
+
 extension Outer: QueryExpression where Base: QueryExpression {
   public typealias QueryValue = Base.QueryValue?
 

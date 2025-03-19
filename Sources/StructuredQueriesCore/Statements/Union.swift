@@ -1,4 +1,4 @@
-extension SelectStatement {
+extension _SelectStatement {
   // TODO: Bikeshed 'UNION ALL'
   public func union<F, J>(
     _ other: some SelectStatement<QueryValue, F, J>
@@ -19,7 +19,7 @@ extension SelectStatement {
   }
 }
 
-public struct CompoundSelect<QueryValue>: Statement {
+public struct CompoundSelect<QueryValue>: _SelectStatement {
   public typealias Joins = Never
   public typealias From = Never
 

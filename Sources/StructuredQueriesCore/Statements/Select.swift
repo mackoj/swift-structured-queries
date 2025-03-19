@@ -210,16 +210,8 @@ extension Table {
 public func with<CTE: Table>(
   _ select: some Statement<CTE>
 ) -> Select<(), CTE, ()> {
-  Select<(), CTE, ()>(
-    ctes: [CommonTableExpressionClause(tableName: CTE.tableName, select: select)],
-    distinct: false,
-    columns: [],
-    joins: [],
-    where: [],
-    group: [],
-    having: [],
-    order: [],
-    limit: nil
+  Select(
+    ctes: [CommonTableExpressionClause(tableName: CTE.tableName, select: select)]
   )
 }
 
@@ -229,7 +221,7 @@ public func with<CTE: Table>(
 public struct Select<Columns, From: Table, Joins> {
   // NB: A parameter pack compiler crash forces us to heap-allocate this storage.
   private struct Clauses {
-    var cte: [CommonTableExpressionClause] = []
+    var ctes: [CommonTableExpressionClause] = []
     var distinct = false
     var columns: [any QueryExpression] = []
     var joins: [JoinClause] = []
@@ -242,9 +234,9 @@ public struct Select<Columns, From: Table, Joins> {
   @CopyOnWrite private var clauses = Clauses()
 
   fileprivate var ctes: [CommonTableExpressionClause] {
-    get { clauses.cte }
-    set { clauses.cte = newValue }
-    _modify { yield &clauses.cte }
+    get { clauses.ctes }
+    set { clauses.ctes = newValue }
+    _modify { yield &clauses.ctes }
   }
   fileprivate var distinct: Bool {
     get { clauses.distinct }
@@ -311,6 +303,10 @@ public struct Select<Columns, From: Table, Joins> {
 }
 
 extension Select {
+  fileprivate init(ctes: [CommonTableExpressionClause]) {
+    self.ctes = ctes
+  }
+
   init(where: [any QueryExpression] = []) {
     self.where = `where`
   }

@@ -20,18 +20,7 @@ extension PrimaryKeyedTable {
   public static func delete(_ row: Self) -> Delete<Self, Void> {
     Delete()
       .where {
-        func open<C: TableColumnExpression>(_ column: C) -> BinaryOperator<Bool, C, C.Value>
-        where
-          C.Root == Self,
-          C.QueryValue.QueryValue == C.QueryValue
-        {
-          BinaryOperator(
-            lhs: column,
-            operator: "=",
-            rhs: C.Value(queryOutput: row[keyPath: column.keyPath])
-          )
-        }
-        return open($0.primaryKey)
+        $0.primaryKey.eq(TableColumns.PrimaryKey(queryOutput: row[keyPath: $0.primaryKey.keyPath]))
       }
   }
 }

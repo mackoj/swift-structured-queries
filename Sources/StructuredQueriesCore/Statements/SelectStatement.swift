@@ -1,4 +1,6 @@
-public protocol SelectStatement<QueryValue, From, Joins>: Statement {
+public protocol _SelectStatement<QueryValue>: Statement {}
+
+public protocol SelectStatement<QueryValue, From, Joins>: _SelectStatement {
   func all() -> Select<QueryValue, From, Joins>
 }
 

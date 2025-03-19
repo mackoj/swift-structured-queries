@@ -3,13 +3,9 @@ public protocol PrimaryKeyedTable: Table where TableColumns: PrimaryKeyedSchema 
 }
 
 public protocol PrimaryKeyedSchema<PrimaryKey>: Schema where QueryValue: PrimaryKeyedTable {
-  associatedtype PrimaryKey: TableColumnExpression
-  where
-    PrimaryKey.Root == QueryValue,
-    PrimaryKey.QueryValue: QueryBindable,
-    PrimaryKey.QueryValue.QueryValue == PrimaryKey.QueryValue
+  associatedtype PrimaryKey: QueryBindable where PrimaryKey.QueryValue == PrimaryKey
 
-  var primaryKey: PrimaryKey { get }
+  var primaryKey: TableColumn<QueryValue, PrimaryKey> { get }
 }
 
 extension PrimaryKeyedSchema {

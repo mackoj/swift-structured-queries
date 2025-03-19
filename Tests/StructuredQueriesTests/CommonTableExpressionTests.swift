@@ -12,9 +12,7 @@ extension SnapshotTests {
             .where { !$0.isCompleted }
             .select { IncompleteReminder.Columns(isFlagged: $0.isFlagged, title: $0.title) }
         )
-        .where { completedReminders in
-          completedReminders.title.collate(.nocase).contains("groceries")
-        }
+        .where { $0.title.collate(.nocase).contains("groceries") }
       ) {
         """
         WITH "incompleteReminders" AS (SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title" FROM "reminders" WHERE NOT ("reminders"."isCompleted")) SELECT "incompleteReminders"."isFlagged", "incompleteReminders"."title" FROM "incompleteReminders" WHERE (("incompleteReminders"."title" COLLATE NOCASE) LIKE '%groceries%')
