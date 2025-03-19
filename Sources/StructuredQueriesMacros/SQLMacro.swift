@@ -166,7 +166,7 @@ public enum SQLMacro: ExpressionMacro {
           Diagnostic(
             node: string,
             position: unexpectedClose.segment.position.advanced(by: unexpectedClose.offset),
-            message: MacroExpansionErrorMessage(
+            message: MacroExpansionWarningMessage(
               """
               Cannot find \(q)\(openingDelimiter)\(q) to match closing \(q)\(closingDelimiter)\(q) \
               in SQL string, producing incomplete fragment; did you mean to make this explicit?

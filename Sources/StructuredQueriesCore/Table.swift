@@ -1,7 +1,16 @@
+@dynamicMemberLookup
 public protocol Table: QueryRepresentable where TableColumns.QueryValue == Self {
   associatedtype TableColumns: Schema
   static var columns: TableColumns { get }
   static var tableName: String { get }
+}
+
+extension Table {
+  public static subscript<Member>(
+    dynamicMember keyPath: KeyPath<TableColumns, TableColumn<Self, Member>>
+  ) -> TableColumn<Self, Member> {
+    columns[keyPath: keyPath]
+  }
 }
 
 extension Never: Table {

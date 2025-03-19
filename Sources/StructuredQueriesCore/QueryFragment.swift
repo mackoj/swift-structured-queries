@@ -95,6 +95,10 @@ extension QueryFragment: ExpressibleByStringInterpolation {
       string.append(literal)
     }
 
+    public mutating func appendInterpolation(quote sql: String) {
+      string.append(sql.quoted())
+    }
+
     public mutating func appendInterpolation(raw sql: String) {
       string.append(sql)
     }
@@ -119,6 +123,10 @@ extension QueryFragment: ExpressibleByStringInterpolation {
 
     public mutating func appendInterpolation(_ expression: some QueryExpression) {
       appendInterpolation(expression.queryFragment)
+    }
+
+    public mutating func appendInterpolation<T: Table>(_ table: T.Type) {
+      appendInterpolation(quote: table.tableName)
     }
 
     @available(

@@ -69,7 +69,7 @@ extension SnapshotTests {
         """
         #sql("(1 + 2))")
              ────────┬─
-                     ╰─ 🛑 Cannot find '(' to match closing ')' in SQL string, producing incomplete fragment; did you mean to make this explicit?
+                     ╰─ ⚠️ Cannot find '(' to match closing ')' in SQL string, producing incomplete fragment; did you mean to make this explicit?
                         ✏️ Use 'SQLQueryExpression.init(_:)' to silence this warning
         """
       } fixes: {
