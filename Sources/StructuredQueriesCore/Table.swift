@@ -26,7 +26,7 @@ extension Never: Table {
     TableColumns()
   }
 
-  public static var tableName: String { "nevers" }
+  public static let tableName = "nevers"
 
   public init(decoder: some QueryDecoder) throws {
     throw DecodingError()

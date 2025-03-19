@@ -24,6 +24,17 @@ extension SnapshotTests {
         avg("users"."age")
         """
       }
+      assertQuery(Reminder.select { $0.id.avg() }) {
+        """
+        SELECT avg("reminders"."id") FROM "reminders"
+        """
+      } results: {
+        """
+        ┌─────┐
+        │ 5.5 │
+        └─────┘
+        """
+      }
     }
 
     @Test func count() {
@@ -35,6 +46,28 @@ extension SnapshotTests {
       assertInlineSnapshot(of: User.columns.id.count(distinct: true), as: .sql) {
         """
         count(DISTINCT "users"."id")
+        """
+      }
+      assertQuery(Reminder.select { $0.id.count() }) {
+        """
+        SELECT count("reminders"."id") FROM "reminders"
+        """
+      } results: {
+        """
+        ┌────┐
+        │ 10 │
+        └────┘
+        """
+      }
+      assertQuery(Reminder.select { $0.priority.count(distinct: true) }) {
+        """
+        SELECT count(DISTINCT "reminders"."priority") FROM "reminders"
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 3 │
+        └───┘
         """
       }
     }
@@ -58,12 +91,34 @@ extension SnapshotTests {
         max("users"."id")
         """
       }
+      assertQuery(Reminder.select { $0.id.max() }) {
+        """
+        SELECT max("reminders"."id") FROM "reminders"
+        """
+      } results: {
+        """
+        ┌────┐
+        │ 10 │
+        └────┘
+        """
+      }
     }
 
     @Test func min() {
       assertInlineSnapshot(of: User.columns.id.min(), as: .sql) {
         """
         min("users"."id")
+        """
+      }
+      assertQuery(Reminder.select { $0.priority.min() }) {
+        """
+        SELECT min("reminders"."priority") FROM "reminders"
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        └───┘
         """
       }
     }
@@ -79,6 +134,17 @@ extension SnapshotTests {
         sum(DISTINCT "users"."id")
         """
       }
+      assertQuery(Reminder.select { $0.id.sum() }) {
+        """
+        SELECT sum("reminders"."id") FROM "reminders"
+        """
+      } results: {
+        """
+        ┌────┐
+        │ 55 │
+        └────┘
+        """
+      }
     }
 
     @Test func total() {
@@ -90,6 +156,17 @@ extension SnapshotTests {
       assertInlineSnapshot(of: User.columns.id.total(distinct: true), as: .sql) {
         """
         total(DISTINCT "users"."id")
+        """
+      }
+      assertQuery(Reminder.select { $0.id.total() }) {
+        """
+        SELECT total("reminders"."id") FROM "reminders"
+        """
+      } results: {
+        """
+        ┌────┐
+        │ 55 │
+        └────┘
         """
       }
     }
@@ -139,6 +216,18 @@ extension SnapshotTests {
         SELECT group_concat("users"."name") FILTER (WHERE "users"."isAdmin") FROM "users"
         """
       }
+
+      assertQuery(Tag.select { $0.name.groupConcat() }.order(by: \.name)) {
+        """
+        SELECT group_concat("tags"."name") FROM "tags" ORDER BY "tags"."name"
+        """
+      }results: {
+        """
+        ┌─────────────────────────────┐
+        │ "car,kids,someday,optional" │
+        └─────────────────────────────┘
+        """
+      }
     }
 
     @Test func aggregateOfExpression() {
@@ -151,6 +240,29 @@ extension SnapshotTests {
       assertInlineSnapshot(of: (User.columns.name + "!").groupConcat(", "), as: .sql) {
         """
         group_concat(("users"."name" || '!'), ', ')
+        """
+      }
+
+      assertQuery(Reminder.select { $0.title.length().count(distinct: true) }) {
+        """
+        SELECT count(DISTINCT length("reminders"."title")) FROM "reminders"
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 8 │
+        └───┘
+        """
+      }
+      assertQuery(Tag.select { ($0.name + "!").groupConcat(", ") }) {
+        """
+        SELECT group_concat(("tags"."name" || '!'), ', ') FROM "tags"
+        """
+      }results: {
+        """
+        ┌────────────────────────────────────┐
+        │ "car!, kids!, someday!, optional!" │
+        └────────────────────────────────────┘
         """
       }
     }

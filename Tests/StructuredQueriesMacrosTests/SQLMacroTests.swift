@@ -4,7 +4,7 @@ import Testing
 
 extension SnapshotTests {
   @MainActor
-  @Suite(.macros(macros: [SQLMacro.self])) struct SQLMacroTests {
+  @Suite struct SQLMacroTests {
     @Test func basics() {
       assertMacro {
         """
