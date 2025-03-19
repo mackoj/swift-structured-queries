@@ -156,119 +156,52 @@ extension _Null: ExpressibleByNilLiteral {
   public init(nilLiteral: ()) {}
 }
 
-extension QueryExpression where QueryValue: _OptionalPromotable {
-  public static func < <Other: _OptionalPromotable>(
-    lhs: Self, rhs: some QueryExpression<Other>
-  ) -> some QueryExpression<Bool>
-  where QueryValue._Optionalized.Wrapped == Other._Optionalized.Wrapped {
+extension QueryExpression {
+  public static func < (
+    lhs: Self, rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
     lhs.lt(rhs)
   }
 
-  public static func > <Other: _OptionalPromotable>(
-    lhs: Self, rhs: some QueryExpression<Other>
-  ) -> some QueryExpression<Bool>
-  where QueryValue._Optionalized.Wrapped == Other._Optionalized.Wrapped {
+  public static func > (
+    lhs: Self, rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
     lhs.gt(rhs)
   }
 
-  public static func <= <Other: _OptionalPromotable>(
-    lhs: Self, rhs: some QueryExpression<Other>
-  ) -> some QueryExpression<Bool>
-  where QueryValue._Optionalized.Wrapped == Other._Optionalized.Wrapped {
+  public static func <= (
+    lhs: Self, rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
     lhs.lte(rhs)
   }
 
-  public static func >= <Other: _OptionalPromotable>(
-    lhs: Self, rhs: some QueryExpression<Other>
-  ) -> some QueryExpression<Bool>
-  where QueryValue._Optionalized.Wrapped == Other._Optionalized.Wrapped {
+  public static func >= (
+    lhs: Self, rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
     lhs.gte(rhs)
   }
 
-  public func lt<Other: _OptionalPromotable>(
-    _ other: some QueryExpression<Other>
-  ) -> some QueryExpression<Bool>
-  where QueryValue._Optionalized.Wrapped == Other._Optionalized.Wrapped {
+  public func lt(
+    _ other: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: "<", rhs: other)
   }
 
-  public func gt<Other: _OptionalPromotable>(
-    _ other: some QueryExpression<Other>
-  ) -> some QueryExpression<Bool>
-  where QueryValue._Optionalized.Wrapped == Other._Optionalized.Wrapped {
+  public func gt(
+    _ other: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: ">", rhs: other)
   }
 
-  public func lte<Other: _OptionalPromotable>(
-    _ other: some QueryExpression<Other>
-  ) -> some QueryExpression<Bool>
-  where QueryValue._Optionalized.Wrapped == Other._Optionalized.Wrapped {
+  public func lte(
+    _ other: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: "<=", rhs: other)
   }
 
-  public func gte<Other: _OptionalPromotable>(
-    _ other: some QueryExpression<Other>
-  ) -> some QueryExpression<Bool>
-  where QueryValue._Optionalized.Wrapped == Other._Optionalized.Wrapped {
-    BinaryOperator(lhs: self, operator: ">=", rhs: other)
-  }
-}
-
-extension QueryExpression
-where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric {
-  public static func < <Other: _OptionalPromotable>(
-    lhs: Self, rhs: some QueryExpression<Other>
-  ) -> some QueryExpression<Bool>
-  where Other._Optionalized.Wrapped: Numeric {
-    lhs.lt(rhs)
-  }
-
-  public static func > <Other: _OptionalPromotable>(
-    lhs: Self, rhs: some QueryExpression<Other>
-  ) -> some QueryExpression<Bool>
-  where Other._Optionalized.Wrapped: Numeric {
-    lhs.gt(rhs)
-  }
-
-  public static func <= <Other: _OptionalPromotable>(
-    lhs: Self, rhs: some QueryExpression<Other>
-  ) -> some QueryExpression<Bool>
-  where Other._Optionalized.Wrapped: Numeric {
-    lhs.lte(rhs)
-  }
-
-  public static func >= <Other: _OptionalPromotable>(
-    lhs: Self, rhs: some QueryExpression<Other>
-  ) -> some QueryExpression<Bool>
-  where Other._Optionalized.Wrapped: Numeric {
-    lhs.gte(rhs)
-  }
-
-  public func lt<Other: _OptionalPromotable>(
-    _ other: some QueryExpression<Other>
-  ) -> some QueryExpression<Bool>
-  where Other._Optionalized.Wrapped: Numeric {
-    BinaryOperator(lhs: self, operator: "<", rhs: other)
-  }
-
-  public func gt<Other: _OptionalPromotable>(
-    _ other: some QueryExpression<Other>
-  ) -> some QueryExpression<Bool>
-  where Other._Optionalized.Wrapped: Numeric {
-    BinaryOperator(lhs: self, operator: ">", rhs: other)
-  }
-
-  public func lte<Other: _OptionalPromotable>(
-    _ other: some QueryExpression<Other>
-  ) -> some QueryExpression<Bool>
-  where Other._Optionalized.Wrapped: Numeric {
-    BinaryOperator(lhs: self, operator: "<=", rhs: other)
-  }
-
-  public func gte<Other: _OptionalPromotable>(
-    _ other: some QueryExpression<Other>
-  ) -> some QueryExpression<Bool>
-  where Other._Optionalized.Wrapped: Numeric {
+  public func gte(
+    _ other: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: ">=", rhs: other)
   }
 }

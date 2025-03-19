@@ -123,46 +123,6 @@ extension SnapshotTests {
         ("rows"."c" >= "rows"."c")
         """
       }
-      assertInlineSnapshot(of: Row.columns.a < Row.columns.c, as: .sql) {
-        """
-        ("rows"."a" < "rows"."c")
-        """
-      }
-      assertInlineSnapshot(of: Row.columns.c < Row.columns.a, as: .sql) {
-        """
-        ("rows"."c" < "rows"."a")
-        """
-      }
-      assertInlineSnapshot(of: Row.columns.a > Row.columns.c, as: .sql) {
-        """
-        ("rows"."a" > "rows"."c")
-        """
-      }
-      assertInlineSnapshot(of: Row.columns.c > Row.columns.a, as: .sql) {
-        """
-        ("rows"."c" > "rows"."a")
-        """
-      }
-      assertInlineSnapshot(of: Row.columns.a <= Row.columns.c, as: .sql) {
-        """
-        ("rows"."a" <= "rows"."c")
-        """
-      }
-      assertInlineSnapshot(of: Row.columns.c <= Row.columns.a, as: .sql) {
-        """
-        ("rows"."c" <= "rows"."a")
-        """
-      }
-      assertInlineSnapshot(of: Row.columns.a >= Row.columns.c, as: .sql) {
-        """
-        ("rows"."a" >= "rows"."c")
-        """
-      }
-      assertInlineSnapshot(of: Row.columns.c >= Row.columns.a, as: .sql) {
-        """
-        ("rows"."c" >= "rows"."a")
-        """
-      }
     }
 
     @Test func logic() {
@@ -462,20 +422,8 @@ extension SnapshotTests {
         """
       }
       assertInlineSnapshot(
-        of: Row.where { $0.c >= Row.select { $0.c.avg() } && $0.c > 1.0 },
-        as: .sql
-      ) {
-        """
-        SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool", "rows"."string" FROM "rows" WHERE (("rows"."c" >= (SELECT avg("rows"."c") FROM "rows")) AND ("rows"."c" > 1.0))
-        """
-      }
-    }
-
-    @Test func whereSubqueryCasts() async throws {
-      assertInlineSnapshot(
         of: Row.where {
-          $0.c.cast(as: Double.self) >= Row.select { $0.c.avg() ?? 0 }
-            && $0.c.cast(as: Double.self) > 1.0
+          $0.c.cast() >= Row.select { $0.c.avg() ?? 0 } && $0.c.cast() > 1.0
         },
         as: .sql
       ) {
