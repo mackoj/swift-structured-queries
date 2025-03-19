@@ -225,10 +225,13 @@ extension SelectionMacro: ExtensionMacro {
       .joined(separator: ",\n")
     let initAssignment: [ExprSyntax] =
       allColumns
-      .map { #"\(\#($0.name).queryFragment)"# as ExprSyntax }
+      .map { #"\(\#($0.name).queryFragment) AS \#(raw: $0.name.text.quoted())"# as ExprSyntax }
 
-    let initDecoder: DeclSyntax? = declaration.hasMacroApplication("Table") ? nil : """
-      
+    let initDecoder: DeclSyntax? =
+      declaration.hasMacroApplication("Table")
+      ? nil
+      : """
+
       public init(decoder: some \(moduleName).QueryDecoder) throws {
       \(decodings, separator: "\n")
       }
@@ -244,7 +247,9 @@ extension SelectionMacro: ExtensionMacro {
         public init(
         \(raw: initArguments)
         ) {
-        self.queryFragment = "\(initAssignment, separator: ", ")"
+        self.queryFragment = \"\"\"
+        \(initAssignment, separator: ", ")
+        \"\"\"
         }
         }\(initDecoder)
         }
@@ -275,5 +280,11 @@ extension SelectionMacro: MemberAttributeMacro {
       @Column
       """
     ]
+  }
+}
+
+extension String {
+  fileprivate func quoted(_ delimiter: String = "\"") -> String {
+    delimiter + replacingOccurrences(of: delimiter, with: delimiter + delimiter) + delimiter
   }
 }

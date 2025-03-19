@@ -205,8 +205,8 @@ extension Table {
 //     Reminder.all().…
 //   }
 //   .select { … }
-public func with<CTE: Table, From: Table, Joins>(
-  _ select: Select<CTE, From, Joins>
+public func with<CTE: Table>(
+  _ select: some Statement<CTE>
 ) -> Select<(), CTE, ()> {
   Select<(), CTE, ()>(
     ctes: [CommonTableExpressionClause(tableName: CTE.tableName, select: select)],
@@ -298,7 +298,7 @@ public struct Select<Columns, From: Table, Joins> {
   ) {
     self.columns = columns
     self.ctes = ctes
-    self.distinct = distinct // TODO: make sure we have tests on 'SELECT DISTINCT'
+    self.distinct = distinct  // TODO: make sure we have tests on 'SELECT DISTINCT'
     self.joins = joins
     self.where = `where`
     self.group = group
@@ -453,7 +453,10 @@ extension Select {
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(repeat each C2), F, (repeat each J2)>,
     on constraint: (
-      (From.TableColumns, repeat (each J1).TableColumns, F.TableColumns, repeat (each J2).TableColumns)
+      (
+        From.TableColumns, repeat (each J1).TableColumns, F.TableColumns,
+        repeat (each J2).TableColumns
+      )
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C1, repeat each C2), From, (repeat each J1, F, repeat each J2)>
   where Columns == (repeat each C1), Joins == (repeat each J1) {
@@ -466,7 +469,7 @@ extension Select {
       )
     )
     return Select<(repeat each C1, repeat each C2), From, (repeat each J1, F, repeat each J2)>(
-      ctes: ctes + other.ctes, // TODO: get test coverage
+      ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -497,7 +500,7 @@ extension Select {
       )
     )
     return Select<(repeat each C1, repeat each C2), From, (repeat each J, F)>(
-      ctes: ctes + other.ctes, // TODO: get test coverage
+      ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -519,7 +522,10 @@ extension Select {
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(repeat each C2), F, (repeat each J2)>,
     on constraint: (
-      (From.TableColumns, repeat (each J1).TableColumns, F.TableColumns, repeat (each J2).TableColumns)
+      (
+        From.TableColumns, repeat (each J1).TableColumns, F.TableColumns,
+        repeat (each J2).TableColumns
+      )
     ) -> some QueryExpression<Bool>
   ) -> Select<
     (repeat each C1, repeat (each C2)._Optionalized),
@@ -540,7 +546,7 @@ extension Select {
       From,
       (repeat each J1, Outer<F>, repeat Outer<(each J2)>)
     >(
-      ctes: ctes + other.ctes, // TODO: get test coverage
+      ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -579,7 +585,7 @@ extension Select {
       From,
       (repeat each J, Outer<F>)
     >(
-      ctes: ctes + other.ctes, // TODO: get test coverage
+      ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -601,7 +607,10 @@ extension Select {
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(repeat each C2), F, (repeat each J2)>,
     on constraint: (
-      (From.TableColumns, repeat (each J1).TableColumns, F.TableColumns, repeat (each J2).TableColumns)
+      (
+        From.TableColumns, repeat (each J1).TableColumns, F.TableColumns,
+        repeat (each J2).TableColumns
+      )
     ) -> some QueryExpression<Bool>
   ) -> Select<
     (repeat (each C1)._Optionalized, repeat each C2),
@@ -622,7 +631,7 @@ extension Select {
       Outer<From>,
       (repeat Outer<each J1>, F, repeat each J2)
     >(
-      ctes: ctes + other.ctes, // TODO: get test coverage
+      ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -661,7 +670,7 @@ extension Select {
       Outer<From>,
       (repeat Outer<each J>, F)
     >(
-      ctes: ctes + other.ctes, // TODO: get test coverage
+      ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -683,7 +692,10 @@ extension Select {
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(repeat each C2), F, (repeat each J2)>,
     on constraint: (
-      (From.TableColumns, repeat (each J1).TableColumns, F.TableColumns, repeat (each J2).TableColumns)
+      (
+        From.TableColumns, repeat (each J1).TableColumns, F.TableColumns,
+        repeat (each J2).TableColumns
+      )
     ) -> some QueryExpression<Bool>
   ) -> Select<
     (repeat (each C1)._Optionalized, repeat (each C2)._Optionalized),
@@ -704,7 +716,7 @@ extension Select {
       Outer<From>,
       (repeat Outer<each J1>, Outer<F>, repeat Outer<each J2>)
     >(
-      ctes: ctes + other.ctes, // TODO: get test coverage
+      ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -743,7 +755,7 @@ extension Select {
       Outer<From>,
       (repeat Outer<each J>, Outer<F>)
     >(
-      ctes: ctes + other.ctes, // TODO: get test coverage
+      ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -877,7 +889,7 @@ public func + <
   return Select<
     (repeat each C1, repeat each C2), From, (repeat each J1, repeat each J2)
   >(
-    ctes: lhs.ctes + rhs.ctes, // TODO: get test coverage
+    ctes: lhs.ctes + rhs.ctes,  // TODO: get test coverage
     distinct: lhs.distinct || rhs.distinct,
     columns: lhs.columns + rhs.columns,
     joins: lhs.joins + rhs.joins,

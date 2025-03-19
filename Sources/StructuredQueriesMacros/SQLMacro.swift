@@ -27,8 +27,7 @@ public enum SQLMacro: ExpressionMacro {
       for segment in string.segments {
         guard let segment = segment.as(StringSegmentSyntax.self)
         else {
-          if
-            invalidBind,
+          if invalidBind,
             let currentDelimiter,
             let segment = segment.as(ExpressionSegmentSyntax.self),
             let expression = segment.expressions.first
@@ -58,7 +57,8 @@ public enum SQLMacro: ExpressionMacro {
                   fixIt: .replace(
                     message: MacroExpansionFixItMessage("Insert 'raw: '"),
                     oldNode: expression,
-                    newNode: expression
+                    newNode:
+                      expression
                       .with(\.label, .identifier("raw"))
                       .with(\.colon, .colonToken(trailingTrivia: " "))
                   )

@@ -5,8 +5,8 @@ import Testing
 
 extension SnapshotTests {
   @Suite struct SelectionTests {
-    @Test func remindersListAndReminderCount() throws {
-      try assertQuery(
+    @Test func remindersListAndReminderCount() {
+      assertQuery(
         RemindersList
           .group(by: \.id)
           .limit(2)
@@ -16,7 +16,7 @@ extension SnapshotTests {
           }
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", count("reminders"."id") FROM "remindersLists" JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID") GROUP BY "remindersLists"."id" LIMIT 2
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name" AS "remindersList", count("reminders"."id") AS "remindersCount" FROM "remindersLists" JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID") GROUP BY "remindersLists"."id" LIMIT 2
         """
       } results: {
         """
@@ -43,8 +43,8 @@ extension SnapshotTests {
       }
     }
 
-    @Test func outerJoin() throws {
-      try assertQuery(
+    @Test func outerJoin() {
+      assertQuery(
         Reminder
           .limit(2)
           .leftJoin(User.all()) { $0.assignedUserID.eq($1.id) }
@@ -56,7 +56,7 @@ extension SnapshotTests {
           }
       ) {
         """
-        SELECT "reminders"."title", "users"."name" FROM "reminders" LEFT JOIN "users" ON ("reminders"."assignedUserID" = "users"."id") LIMIT 2
+        SELECT "reminders"."title" AS "reminderTitle", "users"."name" AS "assignedUserName" FROM "reminders" LEFT JOIN "users" ON ("reminders"."assignedUserID" = "users"."id") LIMIT 2
         """
       } results: {
         """
@@ -75,14 +75,14 @@ extension SnapshotTests {
       }
     }
 
-    @Test func date() throws {
-      try assertQuery(
+    @Test func date() {
+      assertQuery(
         Reminder.select {
           ReminderDate.Columns(date: $0.date)
         }
       ) {
         """
-        SELECT "reminders"."date" FROM "reminders"
+        SELECT "reminders"."date" AS "date" FROM "reminders"
         """
       } results: {
         """

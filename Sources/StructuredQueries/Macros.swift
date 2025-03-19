@@ -1,3 +1,5 @@
+import StructuredQueriesCore
+
 /// Defines and implements a conformance to the ``Table`` protocol.
 ///
 /// - Parameter name: The table's name. Defaults to a lower-camel-case pluralization of the type,
@@ -42,10 +44,10 @@ public macro Column(
 
 @attached(accessor, names: named(willSet))
 public macro Ephemeral() =
-#externalMacro(
-  module: "StructuredQueriesMacros",
-  type: "EphemeralMacro"
-)
+  #externalMacro(
+    module: "StructuredQueriesMacros",
+    type: "EphemeralMacro"
+  )
 
 @attached(
   memberAttribute
@@ -147,16 +149,16 @@ public macro sql<QueryValue>(
 // ) -> SQLQueryExpression<QueryValue> =
 //   #externalMacro(module: "StructuredQueriesMacros", type: "SQLMacro")
 
-import StructuredQueriesCore
-
 func foo() {
-  let stmt: Select<Foo, Reminder, ()> = Reminder.select { Foo.Columns(bar: $0.priority, baz: $0.name) }
+  let stmt: Select<Foo, Reminder, ()> = Reminder.select {
+    Foo.Columns(bar: $0.priority, baz: $0.name)
+  }
   //Select<Foo, Foo, ()>
 
   let tmp = with(
     Reminder.select { Foo.Columns(bar: $0.priority, baz: $0.name) }
   )
-    .select { $0.bar }
+  .select { $0.bar }
 }
 
 @Table struct Reminder {
@@ -174,7 +176,7 @@ struct Foo {
 //  static var columns: TableColumns {
 //    TableColumns()
 //  }
-//  
+//
 //  struct TableColumns: Schema {
 //    var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
 //      [bar, baz]

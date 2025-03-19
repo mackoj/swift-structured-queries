@@ -49,7 +49,9 @@ extension SnapshotTests {
               reminderList: some StructuredQueries.QueryExpression<ReminderList>,
               remindersCount: some StructuredQueries.QueryExpression<Int>
             ) {
-              self.queryFragment = "\(reminderList.queryFragment), \(remindersCount.queryFragment)"
+              self.queryFragment = """
+              \(reminderList.queryFragment) AS "reminderList", \(remindersCount.queryFragment) AS "remindersCount"
+              """
             }
           }
         }

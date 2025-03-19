@@ -175,7 +175,9 @@ extension Where: SelectStatement {
     return `where`
   }
 
-  public func group<C: QueryExpression>(by grouping: (From.TableColumns) -> C) -> Select<(), From, ()>
+  public func group<C: QueryExpression>(by grouping: (From.TableColumns) -> C) -> Select<
+    (), From, ()
+  >
   where C.QueryValue: QueryDecodable {
     all().group(by: grouping)
   }

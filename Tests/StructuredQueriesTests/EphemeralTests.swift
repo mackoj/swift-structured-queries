@@ -6,7 +6,7 @@ import Testing
 
 extension SnapshotTests {
   @Suite struct EphemeralTests {
-    @Test func basics() throws {
+    @Test func basics() {
       assertInlineSnapshot(
         of: TestTable.select { $0.firstName + ", " + $0.lastName },
         as: .sql

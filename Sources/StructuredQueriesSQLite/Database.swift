@@ -90,7 +90,7 @@ public struct Database {
     let sql = query.query
     let code = sqlite3_prepare_v2(storage.handle, sql.string, -1, &statement, nil)
     guard code == SQLITE_OK, let statement
-    else { throw SQLiteError(code: code) }
+    else { throw SQLiteError(db: storage.handle) }
     defer { sqlite3_finalize(statement) }
     for (index, binding) in zip(Int32(1)..., sql.bindings) {
       let result =
@@ -106,7 +106,7 @@ public struct Database {
         case let .text(text):
           sqlite3_bind_text(statement, index, text, -1, SQLITE_TRANSIENT)
         }
-      guard result == SQLITE_OK else { throw SQLiteError(code: result) }
+      guard result == SQLITE_OK else { throw SQLiteError(db: storage.handle) }
     }
     return try body(statement)
   }
@@ -140,7 +140,7 @@ public struct Database {
 
 private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
-struct SQLiteError: Error {
+struct SQLiteError: LocalizedError {
   let message: String
 
   init(db handle: OpaquePointer?) {
@@ -149,5 +149,9 @@ struct SQLiteError: Error {
 
   init(code: Int32) {
     self.message = String(cString: sqlite3_errstr(code))
+  }
+
+  var errorDescription: String? {
+    message
   }
 }

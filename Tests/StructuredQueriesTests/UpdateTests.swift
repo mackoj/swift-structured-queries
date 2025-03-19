@@ -8,8 +8,8 @@ extension SnapshotTests {
   @Suite struct UpdateTests {
     @Dependency(\.defaultDatabase) var db
 
-    @Test func basics() throws {
-      try assertQuery(
+    @Test func basics() {
+      assertQuery(
         Reminder
           .update { $0.isCompleted.toggle() }
           .returning { ($0.title, $0.priority, $0.isCompleted) }
@@ -33,7 +33,7 @@ extension SnapshotTests {
         └────────────────────────────┴─────────┴───────┘
         """
       }
-      try assertQuery(
+      assertQuery(
         Reminder
           .where { $0.priority == nil }
           .update { $0.isCompleted = true }
@@ -58,7 +58,7 @@ extension SnapshotTests {
     @Test func primaryKey() throws {
       var reminder = try #require(try db.execute(Reminder.all()).first)
       reminder.isCompleted.toggle()
-      try assertQuery(
+      assertQuery(
         Reminder
           .update(reminder)
           .returning(\.self)

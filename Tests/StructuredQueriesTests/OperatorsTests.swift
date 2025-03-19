@@ -102,7 +102,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func comparison() throws {
+    @Test func comparison() {
       assertInlineSnapshot(of: Row.columns.c < Row.columns.c, as: .sql) {
         """
         ("rows"."c" < "rows"."c")
@@ -434,8 +434,8 @@ extension SnapshotTests {
       }
     }
 
-    @Test func containsCollectionElement() throws {
-      try assertQuery(
+    @Test func containsCollectionElement() {
+      assertQuery(
         Reminder.select { $0.id }.where { [1, 2].contains($0.id) }
       ) {
         """

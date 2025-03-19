@@ -5,8 +5,8 @@ import Testing
 
 extension SnapshotTests {
   @Suite struct CommonTableExpressionTests {
-    @Test func basics() throws {
-      try assertQuery(
+    @Test func basics() {
+      assertQuery(
         with(
           Reminder
             .where { !$0.isCompleted }
@@ -17,7 +17,7 @@ extension SnapshotTests {
         }
       ) {
         """
-        WITH "incompleteReminders" AS (SELECT "reminders"."isFlagged", "reminders"."title" FROM "reminders" WHERE NOT ("reminders"."isCompleted")) SELECT "incompleteReminders"."isFlagged", "incompleteReminders"."title" FROM "incompleteReminders" WHERE (("incompleteReminders"."title" COLLATE NOCASE) LIKE '%groceries%')
+        WITH "incompleteReminders" AS (SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title" FROM "reminders" WHERE NOT ("reminders"."isCompleted")) SELECT "incompleteReminders"."isFlagged", "incompleteReminders"."title" FROM "incompleteReminders" WHERE (("incompleteReminders"."title" COLLATE NOCASE) LIKE '%groceries%')
         """
       } results: {
         """
@@ -40,8 +40,8 @@ private struct IncompleteReminder {
 }
 
 // TODO: How to support:
-//@Table @Selection
-//private struct RemindersListWithRemindersCount {
-//  let remindersList: RemindersList
-//  let remindersCount: Int
-//}
+// @Table @Selection
+// private struct RemindersListWithRemindersCount {
+//   let remindersList: RemindersList
+//   let remindersCount: Int
+// }

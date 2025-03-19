@@ -1,3 +1,5 @@
+import SwiftUI
+
 extension QueryExpression where QueryValue: QueryBindable {
   public func count(distinct isDistinct: Bool = false) -> some QueryExpression<Int> {
     AggregateFunction("count", isDistinct: isDistinct, self)
@@ -102,7 +104,6 @@ private struct AggregateFunction<QueryValue>: QueryExpression {
   }
 }
 
-import SwiftUI
 extension Color {
   var hexString: String { "" }
   init(hex: String) { fatalError() }

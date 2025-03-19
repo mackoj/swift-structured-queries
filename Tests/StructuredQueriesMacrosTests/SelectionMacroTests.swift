@@ -29,7 +29,9 @@ extension SnapshotTests {
               player: some StructuredQueries.QueryExpression<Player>,
               team: some StructuredQueries.QueryExpression<Team>
             ) {
-              self.queryFragment = "\(player.queryFragment), \(team.queryFragment)"
+              self.queryFragment = """
+              \(player.queryFragment) AS "player", \(team.queryFragment) AS "team"
+              """
             }
           }
           public init(decoder: some StructuredQueries.QueryDecoder) throws {
@@ -81,7 +83,9 @@ extension SnapshotTests {
               reminderTitle: some StructuredQueries.QueryExpression<String>,
               listTitle: some StructuredQueries.QueryExpression<String?>
             ) {
-              self.queryFragment = "\(reminderTitle.queryFragment), \(listTitle.queryFragment)"
+              self.queryFragment = """
+              \(reminderTitle.queryFragment) AS "reminderTitle", \(listTitle.queryFragment) AS "listTitle"
+              """
             }
           }
           public init(decoder: some StructuredQueries.QueryDecoder) throws {
@@ -114,7 +118,9 @@ extension SnapshotTests {
             public init(
               date: some StructuredQueries.QueryExpression<Date.ISO8601Representation>
             ) {
-              self.queryFragment = "\(date.queryFragment)"
+              self.queryFragment = """
+              \(date.queryFragment) AS "date"
+              """
             }
           }
           public init(decoder: some StructuredQueries.QueryDecoder) throws {
@@ -163,7 +169,9 @@ extension SnapshotTests {
             public init(
               date: some StructuredQueries.QueryExpression<Date.ISO8601Representation>
             ) {
-              self.queryFragment = "\(date.queryFragment)"
+              self.queryFragment = """
+              \(date.queryFragment) AS "date"
+              """
             }
           }
           public init(decoder: some StructuredQueries.QueryDecoder) throws {

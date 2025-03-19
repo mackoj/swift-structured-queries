@@ -5,8 +5,8 @@ import Testing
 
 extension SnapshotTests {
   @Suite struct InsertTests {
-    @Test func basics() throws {
-      try assertQuery(
+    @Test func basics() {
+      assertQuery(
         Reminder.insert {
           ($0.remindersListID, $0.title, $0.isCompleted, $0.date, $0.priority)
         } values: {
@@ -51,8 +51,8 @@ extension SnapshotTests {
       }
     }
 
-    @Test func testSingleColumn() throws {
-      try assertQuery(
+    @Test func testSingleColumn() {
+      assertQuery(
         Reminder
           .insert(\.remindersListID) { 1 }
           .returning(\.self)
@@ -247,8 +247,8 @@ extension SnapshotTests {
       }
     }
 
-    @Test func upsertWithID() throws {
-      try assertQuery(Reminder.where { $0.id == 1 }) {
+    @Test func upsertWithID() {
+      assertQuery(Reminder.where { $0.id == 1 }) {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "reminders" WHERE ("reminders"."id" = 1)
         """
@@ -269,7 +269,7 @@ extension SnapshotTests {
         └─────────────────────────────────────────┘
         """
       }
-      try assertQuery(
+      assertQuery(
         Reminder
           .upsert(Reminder.Draft(id: 1, remindersListID: 1, title: "Cash check"))
           .returning(\.self)
@@ -296,8 +296,8 @@ extension SnapshotTests {
       }
     }
 
-    @Test func upsertWithoutID() throws {
-      try assertQuery(Reminder.select { $0.id.max() }) {
+    @Test func upsertWithoutID() {
+      assertQuery(Reminder.select { $0.id.max() }) {
         """
         SELECT max("reminders"."id") FROM "reminders"
         """
@@ -308,7 +308,7 @@ extension SnapshotTests {
         └────┘
         """
       }
-      try assertQuery(
+      assertQuery(
         Reminder.upsert(Reminder.Draft(remindersListID: 1))
           .returning(\.self)
       ) {

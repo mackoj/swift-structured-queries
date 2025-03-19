@@ -17,8 +17,8 @@ extension SnapshotTests {
       _ = Reminder.where(\.isCompleted).select { ($0.id, $0.isCompleted) }
     }
 
-    @Test func selectAll() throws {
-      try assertQuery(Tag.all()) {
+    @Test func selectAll() {
+      assertQuery(Tag.all()) {
         """
         SELECT "tags"."id", "tags"."name" FROM "tags"
         """
@@ -49,8 +49,8 @@ extension SnapshotTests {
       }
     }
 
-    @Test func select() throws {
-      try assertQuery(Reminder.select { ($0.id, $0.title) }) {
+    @Test func select() {
+      assertQuery(Reminder.select { ($0.id, $0.title) }) {
         """
         SELECT "reminders"."id", "reminders"."title" FROM "reminders"
         """
@@ -72,8 +72,8 @@ extension SnapshotTests {
       }
     }
 
-    @Test func selectSingleColumn() throws {
-      try assertQuery(Tag.select(\.name)) {
+    @Test func selectSingleColumn() {
+      assertQuery(Tag.select(\.name)) {
         """
         SELECT "tags"."name" FROM "tags"
         """
@@ -89,8 +89,8 @@ extension SnapshotTests {
       }
     }
 
-    @Test func selectChaining() throws {
-      try assertQuery(Tag.select(\.id).select(\.name)) {
+    @Test func selectChaining() {
+      assertQuery(Tag.select(\.id).select(\.name)) {
         """
         SELECT "tags"."id", "tags"."name" FROM "tags"
         """
@@ -106,8 +106,8 @@ extension SnapshotTests {
       }
     }
 
-    @Test func join() throws {
-      try assertQuery(
+    @Test func join() {
+      assertQuery(
         Reminder
           .join(RemindersList.all()) { $0.remindersListID.eq($1.id) }
       ) {
@@ -244,7 +244,7 @@ extension SnapshotTests {
         """#
       }
 
-      try assertQuery(
+      assertQuery(
         RemindersList
           .join(Reminder.all()) { $0.id.eq($1.remindersListID) }
           .select { ($0.name, $1.title) }
@@ -269,7 +269,7 @@ extension SnapshotTests {
         """
       }
 
-      try assertQuery(
+      assertQuery(
         Reminder.all()
           .leftJoin(User.all()) { $0.assignedUserID.eq($1.id) }
           .select { ($0.title, $1.name) }
@@ -287,7 +287,7 @@ extension SnapshotTests {
         """
       }
 
-      try assertQuery(
+      assertQuery(
         User.all()
           .rightJoin(Reminder.all()) { $0.id.is($1.assignedUserID) }
           .limit(2)
@@ -325,7 +325,7 @@ extension SnapshotTests {
         """
       }
 
-      try assertQuery(
+      assertQuery(
         User.all()
           .rightJoin(Reminder.all()) { $0.id.is($1.assignedUserID) }
           .limit(2)
@@ -364,7 +364,7 @@ extension SnapshotTests {
         """
       }
 
-      try assertQuery(
+      assertQuery(
         User.all()
           .rightJoin(Reminder.all()) { $0.id.is($1.assignedUserID) }
           .select { ($1.title, $0.name) }
@@ -382,7 +382,7 @@ extension SnapshotTests {
         """
       }
 
-      try assertQuery(
+      assertQuery(
         Reminder.all()
           .fullJoin(User.all()) { $0.assignedUserID.eq($1.id) }
           .select { ($0.title, $1.name) }
@@ -401,8 +401,8 @@ extension SnapshotTests {
       }
     }
 
-    @Test func `where`() throws {
-      try assertQuery(
+    @Test func `where`() {
+      assertQuery(
         Reminder.where(\.isCompleted)
       ) {
         """
@@ -451,8 +451,8 @@ extension SnapshotTests {
       }
     }
 
-    @Test func group() throws {
-      try assertQuery(
+    @Test func group() {
+      assertQuery(
         Reminder.select { ($0.isCompleted, $0.id.count()) }.group(by: \.isCompleted)
       ) {
         """
@@ -468,8 +468,8 @@ extension SnapshotTests {
       }
     }
 
-    @Test func having() throws {
-      try assertQuery(
+    @Test func having() {
+      assertQuery(
         Reminder
           .select { ($0.isCompleted, $0.id.count()) }
           .group(by: \.isCompleted)
@@ -487,8 +487,8 @@ extension SnapshotTests {
       }
     }
 
-    @Test func order() throws {
-      try assertQuery(
+    @Test func order() {
+      assertQuery(
         Reminder
           .select(\.title)
           .order(by: \.title)
@@ -512,7 +512,7 @@ extension SnapshotTests {
         └────────────────────────────┘
         """
       }
-      try assertQuery(
+      assertQuery(
         Reminder
           .select { ($0.isCompleted, $0.date) }
           .order { ($0.isCompleted.asc(), $0.date.desc()) }
@@ -536,7 +536,7 @@ extension SnapshotTests {
         └───────┴────────────────────────────────┘
         """
       }
-      try assertQuery(
+      assertQuery(
         Reminder
           .select { ($0.priority, $0.date) }
           .order {
@@ -570,8 +570,8 @@ extension SnapshotTests {
       }
     }
 
-    @Test func limit() throws {
-      try assertQuery(Reminder.select(\.id).limit(2)) {
+    @Test func limit() {
+      assertQuery(Reminder.select(\.id).limit(2)) {
         """
         SELECT "reminders"."id" FROM "reminders" LIMIT 2
         """
@@ -583,7 +583,7 @@ extension SnapshotTests {
         └───┘
         """
       }
-      try assertQuery(Reminder.select(\.id).limit(2, offset: 2)) {
+      assertQuery(Reminder.select(\.id).limit(2, offset: 2)) {
         """
         SELECT "reminders"."id" FROM "reminders" LIMIT 2 OFFSET 2
         """
@@ -597,8 +597,8 @@ extension SnapshotTests {
       }
     }
 
-    @Test func count() throws {
-      try assertQuery(Reminder.count()) {
+    @Test func count() {
+      assertQuery(Reminder.count()) {
         """
         SELECT count(*) FROM "reminders"
         """
@@ -612,8 +612,8 @@ extension SnapshotTests {
     }
 
     #if compiler(>=6.1)
-      @Test func dynamicMember() throws {
-        try assertQuery(
+      @Test func dynamicMember() {
+        assertQuery(
           RemindersList
             .limit(1)
             .select(\.name)

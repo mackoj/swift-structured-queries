@@ -6,12 +6,12 @@ import Testing
 
 extension SnapshotTests {
   @Suite struct DeleteTests {
-    @Test func deleteAll() throws {
-      try assertQuery(Reminder.delete().returning(\.id)) {
+    @Test func deleteAll() {
+      assertQuery(Reminder.delete().returning(\.id)) {
         """
         DELETE FROM "reminders" RETURNING "reminders"."id"
         """
-      }results: {
+      } results: {
         """
         ┌────┐
         │ 1  │
@@ -27,7 +27,7 @@ extension SnapshotTests {
         └────┘
         """
       }
-      try assertQuery(Reminder.count()) {
+      assertQuery(Reminder.count()) {
         """
         SELECT count(*) FROM "reminders"
         """
@@ -40,8 +40,8 @@ extension SnapshotTests {
       }
     }
 
-    @Test func deleteID1() throws {
-      try assertQuery(Reminder.delete().where { $0.id == 1 }.returning(\.self)) {
+    @Test func deleteID1() {
+      assertQuery(Reminder.delete().where { $0.id == 1 }.returning(\.self)) {
         """
         DELETE FROM "reminders" WHERE ("reminders"."id" = 1) RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
         """
@@ -62,7 +62,7 @@ extension SnapshotTests {
         └─────────────────────────────────────────┘
         """
       }
-      try assertQuery(Reminder.count()) {
+      assertQuery(Reminder.count()) {
         """
         SELECT count(*) FROM "reminders"
         """
@@ -75,13 +75,13 @@ extension SnapshotTests {
       }
     }
 
-    @Test func primaryKey() throws {
-      try assertQuery(Reminder.delete(Reminder(id: 1, remindersListID: 1))) {
+    @Test func primaryKey() {
+      assertQuery(Reminder.delete(Reminder(id: 1, remindersListID: 1))) {
         """
         DELETE FROM "reminders" WHERE ("reminders"."id" = 1)
         """
       }
-      try assertQuery(Reminder.count()) {
+      assertQuery(Reminder.count()) {
         """
         SELECT count(*) FROM "reminders"
         """

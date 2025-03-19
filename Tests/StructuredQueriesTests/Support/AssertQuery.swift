@@ -12,7 +12,7 @@ func assertQuery<S: SelectStatement, each J: Table>(
   function: StaticString = #function,
   line: UInt = #line,
   column: UInt = #column
-) throws where S.QueryValue == (), S.Joins == (repeat each J) {
+) where S.QueryValue == (), S.Joins == (repeat each J) {
   assertInlineSnapshot(
     of: query,
     as: .sql,
@@ -29,24 +29,42 @@ func assertQuery<S: SelectStatement, each J: Table>(
     column: column
   )
   @Dependency(\.defaultDatabase) var db
-  let rows = try db.execute(query)
-  var table = ""
-  printTable(rows, to: &table)
-  assertInlineSnapshot(
-    of: table,
-    as: .lines,
-    message: "Results did not match",
-    syntaxDescriptor: InlineSnapshotSyntaxDescriptor(
-      trailingClosureLabel: "results",
-      trailingClosureOffset: 1
-    ),
-    matches: results,
-    fileID: fileID,
-    file: filePath,
-    function: function,
-    line: line,
-    column: column
-  )
+  do {
+    let rows = try db.execute(query)
+    var table = ""
+    printTable(rows, to: &table)
+    assertInlineSnapshot(
+      of: table,
+      as: .lines,
+      message: "Results did not match",
+      syntaxDescriptor: InlineSnapshotSyntaxDescriptor(
+        trailingClosureLabel: "results",
+        trailingClosureOffset: 1
+      ),
+      matches: results,
+      fileID: fileID,
+      file: filePath,
+      function: function,
+      line: line,
+      column: column
+    )
+  } catch {
+    assertInlineSnapshot(
+      of: error.localizedDescription,
+      as: .lines,
+      message: "Results did not match",
+      syntaxDescriptor: InlineSnapshotSyntaxDescriptor(
+        trailingClosureLabel: "results",
+        trailingClosureOffset: 1
+      ),
+      matches: results,
+      fileID: fileID,
+      file: filePath,
+      function: function,
+      line: line,
+      column: column
+    )
+  }
 }
 
 func assertQuery<each V: QueryRepresentable>(
@@ -58,7 +76,7 @@ func assertQuery<each V: QueryRepresentable>(
   function: StaticString = #function,
   line: UInt = #line,
   column: UInt = #column
-) throws {
+) {
   assertInlineSnapshot(
     of: query,
     as: .sql,
@@ -75,12 +93,30 @@ func assertQuery<each V: QueryRepresentable>(
     column: column
   )
   @Dependency(\.defaultDatabase) var db
-  let rows = try db.execute(query)
-  var table = ""
-  printTable(rows, to: &table)
-  if !table.isEmpty {
+  do {
+    let rows = try db.execute(query)
+    var table = ""
+    printTable(rows, to: &table)
+    if !table.isEmpty {
+      assertInlineSnapshot(
+        of: table,
+        as: .lines,
+        message: "Results did not match",
+        syntaxDescriptor: InlineSnapshotSyntaxDescriptor(
+          trailingClosureLabel: "results",
+          trailingClosureOffset: 1
+        ),
+        matches: results,
+        fileID: fileID,
+        file: filePath,
+        function: function,
+        line: line,
+        column: column
+      )
+    }
+  } catch {
     assertInlineSnapshot(
-      of: table,
+      of: error.localizedDescription,
       as: .lines,
       message: "Results did not match",
       syntaxDescriptor: InlineSnapshotSyntaxDescriptor(

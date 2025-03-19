@@ -5,8 +5,8 @@ import Testing
 
 extension SnapshotTests {
   @Suite struct UnionTests {
-    @Test func basics() throws {
-      try assertQuery(
+    @Test func basics() {
+      assertQuery(
         Reminder.select { ("reminder", $0.title) }
           .union(RemindersList.select { ("list", $0.name) })
           .union(Tag.select { ("tag", $0.name) })
@@ -38,5 +38,115 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func commonTableExpression() {
+      assertQuery(
+        with(
+          Reminder.select { Name.Columns(type: "reminder", value: $0.title) }
+            .union(RemindersList.select { Name.Columns(type: "list", value: $0.name) })
+            .union(Tag.select { Name.Columns(type: "tag", value: $0.name) })
+        )
+        .order { ($0.type.desc(), $0.value.asc()) }
+      ) {
+        """
+        WITH "names" AS (SELECT 'reminder' AS "type", "reminders"."title" AS "value" FROM "reminders" UNION SELECT 'list' AS "type", "remindersLists"."name" AS "value" FROM "remindersLists" UNION SELECT 'tag' AS "type", "tags"."name" AS "value" FROM "tags") SELECT "names"."type", "names"."value" FROM "names" ORDER BY "names"."type" DESC, "names"."value" ASC
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────┐
+        │ Name(                               │
+        │   type: "tag",                      │
+        │   value: "car"                      │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ Name(                               │
+        │   type: "tag",                      │
+        │   value: "kids"                     │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ Name(                               │
+        │   type: "tag",                      │
+        │   value: "optional"                 │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ Name(                               │
+        │   type: "tag",                      │
+        │   value: "someday"                  │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ Name(                               │
+        │   type: "reminder",                 │
+        │   value: "Buy concert tickets"      │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ Name(                               │
+        │   type: "reminder",                 │
+        │   value: "Call accountant"          │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ Name(                               │
+        │   type: "reminder",                 │
+        │   value: "Doctor appointment"       │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ Name(                               │
+        │   type: "reminder",                 │
+        │   value: "Get laundry"              │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ Name(                               │
+        │   type: "reminder",                 │
+        │   value: "Groceries"                │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ Name(                               │
+        │   type: "reminder",                 │
+        │   value: "Haircut"                  │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ Name(                               │
+        │   type: "reminder",                 │
+        │   value: "Pick up kids from school" │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ Name(                               │
+        │   type: "reminder",                 │
+        │   value: "Send weekly emails"       │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ Name(                               │
+        │   type: "reminder",                 │
+        │   value: "Take a walk"              │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ Name(                               │
+        │   type: "reminder",                 │
+        │   value: "Take out trash"           │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ Name(                               │
+        │   type: "list",                     │
+        │   value: "Business"                 │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ Name(                               │
+        │   type: "list",                     │
+        │   value: "Family"                   │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ Name(                               │
+        │   type: "list",                     │
+        │   value: "Personal"                 │
+        │ )                                   │
+        └─────────────────────────────────────┘
+        """
+      }
+    }
   }
+}
+
+@Table @Selection
+private struct Name {
+  let type: String
+  let value: String
 }

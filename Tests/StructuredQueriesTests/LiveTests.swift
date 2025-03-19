@@ -6,8 +6,8 @@ import Testing
 
 extension SnapshotTests {
   @Suite struct LiveTests {
-    @Test func selectAll() throws {
-      try assertQuery(Reminder.all()) {
+    @Test func selectAll() {
+      assertQuery(Reminder.all()) {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "reminders"
         """
@@ -142,9 +142,9 @@ extension SnapshotTests {
       }
     }
 
-    @Test func select() throws {
+    @Test func select() {
       let averagePriority = Reminder.select { $0.priority.cast(as: Int.self).avg() }
-      try assertQuery(
+      assertQuery(
         Reminder
           .select { ($0.title, $0.priority, averagePriority) }
           .where { $0.priority.cast(as: Double?.self) < averagePriority || $0.priority == nil }
@@ -168,8 +168,8 @@ extension SnapshotTests {
       }
     }
 
-    @Test func remindersListWithReminderCount() throws {
-      try assertQuery(
+    @Test func remindersListWithReminderCount() {
+      assertQuery(
         RemindersList
           .group(by: \.id)
           .join(Reminder.all()) { $0.id.eq($1.remindersListID) }
@@ -203,8 +203,8 @@ extension SnapshotTests {
       }
     }
 
-    @Test func remindersWithTags() throws {
-      try assertQuery(
+    @Test func remindersWithTags() {
+      assertQuery(
         Reminder
           .group(by: \.id)
           .join(ReminderTag.all()) { $0.id.eq($1.reminderID) }

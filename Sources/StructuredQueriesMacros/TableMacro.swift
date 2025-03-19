@@ -34,12 +34,13 @@ extension TableMacro: ExtensionMacro {
 
     var draftProperties: [DeclSyntax] = []
     var draftTableType: TypeSyntax?
-    var primaryKey: (
-      identifier: TokenSyntax,
-      label: TokenSyntax?,
-      queryOutputType: TypeSyntax?,
-      queryValueType: TypeSyntax?
-    )?
+    var primaryKey:
+      (
+        identifier: TokenSyntax,
+        label: TokenSyntax?,
+        queryOutputType: TypeSyntax?,
+        queryValueType: TypeSyntax?
+      )?
     let selfRewriter = SelfRewriter(
       selfEquivalent: type.as(IdentifierTypeSyntax.self)?.name ?? "QueryValue"
     )
@@ -324,7 +325,7 @@ extension TableMacro: ExtensionMacro {
             }
           }
           if !hasPrimaryKeyArgument {
-            arguments[arguments.index(before: arguments.endIndex)] .trailingComma = .commaToken(
+            arguments[arguments.index(before: arguments.endIndex)].trailingComma = .commaToken(
               trailingTrivia: .space
             )
             arguments.append(
