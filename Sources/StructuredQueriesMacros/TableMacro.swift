@@ -133,7 +133,7 @@ extension TableMacro: ExtensionMacro {
               continue
             }
 
-            columnQueryValueType = "\(raw: base.trimmedDescription)"
+            columnQueryValueType = "\(raw: base.rewritten(selfRewriter).trimmedDescription)"
 
           case let .some(label) where label.text == "primaryKey":
             guard
@@ -280,7 +280,7 @@ extension TableMacro: ExtensionMacro {
         """
         public let \(identifier) = \(moduleName).TableColumn<\
         QueryValue, \
-        \(columnQueryValueType ?? "_")\
+        \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
         >(\
         \(columnName), \
         keyPath: \\QueryValue.\(identifier)\(raw: defaultValue ?? "")\
