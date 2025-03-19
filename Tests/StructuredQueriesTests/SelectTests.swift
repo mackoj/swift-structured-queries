@@ -635,5 +635,87 @@ extension SnapshotTests {
     @Test func selfJoin() {
       // TODO: This is not currently possible.
     }
+
+    @Test func rawSelect() {
+      // TODO: \(quoted:) or \(identifier:)
+      assertQuery(
+        #sql("SELECT \(Reminder.columns) FROM \(raw: Reminder.tableName) LIMIT 2", as: Reminder.self),
+      ) {
+        """
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM reminders LIMIT 2
+        """
+      }results: {
+        """
+        ┌─────────────────────────────────────────┐
+        │ Reminder(                               │
+        │   id: 1,                                │
+        │   assignedUserID: 1,                    │
+        │   date: Date(2001-01-01T00:00:00.000Z), │
+        │   isCompleted: false,                   │
+        │   isFlagged: false,                     │
+        │   notes: "Milk, Eggs, Apples",          │
+        │   priority: nil,                        │
+        │   remindersListID: 1,                   │
+        │   title: "Groceries"                    │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ Reminder(                               │
+        │   id: 2,                                │
+        │   assignedUserID: nil,                  │
+        │   date: Date(2000-12-30T00:00:00.000Z), │
+        │   isCompleted: false,                   │
+        │   isFlagged: true,                      │
+        │   notes: "",                            │
+        │   priority: nil,                        │
+        │   remindersListID: 1,                   │
+        │   title: "Haircut"                      │
+        │ )                                       │
+        └─────────────────────────────────────────┘
+        """
+      }
+      assertQuery(
+        #sql(
+          """
+          SELECT \(Reminder.columns), \(RemindersList.columns) FROM \(raw: Reminder.tableName) \
+          JOIN \(raw: RemindersList.tableName) \
+          ON \(Reminder.columns.remindersListID) = \(RemindersList.columns.id) \
+          LIMIT 2
+          """,
+          as: (Reminder, RemindersList).self
+        )
+      ) {
+        """
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "remindersLists"."id", "remindersLists"."color", "remindersLists"."name" FROM reminders JOIN remindersLists ON "reminders"."remindersListID" = "remindersLists"."id" LIMIT 2
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────────┬────────────────────┐
+        │ Reminder(                               │ RemindersList(     │
+        │   id: 1,                                │   id: 1,           │
+        │   assignedUserID: 1,                    │   color: 4889071,  │
+        │   date: Date(2001-01-01T00:00:00.000Z), │   name: "Personal" │
+        │   isCompleted: false,                   │ )                  │
+        │   isFlagged: false,                     │                    │
+        │   notes: "Milk, Eggs, Apples",          │                    │
+        │   priority: nil,                        │                    │
+        │   remindersListID: 1,                   │                    │
+        │   title: "Groceries"                    │                    │
+        │ )                                       │                    │
+        ├─────────────────────────────────────────┼────────────────────┤
+        │ Reminder(                               │ RemindersList(     │
+        │   id: 2,                                │   id: 1,           │
+        │   assignedUserID: nil,                  │   color: 4889071,  │
+        │   date: Date(2000-12-30T00:00:00.000Z), │   name: "Personal" │
+        │   isCompleted: false,                   │ )                  │
+        │   isFlagged: true,                      │                    │
+        │   notes: "",                            │                    │
+        │   priority: nil,                        │                    │
+        │   remindersListID: 1,                   │                    │
+        │   title: "Haircut"                      │                    │
+        │ )                                       │                    │
+        └─────────────────────────────────────────┴────────────────────┘
+        """
+      }
+    }
   }
 }

@@ -418,8 +418,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool", "rows"."string" FROM "rows" \
-        WHERE ("rows"."c" IN (SELECT CAST("rows"."bool" AS NUMERIC) FROM "rows"))
+        SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool", "rows"."string" FROM "rows" WHERE ("rows"."c" IN (SELECT CAST("rows"."bool" AS NUMERIC) FROM "rows"))
         """
       }
       assertInlineSnapshot(
