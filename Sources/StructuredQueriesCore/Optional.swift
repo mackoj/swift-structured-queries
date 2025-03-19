@@ -8,7 +8,7 @@ extension Optional: _OptionalProtocol {
 }
 
 public protocol _OptionalPromotable<_Optionalized> {
-  associatedtype _Optionalized = Self?
+  associatedtype _Optionalized: _OptionalProtocol = Self?
 }
 
 extension Optional: _OptionalPromotable {

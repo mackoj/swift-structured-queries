@@ -10,12 +10,18 @@ extension SnapshotTests {
       var id: Int
       var name: String
       var isAdmin: Bool
+      var age: Int?
     }
 
     @Test func average() {
       assertInlineSnapshot(of: User.columns.id.avg(), as: .sql) {
         """
         avg("users"."id")
+        """
+      }
+      assertInlineSnapshot(of: User.columns.age.avg(), as: .sql) {
+        """
+        avg("users"."age")
         """
       }
     }

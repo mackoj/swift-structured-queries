@@ -30,12 +30,15 @@ extension QueryExpression {
   }
 }
 
-extension QueryExpression where QueryValue: Numeric {
+extension QueryExpression
+where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric {
   public func avg(distinct isDistinct: Bool = false) -> some QueryExpression<Double?> {
     AggregateFunction("avg", isDistinct: isDistinct, self)
   }
 
-  public func sum(distinct isDistinct: Bool = false) -> some QueryExpression<QueryValue?> {
+  public func sum(
+    distinct isDistinct: Bool = false
+  ) -> some QueryExpression<QueryValue._Optionalized> {
     AggregateFunction("sum", isDistinct: isDistinct, self)
   }
 
