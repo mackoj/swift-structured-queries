@@ -6,6 +6,24 @@ extension QueryExpression {
   }
 }
 
+extension QueryExpression where QueryValue: _OptionalProtocol {
+  public func cast<Other: _OptionalPromotable & SQLiteType>(
+    as _: Other.Type = Other.self
+  ) -> some QueryExpression<Other._Optionalized>
+  where Other._Optionalized: SQLiteType {
+    Cast(base: self)
+  }
+
+  @available(
+    *, deprecated, message: "Cast optional to non-optional produces invalid query expression"
+  )
+  public func cast<Other: SQLiteType>(
+    as _: Other.Type = Other.self
+  ) -> some QueryExpression<Other> {
+    Cast(base: self)
+  }
+}
+
 extension QueryExpression where QueryValue: SQLiteType {
   @available(*, deprecated, message: "Cast to same query value type always succeeds")
   public func cast(

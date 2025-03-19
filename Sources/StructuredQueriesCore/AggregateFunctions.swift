@@ -37,8 +37,12 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
 
   public func sum(
     distinct isDistinct: Bool = false
-  ) -> some QueryExpression<QueryValue._Optionalized> {
-    AggregateFunction("sum", isDistinct: isDistinct, self)
+  ) -> SQLQueryExpression<QueryValue._Optionalized> {
+    // NB: We must explicitly erase here to avoid a runtime crash with opaque return types
+    // TODO: Report issue to Swift team.
+    SQLQueryExpression(
+      AggregateFunction<QueryValue._Optionalized>("sum", isDistinct: isDistinct, self).queryFragment
+    )
   }
 
   public func total(distinct isDistinct: Bool = false) -> some QueryExpression<QueryValue> {

@@ -143,17 +143,17 @@ extension SnapshotTests {
     }
 
     @Test func select() {
-      let averagePriority = Reminder.select { $0.priority.cast(as: Int.self).avg() }
+      let averagePriority = Reminder.select { $0.priority.cast(as: Int?.self).avg() }
       assertQuery(
         Reminder
           .select { ($0.title, $0.priority, averagePriority) }
-          .where { $0.priority.cast(as: Double?.self) < averagePriority || $0.priority == nil }
+          .where { #sql("\($0.priority) < \(averagePriority)") || $0.priority == nil }
           .order { $0.priority.desc() }
       ) {
         """
-        SELECT "reminders"."title", "reminders"."priority", (SELECT avg(CAST("reminders"."priority" AS NUMERIC)) FROM "reminders") FROM "reminders" WHERE ((CAST("reminders"."priority" AS NUMERIC) < (SELECT avg(CAST("reminders"."priority" AS NUMERIC)) FROM "reminders")) OR ("reminders"."priority" IS NULL)) ORDER BY "reminders"."priority" DESC
+        SELECT "reminders"."title", "reminders"."priority", (SELECT avg(CAST("reminders"."priority" AS NUMERIC)) FROM "reminders") FROM "reminders" WHERE ("reminders"."priority" < (SELECT avg(CAST("reminders"."priority" AS NUMERIC)) FROM "reminders") OR ("reminders"."priority" IS NULL)) ORDER BY "reminders"."priority" DESC
         """
-      } results: {
+      }results: {
         """
         ┌───────────────────────┬─────────┬─────┐
         │ "Send weekly emails"  │ .medium │ 2.4 │

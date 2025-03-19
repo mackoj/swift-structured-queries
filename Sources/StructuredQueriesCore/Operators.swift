@@ -156,7 +156,7 @@ extension _Null: ExpressibleByNilLiteral {
   public init(nilLiteral: ()) {}
 }
 
-extension QueryExpression {
+extension QueryExpression where QueryValue: Comparable {
   public static func < (
     lhs: Self, rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {

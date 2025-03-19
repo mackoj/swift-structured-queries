@@ -145,6 +145,17 @@ extension SnapshotTests {
         └────┘
         """
       }
+      assertQuery(Reminder.select { $0.id.sum() }.where { _ in false }) {
+        """
+        SELECT sum("reminders"."id") FROM "reminders" WHERE 0
+        """
+      } results: {
+        """
+        ┌─────┐
+        │ nil │
+        └─────┘
+        """
+      }
     }
 
     @Test func total() {
@@ -221,7 +232,7 @@ extension SnapshotTests {
         """
         SELECT group_concat("tags"."name") FROM "tags" ORDER BY "tags"."name"
         """
-      }results: {
+      } results: {
         """
         ┌─────────────────────────────┐
         │ "car,kids,someday,optional" │
@@ -258,7 +269,7 @@ extension SnapshotTests {
         """
         SELECT group_concat(("tags"."name" || '!'), ', ') FROM "tags"
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────────────────────┐
         │ "car!, kids!, someday!, optional!" │
