@@ -3,8 +3,7 @@ import StructuredQueriesMacros
 import Testing
 
 extension SnapshotTests {
-  @Suite
-  struct SelectionMacroTests {
+  @Suite struct SelectionMacroTests {
     @Test func basics() {
       assertMacro {
         """

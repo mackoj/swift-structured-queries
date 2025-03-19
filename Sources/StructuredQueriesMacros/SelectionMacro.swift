@@ -223,9 +223,9 @@ extension SelectionMacro: ExtensionMacro {
       allColumns
       .map { "\($0): some \(moduleName).QueryExpression\($1.map { "<\($0)>" } ?? "")" }
       .joined(separator: ",\n")
-    let initAssignment: [ExprSyntax] =
+    let initAssignment: [String] =
       allColumns
-      .map { #"\(\#($0.name).queryFragment) AS \#(raw: $0.name.text.quoted())"# as ExprSyntax }
+      .map { #"\(\#($0.name).queryFragment) AS \#($0.name.text.quoted())"# }
 
     let initDecoder: DeclSyntax? =
       declaration.hasMacroApplication("Table")
@@ -248,7 +248,7 @@ extension SelectionMacro: ExtensionMacro {
         \(raw: initArguments)
         ) {
         self.queryFragment = \"\"\"
-        \(initAssignment, separator: ", ")
+        \(raw: initAssignment.joined(separator: ", "))
         \"\"\"
         }
         }\(initDecoder)
