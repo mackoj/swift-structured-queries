@@ -205,6 +205,8 @@ extension Table {
 //     Reminder.all().…
 //   }
 //   .select { … }
+//
+// TODO: Support in insert, update, delete, etc...?
 public func with<CTE: Table>(
   _ select: some Statement<CTE>
 ) -> Select<(), CTE, ()> {
