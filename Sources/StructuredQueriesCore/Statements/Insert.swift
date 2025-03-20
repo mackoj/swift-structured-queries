@@ -153,7 +153,7 @@ extension Table {
     return Insert(
       conflictResolution: conflictResolution,
       columnNames: columnNames,
-      values: .select(selection()),
+      values: .select(selection().queryFragment),
       record: record,
       returning: []
     )
@@ -268,7 +268,7 @@ public struct Insert<Into: Table, Returning> {
 enum Values {
   case `default`
   case values([[QueryFragment]])
-  case select(any SelectStatement)
+  case select(QueryFragment)
 }
 
 extension Insert: Statement {
@@ -289,7 +289,7 @@ extension Insert: Statement {
       query.append(" DEFAULT VALUES")
 
     case let .select(select):
-      query.append(" \(select.query)")
+      query.append(" \(select)")
 
     case .values(let values):
       guard !values.isEmpty else { return "" }
