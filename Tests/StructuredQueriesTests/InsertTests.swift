@@ -172,17 +172,35 @@ extension SnapshotTests {
     }
 
     @Test func select() {
-      assertInlineSnapshot(
-        of: Attendee.insert {
-          ($0.name, $0.syncUpID)
+      assertQuery(
+        Tag.insert {
+          $0.name
         } select: {
-          SyncUp.all().select { ($0.title + " Lead", $0.id) }
-        },
-        as: .sql
+          RemindersList.select { $0.name.lower() }
+        }
+        .returning(\.self)
       ) {
         """
-        INSERT INTO "attendees" ("name", "syncUpID") \
-        SELECT ("syncUps"."title" || ' Lead'), "syncUps"."id" FROM "syncUps"
+        INSERT INTO "tags" ("name") SELECT lower("remindersLists"."name") FROM "remindersLists" RETURNING "tags"."id", "tags"."name"
+        """
+      } results: {
+        """
+        ┌────────────────────┐
+        │ Tag(               │
+        │   id: 5,           │
+        │   name: "personal" │
+        │ )                  │
+        ├────────────────────┤
+        │ Tag(               │
+        │   id: 6,           │
+        │   name: "family"   │
+        │ )                  │
+        ├────────────────────┤
+        │ Tag(               │
+        │   id: 7,           │
+        │   name: "business" │
+        │ )                  │
+        └────────────────────┘
         """
       }
     }
@@ -339,6 +357,34 @@ extension SnapshotTests {
         │   title: ""            │
         │ )                      │
         └────────────────────────┘
+        """
+      }
+    }
+
+    @Test func sql() {
+      assertQuery(
+        #sql(
+          """
+          INSERT INTO \(Tag.self) ("name")
+          VALUES (\(bind: "office"))
+          RETURNING \(Tag.columns)
+          """,
+          as: Tag.self
+        )
+      ) {
+        """
+        INSERT INTO "tags" ("name")
+        VALUES ('office')
+        RETURNING "tags"."id", "tags"."name"
+        """
+      } results: {
+        """
+        ┌──────────────────┐
+        │ Tag(             │
+        │   id: 5,         │
+        │   name: "office" │
+        │ )                │
+        └──────────────────┘
         """
       }
     }

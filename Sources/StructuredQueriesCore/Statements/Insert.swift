@@ -235,7 +235,7 @@ extension Table {
     return Insert(
       conflictResolution: conflictResolution,
       columnNames: columnNames,
-      values: .select(selection().queryFragment),
+      values: .select(selection().query),
       record: record,
       returning: []
     )
