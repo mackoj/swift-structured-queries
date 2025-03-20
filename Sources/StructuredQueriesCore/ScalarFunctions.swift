@@ -211,16 +211,16 @@ extension QueryExpression where QueryValue == ContiguousArray<UInt8> {
 }
 
 struct QueryFunction<QueryValue>: QueryExpression {
-  let name: String
+  let name: QueryFragment
   let arguments: [QueryFragment]
 
-  init<each Argument: QueryExpression>(_ name: String, _ arguments: repeat each Argument) {
+  init<each Argument: QueryExpression>(_ name: QueryFragment, _ arguments: repeat each Argument) {
     self.name = name
     self.arguments = Array(repeat each arguments)
   }
 
   var queryFragment: QueryFragment {
-    "\(raw: name)(\(arguments.joined(separator: ", ")))"
+    "\(name)(\(arguments.joined(separator: ", ")))"
   }
 }
 

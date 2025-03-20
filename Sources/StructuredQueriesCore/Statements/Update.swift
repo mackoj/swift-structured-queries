@@ -66,7 +66,7 @@ extension Update: Statement {
   public var query: QueryFragment {
     var query: QueryFragment = "UPDATE"
     if let conflictResolution {
-      query.append(" OR \(raw: conflictResolution.rawValue)")
+      query.append(" OR \(conflictResolution.rawValue)")
     }
     query.append(" \(From.self) \(record)")
     if !`where`.isEmpty {

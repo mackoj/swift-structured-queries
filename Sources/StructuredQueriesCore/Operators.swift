@@ -411,7 +411,7 @@ extension QueryExpression where QueryValue == String {
     BinaryOperator(
       lhs: self,
       operator: "COLLATE",
-      rhs: SQLQueryExpression("\(raw: collation.rawValue)", as: Void.self)
+      rhs: SQLQueryExpression("\(collation.rawValue)", as: Void.self)
     )
   }
 
@@ -473,7 +473,7 @@ extension QueryExpression {
     BinaryOperator(
       lhs: self,
       operator: "BETWEEN",
-      rhs: BinaryOperator<Void, _, _>(lhs: lowerBound, operator: "AND", rhs: upperBound)
+      rhs: BinaryOperator<Void>(lhs: lowerBound, operator: "AND", rhs: upperBound)
     )
   }
 
@@ -498,27 +498,39 @@ extension Statement {
   }
 }
 
-private struct UnaryOperator<QueryValue, Base: QueryExpression>: QueryExpression {
-  let `operator`: String
-  let base: Base
-  var separator = " "
+private struct UnaryOperator<QueryValue>: QueryExpression {
+  let `operator`: QueryFragment
+  let base: QueryFragment
+  let separator: QueryFragment
+
+  init(operator: QueryFragment, base: some QueryExpression, separator: QueryFragment = " ") {
+    self.operator = `operator`
+    self.base = base.queryFragment
+    self.separator = separator
+  }
 
   var queryFragment: QueryFragment {
-    "\(raw: `operator`)\(raw: separator)(\(base.queryFragment))"
+    "\(`operator`)\(separator)(\(base))"
   }
 }
 
-struct BinaryOperator<
-  QueryValue,
-  LHS: QueryExpression,
-  RHS: QueryExpression
->: QueryExpression {
-  let lhs: LHS
-  let `operator`: String
-  let rhs: RHS
+struct BinaryOperator<QueryValue>: QueryExpression {
+  let lhs: QueryFragment
+  let `operator`: QueryFragment
+  let rhs: QueryFragment
+
+  init(
+    lhs: some QueryExpression,
+    operator: QueryFragment,
+    rhs: some QueryExpression
+  ) {
+    self.lhs = lhs.queryFragment
+    self.operator = `operator`
+    self.rhs = rhs.queryFragment
+  }
 
   var queryFragment: QueryFragment {
-    "(\(lhs.queryFragment) \(raw: `operator`) \(rhs.queryFragment))"
+    "(\(lhs) \(`operator`) \(rhs))"
   }
 }
 

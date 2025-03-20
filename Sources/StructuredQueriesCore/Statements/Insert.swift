@@ -400,7 +400,7 @@ extension Insert: Statement {
   public var query: QueryFragment {
     var query: QueryFragment = "INSERT"
     if let conflictResolution {
-      query.append(" OR \(raw: conflictResolution.rawValue)")
+      query.append(" OR \(conflictResolution.rawValue)")
     }
     query.append(" INTO \(Into.self)")
     if !columnNames.isEmpty {

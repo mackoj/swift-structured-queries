@@ -5,9 +5,9 @@ public struct ConflictResolution: RawRepresentable, Sendable {
   public static let replace = Self(rawValue: "REPLACE")
   public static let rollback = Self(rawValue: "ROLLBACK")
 
-  public let rawValue: String
+  public let rawValue: QueryFragment
 
-  public init(rawValue: String) {
+  public init(rawValue: QueryFragment) {
     self.rawValue = rawValue
   }
 }

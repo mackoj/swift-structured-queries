@@ -45,9 +45,9 @@ public struct SQLiteTypeAffinity: RawRepresentable, Sendable {
   public static let real = Self(rawValue: "REAL")
   public static let text = Self(rawValue: "TEXT")
 
-  public let rawValue: String
+  public let rawValue: QueryFragment
 
-  public init(rawValue: String) {
+  public init(rawValue: QueryFragment) {
     self.rawValue = rawValue
   }
 }
@@ -94,7 +94,7 @@ extension Optional: SQLiteType where Wrapped: SQLiteType {
 private struct Cast<QueryValue: SQLiteType, Base: QueryExpression>: QueryExpression {
   let base: Base
   var queryFragment: QueryFragment {
-    "CAST(\(base.queryFragment) AS \(raw: QueryValue.typeAffinity.rawValue))"
+    "CAST(\(base.queryFragment) AS \(QueryValue.typeAffinity.rawValue))"
   }
 }
 

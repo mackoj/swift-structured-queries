@@ -3,9 +3,9 @@ public struct Collation: RawRepresentable, Sendable {
   public static let nocase = Self(rawValue: "NOCASE")
   public static let rtrim = Self(rawValue: "RTRIM")
 
-  public let rawValue: String
+  public let rawValue: QueryFragment
 
-  public init(rawValue: String) {
+  public init(rawValue: QueryFragment) {
     self.rawValue = rawValue
   }
 }

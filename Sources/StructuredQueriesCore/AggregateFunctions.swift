@@ -60,14 +60,14 @@ public struct CountExpression: QueryExpression {
 }
 
 private struct AggregateFunction<QueryValue>: QueryExpression {
-  var name: String
+  var name: QueryFragment
   var isDistinct: Bool
   var arguments: [QueryFragment]
   var order: QueryFragment?
   var filter: QueryFragment?
 
   init<each Argument: QueryExpression>(
-    _ name: String,
+    _ name: QueryFragment,
     isDistinct: Bool = false,
     _ arguments: repeat each Argument,
     order: (some QueryExpression)? = Never?.none,
@@ -81,7 +81,7 @@ private struct AggregateFunction<QueryValue>: QueryExpression {
   }
 
   var queryFragment: QueryFragment {
-    var query: QueryFragment = "\(raw: name)("
+    var query: QueryFragment = "\(name)("
     if isDistinct {
       query.append("DISTINCT ")
     }

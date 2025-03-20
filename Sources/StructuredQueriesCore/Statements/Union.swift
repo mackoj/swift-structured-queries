@@ -23,25 +23,26 @@ public struct CompoundSelect<QueryValue>: _SelectStatement {
   public typealias Joins = Never
   public typealias From = Never
 
-  fileprivate enum Operator: String {
-    case except = "EXCEPT"
-    case intersect = "INTERSECT"
-    case union = "UNION"
-    case unionAll = "UNION ALL"
+  fileprivate struct Operator {
+    static var except: Self { Self(queryFragment: "EXCEPT") }
+    static var intersect: Self { Self(queryFragment: "INTERSECT") }
+    static var union: Self { Self(queryFragment: "UNION") }
+    static var unionAll: Self { Self(queryFragment: "UNION ALL") }
+    let queryFragment: QueryFragment
   }
 
   let lhs: QueryFragment
-  fileprivate let `operator`: Operator
-  var rhs: QueryFragment
+  let `operator`: QueryFragment
+  let rhs: QueryFragment
 
   fileprivate init(lhs: some _SelectStatement, operator: Operator, rhs: some _SelectStatement) {
     self.lhs = lhs.query
-    self.operator = `operator`
+    self.operator = `operator`.queryFragment
     self.rhs = rhs.query
   }
 
   public var query: QueryFragment {
-    "\(lhs) \(raw: `operator`.rawValue) \(rhs)"
+    "\(lhs) \(`operator`) \(rhs)"
   }
 
   public func union<F, J>(

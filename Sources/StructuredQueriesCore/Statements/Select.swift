@@ -934,14 +934,15 @@ public typealias SelectOf<From: Table, each Join: Table> =
 private struct JoinClause: QueryExpression {
   typealias QueryValue = Void
 
-  enum Operator: String {
-    case full = "FULL"
-    case inner = "INNER"
-    case left = "LEFT"
-    case right = "RIGHT"
+  struct Operator {
+    static let full = Self(queryFragment: "FULL")
+    static let inner = Self(queryFragment: "INNER")
+    static let left = Self(queryFragment: "LEFT")
+    static let right = Self(queryFragment: "RIGHT")
+    let queryFragment: QueryFragment
   }
 
-  let `operator`: Operator?
+  let `operator`: QueryFragment?
   let table: any Table.Type
   let constraint: QueryFragment
 
@@ -950,7 +951,7 @@ private struct JoinClause: QueryExpression {
     table: any Table.Type,
     constraint: some QueryExpression<Bool>
   ) {
-    self.operator = `operator`
+    self.operator = `operator`?.queryFragment
     self.table = table
     self.constraint = constraint.queryFragment
   }
@@ -958,7 +959,7 @@ private struct JoinClause: QueryExpression {
   var queryFragment: QueryFragment {
     var query: QueryFragment = ""
     if let `operator` {
-      query.append("\(raw: `operator`.rawValue) ")
+      query.append("\(`operator`) ")
     }
     query.append("JOIN \(table) ON \(constraint)")
     return query
