@@ -11,15 +11,15 @@ public func with<CTE: Table>(
   _ select: some Statement<CTE>
 ) -> Select<(), CTE, ()> {
   Select(
-    ctes: [CommonTableExpressionClause(tableName: CTE.tableName, select: select)]
+    ctes: [CommonTableExpressionClause(tableName: CTE.tableName, select: select.queryFragment)]
   )
 }
 
 struct CommonTableExpressionClause: QueryExpression {
   typealias QueryValue = ()
   let tableName: String
-  let select: any QueryExpression
+  let select: QueryFragment
   var queryFragment: QueryFragment {
-    "\(raw: tableName.quoted()) AS \(select)"
+    "\(quote: tableName) AS \(select)"
   }
 }

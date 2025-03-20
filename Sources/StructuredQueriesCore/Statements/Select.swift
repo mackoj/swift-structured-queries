@@ -176,8 +176,8 @@ extension Table {
   }
 
   public static func order(
-    @AnyQueryExpressionBuilder
-    by ordering: (TableColumns) -> [any QueryExpression]
+    @QueryFragmentBuilder
+    by ordering: (TableColumns) -> [QueryFragment]
   ) -> Select<(), Self, ()> {
     all().order(by: ordering)
   }
@@ -206,12 +206,12 @@ public struct Select<Columns, From: Table, Joins> {
   private struct Clauses {
     var ctes: [CommonTableExpressionClause] = []
     var distinct = false
-    var columns: [any QueryExpression] = []
+    var columns: [QueryFragment] = []
     var joins: [JoinClause] = []
-    var `where`: [any QueryExpression] = []
-    var group: [any QueryExpression] = []
-    var having: [any QueryExpression] = []
-    var order: [any QueryExpression] = []
+    var `where`: [QueryFragment] = []
+    var group: [QueryFragment] = []
+    var having: [QueryFragment] = []
+    var order: [QueryFragment] = []
     var limit: LimitClause?
   }
   @CopyOnWrite private var clauses = Clauses()
@@ -226,7 +226,7 @@ public struct Select<Columns, From: Table, Joins> {
     set { clauses.distinct = newValue }
     _modify { yield &clauses.distinct }
   }
-  fileprivate var columns: [any QueryExpression] {
+  fileprivate var columns: [QueryFragment] {
     get { clauses.columns }
     set { clauses.columns = newValue }
     _modify { yield &clauses.columns }
@@ -236,22 +236,22 @@ public struct Select<Columns, From: Table, Joins> {
     set { clauses.joins = newValue }
     _modify { yield &clauses.joins }
   }
-  fileprivate var `where`: [any QueryExpression] {
+  fileprivate var `where`: [QueryFragment] {
     get { clauses.where }
     set { clauses.where = newValue }
     _modify { yield &clauses.where }
   }
-  fileprivate var group: [any QueryExpression] {
+  fileprivate var group: [QueryFragment] {
     get { clauses.group }
     set { clauses.group = newValue }
     _modify { yield &clauses.group }
   }
-  fileprivate var having: [any QueryExpression] {
+  fileprivate var having: [QueryFragment] {
     get { clauses.having }
     set { clauses.having = newValue }
     _modify { yield &clauses.having }
   }
-  fileprivate var order: [any QueryExpression] {
+  fileprivate var order: [QueryFragment] {
     get { clauses.order }
     set { clauses.order = newValue }
     _modify { yield &clauses.order }
@@ -265,12 +265,12 @@ public struct Select<Columns, From: Table, Joins> {
   fileprivate init(
     ctes: [CommonTableExpressionClause],
     distinct: Bool,
-    columns: [any QueryExpression],
+    columns: [QueryFragment],
     joins: [JoinClause],
-    where: [any QueryExpression],
-    group: [any QueryExpression],
-    having: [any QueryExpression],
-    order: [any QueryExpression],
+    where: [QueryFragment],
+    group: [QueryFragment],
+    having: [QueryFragment],
+    order: [QueryFragment],
     limit: LimitClause?
   ) {
     self.columns = columns
@@ -290,7 +290,7 @@ extension Select {
     self.ctes = ctes
   }
 
-  init(where: [any QueryExpression] = []) {
+  init(where: [QueryFragment] = []) {
     self.where = `where`
   }
 
@@ -753,7 +753,7 @@ extension Select {
   ) -> Self
   where Joins == (repeat each J) {
     var select = self
-    select.where.append(predicate(From.columns, repeat (each J).columns))
+    select.where.append(predicate(From.columns, repeat (each J).columns).queryFragment)
     return select
   }
 
@@ -804,19 +804,19 @@ extension Select {
   ) -> Self
   where Joins == (repeat each J) {
     var select = self
-    select.having.append(predicate(From.columns, repeat (each J).columns))
+    select.having.append(predicate(From.columns, repeat (each J).columns).queryFragment)
     return select
   }
 
   public func order(by ordering: KeyPath<From.TableColumns, some QueryExpression>) -> Self {
     var select = self
-    select.order.append(From.columns[keyPath: ordering])
+    select.order.append(From.columns[keyPath: ordering].queryFragment)
     return select
   }
 
   public func order<each J: Table>(
-    @AnyQueryExpressionBuilder
-    by ordering: (From.TableColumns, repeat (each J).TableColumns) -> [any QueryExpression]
+    @QueryFragmentBuilder
+    by ordering: (From.TableColumns, repeat (each J).TableColumns) -> [QueryFragment]
   ) -> Self
   where Joins == (repeat each J) {
     var select = self
@@ -898,28 +898,28 @@ extension Select: SelectStatement {
     }
     let columns =
       columns.isEmpty
-      ? (From.columns.allColumns + joins.flatMap { $0.table.columns.allColumns })
+      ? [From.columns.queryFragment] + joins.map { $0.table.columns.queryFragment }
       : columns
     query.append("SELECT")
     if distinct {
       query.append(" DISTINCT")
     }
-    query.append(" \(columns.map(\.queryFragment).joined(separator: ", "))")
+    query.append(" \(columns.joined(separator: ", "))")
     query.append(" FROM \(From.self)")
     for join in joins {
       query.append(" \(join)")
     }
     if !`where`.isEmpty {
-      query.append(" WHERE \(`where`.map(\.queryFragment).joined(separator: " AND "))")
+      query.append(" WHERE \(`where`.joined(separator: " AND "))")
     }
     if !group.isEmpty {
-      query.append(" GROUP BY \(group.map(\.queryFragment).joined(separator: ", "))")
+      query.append(" GROUP BY \(group.joined(separator: ", "))")
     }
     if !having.isEmpty {
-      query.append(" HAVING \(having.map(\.queryFragment).joined(separator: " AND "))")
+      query.append(" HAVING \(having.joined(separator: " AND "))")
     }
     if !order.isEmpty {
-      query.append(" ORDER BY \(order.map(\.queryFragment).joined(separator: ", "))")
+      query.append(" ORDER BY \(order.joined(separator: ", "))")
     }
     if let limit {
       query.append(" \(limit)")
@@ -943,14 +943,24 @@ private struct JoinClause: QueryExpression {
 
   let `operator`: Operator?
   let table: any Table.Type
-  let constraint: any QueryExpression<Bool>
+  let constraint: QueryFragment
+
+  init(
+    operator: Operator?,
+    table: any Table.Type,
+    constraint: some QueryExpression<Bool>
+  ) {
+    self.operator = `operator`
+    self.table = table
+    self.constraint = constraint.queryFragment
+  }
 
   var queryFragment: QueryFragment {
     var query: QueryFragment = ""
     if let `operator` {
       query.append("\(raw: `operator`.rawValue) ")
     }
-    query.append("JOIN \(raw: table.tableName.quoted()) ON \(constraint)")
+    query.append("JOIN \(table) ON \(constraint)")
     return query
   }
 }
@@ -958,8 +968,13 @@ private struct JoinClause: QueryExpression {
 private struct LimitClause: QueryExpression {
   typealias QueryValue = Void
 
-  let maxLength: any QueryExpression
-  let offset: (any QueryExpression)?
+  let maxLength: QueryFragment
+  let offset: QueryFragment?
+
+  init(maxLength: some QueryExpression, offset: (some QueryExpression)? = Never?.none) {
+    self.maxLength = maxLength.queryFragment
+    self.offset = offset?.queryFragment
+  }
 
   var queryFragment: QueryFragment {
     var query: QueryFragment = "LIMIT \(maxLength)"

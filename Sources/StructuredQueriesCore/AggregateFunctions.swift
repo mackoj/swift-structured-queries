@@ -62,25 +62,22 @@ public struct CountExpression: QueryExpression {
 private struct AggregateFunction<QueryValue>: QueryExpression {
   var name: String
   var isDistinct: Bool
-  var arguments: [any QueryExpression]
-  var order: (any QueryExpression)?
-  var filter: (any QueryExpression)?
+  var arguments: [QueryFragment]
+  var order: QueryFragment?
+  var filter: QueryFragment?
 
   init<each Argument: QueryExpression>(
     _ name: String,
     isDistinct: Bool = false,
     _ arguments: repeat each Argument,
-    order: (some QueryExpression)? = Bool?.none,
-    filter: (some QueryExpression)? = Bool?.none
+    order: (some QueryExpression)? = Never?.none,
+    filter: (some QueryExpression)? = Never?.none
   ) {
     self.name = name
     self.isDistinct = isDistinct
-    self.arguments = []
-    for argument in repeat each arguments {
-      self.arguments.append(argument)
-    }
-    self.order = order
-    self.filter = filter
+    self.arguments = Array(repeat each arguments)
+    self.order = order?.queryFragment
+    self.filter = filter?.queryFragment
   }
 
   var queryFragment: QueryFragment {
@@ -88,23 +85,13 @@ private struct AggregateFunction<QueryValue>: QueryExpression {
     if isDistinct {
       query.append("DISTINCT ")
     }
-    var isFirst = true
-    for argument in arguments {
-      defer { isFirst = false }
-      if !isFirst {
-        query.append(", ")
-      }
-      query.append(argument.queryFragment)
-    }
+    query.append(arguments.joined(separator: ", "))
     if let order {
-      query.append(" ORDER BY ")
-      query.append(order.queryFragment)
+      query.append(" ORDER BY \(order)")
     }
     query.append(")")
     if let filter {
-      query.append(" FILTER (WHERE ")
-      query.append(filter.queryFragment)
-      query.append(")")
+      query.append(" FILTER (WHERE \(filter))")
     }
     return query
   }

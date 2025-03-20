@@ -1,24 +1,24 @@
 @resultBuilder
-public enum AnyQueryExpressionBuilder {
+public enum QueryFragmentBuilder {
   public static func buildExpression<each C: QueryExpression>(
     _ expression: (repeat each C)
-  ) -> [any QueryExpression] {
+  ) -> [QueryFragment] {
     Array(repeat each expression)
   }
 
-  public static func buildBlock(_ component: [any QueryExpression]) -> [any QueryExpression] {
+  public static func buildBlock(_ component: [QueryFragment]) -> [QueryFragment] {
     component
   }
 
-  public static func buildEither(first component: [any QueryExpression]) -> [any QueryExpression] {
+  public static func buildEither(first component: [QueryFragment]) -> [QueryFragment] {
     component
   }
 
-  public static func buildEither(second component: [any QueryExpression]) -> [any QueryExpression] {
+  public static func buildEither(second component: [QueryFragment]) -> [QueryFragment] {
     component
   }
 
-  public static func buildOptional(_ component: [any QueryExpression]?) -> [any QueryExpression] {
+  public static func buildOptional(_ component: [QueryFragment]?) -> [QueryFragment] {
     component ?? []
   }
 }

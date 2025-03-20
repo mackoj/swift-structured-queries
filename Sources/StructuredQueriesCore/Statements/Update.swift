@@ -36,12 +36,12 @@ extension PrimaryKeyedTable {
 public struct Update<From: Table, Returning> {
   var conflictResolution: ConflictResolution?
   var record: Record<From>
-  var `where`: [any QueryExpression] = []
-  var returning: [any QueryExpression] = []
+  var `where`: [QueryFragment] = []
+  var returning: [QueryFragment] = []
 
   public func `where`(_ predicate: (From.TableColumns) -> some QueryExpression<Bool>) -> Self {
     var update = self
-    update.where.append(predicate(From.columns))
+    update.where.append(predicate(From.columns).queryFragment)
     return update
   }
 
@@ -68,12 +68,12 @@ extension Update: Statement {
     if let conflictResolution {
       query.append(" OR \(raw: conflictResolution.rawValue)")
     }
-    query.append(" \(raw: From.tableName.quoted()) \(bind: record)")
+    query.append(" \(From.self) \(record)")
     if !`where`.isEmpty {
-      query.append(" WHERE \(`where`.map(\.queryFragment).joined(separator: " AND "))")
+      query.append(" WHERE \(`where`.joined(separator: " AND "))")
     }
     if !returning.isEmpty {
-      query.append(" RETURNING \(returning.map(\.queryFragment).joined(separator: ", "))")
+      query.append(" RETURNING \(returning.joined(separator: ", "))")
     }
     return query
   }

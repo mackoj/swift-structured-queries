@@ -6,7 +6,7 @@ extension PrimaryKeyedTable {
       row,
       onConflict: { record in
         for column in Draft.columns.allColumns where column.name != columns.primaryKey.name {
-          record.updates.append((column.name, "excluded.\(raw: column.name.quoted())"))
+          record.updates.append((column.name, "excluded.\(quote: column.name)"))
         }
       }
     )

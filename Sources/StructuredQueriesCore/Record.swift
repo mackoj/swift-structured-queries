@@ -35,6 +35,6 @@ extension Record: QueryExpression {
   public typealias QueryValue = Void
 
   public var queryFragment: QueryFragment {
-    "SET \(updates.map { "\(raw: $0.quoted()) = \($1)" }.joined(separator: ", "))"
+    "SET \(updates.map { "\(quote: $0) = \($1)" }.joined(separator: ", "))"
   }
 }

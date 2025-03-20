@@ -249,7 +249,7 @@ public struct Insert<Into: Table, Returning> {
   var columnNames: [String] = []
   var values: Values
   var record: Record<Into>?
-  var returning: [any QueryExpression] = []
+  var returning: [QueryFragment] = []
 
   public func returning<each ResultColumn: QueryExpression>(
     _ selection: (Into.TableColumns) -> (repeat each ResultColumn)
@@ -280,9 +280,9 @@ extension Insert: Statement {
     if let conflictResolution {
       query.append(" OR \(raw: conflictResolution.rawValue)")
     }
-    query.append(" INTO \(raw: Into.tableName.quoted())")
+    query.append(" INTO \(Into.self)")
     if !columnNames.isEmpty {
-      query.append(" (\(columnNames.map { "\(raw: $0.quoted())" }.joined(separator: ", ")))")
+      query.append(" (\(columnNames.map { "\(quote: $0)" }.joined(separator: ", ")))")
     }
     switch values {
     case .default:
@@ -309,7 +309,7 @@ extension Insert: Statement {
       )
     }
     if !returning.isEmpty {
-      query.append(" RETURNING \(returning.map(\.queryFragment).joined(separator: ", "))")
+      query.append(" RETURNING \(returning.joined(separator: ", "))")
     }
     return query
   }

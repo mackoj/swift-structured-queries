@@ -42,6 +42,6 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
   }
 
   public var queryFragment: QueryFragment {
-    "\(raw: Root.tableName.quoted()).\(raw: name.quoted())"
+    "\(Root.self).\(quote: name)"
   }
 }

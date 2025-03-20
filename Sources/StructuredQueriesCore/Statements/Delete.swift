@@ -26,8 +26,8 @@ extension PrimaryKeyedTable {
 }
 
 public struct Delete<From: Table, Returning> {
-  var `where`: [any QueryExpression] = []
-  var returning: [any QueryExpression] = []
+  var `where`: [QueryFragment] = []
+  var returning: [QueryFragment] = []
 
   /// Adds a condition to a delete statement.
   ///
@@ -35,7 +35,7 @@ public struct Delete<From: Table, Returning> {
   /// - Returns: A statement with the added predicate.
   public func `where`(_ predicate: (From.TableColumns) -> some QueryExpression<Bool>) -> Self {
     var update = self
-    update.where.append(predicate(From.columns))
+    update.where.append(predicate(From.columns).queryFragment)
     return update
   }
 
@@ -60,12 +60,12 @@ extension Delete: Statement {
   public typealias QueryValue = Returning
 
   public var query: QueryFragment {
-    var query: QueryFragment = "DELETE FROM \(raw: From.tableName.quoted())"
+    var query: QueryFragment = "DELETE FROM \(From.self)"
     if !`where`.isEmpty {
-      query.append(" WHERE \(`where`.map(\.queryFragment).joined(separator: " AND "))")
+      query.append(" WHERE \(`where`.joined(separator: " AND "))")
     }
     if !returning.isEmpty {
-      query.append(" RETURNING \(returning.map(\.queryFragment).joined(separator: ", "))")
+      query.append(" RETURNING \(returning.joined(separator: ", "))")
     }
     return query
   }

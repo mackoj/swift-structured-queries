@@ -28,7 +28,7 @@ extension Table {
   public static func `where`(
     _ predicate: (TableColumns) -> some QueryExpression<Bool>
   ) -> Where<Self> {
-    Where(predicates: [predicate(columns)])
+    Where(predicates: [predicate(columns).queryFragment])
   }
 }
 
@@ -43,7 +43,7 @@ public struct Where<From: Table> {
     Where(predicates: lhs.predicates + rhs.predicates)
   }
 
-  var predicates: [any QueryExpression] = []
+  var predicates: [QueryFragment] = []
 
   #if compiler(>=6.1)
     public subscript<each C: QueryRepresentable, each J: Table>(
@@ -171,7 +171,7 @@ extension Where: SelectStatement {
 
   public func `where`(_ predicate: (From.TableColumns) -> some QueryExpression<Bool>) -> Self {
     var `where` = self
-    `where`.predicates.append(predicate(From.columns))
+    `where`.predicates.append(predicate(From.columns).queryFragment)
     return `where`
   }
 
@@ -206,8 +206,8 @@ extension Where: SelectStatement {
   }
 
   public func order(
-    @AnyQueryExpressionBuilder
-    by ordering: (From.TableColumns) -> [any QueryExpression]
+    @QueryFragmentBuilder
+    by ordering: (From.TableColumns) -> [QueryFragment]
   ) -> Select<(), From, ()> {
     all().order(by: ordering)
   }

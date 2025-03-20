@@ -78,14 +78,14 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
     lhs: Self,
     rhs: some QueryExpression<QueryValue.Wrapped>
   ) -> CoalesceFunction<QueryValue.Wrapped> {
-    CoalesceFunction([lhs, rhs])
+    CoalesceFunction([lhs.queryFragment, rhs.queryFragment])
   }
 
   public static func ?? (
     lhs: Self,
     rhs: some QueryExpression<QueryValue>
   ) -> CoalesceFunction<QueryValue> {
-    CoalesceFunction([lhs, rhs])
+    CoalesceFunction([lhs.queryFragment, rhs.queryFragment])
   }
 
   @available(
@@ -98,7 +98,7 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
     lhs: some QueryExpression<QueryValue.Wrapped>,
     rhs: Self
   ) -> CoalesceFunction<QueryValue> {
-    CoalesceFunction([lhs, rhs])
+    CoalesceFunction([lhs.queryFragment, rhs.queryFragment])
   }
 }
 
@@ -113,7 +113,7 @@ extension QueryExpression {
     lhs: some QueryExpression<QueryValue>,
     rhs: Self
   ) -> CoalesceFunction<QueryValue> {
-    CoalesceFunction([lhs, rhs])
+    CoalesceFunction([lhs.queryFragment, rhs.queryFragment])
   }
 }
 
@@ -212,38 +212,34 @@ extension QueryExpression where QueryValue == ContiguousArray<UInt8> {
 
 struct QueryFunction<QueryValue>: QueryExpression {
   let name: String
-  let arguments: [any QueryExpression]
+  let arguments: [QueryFragment]
 
   init<each Argument: QueryExpression>(_ name: String, _ arguments: repeat each Argument) {
     self.name = name
-    var expressions: [any QueryExpression] = []
-    for argument in repeat each arguments {
-      expressions.append(argument)
-    }
-    self.arguments = expressions
+    self.arguments = Array(repeat each arguments)
   }
 
   var queryFragment: QueryFragment {
-    "\(raw: name)(\(arguments.map(\.queryFragment).joined(separator: ", ")))"
+    "\(raw: name)(\(arguments.joined(separator: ", ")))"
   }
 }
 
 public struct CoalesceFunction<QueryValue>: QueryExpression {
-  private let arguments: [any QueryExpression]
+  private let arguments: [QueryFragment]
 
-  fileprivate init(_ arguments: [any QueryExpression]) {
+  fileprivate init(_ arguments: [QueryFragment]) {
     self.arguments = arguments
   }
 
   public var queryFragment: QueryFragment {
-    "coalesce(\(arguments.map(\.queryFragment).joined(separator: ", ")))"
+    "coalesce(\(arguments.joined(separator: ", ")))"
   }
 
   public static func ?? <T: _OptionalProtocol<QueryValue>>(
     lhs: some QueryExpression<T>,
     rhs: Self
   ) -> CoalesceFunction<QueryValue> {
-    Self([lhs] + rhs.arguments)
+    Self([lhs.queryFragment] + rhs.arguments)
   }
 }
 
@@ -252,6 +248,6 @@ extension CoalesceFunction where QueryValue: _OptionalProtocol {
     lhs: some QueryExpression<QueryValue>,
     rhs: Self
   ) -> Self {
-    Self([lhs] + rhs.arguments)
+    Self([lhs.queryFragment] + rhs.arguments)
   }
 }
