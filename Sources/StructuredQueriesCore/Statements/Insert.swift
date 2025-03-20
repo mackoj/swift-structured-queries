@@ -1,6 +1,8 @@
 extension Table {
   /// An insert statement for a table row.
   ///
+  /// A convenience overload of ``insert(or:_:onConflict:)-7u2mc`` that takes a single row.
+  ///
   /// - Parameters:
   ///   - conflictResolution: A conflict resolution algorithm.
   ///   - row: A row to insert.
@@ -16,6 +18,32 @@ extension Table {
   }
 
   /// An insert statement for table rows.
+  ///
+  /// This function can be used to create an insert statement for a number of Swift values for a
+  /// ``Table`` conformance.
+  ///
+  /// For example:
+  ///
+  /// ```swift
+  /// @Table
+  /// struct Tag {
+  ///   var name: String
+  /// }
+  ///
+  /// let tags = [
+  ///   Tag(name: "car"),
+  ///   Tag(name: "kids"),
+  ///   Tag(name: "someday"),
+  ///   Tag(name: "optional"),
+  /// ]
+  ///
+  /// Tag.insert(tags)
+  /// // INSERT INTO "tags" ("name")
+  /// // VALUES ('car'), ('kids'), ('someday'), ('optional')
+  /// ```
+  ///
+  /// To create an insert statement from column values instead of a full record, see
+  /// ``insert(or:_:values:onConflict:)-6zwu9``.
   ///
   /// - Parameters:
   ///   - conflictResolution: A conflict resolution algorithm.
@@ -79,6 +107,21 @@ extension Table {
 
   /// An insert statement for table values.
   ///
+  /// This function can be used to create an insert statement for a specified set of columns.
+  ///
+  /// For example:
+  ///
+  /// ```swift
+  /// Reminder.insert {
+  ///   ($0.reminderListID, $0.title, $0.isFlagged)
+  /// } values: {
+  ///   (list.id, "Groceries", false)
+  ///   (list.id, "Haircut", true)
+  /// }
+  /// // INSERT INTO "reminders" ("remindersListID", "title", "isFlagged")
+  /// // VALUES (42, 'Groceries', 0), (42, 'Haircut', 1)
+  /// ```
+  ///
   /// - Parameters:
   ///   - conflictResolution: A conflict resolution algorithm.
   ///   - columns: Columns values to be inserted.
@@ -135,6 +178,9 @@ extension Table {
   }
 
   /// An insert statement for a table selection.
+  ///
+  /// This function can be used to create an insert statement for the results of a ``Select``
+  /// statement.
   ///
   /// - Parameters:
   ///   - conflictResolution: A conflict resolution algorithm.
@@ -196,6 +242,13 @@ extension Table {
   }
 
   /// An insert statement for a table's default values.
+  ///
+  /// For example:
+  ///
+  /// ```swift
+  /// Reminder.insert()
+  /// // INSERT INTO "reminders" DEFAULT VALUES
+  /// ```
   ///
   /// - Parameters:
   ///   - conflictResolution: A conflict resolution algorithm.
