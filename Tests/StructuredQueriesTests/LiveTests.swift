@@ -260,24 +260,28 @@ extension SnapshotTests {
     @Test func basics() throws {
       let db = try Database()
       try db.execute(
-        """
-        CREATE TABLE "syncUps" (
-          "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
-          "isActive" BOOLEAN NOT NULL DEFAULT 1,
-          "title" TEXT NOT NULL DEFAULT '',
-          "createdAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        #sql(
+          """
+          CREATE TABLE "syncUps" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+            "isActive" BOOLEAN NOT NULL DEFAULT 1,
+            "title" TEXT NOT NULL DEFAULT '',
+            "createdAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+          )
+          """
         )
-        """
       )
       try db.execute(
-        """
-        CREATE TABLE "attendees" (
-          "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
-          "name" TEXT NOT NULL DEFAULT '',
-          "syncUpID" INTEGER NOT NULL,
-          "createdAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        #sql(
+          """
+          CREATE TABLE "attendees" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+            "name" TEXT NOT NULL DEFAULT '',
+            "syncUpID" INTEGER NOT NULL,
+            "createdAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+          )
+          """
         )
-        """
       )
       try db.execute(
         SyncUp.insert()

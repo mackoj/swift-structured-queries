@@ -72,12 +72,7 @@ public enum SQLMacro: ExpressionMacro {
 
         for (offset, byte) in segment.content.syntaxTextBytes.enumerated() {
           if let delimiter = currentDelimiter ?? parenStack.last {
-            if byte == delimiters[delimiter.delimiter],
-              delimiter.segment == segment ? offset != delimiter.offset + 1 : true,
-              segment.content.syntaxTextBytes.indices.contains(offset - 1)
-                ? segment.content.syntaxTextBytes[offset - 1] != delimiters[byte]
-                : true
-            {
+            if byte == delimiters[delimiter.delimiter] {
               if currentDelimiter == nil {
                 parenStack.removeLast()
                 continue

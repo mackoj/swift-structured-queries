@@ -256,5 +256,61 @@ extension SnapshotTests {
         """#
       }
     }
+
+    @Test func emptyDelimiters() {
+      assertMacro {
+        #"""
+        #sql("''")
+        """#
+      } expansion: {
+        """
+        StructuredQueries.SQLQueryExpression("''")
+        """
+      }
+      assertMacro {
+        #"""
+        #sql(
+          """
+          ""
+          """
+        )
+        """#
+      } expansion: {
+        #"""
+        StructuredQueries.SQLQueryExpression(
+          """
+          ""
+          """)
+        """#
+      }
+      assertMacro {
+        #"""
+        #sql("[]")
+        """#
+      } expansion: {
+        """
+        StructuredQueries.SQLQueryExpression("[]")
+        """
+      }
+    }
+
+    @Test func quotedDelimiters() {
+      assertMacro {
+        #"""
+        #sql(
+          """
+          SELECT 1 AS "a ""real"" one"
+          """
+        )
+        """#
+      } expansion: {
+        #"""
+        StructuredQueries.SQLQueryExpression(
+          """
+          SELECT 1 AS "a ""real"" one"
+          """)
+        """#
+      }
+    }
   }
 }
