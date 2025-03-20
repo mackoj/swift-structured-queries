@@ -5,11 +5,16 @@
 public struct SQLQueryExpression<QueryValue>: Statement {
   public typealias From = Never
 
-  public var queryFragment: QueryFragment { query }
+  public let queryFragment: QueryFragment
 
-  public let query: QueryFragment
+  public var query: QueryFragment { queryFragment }
 
   public init(_ queryFragment: QueryFragment, as output: QueryValue.Type = QueryValue.self) {
-    self.query = queryFragment
+    self.queryFragment = queryFragment
+  }
+
+  @_disfavoredOverload
+  public init(_ expression: some QueryExpression<QueryValue>) {
+    self.queryFragment = expression.queryFragment
   }
 }

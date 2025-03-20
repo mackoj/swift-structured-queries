@@ -241,13 +241,13 @@ extension QueryExpression where QueryValue == Bool {
 public prefix func ! (
   expression: any QueryExpression<Bool>
 ) -> some QueryExpression<Bool> {
-  func open(_ expression: some QueryExpression<Bool>) -> AnyQueryExpression<Bool> {
-    AnyQueryExpression(expression.not())
+  func open(_ expression: some QueryExpression<Bool>) -> SQLQueryExpression<Bool> {
+    SQLQueryExpression(expression.not())
   }
   return open(expression)
 }
 
-extension AnyQueryExpression<Bool> {
+extension SQLQueryExpression<Bool> {
   public mutating func toggle() {
     self = Self(not())
   }
@@ -292,8 +292,8 @@ extension QueryExpression where QueryValue: Numeric {
 public prefix func - <QueryValue: Numeric>(
   expression: any QueryExpression<QueryValue>
 ) -> some QueryExpression<QueryValue> {
-  func open(_ expression: some QueryExpression<QueryValue>) -> AnyQueryExpression<QueryValue> {
-    AnyQueryExpression(UnaryOperator(operator: "-", base: expression, separator: ""))
+  func open(_ expression: some QueryExpression<QueryValue>) -> SQLQueryExpression<QueryValue> {
+    SQLQueryExpression(UnaryOperator(operator: "-", base: expression, separator: ""))
   }
   return open(expression)
 }
@@ -303,13 +303,13 @@ public prefix func - <QueryValue: Numeric>(
 public prefix func + <QueryValue: Numeric>(
   expression: any QueryExpression<QueryValue>
 ) -> some QueryExpression<QueryValue> {
-  func open(_ expression: some QueryExpression<QueryValue>) -> AnyQueryExpression<QueryValue> {
-    AnyQueryExpression(UnaryOperator(operator: "+", base: expression, separator: ""))
+  func open(_ expression: some QueryExpression<QueryValue>) -> SQLQueryExpression<QueryValue> {
+    SQLQueryExpression(UnaryOperator(operator: "+", base: expression, separator: ""))
   }
   return open(expression)
 }
 
-extension AnyQueryExpression where QueryValue: Numeric {
+extension SQLQueryExpression where QueryValue: Numeric {
   public static func += (lhs: inout Self, rhs: some QueryExpression<QueryValue>) {
     lhs = Self(lhs + rhs)
   }
@@ -372,13 +372,13 @@ extension QueryExpression where QueryValue: BinaryInteger {
 public prefix func ~ <QueryValue: BinaryInteger>(
   expression: any QueryExpression<QueryValue>
 ) -> some QueryExpression<QueryValue> {
-  func open(_ expression: some QueryExpression<QueryValue>) -> AnyQueryExpression<QueryValue> {
-    AnyQueryExpression(UnaryOperator(operator: "~", base: expression, separator: ""))
+  func open(_ expression: some QueryExpression<QueryValue>) -> SQLQueryExpression<QueryValue> {
+    SQLQueryExpression(UnaryOperator(operator: "~", base: expression, separator: ""))
   }
   return open(expression)
 }
 
-extension AnyQueryExpression where QueryValue: BinaryInteger {
+extension SQLQueryExpression where QueryValue: BinaryInteger {
   public static func %= (lhs: inout Self, rhs: some QueryExpression<QueryValue>) {
     lhs = Self(lhs % rhs)
   }
@@ -437,7 +437,7 @@ extension QueryExpression where QueryValue == String {
   }
 }
 
-extension AnyQueryExpression<String> {
+extension SQLQueryExpression<String> {
   public static func += (
     lhs: inout Self, rhs: some QueryExpression<QueryValue>
   ) {

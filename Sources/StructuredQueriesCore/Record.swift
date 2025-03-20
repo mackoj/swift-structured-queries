@@ -12,8 +12,8 @@ public struct Record<Base: Table> {
   @_disfavoredOverload
   public subscript<Value>(
     dynamicMember keyPath: KeyPath<Base.TableColumns, TableColumn<Base, Value>>
-  ) -> AnyQueryExpression<Value> {
-    get { AnyQueryExpression(Base.columns[keyPath: keyPath]) }
+  ) -> SQLQueryExpression<Value> {
+    get { SQLQueryExpression(Base.columns[keyPath: keyPath]) }
     set { updates.append((Base.columns[keyPath: keyPath].name, newValue.queryFragment)) }
   }
 
