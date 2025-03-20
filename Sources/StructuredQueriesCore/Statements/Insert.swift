@@ -1,4 +1,12 @@
 extension Table {
+  /// An insert statement for a table row.
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - row: A row to insert.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  /// - Returns: An insert statement.
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ row: Self,
@@ -7,6 +15,14 @@ extension Table {
     insert(or: conflictResolution, [row], onConflict: updates)
   }
 
+  /// An insert statement for table rows.
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - rows: Rows to insert. An empty array will return an empty query.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  /// - Returns: An insert statement.
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ rows: [Self],
@@ -23,6 +39,8 @@ extension Table {
     )
   }
 
+  // NB: This overload allows for the builder to work with full table records.
+  @_documentation(visibility: private)
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumns) = { $0 },
@@ -59,6 +77,15 @@ extension Table {
     )
   }
 
+  /// An insert statement for table values.
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - columns: Columns values to be inserted.
+  ///   - rows: A builder of row values for the given columns.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  /// - Returns: An insert statement.
   public static func insert<V1: QueryBindable, each V2: QueryBindable>(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
@@ -107,6 +134,15 @@ extension Table {
     )
   }
 
+  /// An insert statement for a table selection.
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - columns: Columns values to be inserted.
+  ///   - selection: A statement that selects the values to be inserted.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  /// - Returns: An insert statement.
   public static func insert<
     V1: QueryBindable,
     each V2: QueryBindable,
@@ -159,6 +195,13 @@ extension Table {
     )
   }
 
+  /// An insert statement for a table's default values.
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  /// - Returns: An insert statement.
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
@@ -179,6 +222,14 @@ extension Table {
 }
 
 extension PrimaryKeyedTable {
+  /// An insert statement for a table row draft.
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - row: A draft to insert.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  /// - Returns: An insert statement.
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ row: Draft,
@@ -191,6 +242,14 @@ extension PrimaryKeyedTable {
     )
   }
 
+  /// An insert statement for table row drafts.
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - rows: Rows to insert. An empty array will return an empty query.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  /// - Returns: An insert statement.
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ rows: [Draft],
@@ -207,6 +266,8 @@ extension PrimaryKeyedTable {
     )
   }
 
+  // NB: This overload allows for the builder to work with full table drafts.
+  @_documentation(visibility: private)
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (Draft.TableColumns) -> (Draft.TableColumns) = { $0 },
@@ -244,6 +305,10 @@ extension PrimaryKeyedTable {
   }
 }
 
+/// An `INSERT` statement.
+///
+/// This type of statement is returned from ``Table/insert(or:_:values:onConflict:)-6zwu9`` and
+/// related functions.
 public struct Insert<Into: Table, Returning> {
   var conflictResolution: ConflictResolution?
   var columnNames: [String] = []
@@ -251,6 +316,10 @@ public struct Insert<Into: Table, Returning> {
   var record: Record<Into>?
   var returning: [QueryFragment] = []
 
+  /// Adds a returning clause to an insert statement.
+  ///
+  /// - Parameter selection: Columns to return.
+  /// - Returns: A statement with a returning clause.
   public func returning<each ResultColumn: QueryExpression>(
     _ selection: (Into.TableColumns) -> (repeat each ResultColumn)
   ) -> Insert<Into, (repeat (each ResultColumn).QueryValue)>
@@ -317,6 +386,10 @@ extension Insert: Statement {
 
 public typealias InsertOf<Into: Table> = Insert<Into, ()>
 
+/// A builder of insert statement values.
+///
+/// This result builder is used by ``Table/insert(or:_:values:onConflict:)-6zwu9`` to insert any
+/// number of rows into a table.
 @resultBuilder
 public enum InsertValuesBuilder<Value> {
   public static func buildArray(_ components: [[Value]]) -> [Value] {

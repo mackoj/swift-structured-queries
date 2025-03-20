@@ -35,7 +35,9 @@ public struct Database {
   public func execute<QueryValue: QueryRepresentable>(
     _ query: some Statement<QueryValue>
   ) throws -> [QueryValue.QueryOutput] {
-    try withStatement(query) { statement in
+    let query = query.query
+    guard !query.isEmpty else { return [] }
+    return try withStatement(query) { statement in
       var results: [QueryValue.QueryOutput] = []
       let decoder = SQLiteQueryDecoder(database: storage.handle, statement: statement)
       loop: while true {
@@ -57,7 +59,9 @@ public struct Database {
   public func execute<each V: QueryRepresentable>(
     _ query: some Statement<(repeat each V)>
   ) throws -> [(repeat (each V).QueryOutput)] {
-    try withStatement(query) { statement in
+    let query = query.query
+    guard !query.isEmpty else { return [] }
+    return try withStatement(query) { statement in
       var results: [(repeat (each V).QueryOutput)] = []
       let decoder = SQLiteQueryDecoder(database: storage.handle, statement: statement)
       loop: while true {
@@ -84,15 +88,14 @@ public struct Database {
   }
 
   private func withStatement<R>(
-    _ query: some Statement, body: (OpaquePointer) throws -> R
+    _ query: QueryFragment, body: (OpaquePointer) throws -> R
   ) throws -> R {
     var statement: OpaquePointer?
-    let sql = query.query
-    let code = sqlite3_prepare_v2(storage.handle, sql.string, -1, &statement, nil)
+    let code = sqlite3_prepare_v2(storage.handle, query.string, -1, &statement, nil)
     guard code == SQLITE_OK, let statement
     else { throw SQLiteError(db: storage.handle) }
     defer { sqlite3_finalize(statement) }
-    for (index, binding) in zip(Int32(1)..., sql.bindings) {
+    for (index, binding) in zip(Int32(1)..., query.bindings) {
       let result =
         switch binding {
         case let .blob(blob):

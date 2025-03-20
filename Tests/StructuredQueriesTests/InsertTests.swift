@@ -81,7 +81,16 @@ extension SnapshotTests {
 
     @Test
     func emptyValues() {
-      #expect(SyncUp.insert(\.id) { return [] }.query.isEmpty)
+      assertQuery(Reminder.insert([])) {
+        """
+
+        """
+      }
+      assertQuery(Reminder.insert(\.id) { return [] }) {
+        """
+
+        """
+      }
     }
 
     @Test
