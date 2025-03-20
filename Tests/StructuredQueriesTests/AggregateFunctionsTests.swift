@@ -245,11 +245,12 @@ extension SnapshotTests {
           .select {
             #sql("iif(\($0.name.length() > 5), \($0.name), NULL)", as: String?.self).groupConcat()
           }
-          .order(by: \.name)) {
+          .order(by: \.name)
+      ) {
         """
         SELECT group_concat(iif((length("tags"."name") > 5), "tags"."name", NULL)) FROM "tags" ORDER BY "tags"."name"
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────┐
         │ "someday,optional" │

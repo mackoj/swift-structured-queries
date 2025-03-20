@@ -132,7 +132,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "remindersLists"."id" FROM "reminders" JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
         """
-      }results: {
+      } results: {
         """
         ┌────┬───┐
         │ 1  │ 1 │

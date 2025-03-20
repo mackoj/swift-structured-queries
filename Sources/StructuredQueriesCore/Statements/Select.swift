@@ -905,7 +905,7 @@ extension Select: SelectStatement {
       query.append(" DISTINCT")
     }
     query.append(" \(columns.map(\.queryFragment).joined(separator: ", "))")
-    query.append(" FROM \(raw: From.tableName.quoted())")
+    query.append(" FROM \(From.self)")
     for join in joins {
       query.append(" \(join)")
     }
