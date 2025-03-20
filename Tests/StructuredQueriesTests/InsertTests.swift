@@ -95,78 +95,72 @@ extension SnapshotTests {
 
     @Test
     func records() {
-      assertInlineSnapshot(
-        of: SyncUp.insert {
+      assertQuery(
+        Reminder.insert {
           $0
         } values: {
-          SyncUp(
-            id: 1,
-            title: "Engineering",
-            isActive: true,
-            createdAt: Date(timeIntervalSinceReferenceDate: 0)
-          )
-        },
-        as: .sql
+          Reminder(id: 100, remindersListID: 1, title: "Check email")
+        }
+        .returning(\.id)
       ) {
         """
-        INSERT INTO "syncUps" \
-        ("id", "title", "isActive", "createdAt") \
-        VALUES \
-        (1, 'Engineering', 1, '2001-01-01 00:00:00.000')
+        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (100, NULL, NULL, 0, 0, '', NULL, 1, 'Check email') RETURNING "reminders"."id"
+        """
+      } results: {
+        """
+        ┌─────┐
+        │ 100 │
+        └─────┘
         """
       }
-      assertInlineSnapshot(
-        of: SyncUp.insert {
-          SyncUp(
-            id: 1,
-            title: "Engineering",
-            isActive: true,
-            createdAt: Date(timeIntervalSinceReferenceDate: 0)
-          )
-        },
-        as: .sql
+      assertQuery(
+        Reminder.insert {
+          Reminder(id: 101, remindersListID: 1, title: "Check voicemail")
+        }
+        .returning(\.id)
       ) {
         """
-        INSERT INTO "syncUps" \
-        ("id", "title", "isActive", "createdAt") \
-        VALUES \
-        (1, 'Engineering', 1, '2001-01-01 00:00:00.000')
+        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (101, NULL, NULL, 0, 0, '', NULL, 1, 'Check voicemail') RETURNING "reminders"."id"
+        """
+      } results: {
+        """
+        ┌─────┐
+        │ 101 │
+        └─────┘
         """
       }
-      assertInlineSnapshot(
-        of: SyncUp.insert([
-          SyncUp(
-            id: 1,
-            title: "Engineering",
-            isActive: true,
-            createdAt: Date(timeIntervalSinceReferenceDate: 0)
-          )
-        ]),
-        as: .sql
+      assertQuery(
+        Reminder.insert([
+          Reminder(id: 102, remindersListID: 1, title: "Check mailbox"),
+          Reminder(id: 103, remindersListID: 1, title: "Check Slack"),
+        ])
+        .returning(\.id)
       ) {
         """
-        INSERT INTO "syncUps" \
-        ("id", "title", "isActive", "createdAt") \
-        VALUES \
-        (1, 'Engineering', 1, '2001-01-01 00:00:00.000')
+        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (102, NULL, NULL, 0, 0, '', NULL, 1, 'Check mailbox'), (103, NULL, NULL, 0, 0, '', NULL, 1, 'Check Slack') RETURNING "reminders"."id"
+        """
+      } results: {
+        """
+        ┌─────┐
+        │ 102 │
+        │ 103 │
+        └─────┘
         """
       }
-      assertInlineSnapshot(
-        of: SyncUp.insert(
-          SyncUp(
-            id: 1,
-            title: "Engineering",
-            isActive: true,
-            createdAt: Date(timeIntervalSinceReferenceDate: 0)
-          )
-        ),
-        as: .sql
+      assertQuery(
+        Reminder.insert(
+          Reminder(id: 104, remindersListID: 1, title: "Check pager")
+        )
+        .returning(\.id)
       ) {
         """
-        INSERT INTO "syncUps" \
-        ("id", "title", "isActive", "createdAt") \
-        VALUES \
-        (1, 'Engineering', 1, '2001-01-01 00:00:00.000')
+        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (104, NULL, NULL, 0, 0, '', NULL, 1, 'Check pager') RETURNING "reminders"."id"
+        """
+      } results: {
+        """
+        ┌─────┐
+        │ 104 │
+        └─────┘
         """
       }
     }
@@ -206,70 +200,58 @@ extension SnapshotTests {
     }
 
     @Test func draft() {
-      assertInlineSnapshot(
-        of: SyncUp.insert {
-          SyncUp.Draft(
-            title: "Engineering",
-            isActive: true,
-            createdAt: Date(timeIntervalSinceReferenceDate: 0)
-          )
+      assertQuery(
+        Reminder.insert {
+          Reminder.Draft(remindersListID: 1, title: "Check email")
         }
-        .returning(\.self),
-        as: .sql
+        .returning(\.id)
       ) {
         """
-        INSERT INTO "syncUps" \
-        ("id", "title", "isActive", "createdAt") \
-        VALUES \
-        (NULL, 'Engineering', 1, '2001-01-01 00:00:00.000') \
-        RETURNING "syncUps"."id", "syncUps"."title", "syncUps"."isActive", "syncUps"."createdAt"
+        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check email') RETURNING "reminders"."id"
+        """
+      } results: {
+        """
+        ┌────┐
+        │ 11 │
+        └────┘
         """
       }
 
-      assertInlineSnapshot(
-        of: SyncUp.insert(
-          SyncUp.Draft(
-            title: "Engineering",
-            isActive: true,
-            createdAt: Date(timeIntervalSinceReferenceDate: 0)
-          )
+      assertQuery(
+        Reminder.insert(
+          Reminder.Draft(remindersListID: 1, title: "Check voicemail")
         )
-        .returning(\.self),
-        as: .sql
+        .returning(\.id)
       ) {
         """
-        INSERT INTO "syncUps" \
-        ("id", "title", "isActive", "createdAt") \
-        VALUES (NULL, 'Engineering', 1, '2001-01-01 00:00:00.000') \
-        RETURNING "syncUps"."id", "syncUps"."title", "syncUps"."isActive", "syncUps"."createdAt"
+        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check voicemail') RETURNING "reminders"."id"
+        """
+      } results: {
+        """
+        ┌────┐
+        │ 12 │
+        └────┘
         """
       }
 
-      assertInlineSnapshot(
-        of: SyncUp.insert(
+      assertQuery(
+        Reminder.insert(
           [
-            SyncUp.Draft(
-              title: "Engineering",
-              isActive: true,
-              createdAt: Date(timeIntervalSinceReferenceDate: 0)
-            ),
-            SyncUp.Draft(
-              title: "Design",
-              isActive: false,
-              createdAt: Date(timeIntervalSinceReferenceDate: 1_234_567_890)
-            ),
+            Reminder.Draft(remindersListID: 1, title: "Check mailbox"),
+            Reminder.Draft(remindersListID: 1, title: "Check Slack"),
           ]
         )
-        .returning(\.self),
-        as: .sql
+        .returning(\.id)
       ) {
         """
-        INSERT INTO "syncUps" \
-        ("id", "title", "isActive", "createdAt") \
-        VALUES \
-        (NULL, 'Engineering', 1, '2001-01-01 00:00:00.000'), \
-        (NULL, 'Design', 0, '2040-02-14 23:31:30.000') \
-        RETURNING "syncUps"."id", "syncUps"."title", "syncUps"."isActive", "syncUps"."createdAt"
+        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check mailbox'), (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check Slack') RETURNING "reminders"."id"
+        """
+      } results: {
+        """
+        ┌────┐
+        │ 13 │
+        │ 14 │
+        └────┘
         """
       }
     }
@@ -389,22 +371,4 @@ extension SnapshotTests {
       }
     }
   }
-}
-
-@Table
-private struct SyncUp {
-  let id: Int
-  var title = ""
-  var isActive = true
-  @Column(as: Date.ISO8601Representation.self)
-  var createdAt: Date
-}
-
-@Table
-private struct Attendee {
-  let id: Int
-  var syncUpID: Int
-  var name = ""
-  @Column(as: Date.ISO8601Representation.self)
-  var createdAt: Date
 }
