@@ -1,9 +1,9 @@
 extension _SelectStatement {
-  // TODO: Bikeshed 'UNION ALL'
   public func union<F, J>(
+    all: Bool = false,
     _ other: some SelectStatement<QueryValue, F, J>
   ) -> CompoundSelect<QueryValue> {
-    CompoundSelect(lhs: self, operator: "UNION", rhs: other)
+    CompoundSelect(lhs: self, operator: all ? "UNION ALL" : "UNION", rhs: other)
   }
 
   public func intersect<F, J>(
@@ -32,9 +32,10 @@ public struct CompoundSelect<QueryValue>: _SelectStatement {
   }
 
   public func union<F, J>(
+    all: Bool = false,
     _ other: some SelectStatement<QueryValue, F, J>
   ) -> CompoundSelect<QueryValue> {
-    CompoundSelect(lhs: self, operator: "UNION", rhs: other)
+    CompoundSelect(lhs: self, operator: all ? "UNION ALL" : "UNION", rhs: other)
   }
 
   public func intersect<F, J>(
