@@ -49,6 +49,23 @@ extension SnapshotTests {
       }
     }
 
+    @Test func selectDistinct() {
+      assertQuery(Reminder.distinct().select(\.priority)) {
+        """
+        SELECT DISTINCT "reminders"."priority" FROM "reminders"
+        """
+      } results: {
+        """
+        ┌─────────┐
+        │ nil     │
+        │ .high   │
+        │ .low    │
+        │ .medium │
+        └─────────┘
+        """
+      }
+    }
+
     @Test func select() {
       assertQuery(Reminder.select { ($0.id, $0.title) }) {
         """

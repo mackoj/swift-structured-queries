@@ -198,23 +198,6 @@ extension Table {
   }
 }
 
-// TODO: Make builder variant:
-//   with {
-//     Reminder.all().…
-//     Reminder.all().…
-//     Reminder.all().…
-//   }
-//   .select { … }
-//
-// TODO: Support in insert, update, delete, etc...?
-public func with<CTE: Table>(
-  _ select: some Statement<CTE>
-) -> Select<(), CTE, ()> {
-  Select(
-    ctes: [CommonTableExpressionClause(tableName: CTE.tableName, select: select)]
-  )
-}
-
 #if compiler(>=6.1)
   @dynamicMemberLookup
 #endif
@@ -292,7 +275,7 @@ public struct Select<Columns, From: Table, Joins> {
   ) {
     self.columns = columns
     self.ctes = ctes
-    self.distinct = distinct  // TODO: make sure we have tests on 'SELECT DISTINCT'
+    self.distinct = distinct
     self.joins = joins
     self.where = `where`
     self.group = group
@@ -303,7 +286,7 @@ public struct Select<Columns, From: Table, Joins> {
 }
 
 extension Select {
-  fileprivate init(ctes: [CommonTableExpressionClause]) {
+  init(ctes: [CommonTableExpressionClause]) {
     self.ctes = ctes
   }
 
@@ -437,7 +420,7 @@ extension Select {
 
   public func distinct(_ isDistinct: Bool = true) -> Self {
     var select = self
-    select.distinct = distinct
+    select.distinct = isDistinct
     return select
   }
 
@@ -947,15 +930,6 @@ extension Select: SelectStatement {
 
 public typealias SelectOf<From: Table, each Join: Table> =
   Select<(), From, (repeat each Join)>
-
-private struct CommonTableExpressionClause: QueryExpression {
-  typealias QueryValue = ()
-  let tableName: String
-  let select: any QueryExpression
-  var queryFragment: QueryFragment {
-    "\(raw: tableName.quoted()) AS \(select)"
-  }
-}
 
 private struct JoinClause: QueryExpression {
   typealias QueryValue = Void
