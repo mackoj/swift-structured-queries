@@ -50,7 +50,46 @@ character more than using `==`.
 The same goes for any mathematical operator supported by SQL, such as `&&`, `||`, `!`, etc. You can
 start out using those operators, but if you notice a compiler slowdown, your first instinct should
 be to convert a few of those operators to their method variant, ``QueryExpression/and(_:)``,
-``QueryExpression/or(_:)``, ``QueryExpression/not()``. 
+``QueryExpression/or(_:)``, ``QueryExpression/not()``.
+
+@Row {
+  @Column {
+    ```
+    lhs == rhs
+    
+    
+    lhs != rhs
+    
+    
+    lhs && rhs
+    lhs || rhs
+    !value
+    
+    lhs < rhs
+    lhs > rhs
+    lhs <= rhs
+    lhs >= rhs
+    ```
+  }
+  @Column {
+    ```
+    lhs.eq(rhs)
+    lhs.is(rhs)
+    
+    lhs.neq(rhs)
+    lhs.isNot(rhs)
+    
+    lhs.and(rhs)
+    lhs.or(rhs)
+    value.not()
+    
+    lhs.lt(rhs)
+    lhs.gt(rhs)
+    lhs.lte(rhs)
+    lhs.gte(rhs)
+    ```
+  }
+}
 
 Often one does not need to convert _every_ operator to the method style. You can usually do it for
 just a few operators to get a big boost, and we recommend starting with `==`.
