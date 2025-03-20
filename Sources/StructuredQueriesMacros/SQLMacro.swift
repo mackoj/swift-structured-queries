@@ -70,11 +70,21 @@ public enum SQLMacro: ExpressionMacro {
           continue
         }
 
-        for (offset, byte) in segment.content.syntaxTextBytes.enumerated() {
+        var offset = 0
+        while offset < segment.content.syntaxTextBytes.endIndex {
+          defer { offset += 1 }
+          let byte = segment.content.syntaxTextBytes[offset]
           if let delimiter = currentDelimiter ?? parenStack.last {
             if byte == delimiters[delimiter.delimiter] {
               if currentDelimiter == nil {
                 parenStack.removeLast()
+                continue
+              } else if delimiter.segment == segment,
+                offset > delimiter.offset + 1,
+                segment.content.syntaxTextBytes.indices.contains(offset + 1),
+                segment.content.syntaxTextBytes[offset + 1] == byte
+              {
+                offset += 1
                 continue
               } else {
                 currentDelimiter = nil

@@ -312,5 +312,41 @@ extension SnapshotTests {
         """#
       }
     }
+
+    @Test func unclosedQuotedDelimiters() {
+      assertMacro {
+        #"""
+        #sql(
+          """
+          SELECT 1 AS "a ""real"" one
+          """
+        )
+        """#
+      } diagnostics: {
+        #"""
+        #sql(
+          """
+          SELECT 1 AS "a ""real"" one
+                      ╰─ ⚠️ Cannot find '"' to match opening '"' in SQL string, producing incomplete fragment; did you mean to make this explicit?
+                         ✏️ Use 'SQLQueryExpression.init(_:)' to silence this warning
+          """
+        )
+        """#
+      } fixes: {
+        #"""
+        SQLQueryExpression(
+          """
+          SELECT 1 AS "a ""real"" one
+          """)
+        """#
+      } expansion: {
+        #"""
+        SQLQueryExpression(
+          """
+          SELECT 1 AS "a ""real"" one
+          """)
+        """#
+      }
+    }
   }
 }
