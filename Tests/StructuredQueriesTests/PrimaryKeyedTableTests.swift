@@ -18,5 +18,10 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func joinWith() {
+      //RemindersList.join(Reminder.all(), with: \.remindersListID)
+      //Reminder.join(RemindersList.all(), with: \.remindersListID)
+    }
   }
 }
