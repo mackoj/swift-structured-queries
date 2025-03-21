@@ -69,7 +69,11 @@ extension Table {
     on constraint: (
       (TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
-  ) -> Select<(repeat (each C)._Optionalized), Self, (Outer<F>, repeat Outer<each J>)> {
+  ) -> Select<
+    (repeat (each C)._Optionalized),
+    Self,
+    (F._Optionalized, repeat (each J)._Optionalized)
+  > {
     let select = all().leftJoin(other, on: constraint)
     return select
   }
@@ -81,7 +85,7 @@ extension Table {
     on constraint: (
       (TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
-  ) -> Select<(repeat (each C)._Optionalized), Self, Outer<F>> {
+  ) -> Select<(repeat (each C)._Optionalized), Self, F._Optionalized> {
     let select = all().leftJoin(other, on: constraint)
     return select
   }
@@ -95,7 +99,7 @@ extension Table {
     on constraint: (
       (TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
-  ) -> Select<(repeat each C), Outer<Self>, (F, repeat each J)> {
+  ) -> Select<(repeat each C), Self._Optionalized, (F, repeat each J)> {
     let select = all().rightJoin(other, on: constraint)
     return select
   }
@@ -107,7 +111,7 @@ extension Table {
     on constraint: (
       (TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
-  ) -> Select<(repeat each C), Outer<Self>, F> {
+  ) -> Select<(repeat each C), Self._Optionalized, F> {
     let select = all().rightJoin(other, on: constraint)
     return select
   }
@@ -123,8 +127,8 @@ extension Table {
     ) -> some QueryExpression<Bool>
   ) -> Select<
     (repeat (each C)._Optionalized),
-    Outer<Self>,
-    (Outer<F>, repeat Outer<each J>)
+    Self._Optionalized,
+    (F._Optionalized, repeat (each J)._Optionalized)
   > {
     let select = all().fullJoin(other, on: constraint)
     return select
@@ -137,7 +141,7 @@ extension Table {
     on constraint: (
       (TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
-  ) -> Select<(repeat (each C)._Optionalized), Outer<Self>, Outer<F>> {
+  ) -> Select<(repeat (each C)._Optionalized), Self._Optionalized, F._Optionalized> {
     let select = all().fullJoin(other, on: constraint)
     return select
   }
@@ -511,7 +515,7 @@ extension Select {
   ) -> Select<
     (repeat each C1, repeat (each C2)._Optionalized),
     From,
-    (repeat each J1, Outer<F>, repeat Outer<each J2>)
+    (repeat each J1, F._Optionalized, repeat (each J2)._Optionalized)
   >
   where Columns == (repeat each C1), Joins == (repeat each J1) {
     let other = other.all()
@@ -525,7 +529,7 @@ extension Select {
     return Select<
       (repeat each C1, repeat (each C2)._Optionalized),
       From,
-      (repeat each J1, Outer<F>, repeat Outer<(each J2)>)
+      (repeat each J1, F._Optionalized, repeat (each J2)._Optionalized)
     >(
       ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
@@ -550,7 +554,7 @@ extension Select {
   ) -> Select<
     (repeat each C1, repeat (each C2)._Optionalized),
     From,
-    (repeat each J, Outer<F>)
+    (repeat each J, F._Optionalized)
   >
   where Columns == (repeat each C1), Joins == (repeat each J) {
     let other = other.all()
@@ -564,7 +568,7 @@ extension Select {
     return Select<
       (repeat each C1, repeat (each C2)._Optionalized),
       From,
-      (repeat each J, Outer<F>)
+      (repeat each J, F._Optionalized)
     >(
       ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
@@ -595,8 +599,8 @@ extension Select {
     ) -> some QueryExpression<Bool>
   ) -> Select<
     (repeat (each C1)._Optionalized, repeat each C2),
-    Outer<From>,
-    (repeat Outer<each J1>, F, repeat each J2)
+    From._Optionalized,
+    (repeat (each J1)._Optionalized, F, repeat each J2)
   >
   where Columns == (repeat each C1), Joins == (repeat each J1) {
     let other = other.all()
@@ -609,8 +613,8 @@ extension Select {
     )
     return Select<
       (repeat (each C1)._Optionalized, repeat each C2),
-      Outer<From>,
-      (repeat Outer<each J1>, F, repeat each J2)
+      From._Optionalized,
+      (repeat (each J1)._Optionalized, F, repeat each J2)
     >(
       ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
@@ -634,8 +638,8 @@ extension Select {
     ) -> some QueryExpression<Bool>
   ) -> Select<
     (repeat (each C1)._Optionalized, repeat each C2),
-    Outer<From>,
-    (repeat Outer<each J>, F)
+    From._Optionalized,
+    (repeat (each J)._Optionalized, F)
   >
   where Columns == (repeat each C1), Joins == (repeat each J) {
     let other = other.all()
@@ -648,8 +652,8 @@ extension Select {
     )
     return Select<
       (repeat (each C1)._Optionalized, repeat each C2),
-      Outer<From>,
-      (repeat Outer<each J>, F)
+      From._Optionalized,
+      (repeat (each J)._Optionalized, F)
     >(
       ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
@@ -680,8 +684,8 @@ extension Select {
     ) -> some QueryExpression<Bool>
   ) -> Select<
     (repeat (each C1)._Optionalized, repeat (each C2)._Optionalized),
-    Outer<From>,
-    (repeat Outer<each J1>, Outer<F>, repeat Outer<each J2>)
+    From._Optionalized,
+    (repeat (each J1)._Optionalized, F._Optionalized, repeat (each J2)._Optionalized)
   >
   where Columns == (repeat each C1), Joins == (repeat each J1) {
     let other = other.all()
@@ -694,8 +698,8 @@ extension Select {
     )
     return Select<
       (repeat (each C1)._Optionalized, repeat (each C2)._Optionalized),
-      Outer<From>,
-      (repeat Outer<each J1>, Outer<F>, repeat Outer<each J2>)
+      From._Optionalized,
+      (repeat (each J1)._Optionalized, F._Optionalized, repeat (each J2)._Optionalized)
     >(
       ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
@@ -719,8 +723,8 @@ extension Select {
     ) -> some QueryExpression<Bool>
   ) -> Select<
     (repeat (each C1)._Optionalized, repeat (each C2)._Optionalized),
-    Outer<From>,
-    (repeat Outer<each J>, Outer<F>)
+    From._Optionalized,
+    (repeat (each J)._Optionalized, F._Optionalized)
   >
   where Columns == (repeat each C1), Joins == (repeat each J) {
     let other = other.all()
@@ -733,8 +737,8 @@ extension Select {
     )
     return Select<
       (repeat (each C1)._Optionalized, repeat (each C2)._Optionalized),
-      Outer<From>,
-      (repeat Outer<each J>, Outer<F>)
+      From._Optionalized,
+      (repeat (each J)._Optionalized, F._Optionalized)
     >(
       ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,

@@ -117,7 +117,11 @@ extension Where: SelectStatement {
     on constraint: (
       (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
-  ) -> Select<(repeat (each C)._Optionalized), From, (Outer<F>, repeat Outer<each J>)> {
+  ) -> Select<
+    (repeat (each C)._Optionalized),
+    From,
+    (F._Optionalized, repeat (each J)._Optionalized)
+  > {
     let joined = all().leftJoin(other, on: constraint)
     return joined
   }
@@ -127,7 +131,7 @@ extension Where: SelectStatement {
   public func leftJoin<each C: QueryDecodable, F: Table>(
     _ other: any SelectStatement<(repeat each C), F, ()>,
     on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
-  ) -> Select<(repeat (each C)._Optionalized), From, (Outer<F>)> {
+  ) -> Select<(repeat (each C)._Optionalized), From, F._Optionalized> {
     all().leftJoin(other, on: constraint)
   }
 
@@ -136,7 +140,7 @@ extension Where: SelectStatement {
     on constraint: (
       (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
-  ) -> Select<(repeat each C), Outer<From>, (F, repeat each J)> {
+  ) -> Select<(repeat each C), From._Optionalized, (F, repeat each J)> {
     let joined = all().rightJoin(other, on: constraint)
     return joined
   }
@@ -146,7 +150,7 @@ extension Where: SelectStatement {
   public func rightJoin<each C: QueryDecodable, F: Table>(
     _ other: any SelectStatement<(repeat each C), F, ()>,
     on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
-  ) -> Select<(repeat each C), Outer<From>, F> {
+  ) -> Select<(repeat each C), From._Optionalized, F> {
     all().rightJoin(other, on: constraint)
   }
 
@@ -155,7 +159,11 @@ extension Where: SelectStatement {
     on constraint: (
       (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
-  ) -> Select<(repeat (each C)._Optionalized), Outer<From>, (Outer<F>, repeat Outer<each J>)> {
+  ) -> Select<
+    (repeat (each C)._Optionalized),
+    From._Optionalized,
+    (F._Optionalized, repeat (each J)._Optionalized)
+  > {
     let joined = all().fullJoin(other, on: constraint)
     return joined
   }
@@ -165,7 +173,7 @@ extension Where: SelectStatement {
   public func fullJoin<each C: QueryDecodable, F: Table>(
     _ other: any SelectStatement<(repeat each C), F, ()>,
     on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
-  ) -> Select<(repeat (each C)._Optionalized), Outer<From>, Outer<F>> {
+  ) -> Select<(repeat (each C)._Optionalized), From._Optionalized, F._Optionalized> {
     all().fullJoin(other, on: constraint)
   }
 
