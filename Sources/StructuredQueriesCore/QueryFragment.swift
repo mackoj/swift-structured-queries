@@ -126,7 +126,7 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     }
 
     public mutating func appendInterpolation<T: Table>(_ table: T.Type) {
-      appendInterpolation(quote: table.tableName)
+      appendInterpolation(quote: table.tableAlias ?? table.tableName)
     }
 
     @available(

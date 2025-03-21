@@ -723,7 +723,34 @@ extension SnapshotTests {
     #endif
 
     @Test func selfJoin() {
-      // TODO: This is not currently possible.
+      enum R1: AliasName { static func name<T: Table>(for table: T.Type) -> String { "r1" } }
+      enum R2: AliasName { static func name<T: Table>(for table: T.Type) -> String { "r2" } }
+      assertQuery(
+        Reminder.as(R1.self)
+          // TODO: Should we have 'join' overloads that take 'Table.Type'?
+          .join(Reminder.as(R2.self).all()) { $0.id.eq($1.id) }
+          .limit(1)
+      ) {
+        """
+        SELECT "r1"."id", "r1"."assignedUserID", "r1"."date", "r1"."isCompleted", "r1"."isFlagged", "r1"."notes", "r1"."priority", "r1"."remindersListID", "r1"."title", "r2"."id", "r2"."assignedUserID", "r2"."date", "r2"."isCompleted", "r2"."isFlagged", "r2"."notes", "r2"."priority", "r2"."remindersListID", "r2"."title" FROM "reminders" AS "r1" JOIN "reminders" AS "r2" ON ("r1"."id" = "r2"."id") LIMIT 1
+        """
+      }results: {
+        """
+        ┌─────────────────────────────────────────┬─────────────────────────────────────────┐
+        │ Reminder(                               │ Reminder(                               │
+        │   id: 1,                                │   id: 1,                                │
+        │   assignedUserID: 1,                    │   assignedUserID: 1,                    │
+        │   date: Date(2001-01-01T00:00:00.000Z), │   date: Date(2001-01-01T00:00:00.000Z), │
+        │   isCompleted: false,                   │   isCompleted: false,                   │
+        │   isFlagged: false,                     │   isFlagged: false,                     │
+        │   notes: "Milk, Eggs, Apples",          │   notes: "Milk, Eggs, Apples",          │
+        │   priority: nil,                        │   priority: nil,                        │
+        │   remindersListID: 1,                   │   remindersListID: 1,                   │
+        │   title: "Groceries"                    │   title: "Groceries"                    │
+        │ )                                       │ )                                       │
+        └─────────────────────────────────────────┴─────────────────────────────────────────┘
+        """
+      }
     }
   }
 }

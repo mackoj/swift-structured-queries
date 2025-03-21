@@ -1,10 +1,14 @@
 public struct Outer<Base: Table>: _OptionalPromotable, Table {
+  public static var columns: TableColumns {
+    TableColumns()
+  }
+
   public static var tableName: String {
     Base.tableName
   }
 
-  public static var columns: TableColumns {
-    TableColumns()
+  public static var tableAlias: String? {
+    Base.tableAlias
   }
 
   let base: Base?

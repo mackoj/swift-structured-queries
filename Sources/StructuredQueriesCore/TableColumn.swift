@@ -4,6 +4,10 @@ public protocol TableColumnExpression<Root, Value>: QueryExpression where Value 
 
   var name: String { get }
   var keyPath: KeyPath<Root, Value.QueryOutput> { get }
+
+  func _aliased<Name: AliasName>(
+    _ alias: Name.Type
+  ) -> any TableColumnExpression<Alias<Root, Name>, Value>
 }
 
 public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
@@ -43,5 +47,14 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
 
   public var queryFragment: QueryFragment {
     "\(Root.self).\(quote: name)"
+  }
+
+  public func _aliased<Name>(
+    _ alias: Name.Type
+  ) -> any TableColumnExpression<Alias<Root, Name>, Value> {
+    TableColumn<Alias<Root, Name>, Value>(
+      name,
+      keyPath: \.[member: \Value.self, column: _keyPath]
+    )
   }
 }

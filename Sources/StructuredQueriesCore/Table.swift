@@ -3,9 +3,14 @@ public protocol Table: QueryRepresentable where TableColumns.QueryValue == Self 
   associatedtype TableColumns: Schema
   static var columns: TableColumns { get }
   static var tableName: String { get }
+  static var tableAlias: String? { get }
 }
 
 extension Table {
+  public static var tableAlias: String? {
+    nil
+  }
+
   public static subscript<Member>(
     dynamicMember keyPath: KeyPath<TableColumns, TableColumn<Self, Member>>
   ) -> TableColumn<Self, Member> {

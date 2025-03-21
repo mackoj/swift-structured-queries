@@ -929,7 +929,10 @@ extension Select: SelectStatement {
       query.append(" DISTINCT")
     }
     query.append(" \(columns.joined(separator: ", "))")
-    query.append(" FROM \(From.self)")
+    query.append(" FROM \(quote: From.tableName)")
+    if let tableAlias = From.tableAlias {
+      query.append(" AS \(quote: tableAlias)")
+    }
     for join in joins {
       query.append(" \(join)")
     }
@@ -985,7 +988,11 @@ private struct JoinClause: QueryExpression {
     if let `operator` {
       query.append("\(`operator`) ")
     }
-    query.append("JOIN \(table) ON \(constraint)")
+    query.append("JOIN \(quote: table.tableName) ")
+    if let tableAlias = table.tableAlias {
+      query.append("AS \(quote: tableAlias) ")
+    }
+    query.append("ON \(constraint)")
     return query
   }
 }
