@@ -1,4 +1,4 @@
-extension QueryExpression where QueryValue: QueryDecodable {
+extension QueryExpression where QueryValue: QueryBindable {
   public func asc(nulls nullOrdering: NullOrdering? = nil) -> some QueryExpression {
     OrderingTerm(base: self, direction: .asc, nullOrdering: nullOrdering)
   }

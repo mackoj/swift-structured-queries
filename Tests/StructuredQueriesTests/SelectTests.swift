@@ -688,6 +688,11 @@ extension SnapshotTests {
         └─────────────────────────────────────────┘
         """
       }
+      assertQuery(Reminder.limit(1).select { ($0.id, $0.title) }.map { ($1, $0) }) {
+        """
+        SELECT "reminders"."title", "reminders"."id" FROM "reminders" LIMIT 1
+        """
+      }
     }
 
     #if compiler(>=6.1)

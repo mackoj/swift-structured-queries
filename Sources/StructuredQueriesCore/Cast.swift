@@ -1,4 +1,4 @@
-extension QueryExpression {
+extension QueryExpression where QueryValue: QueryBindable {
   public func cast<Other: SQLiteType>(
     as _: Other.Type = Other.self
   ) -> some QueryExpression<Other> {
@@ -6,7 +6,7 @@ extension QueryExpression {
   }
 }
 
-extension QueryExpression where QueryValue: _OptionalProtocol {
+extension QueryExpression where QueryValue: QueryBindable & _OptionalProtocol {
   public func cast<Other: _OptionalPromotable & SQLiteType>(
     as _: Other.Type = Other.self
   ) -> some QueryExpression<Other._Optionalized>

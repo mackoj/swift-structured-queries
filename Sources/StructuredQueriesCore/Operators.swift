@@ -1,4 +1,4 @@
-extension QueryExpression {
+extension QueryExpression where QueryValue: QueryBindable {
   /// Returns a predicate expression indicating whether two query expressions are equal.
   ///
   /// > Important: Overloaded operators can strain the Swift compiler's type checking ability.
@@ -50,9 +50,7 @@ extension QueryExpression {
   public func neq(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: "<>", rhs: other)
   }
-}
 
-extension QueryExpression where QueryValue: _OptionalPromotable {
   public func `is`(
     _ other: some QueryExpression<QueryValue._Optionalized>
   ) -> some QueryExpression<Bool> {
@@ -71,7 +69,7 @@ private func isNull<Value>(_ expression: some QueryExpression<Value>) -> Bool {
   (expression as? any _OptionalProtocol).map { $0._wrapped == nil } ?? false
 }
 
-extension QueryExpression where QueryValue: _OptionalProtocol {
+extension QueryExpression where QueryValue: QueryBindable & _OptionalProtocol {
   public static func == (
     lhs: Self, rhs: some QueryExpression<QueryValue.Wrapped>
   ) -> some QueryExpression<Bool> {
@@ -125,7 +123,7 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
   }
 }
 
-extension QueryExpression {
+extension QueryExpression where QueryValue: QueryBindable {
   public static func == (lhs: Self, rhs: _Null<QueryValue>) -> some QueryExpression<Bool> {
     lhs.is(rhs)
   }
@@ -156,7 +154,7 @@ extension _Null: ExpressibleByNilLiteral {
   public init(nilLiteral: ()) {}
 }
 
-extension QueryExpression where QueryValue: Comparable {
+extension QueryExpression where QueryValue: QueryBindable & Comparable {
   public static func < (
     lhs: Self, rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
@@ -453,7 +451,7 @@ extension SQLQueryExpression<String> {
   }
 }
 
-extension QueryExpression {
+extension QueryExpression where QueryValue: QueryBindable {
   public func `in`(_ expression: some QueryExpression<[QueryValue]>) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: "IN", rhs: expression)
   }
@@ -476,21 +474,26 @@ extension QueryExpression {
       rhs: BinaryOperator<Void>(lhs: lowerBound, operator: "AND", rhs: upperBound)
     )
   }
+}
 
-  public func contains<Element>(
+// TODO: Define concretely on 'Array' and 'ClosedRange' instead of conforming them?
+extension QueryExpression {
+  public func contains<Element: QueryBindable>(
     _ element: some QueryExpression<Element>
   ) -> some QueryExpression<Bool>
   where QueryValue == [Element] {
     element.in(self)
   }
 
-  public func contains<Bound>(_ element: some QueryExpression<Bound>) -> some QueryExpression<Bool>
+  public func contains<Bound: QueryBindable>(
+    _ element: some QueryExpression<Bound>
+  ) -> some QueryExpression<Bool>
   where QueryValue == ClosedRange<Bound> {
     BinaryOperator(lhs: element, operator: "BETWEEN", rhs: self)
   }
 }
 
-extension Statement {
+extension Statement where QueryValue: QueryBindable {
   public func contains(
     _ element: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
