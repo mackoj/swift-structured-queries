@@ -65,12 +65,33 @@ struct ReminderResult {
   let isCompleted: Bool
 }
 
-Reminder.select {
+let query = Reminder.select {
   ReminderResult.Columns(
     title: $0.title,
     isCompleted: $0.isCompleted
   )
 }
+
+_: some Statement<ReminderResult> = query
+```
+
+To bundle up incrementally-selected columns, you can use the ``Select/map(_:)`` operator, which is
+handed the currently-selected columns:
+
+```swift
+let query = Reminder
+  .select(\.id)
+  .select(\.title)
+  .select(\.isCompleted)
+
+query.map { _, title, isCompleted in
+  ReminderResult.Columns(
+    title: $0.title,
+    isCompleted: $0.isCompleted
+  )
+}
+// SELECT "reminders"."title", "reminders"."isCompleted"
+// FROM "reminders"
 ```
 
 ### Joining tables
