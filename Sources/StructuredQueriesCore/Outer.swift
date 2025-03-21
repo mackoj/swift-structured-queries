@@ -32,11 +32,11 @@ public struct Outer<Base: Table>: _OptionalPromotable, Table {
 
     public subscript<Member>(
       dynamicMember keyPath: KeyPath<Base.TableColumns, TableColumn<Base, Member>>
-    ) -> TableColumn<Outer<Base>, Member?> {
+    ) -> TableColumn<Outer, Member?> {
       let column = Base.columns[keyPath: keyPath]
-      return TableColumn<Outer<Base>, Member?>(
+      return TableColumn<Outer, Member?>(
         column.name,
-        keyPath: \Outer<Base>.[member: \Member.self, column: column._keyPath]
+        keyPath: \.[member: \Member.self, column: column._keyPath]
       )
     }
   }
@@ -49,8 +49,8 @@ extension Outer: PrimaryKeyedTable where Base: PrimaryKeyedTable {
 extension Outer.TableColumns: PrimaryKeyedSchema where Base.TableColumns: PrimaryKeyedSchema {
   public typealias PrimaryKey = Base.TableColumns.PrimaryKey?
 
-  public var primaryKey: TableColumn<Outer<Base>, Base.TableColumns.PrimaryKey.QueryValue?> {
-    self[dynamicMember: \Base.TableColumns.primaryKey]
+  public var primaryKey: TableColumn<Outer, Base.TableColumns.PrimaryKey.QueryValue?> {
+    self[dynamicMember: \.primaryKey]
   }
 }
 
