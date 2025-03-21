@@ -723,8 +723,8 @@ extension SnapshotTests {
     #endif
 
     @Test func selfJoin() {
-      enum R1: AliasName { static func name<T: Table>(for table: T.Type) -> String { "r1" } }
-      enum R2: AliasName { static func name<T: Table>(for table: T.Type) -> String { "r2" } }
+      enum R1: AliasName {}
+      enum R2: AliasName {}
       assertQuery(
         Reminder.as(R1.self)
           // TODO: Should we have 'join' overloads that take 'Table.Type'?
@@ -732,7 +732,7 @@ extension SnapshotTests {
           .limit(1)
       ) {
         """
-        SELECT "r1"."id", "r1"."assignedUserID", "r1"."date", "r1"."isCompleted", "r1"."isFlagged", "r1"."notes", "r1"."priority", "r1"."remindersListID", "r1"."title", "r2"."id", "r2"."assignedUserID", "r2"."date", "r2"."isCompleted", "r2"."isFlagged", "r2"."notes", "r2"."priority", "r2"."remindersListID", "r2"."title" FROM "reminders" AS "r1" JOIN "reminders" AS "r2" ON ("r1"."id" = "r2"."id") LIMIT 1
+        SELECT "r1s"."id", "r1s"."assignedUserID", "r1s"."date", "r1s"."isCompleted", "r1s"."isFlagged", "r1s"."notes", "r1s"."priority", "r1s"."remindersListID", "r1s"."title", "r2s"."id", "r2s"."assignedUserID", "r2s"."date", "r2s"."isCompleted", "r2s"."isFlagged", "r2s"."notes", "r2s"."priority", "r2s"."remindersListID", "r2s"."title" FROM "reminders" AS "r1s" JOIN "reminders" AS "r2s" ON ("r1s"."id" = "r2s"."id") LIMIT 1
         """
       }results: {
         """
