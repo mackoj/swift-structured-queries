@@ -692,6 +692,12 @@ extension SnapshotTests {
         """
         SELECT "reminders"."title", "reminders"."id" FROM "reminders" LIMIT 1
         """
+      } results: {
+        """
+        ┌─────────────┬───┐
+        │ "Groceries" │ 1 │
+        └─────────────┴───┘
+        """
       }
     }
 

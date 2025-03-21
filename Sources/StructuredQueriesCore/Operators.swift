@@ -452,8 +452,8 @@ extension SQLQueryExpression<String> {
 }
 
 extension QueryExpression where QueryValue: QueryBindable {
-  public func `in`(_ expression: some QueryExpression<[QueryValue]>) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "IN", rhs: expression)
+  public func `in`(_ expression: [QueryValue]) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "IN", rhs: Array.Expression(elements: expression))
   }
 
   public func `in`(_ query: some Statement<QueryValue>) -> some QueryExpression<Bool> {
@@ -476,20 +476,19 @@ extension QueryExpression where QueryValue: QueryBindable {
   }
 }
 
-// TODO: Define concretely on 'Array' and 'ClosedRange' instead of conforming them?
-extension QueryExpression {
-  public func contains<Element: QueryBindable>(
+extension Array where Element: QueryBindable {
+  public func contains(
     _ element: some QueryExpression<Element>
-  ) -> some QueryExpression<Bool>
-  where QueryValue == [Element] {
+  ) -> some QueryExpression<Bool> {
     element.in(self)
   }
+}
 
-  public func contains<Bound: QueryBindable>(
-    _ element: some QueryExpression<Bound>
-  ) -> some QueryExpression<Bool>
-  where QueryValue == ClosedRange<Bound> {
-    BinaryOperator(lhs: element, operator: "BETWEEN", rhs: self)
+extension ClosedRange where Bound: QueryBindable {
+  public func contains(
+    _ element: some QueryExpression<Bound.QueryValue>
+  ) -> some QueryExpression<Bool> {
+    element.between(lowerBound, and: upperBound)
   }
 }
 
@@ -554,5 +553,19 @@ private struct LikeOperator<
     }
     query.append(")")
     return query
+  }
+}
+
+extension Array where Element: QueryBindable {
+  fileprivate struct Expression: QueryExpression {
+    typealias QueryValue = Array
+
+    let elements: [Element]
+    init(elements: [Element]) {
+      self.elements = elements
+    }
+    var queryFragment: QueryFragment {
+      "(\(elements.map(\.queryFragment).joined(separator: ", ")))"
+    }
   }
 }
