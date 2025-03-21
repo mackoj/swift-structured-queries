@@ -1,0 +1,85 @@
+# Selects
+
+Learn how to build queries that read data from a database.
+
+## Overview
+
+### Selecting columns
+
+The ``Select/select(_:)-2i9ot`` function is used to specify the result columns of a query. It uses
+a given closure to specify any number of result columns as a variadic tuple from the table columns
+passed to the closure:
+
+```swift
+@Table
+struct Reminder {
+  let id: Int
+  var title = ""
+  var isCompleted = false
+}
+
+Reminder.select(\.id)
+// SELECT "reminders"."id"
+// FROM "reminders"
+
+Reminder.select { ($0.id, $0.title) }
+// SELECT "reminders"."id", "reminders"."title"
+// FROM "reminders"
+
+Reminder.select { ($0.id, $0.title, $0.isCompleted) }
+// SELECT "reminders"."id", "reminders"."title", "reminders"."isCompleted"
+// FROM "reminders"
+```
+
+These selected columns become the row data type that will be decoded from a database.
+
+```swift
+let query = Reminder.select { ($0.id, $0.title, $0.isCompleted) }
+
+for (id, title, isCompleted) in try await db.execute(query) {
+  _: Int = id
+  _: String = title
+  _: Bool = isCompleted
+}
+```
+
+Selection is incremental, so multiple chained calls to `select` will result in a statement that
+returns a tuple of the combined columns:
+
+```swift
+let query = Reminder
+  .select(\.id)
+  .select(\.title)
+  .select(\.isCompleted)
+
+_: some Statement<(Int, String, Bool)> = query
+```
+
+To bundle selected columns up into a custom data type, you can annotate a struct of decoded results
+with the `@Selection` macro:
+
+```swift
+@Selection
+struct ReminderResult {
+  let title: String
+  let isCompleted: Bool
+}
+
+Reminder.select {
+  ReminderResult.Columns(
+    title: $0.title,
+    isCompleted: $0.isCompleted
+  )
+}
+```
+
+### Joining tables
+
+### Filtering results
+
+## Topics
+
+### Statements
+
+- ``Select``
+- ``SelectStatement``

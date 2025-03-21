@@ -10,11 +10,11 @@
 
 ### Query building
 
-- ``Select``
-- ``Insert``
-- ``Update``
-- ``Delete``
-- ``Where``
+- <doc:Selects>
+- <doc:Inserts>
+- <doc:Updates>
+- <doc:Deletes>
+- <doc:WhereClauses>
 
 ### Schema definition
 
