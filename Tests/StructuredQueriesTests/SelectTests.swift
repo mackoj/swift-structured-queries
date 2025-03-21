@@ -655,6 +655,41 @@ extension SnapshotTests {
       }
     }
 
+    @Test func map() {
+      assertQuery(Reminder.limit(1).select { ($0.id, $0.title) }.map { ($1, $0) }) {
+        """
+        SELECT "reminders"."title", "reminders"."id" FROM "reminders" LIMIT 1
+        """
+      } results: {
+        """
+        ┌─────────────┬───┐
+        │ "Groceries" │ 1 │
+        └─────────────┴───┘
+        """
+      }
+      assertQuery(Reminder.limit(1).select { ($0.id, $0.title) }.map { _, _ in }) {
+        """
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "reminders" LIMIT 1
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────────┐
+        │ Reminder(                               │
+        │   id: 1,                                │
+        │   assignedUserID: 1,                    │
+        │   date: Date(2001-01-01T00:00:00.000Z), │
+        │   isCompleted: false,                   │
+        │   isFlagged: false,                     │
+        │   notes: "Milk, Eggs, Apples",          │
+        │   priority: nil,                        │
+        │   remindersListID: 1,                   │
+        │   title: "Groceries"                    │
+        │ )                                       │
+        └─────────────────────────────────────────┘
+        """
+      }
+    }
+
     #if compiler(>=6.1)
       @Test func dynamicMember() {
         assertQuery(

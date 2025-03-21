@@ -206,7 +206,7 @@ public struct Select<Columns, From: Table, Joins> {
   private struct Clauses {
     var ctes: [CommonTableExpressionClause] = []
     var distinct = false
-    var columns: [QueryFragment] = []
+    var columns: [any QueryExpression] = []
     var joins: [JoinClause] = []
     var `where`: [QueryFragment] = []
     var group: [QueryFragment] = []
@@ -226,7 +226,7 @@ public struct Select<Columns, From: Table, Joins> {
     set { clauses.distinct = newValue }
     _modify { yield &clauses.distinct }
   }
-  fileprivate var columns: [QueryFragment] {
+  fileprivate var columns: [any QueryExpression] {
     get { clauses.columns }
     set { clauses.columns = newValue }
     _modify { yield &clauses.columns }
@@ -265,7 +265,7 @@ public struct Select<Columns, From: Table, Joins> {
   fileprivate init(
     ctes: [CommonTableExpressionClause],
     distinct: Bool,
-    columns: [QueryFragment],
+    columns: [any QueryExpression],
     joins: [JoinClause],
     where: [QueryFragment],
     group: [QueryFragment],
@@ -850,6 +850,30 @@ extension Select {
   where Columns == (repeat each C), Joins == (repeat each J) {
     select { _ in .count() }
   }
+
+  public func map<each C1: QueryRepresentable, each C2: QueryExpression>(
+    _ transform: (repeat SQLQueryExpression<each C1>) -> (repeat each C2)
+  ) -> Select<(repeat (each C2).QueryValue), From, Joins>
+  where
+    QueryValue == (repeat each C1),
+    repeat (each C2).QueryValue: QueryRepresentable
+  {
+    var iterator = columns.makeIterator()
+    func next<Element>() -> SQLQueryExpression<Element> {
+      SQLQueryExpression(iterator.next()!.queryFragment)
+    }
+    return Select<(repeat (each C2).QueryValue), From, Joins>(
+      ctes: ctes,
+      distinct: distinct,
+      columns: Array(repeat each transform(repeat { _ in next() }((each C1).self))),
+      joins: joins,
+      where: `where`,
+      group: group,
+      having: having,
+      order: order,
+      limit: limit
+    )
+  }
 }
 
 public func + <
@@ -899,7 +923,7 @@ extension Select: SelectStatement {
     let columns =
       columns.isEmpty
       ? [From.columns.queryFragment] + joins.map { $0.table.columns.queryFragment }
-      : columns
+      : columns.map(\.queryFragment)
     query.append("SELECT")
     if distinct {
       query.append(" DISTINCT")
