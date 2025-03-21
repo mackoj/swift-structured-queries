@@ -1,0 +1,108 @@
+public protocol AliasName {
+  static var aliasName: String { get }
+}
+
+extension AliasName {
+  public static var aliasName: String {
+    _typeName(Self.self, qualified: false).lowerCamelCased().pluralized()
+  }
+}
+
+extension Table {
+  public static func `as`<Name: AliasName>(_ alias: Name.Type) -> TableAlias<Self, Name>.Type {
+    TableAlias.self
+  }
+}
+
+// TODO: Use value generic to tag name in a more predictable way when available in Swift?
+public struct TableAlias<Base: Table, Name: AliasName>: _OptionalPromotable, Table {
+  public static var columns: TableColumns {
+    TableColumns()
+  }
+
+  public static var tableName: String {
+    Base.tableName
+  }
+
+  public static var tableAlias: String? {
+    Name.aliasName
+  }
+
+  let base: Base
+
+  subscript<Member: QueryRepresentable>(
+    member _: KeyPath<Member, Member> & Sendable,
+    column keyPath: KeyPath<Base, Member.QueryOutput> & Sendable
+  ) -> Member.QueryOutput {
+    base[keyPath: keyPath]
+  }
+
+  @dynamicMemberLookup
+  public struct TableColumns: Schema {
+    public var allColumns: [any TableColumnExpression] {
+      Base.columns.allColumns.map { $0._aliased(Name.self) }
+    }
+
+    public static var count: Int {
+      Base.TableColumns.count
+    }
+
+    public typealias QueryValue = TableAlias
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Base.TableColumns, TableColumn<Base, Member>>
+    ) -> TableColumn<TableAlias, Member> {
+      let column = Base.columns[keyPath: keyPath]
+      return TableColumn<TableAlias, Member>(
+        column.name,
+        keyPath: \.[member: \Member.self, column: column._keyPath]
+      )
+    }
+  }
+}
+
+extension TableAlias: PrimaryKeyedTable where Base: PrimaryKeyedTable {
+  public typealias Draft = TableAlias<Base.Draft, Name>
+}
+
+extension TableAlias.TableColumns: PrimaryKeyedSchema where Base.TableColumns: PrimaryKeyedSchema {
+  public typealias PrimaryKey = Base.TableColumns.PrimaryKey
+
+  public var primaryKey: TableColumn<TableAlias, Base.TableColumns.PrimaryKey.QueryValue> {
+    self[dynamicMember: \.primaryKey]
+  }
+}
+
+extension TableAlias: QueryExpression where Base: QueryExpression {
+  public typealias QueryValue = Base.QueryValue
+
+  public var queryFragment: QueryFragment {
+    base.queryFragment
+  }
+}
+
+extension TableAlias: QueryBindable where Base: QueryBindable {
+  public var queryBinding: QueryBinding {
+    base.queryBinding
+  }
+}
+
+extension TableAlias: QueryDecodable where Base: QueryDecodable {
+  public init(decoder: some QueryDecoder) throws {
+    self.init(base: try decoder.decodeColumns(Base.self))
+  }
+}
+
+extension TableAlias: QueryRepresentable where Base: QueryRepresentable {
+  public typealias QueryOutput = Base
+
+  public init(queryOutput: Base) {
+    self.init(base: queryOutput)
+  }
+
+  public var queryOutput: Base {
+    base
+  }
+}
+
+extension TableAlias: Sendable where Base: Sendable {}

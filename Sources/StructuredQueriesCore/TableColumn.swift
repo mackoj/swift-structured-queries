@@ -7,7 +7,7 @@ public protocol TableColumnExpression<Root, Value>: QueryExpression where Value 
 
   func _aliased<Name: AliasName>(
     _ alias: Name.Type
-  ) -> any TableColumnExpression<Alias<Root, Name>, Value>
+  ) -> any TableColumnExpression<TableAlias<Root, Name>, Value>
 }
 
 public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
@@ -51,8 +51,8 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
 
   public func _aliased<Name>(
     _ alias: Name.Type
-  ) -> any TableColumnExpression<Alias<Root, Name>, Value> {
-    TableColumn<Alias<Root, Name>, Value>(
+  ) -> any TableColumnExpression<TableAlias<Root, Name>, Value> {
+    TableColumn<TableAlias<Root, Name>, Value>(
       name,
       keyPath: \.[member: \Value.self, column: _keyPath]
     )
