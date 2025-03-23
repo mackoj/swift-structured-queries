@@ -35,18 +35,6 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "reminderListWithCounts"
-          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
-            let reminderList = try decoder.decode(ReminderList.self)
-            let remindersCount = try decoder.decode(Int.self)
-            guard let reminderList else {
-              throw QueryDecodingError.missingRequiredColumn
-            }
-            guard let remindersCount else {
-              throw QueryDecodingError.missingRequiredColumn
-            }
-            self.reminderList = reminderList
-            self.remindersCount = remindersCount
-          }
         }
 
         extension ReminderListWithCount: StructuredQueries.QueryRepresentable {
@@ -61,6 +49,18 @@ extension SnapshotTests {
               \(reminderList.queryFragment) AS "reminderList", \(remindersCount.queryFragment) AS "remindersCount"
               """
             }
+          }
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let reminderList = try decoder.decode(ReminderList.self)
+            let remindersCount = try decoder.decode(Int.self)
+            guard let reminderList else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            guard let remindersCount else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.reminderList = reminderList
+            self.remindersCount = remindersCount
           }
         }
         """#

@@ -194,9 +194,10 @@ extension SelectionMacro: ExtensionMacro {
       }
 
       allColumns.append((identifier, columnQueryValueType))
+      let decodedType = columnQueryValueType?.asNonOptionalType()
       decodings.append(
         """
-        let \(identifier) = try decoder.decode(\(columnQueryValueType.map { "\($0).self" } ?? ""))
+        let \(identifier) = try decoder.decode(\(decodedType.map { "\($0).self" } ?? ""))
         """
       )
       if columnQueryValueType.map({ !$0.isOptionalType }) ?? true {
@@ -241,10 +242,7 @@ extension SelectionMacro: ExtensionMacro {
       allColumns
       .map { #"\(\#($0.name).queryFragment) AS \#($0.name.text.quoted())"# }
 
-    let initDecoder: DeclSyntax? =
-      declaration.hasMacroApplication("Table")
-      ? nil
-      : """
+    let initDecoder: DeclSyntax = """
 
       public init(decoder: inout some \(moduleName).QueryDecoder) throws {
       \(decodings + decodingUnwrappings + decodingAssignments, separator: "\n")

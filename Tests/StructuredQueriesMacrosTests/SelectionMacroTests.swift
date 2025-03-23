@@ -97,7 +97,7 @@ extension SnapshotTests {
           }
           public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
             let reminderTitle = try decoder.decode(String.self)
-            let listTitle = try decoder.decode(String?.self)
+            let listTitle = try decoder.decode(String.self)
             guard let reminderTitle else {
               throw QueryDecodingError.missingRequiredColumn
             }

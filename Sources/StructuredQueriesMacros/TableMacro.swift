@@ -275,9 +275,7 @@ extension TableMacro: ExtensionMacro {
         )
       }
 
-      let defaultValue = (binding.initializer?.value).map {
-        ", default: \(selfRewriter.rewrite($0).trimmedDescription)"
-      }
+      let defaultValue = binding.initializer?.value.rewritten(selfRewriter)
       columnsProperties.append(
         """
         public let \(identifier) = \(moduleName).TableColumn<\
@@ -285,28 +283,42 @@ extension TableMacro: ExtensionMacro {
         \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
         >(\
         \(columnName), \
-        keyPath: \\QueryValue.\(identifier)\(raw: defaultValue ?? "")\
+        keyPath: \\QueryValue.\(identifier)\(defaultValue.map { ", default: \($0)" } ?? "")\
         )
         """
       )
       allColumns.append(identifier)
-      decodings.append(
-        """
-        let \(identifier) = try decoder.decode(\(columnQueryValueType.map { "\($0).self" } ?? ""))
-        """
-      )
-      if columnQueryValueType.map({ !$0.isOptionalType }) ?? true {
+      let decodedType = columnQueryValueType?.asNonOptionalType()
+      if let defaultValue {
+        decodings.append(
+          """
+          self.\(identifier) = try decoder.decode(\(decodedType.map { "\($0).self" } ?? "")) \
+          ?? \(defaultValue)
+          """
+        )
+      } else if columnQueryValueType.map({ $0.isOptionalType }) ?? false {
+        decodings.append(
+          """
+          self.\(identifier) = try decoder.decode(\(decodedType.map { "\($0).self" } ?? ""))
+          """
+        )
+      } else {
+        decodings.append(
+          """
+          let \(identifier) = try decoder.decode(\(decodedType.map { "\($0).self" } ?? ""))
+          """
+        )
         decodingUnwrappings.append(
           """
           guard let \(identifier) else { throw QueryDecodingError.missingRequiredColumn }
           """
         )
+        decodingAssignments.append(
+          """
+          self.\(identifier) = \(identifier)
+          """
+        )
       }
-      decodingAssignments.append(
-        """
-        self.\(identifier) = \(identifier)
-        """
-      )
 
       if let primaryKey, primaryKey.identifier == identifier {
         var hasColumnAttribute = false
@@ -481,6 +493,15 @@ extension TableMacro: ExtensionMacro {
       return []
     }
 
+    let initDecoder: DeclSyntax? =
+      declaration.hasMacroApplication("Selection")
+      ? nil
+      : """
+
+      public init(decoder: inout some \(moduleName).QueryDecoder) throws {
+      \(decodings + decodingUnwrappings + decodingAssignments, separator: "\n")
+      }
+      """
     return [
       DeclSyntax(
         """
@@ -497,10 +518,7 @@ extension TableMacro: ExtensionMacro {
         }
         }\(draft)
         public static let columns = TableColumns()
-        public static let tableName = \(tableName)
-        public init(decoder: inout some \(moduleName).QueryDecoder) throws {
-        \(decodings + decodingUnwrappings + decodingAssignments, separator: "\n")
-        }\(initFromOther)
+        public static let tableName = \(tableName)\(initDecoder)\(initFromOther)
         }
         """
       )

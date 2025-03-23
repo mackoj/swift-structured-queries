@@ -23,17 +23,17 @@ extension Optional: QueryBindable where Wrapped: QueryBindable {
   }
 }
 
-//extension Optional: QueryDecodable where Wrapped: QueryDecodable {
-//  @inlinable
-//  @inline(__always)
-//  public init(decoder: some QueryDecoder) throws {
-//    if try decoder.decodeNil() {
-//      self = .none
-//    } else {
-//      self = try decoder.decode(Wrapped.self)
-//    }
-//  }
-//}
+extension Optional: QueryDecodable where Wrapped: QueryDecodable {
+  @inlinable
+  @inline(__always)
+  public init(decoder: inout some QueryDecoder) throws {
+    do {
+      self = try Wrapped(decoder: &decoder)
+    } catch QueryDecodingError.missingRequiredColumn {
+      self = nil
+    }
+  }
+}
 
 extension Optional: QueryExpression where Wrapped: QueryExpression {
   public typealias QueryValue = Wrapped.QueryValue?

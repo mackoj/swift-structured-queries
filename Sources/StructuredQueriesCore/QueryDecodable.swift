@@ -3,44 +3,42 @@ public protocol QueryDecodable: _OptionalPromotable {
 }
 
 extension ContiguousArray<UInt8>: QueryDecodable {
+  @inlinable
+  @inline(__always)
   public init(decoder: inout some QueryDecoder) throws {
-    guard let result = try decoder.decodeColumn(ContiguousArray<UInt8>.self)
+    guard let result = try decoder.decode(ContiguousArray<UInt8>.self)
     else { throw QueryDecodingError.missingRequiredColumn }
     self = result
   }
 }
 
 extension Double: QueryDecodable {
+  @inlinable
+  @inline(__always)
   public init(decoder: inout some QueryDecoder) throws {
-    guard let result = try decoder.decodeColumn(Double.self)
+    guard let result = try decoder.decode(Double.self)
     else { throw QueryDecodingError.missingRequiredColumn }
     self = result
   }
 }
 
 extension Int64: QueryDecodable {
+  @inlinable
+  @inline(__always)
   public init(decoder: inout some QueryDecoder) throws {
-    guard let result = try decoder.decodeColumn(Int64.self)
+    guard let result = try decoder.decode(Int64.self)
     else { throw QueryDecodingError.missingRequiredColumn }
     self = result
   }
 }
 
 extension String: QueryDecodable {
+//  @inlinable
+//  @inline(__always)
   public init(decoder: inout some QueryDecoder) throws {
-    guard let result = try decoder.decodeColumn(String.self)
+    guard let result = try decoder.decode(String.self)
     else { throw QueryDecodingError.missingRequiredColumn }
     self = result
-  }
-}
-
-extension Optional: QueryDecodable where Wrapped: QueryDecodable {
-  public init(decoder: inout some QueryDecoder) throws {
-    do {
-      self = try Wrapped(decoder: &decoder)
-    } catch QueryDecodingError.missingRequiredColumn {
-      self = nil
-    }
   }
 }
 
