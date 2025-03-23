@@ -28,7 +28,7 @@ extension Never: Table {
 
   public static let tableName = "nevers"
 
-  public init(decoder: some QueryDecoder) throws {
+  public init(decoder: inout some QueryDecoder) throws {
     throw DecodingError()
   }
 

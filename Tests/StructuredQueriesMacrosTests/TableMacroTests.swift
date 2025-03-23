@@ -32,8 +32,12 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "foos"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.bar = try decoder.decode(Int.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let bar = try decoder.decode(Int.self)
+            guard let bar else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.bar = bar
           }
         }
         """#
@@ -67,8 +71,12 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "foo"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.bar = try decoder.decode(Int.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let bar = try decoder.decode(Int.self)
+            guard let bar else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.bar = bar
           }
         }
         """#
@@ -151,11 +159,27 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "foos"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.c1 = try decoder.decode(Swift.Bool.self)
-            self.c2 = try decoder.decode(Swift.Int.self)
-            self.c3 = try decoder.decode(Swift.Double.self)
-            self.c4 = try decoder.decode(Swift.String.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let c1 = try decoder.decode(Swift.Bool.self)
+            let c2 = try decoder.decode(Swift.Int.self)
+            let c3 = try decoder.decode(Swift.Double.self)
+            let c4 = try decoder.decode(Swift.String.self)
+            guard let c1 else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            guard let c2 else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            guard let c3 else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            guard let c4 else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.c1 = c1
+            self.c2 = c2
+            self.c3 = c3
+            self.c4 = c4
           }
         }
         """#
@@ -190,8 +214,12 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "foos"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.bar = try decoder.decode(Int.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let bar = try decoder.decode(Int.self)
+            guard let bar else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.bar = bar
           }
         }
         """#
@@ -270,8 +298,12 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "foos"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.bar = try decoder.decode(Date.ISO8601Representation.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let bar = try decoder.decode(Date.ISO8601Representation.self)
+            guard let bar else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.bar = bar
           }
         }
         """#
@@ -307,8 +339,12 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "foos"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.bar = try decoder.decode(Int.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let bar = try decoder.decode(Int.self)
+            guard let bar else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.bar = bar
           }
         }
         """#
@@ -344,8 +380,12 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "foos"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.bar = try decoder.decode(Int.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let bar = try decoder.decode(Int.self)
+            guard let bar else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.bar = bar
           }
         }
         """#
@@ -399,8 +439,12 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "foos"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.bar = try decoder.decode(Date.ISO8601Representation.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let bar = try decoder.decode(Date.ISO8601Representation.self)
+            guard let bar else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.bar = bar
           }
         }
         """#
@@ -454,8 +498,9 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "foos"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.bar = try decoder.decode(Date.ISO8601Representation?.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let bar = try decoder.decode(Date.ISO8601Representation?.self)
+            self.bar = bar
           }
         }
         """#
@@ -509,8 +554,9 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "foos"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.bar = try decoder.decode(Date.ISO8601Representation?.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let bar = try decoder.decode(Date.ISO8601Representation?.self)
+            self.bar = bar
           }
         }
         """#
@@ -564,8 +610,12 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "foos"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.bar = try decoder.decode(Date.ISO8601Representation.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let bar = try decoder.decode(Date.ISO8601Representation.self)
+            guard let bar else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.bar = bar
           }
         }
         """#
@@ -599,8 +649,12 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "foos"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.`bar` = try decoder.decode(Int.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let `bar` = try decoder.decode(Int.self)
+            guard let `bar` else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.`bar` = `bar`
           }
         }
         """#
@@ -634,8 +688,12 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "foos"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.bar = try decoder.decode(ID<Foo>.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let bar = try decoder.decode(ID<Foo>.self)
+            guard let bar else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.bar = bar
           }
         }
         """#
@@ -669,8 +727,12 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "foos"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.bar = try decoder.decode()
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let bar = try decoder.decode()
+            guard let bar else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.bar = bar
           }
         }
         """#
@@ -726,9 +788,11 @@ extension SnapshotTests {
             }
             public static let columns = TableColumns()
             public static let tableName = User.tableName
-            public init(decoder: some StructuredQueries.QueryDecoder) throws {
-              self.id = try decoder.decode(ID<User, UUID.BytesRepresentation>?.self)
-              self.referrerID = try decoder.decode(ID<User, UUID.BytesRepresentation>?.self)
+            public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+              let id = try decoder.decode(ID<User, UUID.BytesRepresentation>?.self)
+              let referrerID = try decoder.decode(ID<User, UUID.BytesRepresentation>?.self)
+              self.id = id
+              self.referrerID = referrerID
             }
             public init(_ other: User) {
               self.id = other.id
@@ -744,9 +808,14 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "users"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.id = try decoder.decode(ID<User, UUID.BytesRepresentation>.self)
-            self.referrerID = try decoder.decode(ID<User, UUID.BytesRepresentation>?.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let id = try decoder.decode(ID<User, UUID.BytesRepresentation>.self)
+            let referrerID = try decoder.decode(ID<User, UUID.BytesRepresentation>?.self)
+            guard let id else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
+            self.referrerID = referrerID
           }
           public init?(_ other: Draft) {
             guard let id = other.id else {
@@ -789,8 +858,12 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "syncUps"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.name = try decoder.decode(String.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let name = try decoder.decode(String.self)
+            guard let name else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.name = name
           }
         }
         """#
@@ -825,8 +898,12 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "syncUps"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.seconds = try decoder.decode()
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let seconds = try decoder.decode()
+            guard let seconds else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.seconds = seconds
           }
         }
         """#
@@ -865,8 +942,12 @@ extension SnapshotTests {
         }
         public static let columns = TableColumns()
         public static let tableName = "foos"
-        public init(decoder: some StructuredQueries.QueryDecoder) throws {
-          self.name = try decoder.decode(String.self)
+        public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+          let name = try decoder.decode(String.self)
+          guard let name else {
+            throw QueryDecodingError.missingRequiredColumn
+          }
+          self.name = name
         }
       }
       """#
@@ -918,8 +999,9 @@ extension SnapshotTests {
             }
             public static let columns = TableColumns()
             public static let tableName = Foo.tableName
-            public init(decoder: some StructuredQueries.QueryDecoder) throws {
-              self.id = try decoder.decode(Int?.self)
+            public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+              let id = try decoder.decode(Int?.self)
+              self.id = id
             }
             public init(_ other: Foo) {
               self.id = other.id
@@ -932,8 +1014,12 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "foos"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.id = try decoder.decode(Int.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let id = try decoder.decode(Int.self)
+            guard let id else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
           }
           public init?(_ other: Draft) {
             guard let id = other.id else {
@@ -1009,8 +1095,12 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = Foo.tableName
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.id = try decoder.decode(Int.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let id = try decoder.decode(Int.self)
+            guard let id else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
           }
           public init(_ other: Foo) {
             self.id = other.id
@@ -1076,9 +1166,14 @@ extension SnapshotTests {
             }
             public static let columns = TableColumns()
             public static let tableName = Foo.tableName
-            public init(decoder: some StructuredQueries.QueryDecoder) throws {
-              self.id = try decoder.decode(Int?.self)
-              self.name = try decoder.decode(String.self)
+            public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+              let id = try decoder.decode(Int?.self)
+              let name = try decoder.decode(String.self)
+              guard let name else {
+                throw QueryDecodingError.missingRequiredColumn
+              }
+              self.id = id
+              self.name = name
             }
             public init(_ other: Foo) {
               self.id = other.id
@@ -1094,9 +1189,17 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "foos"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.id = try decoder.decode(Int.self)
-            self.name = try decoder.decode(String.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let id = try decoder.decode(Int.self)
+            let name = try decoder.decode(String.self)
+            guard let id else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            guard let name else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
+            self.name = name
           }
           public init?(_ other: Draft) {
             guard let id = other.id else {
@@ -1169,11 +1272,18 @@ extension SnapshotTests {
             }
             public static let columns = TableColumns()
             public static let tableName = Reminder.tableName
-            public init(decoder: some StructuredQueries.QueryDecoder) throws {
-              self.id = try decoder.decode(Int?.self)
-              self.title = try decoder.decode(Swift.String.self)
-              self.date = try decoder.decode(Date.UnixTimeRepresentation?.self)
-              self.priority = try decoder.decode(Priority?.self)
+            public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+              let id = try decoder.decode(Int?.self)
+              let title = try decoder.decode(Swift.String.self)
+              let date = try decoder.decode(Date.UnixTimeRepresentation?.self)
+              let priority = try decoder.decode(Priority?.self)
+              guard let title else {
+                throw QueryDecodingError.missingRequiredColumn
+              }
+              self.id = id
+              self.title = title
+              self.date = date
+              self.priority = priority
             }
             public init(_ other: Reminder) {
               self.id = other.id
@@ -1195,11 +1305,21 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "reminders"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.id = try decoder.decode(Int.self)
-            self.title = try decoder.decode(Swift.String.self)
-            self.date = try decoder.decode(Date.UnixTimeRepresentation?.self)
-            self.priority = try decoder.decode(Priority?.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let id = try decoder.decode(Int.self)
+            let title = try decoder.decode(Swift.String.self)
+            let date = try decoder.decode(Date.UnixTimeRepresentation?.self)
+            let priority = try decoder.decode(Priority?.self)
+            guard let id else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            guard let title else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
+            self.title = title
+            self.date = date
+            self.priority = priority
           }
           public init?(_ other: Draft) {
             guard let id = other.id else {
@@ -1258,8 +1378,9 @@ extension SnapshotTests {
             }
             public static let columns = TableColumns()
             public static let tableName = Reminder.tableName
-            public init(decoder: some StructuredQueries.QueryDecoder) throws {
-              self.id = try decoder.decode(UUID.BytesRepresentation?.self)
+            public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+              let id = try decoder.decode(UUID.BytesRepresentation?.self)
+              self.id = id
             }
             public init(_ other: Reminder) {
               self.id = other.id
@@ -1272,8 +1393,12 @@ extension SnapshotTests {
           }
           public static let columns = TableColumns()
           public static let tableName = "reminders"
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.id = try decoder.decode(UUID.BytesRepresentation.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let id = try decoder.decode(UUID.BytesRepresentation.self)
+            guard let id else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
           }
           public init?(_ other: Draft) {
             guard let id = other.id else {

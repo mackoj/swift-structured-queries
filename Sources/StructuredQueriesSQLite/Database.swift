@@ -39,12 +39,12 @@ public struct Database {
     guard !query.isEmpty else { return [] }
     return try withStatement(query) { statement in
       var results: [QueryValue.QueryOutput] = []
-      let decoder = SQLiteQueryDecoder(database: storage.handle, statement: statement)
+      var decoder = SQLiteQueryDecoder(database: storage.handle, statement: statement)
       loop: while true {
         let code = sqlite3_step(statement)
         switch code {
         case SQLITE_ROW:
-          try results.append(QueryValue(decoder: decoder).queryOutput)
+          try results.append(decoder.decodeColumns(QueryValue.self))
           decoder.next()
         case SQLITE_DONE:
           break loop
@@ -63,12 +63,12 @@ public struct Database {
     guard !query.isEmpty else { return [] }
     return try withStatement(query) { statement in
       var results: [(repeat (each V).QueryOutput)] = []
-      let decoder = SQLiteQueryDecoder(database: storage.handle, statement: statement)
+      var decoder = SQLiteQueryDecoder(database: storage.handle, statement: statement)
       loop: while true {
         let code = sqlite3_step(statement)
         switch code {
         case SQLITE_ROW:
-          try results.append((repeat (each V)(decoder: decoder).queryOutput))
+          try results.append(decoder.decodeColumns((repeat each V).self))
           decoder.next()
         case SQLITE_DONE:
           break loop

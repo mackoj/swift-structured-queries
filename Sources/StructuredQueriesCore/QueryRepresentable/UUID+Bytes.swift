@@ -17,8 +17,8 @@ extension UUID.BytesRepresentation: QueryBindable {
 }
 
 extension UUID.BytesRepresentation: QueryDecodable {
-  public init(decoder: some QueryDecoder) throws {
-    let queryOutput = try decoder.decode(ContiguousArray<UInt8>.self)
+  public init(decoder: inout some QueryDecoder) throws {
+    let queryOutput = try ContiguousArray<UInt8>(decoder: &decoder)
     guard queryOutput.count == 16 else {
       throw InvalidBytes()
     }

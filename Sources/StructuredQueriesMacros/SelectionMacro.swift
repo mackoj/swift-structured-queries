@@ -25,6 +25,8 @@ extension SelectionMacro: ExtensionMacro {
     }
     var allColumns: [(name: TokenSyntax, type: TypeSyntax?)] = []
     var decodings: [ExprSyntax] = []
+    var decodingUnwrappings: [ExprSyntax] = []
+    var decodingAssignments: [ExprSyntax] = []
     var diagnostics: [Diagnostic] = []
 
     let selfRewriter = SelfRewriter(
@@ -194,7 +196,19 @@ extension SelectionMacro: ExtensionMacro {
       allColumns.append((identifier, columnQueryValueType))
       decodings.append(
         """
-        self.\(identifier) = try decoder.decode(\(columnQueryValueType.map { "\($0).self" } ?? ""))
+        let \(identifier) = try decoder.decode(\(columnQueryValueType.map { "\($0).self" } ?? ""))
+        """
+      )
+      if columnQueryValueType.map({ !$0.isOptionalType }) ?? true {
+        decodingUnwrappings.append(
+          """
+          guard let \(identifier) else { throw QueryDecodingError.missingRequiredColumn }
+          """
+        )
+      }
+      decodingAssignments.append(
+        """
+        self.\(identifier) = \(identifier)
         """
       )
     }
@@ -232,8 +246,8 @@ extension SelectionMacro: ExtensionMacro {
       ? nil
       : """
 
-      public init(decoder: some \(moduleName).QueryDecoder) throws {
-      \(decodings, separator: "\n")
+      public init(decoder: inout some \(moduleName).QueryDecoder) throws {
+      \(decodings + decodingUnwrappings + decodingAssignments, separator: "\n")
       }
       """
     return [

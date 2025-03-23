@@ -37,8 +37,8 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
     self._keyPath = keyPath
   }
 
-  public func decode(_ decoder: some QueryDecoder) throws -> Value.QueryOutput {
-    try decoder.decode(Value.self)
+  public func decode(_ decoder: inout some QueryDecoder) throws -> Value.QueryOutput {
+    try Value(decoder: &decoder).queryOutput
   }
 
   public var queryFragment: QueryFragment {

@@ -26,6 +26,8 @@ extension TableMacro: ExtensionMacro {
     var allColumns: [TokenSyntax] = []
     var columnsProperties: [DeclSyntax] = []
     var decodings: [ExprSyntax] = []
+    var decodingUnwrappings: [ExprSyntax] = []
+    var decodingAssignments: [ExprSyntax] = []
     var diagnostics: [Diagnostic] = []
 
     // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
@@ -290,7 +292,19 @@ extension TableMacro: ExtensionMacro {
       allColumns.append(identifier)
       decodings.append(
         """
-        self.\(identifier) = try decoder.decode(\(columnQueryValueType.map { "\($0).self" } ?? ""))
+        let \(identifier) = try decoder.decode(\(columnQueryValueType.map { "\($0).self" } ?? ""))
+        """
+      )
+      if columnQueryValueType.map({ !$0.isOptionalType }) ?? true {
+        decodingUnwrappings.append(
+          """
+          guard let \(identifier) else { throw QueryDecodingError.missingRequiredColumn }
+          """
+        )
+      }
+      decodingAssignments.append(
+        """
+        self.\(identifier) = \(identifier)
         """
       )
 
@@ -484,8 +498,8 @@ extension TableMacro: ExtensionMacro {
         }\(draft)
         public static let columns = TableColumns()
         public static let tableName = \(tableName)
-        public init(decoder: some \(moduleName).QueryDecoder) throws {
-        \(decodings, separator: "\n")
+        public init(decoder: inout some \(moduleName).QueryDecoder) throws {
+        \(decodings + decodingUnwrappings + decodingAssignments, separator: "\n")
         }\(initFromOther)
         }
         """
