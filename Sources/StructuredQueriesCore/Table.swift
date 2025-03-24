@@ -18,8 +18,6 @@ extension Never: Table {
     public typealias QueryValue = Never
 
     public var allColumns: [any TableColumnExpression] { [] }
-
-    public static var count: Int { 0 }
   }
 
   public static var columns: TableColumns {

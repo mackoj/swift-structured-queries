@@ -509,9 +509,6 @@ extension TableMacro: ExtensionMacro {
         \(conformances.isEmpty ? "" : ": \(conformances, separator: ", ")") {
         public struct TableColumns: \(schemaConformances, separator: ", ") {
         public typealias QueryValue = \(type.trimmed)
-        public static var count: Int {\
-        \(IntegerLiteralExprSyntax(integerLiteral: allColumns.count))\
-        }
         \(columnsProperties, separator: "\n")
         public var allColumns: [any \(moduleName).TableColumnExpression] { \
         [\(allColumns.map { "self.\($0)" as ExprSyntax }, separator: ", ")]

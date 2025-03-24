@@ -22,9 +22,6 @@ extension SnapshotTests {
         extension Foo: StructuredQueries.Table {
           public struct TableColumns: StructuredQueries.Schema {
             public typealias QueryValue = Foo
-            public static var count: Int {
-              1
-            }
             public let bar = StructuredQueries.TableColumn<QueryValue, Int>("bar", keyPath: \QueryValue.bar)
             public var allColumns: [any StructuredQueries.TableColumnExpression] {
               [self.bar]
@@ -61,9 +58,6 @@ extension SnapshotTests {
         extension Foo: StructuredQueries.Table {
           public struct TableColumns: StructuredQueries.Schema {
             public typealias QueryValue = Foo
-            public static var count: Int {
-              1
-            }
             public let bar = StructuredQueries.TableColumn<QueryValue, Int>("bar", keyPath: \QueryValue.bar)
             public var allColumns: [any StructuredQueries.TableColumnExpression] {
               [self.bar]
@@ -146,9 +140,6 @@ extension SnapshotTests {
         extension Foo: StructuredQueries.Table {
           public struct TableColumns: StructuredQueries.Schema {
             public typealias QueryValue = Foo
-            public static var count: Int {
-              4
-            }
             public let c1 = StructuredQueries.TableColumn<QueryValue, Swift.Bool>("c1", keyPath: \QueryValue.c1, default: true)
             public let c2 = StructuredQueries.TableColumn<QueryValue, Swift.Int>("c2", keyPath: \QueryValue.c2, default: 1)
             public let c3 = StructuredQueries.TableColumn<QueryValue, Swift.Double>("c3", keyPath: \QueryValue.c3, default: 1.2)
@@ -188,9 +179,6 @@ extension SnapshotTests {
         extension Foo: StructuredQueries.Table {
           public struct TableColumns: StructuredQueries.Schema {
             public typealias QueryValue = Foo
-            public static var count: Int {
-              1
-            }
             public let bar = StructuredQueries.TableColumn<QueryValue, Int>("Bar", keyPath: \QueryValue.bar)
             public var allColumns: [any StructuredQueries.TableColumnExpression] {
               [self.bar]
@@ -272,9 +260,6 @@ extension SnapshotTests {
         extension Foo: StructuredQueries.Table {
           public struct TableColumns: StructuredQueries.Schema {
             public typealias QueryValue = Foo
-            public static var count: Int {
-              1
-            }
             public let bar = StructuredQueries.TableColumn<QueryValue, Date.ISO8601Representation>("bar", keyPath: \QueryValue.bar)
             public var allColumns: [any StructuredQueries.TableColumnExpression] {
               [self.bar]
@@ -313,9 +298,6 @@ extension SnapshotTests {
         extension Foo: StructuredQueries.Table {
           public struct TableColumns: StructuredQueries.Schema {
             public typealias QueryValue = Foo
-            public static var count: Int {
-              1
-            }
             public let bar = StructuredQueries.TableColumn<QueryValue, Int>("bar", keyPath: \QueryValue.bar)
             public var allColumns: [any StructuredQueries.TableColumnExpression] {
               [self.bar]
@@ -354,9 +336,6 @@ extension SnapshotTests {
         extension Foo: StructuredQueries.Table {
           public struct TableColumns: StructuredQueries.Schema {
             public typealias QueryValue = Foo
-            public static var count: Int {
-              1
-            }
             public let bar = StructuredQueries.TableColumn<QueryValue, Int>("bar", keyPath: \QueryValue.bar)
             public var allColumns: [any StructuredQueries.TableColumnExpression] {
               [self.bar]
@@ -413,9 +392,6 @@ extension SnapshotTests {
         extension Foo: StructuredQueries.Table {
           public struct TableColumns: StructuredQueries.Schema {
             public typealias QueryValue = Foo
-            public static var count: Int {
-              1
-            }
             public let bar = StructuredQueries.TableColumn<QueryValue, Date.ISO8601Representation>("bar", keyPath: \QueryValue.bar)
             public var allColumns: [any StructuredQueries.TableColumnExpression] {
               [self.bar]
@@ -472,9 +448,6 @@ extension SnapshotTests {
         extension Foo: StructuredQueries.Table {
           public struct TableColumns: StructuredQueries.Schema {
             public typealias QueryValue = Foo
-            public static var count: Int {
-              1
-            }
             public let bar = StructuredQueries.TableColumn<QueryValue, Date.ISO8601Representation?>("bar", keyPath: \QueryValue.bar)
             public var allColumns: [any StructuredQueries.TableColumnExpression] {
               [self.bar]
@@ -527,9 +500,6 @@ extension SnapshotTests {
         extension Foo: StructuredQueries.Table {
           public struct TableColumns: StructuredQueries.Schema {
             public typealias QueryValue = Foo
-            public static var count: Int {
-              1
-            }
             public let bar = StructuredQueries.TableColumn<QueryValue, Date.ISO8601Representation?>("bar", keyPath: \QueryValue.bar)
             public var allColumns: [any StructuredQueries.TableColumnExpression] {
               [self.bar]
@@ -582,9 +552,6 @@ extension SnapshotTests {
         extension Foo: StructuredQueries.Table {
           public struct TableColumns: StructuredQueries.Schema {
             public typealias QueryValue = Foo
-            public static var count: Int {
-              1
-            }
             public let bar = StructuredQueries.TableColumn<QueryValue, Date.ISO8601Representation>("bar", keyPath: \QueryValue.bar, default: Date())
             public var allColumns: [any StructuredQueries.TableColumnExpression] {
               [self.bar]
@@ -617,9 +584,6 @@ extension SnapshotTests {
         extension Foo: StructuredQueries.Table {
           public struct TableColumns: StructuredQueries.Schema {
             public typealias QueryValue = Foo
-            public static var count: Int {
-              1
-            }
             public let `bar` = StructuredQueries.TableColumn<QueryValue, Int>("bar", keyPath: \QueryValue.`bar`)
             public var allColumns: [any StructuredQueries.TableColumnExpression] {
               [self.`bar`]
@@ -656,9 +620,6 @@ extension SnapshotTests {
         extension Foo: StructuredQueries.Table {
           public struct TableColumns: StructuredQueries.Schema {
             public typealias QueryValue = Foo
-            public static var count: Int {
-              1
-            }
             public let bar = StructuredQueries.TableColumn<QueryValue, ID<Foo>>("bar", keyPath: \QueryValue.bar)
             public var allColumns: [any StructuredQueries.TableColumnExpression] {
               [self.bar]
@@ -695,9 +656,6 @@ extension SnapshotTests {
         extension Foo: StructuredQueries.Table {
           public struct TableColumns: StructuredQueries.Schema {
             public typealias QueryValue = Foo
-            public static var count: Int {
-              1
-            }
             public let bar = StructuredQueries.TableColumn<QueryValue, _>("bar", keyPath: \QueryValue.bar, default: ID<Foo>())
             public var allColumns: [any StructuredQueries.TableColumnExpression] {
               [self.bar]
@@ -734,9 +692,6 @@ extension SnapshotTests {
         extension User: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
           public struct TableColumns: StructuredQueries.Schema, StructuredQueries.PrimaryKeyedSchema {
             public typealias QueryValue = User
-            public static var count: Int {
-              2
-            }
             public let id = StructuredQueries.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>>("id", keyPath: \QueryValue.id)
             public let referrerID = StructuredQueries.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>("referrerID", keyPath: \QueryValue.referrerID)
             public var primaryKey: StructuredQueries.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>> {
@@ -751,9 +706,6 @@ extension SnapshotTests {
             @Column(as: ID<User, UUID.BytesRepresentation>?.self) var referrerID: ID<User, UUID>?
             public struct TableColumns: StructuredQueries.Schema {
               public typealias QueryValue = User.Draft
-              public static var count: Int {
-                2
-              }
               public let id = StructuredQueries.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>("id", keyPath: \QueryValue.id)
               public let referrerID = StructuredQueries.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>("referrerID", keyPath: \QueryValue.referrerID)
               public var allColumns: [any StructuredQueries.TableColumnExpression] {
@@ -819,9 +771,6 @@ extension SnapshotTests {
         extension SyncUp: StructuredQueries.Table {
           public struct TableColumns: StructuredQueries.Schema {
             public typealias QueryValue = SyncUp
-            public static var count: Int {
-              1
-            }
             public let name = StructuredQueries.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
             public var allColumns: [any StructuredQueries.TableColumnExpression] {
               [self.name]
@@ -859,9 +808,6 @@ extension SnapshotTests {
         extension SyncUp: StructuredQueries.Table {
           public struct TableColumns: StructuredQueries.Schema {
             public typealias QueryValue = SyncUp
-            public static var count: Int {
-              1
-            }
             public let seconds = StructuredQueries.TableColumn<QueryValue, _>("seconds", keyPath: \QueryValue.seconds, default: 60 * 5)
             public var allColumns: [any StructuredQueries.TableColumnExpression] {
               [self.seconds]
@@ -899,9 +845,6 @@ extension SnapshotTests {
       extension Foo: StructuredQueries.Table {
         public struct TableColumns: StructuredQueries.Schema {
           public typealias QueryValue = Foo
-          public static var count: Int {
-            1
-          }
           public let name = StructuredQueries.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
           public var allColumns: [any StructuredQueries.TableColumnExpression] {
             [self.name]
@@ -940,9 +883,6 @@ extension SnapshotTests {
         extension Foo: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
           public struct TableColumns: StructuredQueries.Schema, StructuredQueries.PrimaryKeyedSchema {
             public typealias QueryValue = Foo
-            public static var count: Int {
-              1
-            }
             public let id = StructuredQueries.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
             public var primaryKey: StructuredQueries.TableColumn<QueryValue, Int> {
               self.id
@@ -956,9 +896,6 @@ extension SnapshotTests {
             let id: Int?
             public struct TableColumns: StructuredQueries.Schema {
               public typealias QueryValue = Foo.Draft
-              public static var count: Int {
-                1
-              }
               public let id = StructuredQueries.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
               public var allColumns: [any StructuredQueries.TableColumnExpression] {
                 [self.id]
@@ -1051,9 +988,6 @@ extension SnapshotTests {
         extension Foo.Draft: StructuredQueries.Table {
           public struct TableColumns: StructuredQueries.Schema {
             public typealias QueryValue = Foo.Draft
-            public static var count: Int {
-              1
-            }
             public let id = StructuredQueries.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
             public var allColumns: [any StructuredQueries.TableColumnExpression] {
               [self.id]
@@ -1103,9 +1037,6 @@ extension SnapshotTests {
         extension Foo: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
           public struct TableColumns: StructuredQueries.Schema, StructuredQueries.PrimaryKeyedSchema {
             public typealias QueryValue = Foo
-            public static var count: Int {
-              2
-            }
             public let id = StructuredQueries.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
             public let name = StructuredQueries.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
             public var primaryKey: StructuredQueries.TableColumn<QueryValue, Int> {
@@ -1121,9 +1052,6 @@ extension SnapshotTests {
             var name: String
             public struct TableColumns: StructuredQueries.Schema {
               public typealias QueryValue = Foo.Draft
-              public static var count: Int {
-                2
-              }
               public let id = StructuredQueries.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
               public let name = StructuredQueries.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
               public var allColumns: [any StructuredQueries.TableColumnExpression] {
@@ -1202,9 +1130,6 @@ extension SnapshotTests {
         extension Reminder: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
           public struct TableColumns: StructuredQueries.Schema, StructuredQueries.PrimaryKeyedSchema {
             public typealias QueryValue = Reminder
-            public static var count: Int {
-              4
-            }
             public let id = StructuredQueries.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
             public let title = StructuredQueries.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
             public let date = StructuredQueries.TableColumn<QueryValue, Date.UnixTimeRepresentation?>("date", keyPath: \QueryValue.date)
@@ -1224,9 +1149,6 @@ extension SnapshotTests {
             var priority: Priority?
             public struct TableColumns: StructuredQueries.Schema {
               public typealias QueryValue = Reminder.Draft
-              public static var count: Int {
-                4
-              }
               public let id = StructuredQueries.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
               public let title = StructuredQueries.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
               public let date = StructuredQueries.TableColumn<QueryValue, Date.UnixTimeRepresentation?>("date", keyPath: \QueryValue.date)
@@ -1305,9 +1227,6 @@ extension SnapshotTests {
         extension Reminder: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
           public struct TableColumns: StructuredQueries.Schema, StructuredQueries.PrimaryKeyedSchema {
             public typealias QueryValue = Reminder
-            public static var count: Int {
-              1
-            }
             public let id = StructuredQueries.TableColumn<QueryValue, UUID.BytesRepresentation>("id", keyPath: \QueryValue.id)
             public var primaryKey: StructuredQueries.TableColumn<QueryValue, UUID.BytesRepresentation> {
               self.id
@@ -1320,9 +1239,6 @@ extension SnapshotTests {
             @Column(as: UUID.BytesRepresentation?.self, primaryKey: false) let id: UUID?
             public struct TableColumns: StructuredQueries.Schema {
               public typealias QueryValue = Reminder.Draft
-              public static var count: Int {
-                1
-              }
               public let id = StructuredQueries.TableColumn<QueryValue, UUID.BytesRepresentation?>("id", keyPath: \QueryValue.id)
               public var allColumns: [any StructuredQueries.TableColumnExpression] {
                 [self.id]
