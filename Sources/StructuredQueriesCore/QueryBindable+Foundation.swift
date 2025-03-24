@@ -4,11 +4,11 @@ import Foundation
 
 extension Data: QueryBindable {
   public var queryBinding: QueryBinding {
-    .blob(ContiguousArray(self))
+    .blob([UInt8](self))
   }
 
   public init(decoder: inout some QueryDecoder) throws {
-    try self.init(ContiguousArray(decoder: &decoder))
+    try self.init([UInt8](decoder: &decoder))
   }
 }
 

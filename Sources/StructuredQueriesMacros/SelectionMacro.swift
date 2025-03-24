@@ -24,9 +24,9 @@ extension SelectionMacro: ExtensionMacro {
       return []
     }
     var allColumns: [(name: TokenSyntax, type: TypeSyntax?)] = []
-    var decodings: [ExprSyntax] = []
-    var decodingUnwrappings: [ExprSyntax] = []
-    var decodingAssignments: [ExprSyntax] = []
+    var decodings: [String] = []
+    var decodingUnwrappings: [String] = []
+    var decodingAssignments: [String] = []
     var diagnostics: [Diagnostic] = []
 
     let selfRewriter = SelfRewriter(
@@ -245,7 +245,7 @@ extension SelectionMacro: ExtensionMacro {
     let initDecoder: DeclSyntax = """
 
       public init(decoder: inout some \(moduleName).QueryDecoder) throws {
-      \(decodings + decodingUnwrappings + decodingAssignments, separator: "\n")
+      \(raw: (decodings + decodingUnwrappings + decodingAssignments).joined(separator: "\n"))
       }
       """
     return [

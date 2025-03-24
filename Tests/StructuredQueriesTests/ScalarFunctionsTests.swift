@@ -14,7 +14,7 @@ extension SnapshotTests {
       var referrerID: Int?
       @Column(as: Date.ISO8601Representation.self)
       var updatedAt: Date
-      var image: ContiguousArray<UInt8>
+      var image: [UInt8]
     }
 
     @Test func likelihood() {

@@ -2,11 +2,11 @@ public protocol QueryDecodable: _OptionalPromotable {
   init(decoder: inout some QueryDecoder) throws
 }
 
-extension ContiguousArray<UInt8>: QueryDecodable {
+extension [UInt8]: QueryDecodable {
   @inlinable
   @inline(__always)
   public init(decoder: inout some QueryDecoder) throws {
-    guard let result = try decoder.decode(ContiguousArray<UInt8>.self)
+    guard let result = try decoder.decode([UInt8].self)
     else { throw QueryDecodingError.missingRequiredColumn }
     self = result
   }

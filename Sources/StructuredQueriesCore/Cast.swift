@@ -83,7 +83,7 @@ extension String: SQLiteType {
   public static var typeAffinity: SQLiteTypeAffinity { .text }
 }
 
-extension ContiguousArray<UInt8>: SQLiteType {
+extension [UInt8]: SQLiteType {
   public static var typeAffinity: SQLiteTypeAffinity { .blob }
 }
 

@@ -15,7 +15,7 @@ extension Optional: _OptionalPromotable {
   public typealias _Optionalized = Self
 }
 
-extension ContiguousArray: _OptionalPromotable where Element: _OptionalPromotable {}
+extension [UInt8]: _OptionalPromotable where Element: _OptionalPromotable {}
 
 extension Optional: QueryBindable where Wrapped: QueryBindable {
   public typealias QueryValue = Wrapped.QueryValue?

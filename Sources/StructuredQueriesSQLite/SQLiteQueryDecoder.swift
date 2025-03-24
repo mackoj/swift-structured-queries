@@ -19,10 +19,10 @@ struct SQLiteQueryDecoder: QueryDecoder {
 
   @inlinable
   @inline(__always)
-  mutating func decode(_ columnType: ContiguousArray<UInt8>.Type) throws -> ContiguousArray<UInt8>? {
+  mutating func decode(_ columnType: [UInt8].Type) throws -> [UInt8]? {
     defer { currentIndex += 1 }
     guard sqlite3_column_type(statement, currentIndex) != SQLITE_NULL else { return nil }
-    return ContiguousArray<UInt8>(
+    return [UInt8](
       UnsafeRawBufferPointer(
         start: sqlite3_column_blob(statement, currentIndex),
         count: Int(sqlite3_column_bytes(statement, currentIndex))

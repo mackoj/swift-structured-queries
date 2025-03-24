@@ -55,7 +55,7 @@ extension UInt32: QueryBindable {
   public var queryBinding: QueryBinding { .int(Int64(self)) }
 }
 
-extension ContiguousArray<UInt8>: QueryBindable, QueryExpression {
+extension [UInt8]: QueryBindable, QueryExpression {
   public var queryBinding: QueryBinding { .blob(self) }
 }
 

@@ -25,9 +25,9 @@ extension TableMacro: ExtensionMacro {
     }
     var allColumns: [TokenSyntax] = []
     var columnsProperties: [DeclSyntax] = []
-    var decodings: [ExprSyntax] = []
-    var decodingUnwrappings: [ExprSyntax] = []
-    var decodingAssignments: [ExprSyntax] = []
+    var decodings: [String] = []
+    var decodingUnwrappings: [String] = []
+    var decodingAssignments: [String] = []
     var diagnostics: [Diagnostic] = []
 
     // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
@@ -499,7 +499,7 @@ extension TableMacro: ExtensionMacro {
       : """
 
       public init(decoder: inout some \(moduleName).QueryDecoder) throws {
-      \(decodings + decodingUnwrappings + decodingAssignments, separator: "\n")
+      \(raw: (decodings + decodingUnwrappings + decodingAssignments).joined(separator: "\n"))
       }
       """
     return [

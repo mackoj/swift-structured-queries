@@ -1,7 +1,5 @@
 public enum QueryBinding: Codable, Hashable, Sendable {
-  // TODO: Should this be '[UInt8]'?
-  // It would mean getting rid of '[QueryExpression]: QueryExpression', but maybe that's good
-  case blob(ContiguousArray<UInt8>)
+  case blob([UInt8])
   case double(Double)
   case int(Int64)
   case null

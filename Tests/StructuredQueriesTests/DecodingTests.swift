@@ -33,9 +33,9 @@ extension SnapshotTests {
           SimpleSelect { "deadbeef".unhex() }
         )
         .first
-          == ContiguousArray<UInt8>([
+          == [
             0xDE, 0xAD, 0xBE, 0xEF,
-          ])
+          ]
       )
     }
 
