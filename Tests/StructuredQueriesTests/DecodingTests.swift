@@ -28,15 +28,14 @@ extension SnapshotTests {
     }
 
     @Test func blob() throws {
-      #expect(
+      let bytes = try #require(
         try db.execute(
           SimpleSelect { "deadbeef".unhex() }
         )
         .first
-          == [
-            0xDE, 0xAD, 0xBE, 0xEF,
-          ]
       )
+
+      #expect(bytes == [0xDE, 0xAD, 0xBE, 0xEF])
     }
 
     @Test func rawRepresentable() throws {
@@ -98,7 +97,8 @@ extension SnapshotTests {
         try db.execute(
           SimpleSelect {
             "deadbeef-dead-beef-dead-beefdeadbeef".unhex("-").cast(
-              as: UUID.BytesRepresentation.self)
+              as: UUID.BytesRepresentation.self
+            )
           }
         )
         .first

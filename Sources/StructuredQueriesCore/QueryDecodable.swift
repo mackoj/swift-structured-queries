@@ -33,8 +33,8 @@ extension Int64: QueryDecodable {
 }
 
 extension String: QueryDecodable {
-//  @inlinable
-//  @inline(__always)
+  @inlinable
+  @inline(__always)
   public init(decoder: inout some QueryDecoder) throws {
     guard let result = try decoder.decode(String.self)
     else { throw QueryDecodingError.missingRequiredColumn }

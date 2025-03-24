@@ -284,7 +284,7 @@ extension SnapshotTests {
           .returning(\.self)
       ) {
         """
-        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (1, NULL, NULL, 0, 0, '', NULL, 1, 'Cash check') ON CONFLICT DO UPDATE SET "assignedUserID" = excluded."assignedUserID", "date" = excluded."date", "isCompleted" = excluded."isCompleted", "isFlagged" = excluded."isFlagged", "notes" = excluded."notes", "priority" = excluded."priority", "remindersListID" = excluded."remindersListID", "title" = excluded."title" RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (1, NULL, NULL, 0, 0, '', NULL, 1, 'Cash check') ON CONFLICT DO UPDATE SET "assignedUserID" = "excluded"."assignedUserID", "date" = "excluded"."date", "isCompleted" = "excluded"."isCompleted", "isFlagged" = "excluded"."isFlagged", "notes" = "excluded"."notes", "priority" = "excluded"."priority", "remindersListID" = "excluded"."remindersListID", "title" = "excluded"."title" RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
         """
       } results: {
         """
@@ -322,7 +322,7 @@ extension SnapshotTests {
           .returning(\.self)
       ) {
         """
-        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (NULL, NULL, NULL, 0, 0, '', NULL, 1, '') ON CONFLICT DO UPDATE SET "assignedUserID" = excluded."assignedUserID", "date" = excluded."date", "isCompleted" = excluded."isCompleted", "isFlagged" = excluded."isFlagged", "notes" = excluded."notes", "priority" = excluded."priority", "remindersListID" = excluded."remindersListID", "title" = excluded."title" RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (NULL, NULL, NULL, 0, 0, '', NULL, 1, '') ON CONFLICT DO UPDATE SET "assignedUserID" = "excluded"."assignedUserID", "date" = "excluded"."date", "isCompleted" = "excluded"."isCompleted", "isFlagged" = "excluded"."isFlagged", "notes" = "excluded"."notes", "priority" = "excluded"."priority", "remindersListID" = "excluded"."remindersListID", "title" = "excluded"."title" RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
         """
       } results: {
         """

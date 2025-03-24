@@ -25,6 +25,13 @@ extension QueryDecoder {
   ) throws -> (repeat (each T).QueryOutput) {
     try (repeat (each T)(decoder: &self).queryOutput)
   }
+  @inlinable
+  @inline(__always)
+  public mutating func decode<T: QueryRepresentable<T>>(
+    _ columnType: T.Type = T.self
+  ) throws -> T? {
+    try T?(decoder: &self)?.queryOutput
+  }
 }
 
 public enum QueryDecodingError: Error {
