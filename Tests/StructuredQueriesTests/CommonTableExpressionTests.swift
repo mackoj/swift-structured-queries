@@ -132,6 +132,36 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func cte2() {
+      assertQuery(
+        With {
+          Reminder
+            .where { !$0.isCompleted }
+            .select { IncompleteReminder.Columns(isFlagged: $0.isFlagged, title: $0.title) }
+        } query: {
+          IncompleteReminder
+            .where { $0.title.collate(.nocase).contains("groceries") }
+            .select { $0.isFlagged }
+        }
+      )
+      let tmp = RemindersList
+        .join(Reminder.all()) { $0.id.eq($1.remindersListID) }
+        .select {
+          RemindersListWithRemindersCount.Columns(
+            //                remindersList: $0,
+            remindersCount: $1.count()
+          )
+        }
+      assertQuery(
+        With {
+          tmp 
+        } query: {
+          //RemindersListWithRemindersCount.select { $0.remindersCount }
+          Reminder.where { _ in true }
+        }
+      )
+    }
   }
 }
 
@@ -142,8 +172,9 @@ private struct IncompleteReminder {
 }
 
 // TODO: How to support:
-// @Table @Selection
-// private struct RemindersListWithRemindersCount {
+ @Table @Selection
+ private struct RemindersListWithRemindersCount {
 //   let remindersList: RemindersList
-//   let remindersCount: Int
-// }
+   let remindersCount: Int
+ }
+// select { $0.remindersList.name }

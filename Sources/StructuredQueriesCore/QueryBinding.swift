@@ -1,9 +1,19 @@
-public enum QueryBinding: Codable, Hashable, Sendable {
+public enum QueryBinding: Hashable, Sendable {
   case blob([UInt8])
   case double(Double)
   case int(Int64)
   case null
   case text(String)
+  case failure(QueryBindingError)
+}
+
+public struct QueryBindingError: Error, Hashable {
+  public let underlyingError: any Error
+  public init(underlyingError: any Error) {
+    self.underlyingError = underlyingError
+  }
+  public static func == (lhs: Self, rhs: Self) -> Bool { true }
+  public func hash(into hasher: inout Hasher) {}
 }
 
 extension QueryBinding: CustomDebugStringConvertible {
@@ -23,6 +33,8 @@ extension QueryBinding: CustomDebugStringConvertible {
       return "NULL"
     case let .text(string):
       return string.quoted("'")
+    case .failure(let error):
+      return "<\(error.underlyingError.localizedDescription)>"
     }
   }
 }

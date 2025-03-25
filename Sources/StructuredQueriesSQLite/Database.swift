@@ -109,6 +109,9 @@ public struct Database {
           sqlite3_bind_null(statement, index)
         case let .text(text):
           sqlite3_bind_text(statement, index, text, -1, SQLITE_TRANSIENT)
+        case .failure(let error):
+          // TODO: Include more information about the query binding that caused this error.
+          throw error.underlyingError
         }
       guard result == SQLITE_OK else { throw SQLiteError(db: storage.handle) }
     }
@@ -141,6 +144,8 @@ public struct Database {
     }
   }
 }
+
+private struct InvalidBindingError: Error {}
 
 private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 

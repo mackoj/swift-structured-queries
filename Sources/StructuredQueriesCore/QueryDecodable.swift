@@ -135,4 +135,4 @@ extension QueryDecodable where Self: RawRepresentable, RawValue: QueryDecodable 
 }
 
 private struct DataCorruptedError: Error {}
-private struct OverflowError: Error {}
+struct OverflowError: Error {}
