@@ -7,7 +7,7 @@ public struct With<QueryValue>: Statement {
   @_disfavoredOverload
   public init(
     @CommonTableExpressionBuilder _ ctes: () -> [CommonTableExpressionClause],
-    do statement: () -> some Statement<QueryValue>
+    query statement: () -> some Statement<QueryValue>
   ) {
     self.ctes = ctes()
     self.statement = statement().query
@@ -15,7 +15,7 @@ public struct With<QueryValue>: Statement {
 
   public init<S: SelectStatement, each J: Table>(
     @CommonTableExpressionBuilder _ ctes: () -> [CommonTableExpressionClause],
-    do statement: () -> S
+    query statement: () -> S
   ) where
     S.QueryValue == (),
     S.Joins == (repeat each J),

@@ -45,7 +45,7 @@ extension SnapshotTests {
           Reminder.select { Name.Columns(type: "reminder", value: $0.title) }
             .union(RemindersList.select { Name.Columns(type: "list", value: $0.name) })
             .union(Tag.select { Name.Columns(type: "tag", value: $0.name) })
-        } do: {
+        } query: {
           Name.order { ($0.type.desc(), $0.value.asc()) }
         }
       ) {

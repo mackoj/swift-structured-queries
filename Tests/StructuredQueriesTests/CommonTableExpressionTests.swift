@@ -11,7 +11,7 @@ extension SnapshotTests {
           Reminder
             .where { !$0.isCompleted }
             .select { IncompleteReminder.Columns(isFlagged: $0.isFlagged, title: $0.title) }
-        } do: {
+        } query: {
           IncompleteReminder
             .where { $0.title.collate(.nocase).contains("groceries") }
         }
