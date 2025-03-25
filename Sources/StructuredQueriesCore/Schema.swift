@@ -8,9 +8,3 @@ extension Schema {
     allColumns.map(\.queryFragment).joined(separator: ", ")
   }
 }
-
-extension Never: Schema {
-  public typealias QueryValue = Never
-
-  public var allColumns: [any TableColumnExpression] { [] }
-}

@@ -1,19 +1,23 @@
 public struct With<QueryValue>: Statement {
   public typealias From = Never
 
+  let recursive: Bool
   var ctes: [CommonTableExpressionClause]
   var statement: QueryFragment
 
   @_disfavoredOverload
   public init(
+    recursive: Bool = false,
     @CommonTableExpressionBuilder _ ctes: () -> [CommonTableExpressionClause],
     query statement: () -> some Statement<QueryValue>
   ) {
     self.ctes = ctes()
+    self.recursive = recursive
     self.statement = statement().query
   }
 
   public init<S: SelectStatement, each J: Table>(
+    recursive: Bool = false,
     @CommonTableExpressionBuilder _ ctes: () -> [CommonTableExpressionClause],
     query statement: () -> S
   ) where
@@ -22,11 +26,17 @@ public struct With<QueryValue>: Statement {
     QueryValue == (S.From, repeat each J)
   {
     self.ctes = ctes()
+    self.recursive = recursive
     self.statement = statement().query
   }
 
   public var query: QueryFragment {
-    "WITH \(ctes.map(\.queryFragment).joined(separator: ", ")) \(statement)"
+    var sql: QueryFragment = "WITH "
+    if recursive {
+      sql.append("RECURSIVE ")
+    }
+    sql.append("\(ctes.map(\.queryFragment).joined(separator: ", ")) \(statement)")
+    return sql
   }
 }
 

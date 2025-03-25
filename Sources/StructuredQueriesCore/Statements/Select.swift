@@ -971,7 +971,7 @@ private struct LimitClause: QueryExpression {
   let maxLength: QueryFragment
   let offset: QueryFragment?
 
-  init(maxLength: some QueryExpression, offset: (some QueryExpression)? = Never?.none) {
+  init(maxLength: some QueryExpression, offset: (some QueryExpression)? = _EmptyQueryExpression?.none) {
     self.maxLength = maxLength.queryFragment
     self.offset = offset?.queryFragment
   }
@@ -1012,3 +1012,15 @@ private struct CopyOnWrite<Value> {
 extension CopyOnWrite: Sendable where Value: Sendable {}
 
 extension CopyOnWrite.Storage: @unchecked Sendable where Value: Sendable {}
+
+
+extension Select {
+  // NB: This overload is required for common table expressions with join clauses to avoid compiler bug
+  @_disfavoredOverload
+  public func select<C: QueryExpression, each J: Table>(
+    _ selection: ((From.TableColumns, repeat (each J).TableColumns)) -> C
+  ) -> Select<C.QueryValue, From, (repeat each J)>
+  where Columns == (), C.QueryValue: QueryRepresentable, Joins == (repeat each J) {
+    _select(selection)
+  }
+}

@@ -1,7 +1,7 @@
 extension _SelectStatement {
-  public func union<F, J>(
+  public func union(
     all: Bool = false,
-    _ other: some SelectStatement<QueryValue, F, J>
+    _ other: some _SelectStatement<QueryValue>
   ) -> CompoundSelect<QueryValue> {
     CompoundSelect(lhs: self, operator: all ? .unionAll : .union, rhs: other)
   }

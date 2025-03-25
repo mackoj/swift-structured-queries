@@ -358,6 +358,12 @@ extension PrimaryKeyedTable {
   }
 }
 
+fileprivate enum InsertValues {
+  case `default`
+  case values([[QueryFragment]])
+  case select(QueryFragment)
+}
+
 /// An `INSERT` statement.
 ///
 /// This type of statement is returned from ``Table/insert(or:_:values:onConflict:)-6zwu9`` and
@@ -365,7 +371,7 @@ extension PrimaryKeyedTable {
 public struct Insert<Into: Table, Returning> {
   var conflictResolution: ConflictResolution?
   var columnNames: [String] = []
-  var values: Values
+  fileprivate var values: InsertValues
   var record: Record<Into>?
   var returning: [QueryFragment] = []
 
@@ -385,12 +391,6 @@ public struct Insert<Into: Table, Returning> {
       returning: Array(repeat each selection(Into.columns))
     )
   }
-}
-
-enum Values {
-  case `default`
-  case values([[QueryFragment]])
-  case select(QueryFragment)
 }
 
 extension Insert: Statement {
