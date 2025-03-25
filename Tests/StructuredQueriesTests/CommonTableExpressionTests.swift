@@ -70,6 +70,68 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func update() {
+      assertQuery(
+        With {
+          Reminder
+            .where { !$0.isCompleted }
+            .select { IncompleteReminder.Columns(isFlagged: $0.isFlagged, title: $0.title) }
+        } query: {
+          Reminder
+            .where { $0.title.in(IncompleteReminder.select(\.title)) }
+            .update { $0.title = $0.title.upper() }
+            .returning(\.title)
+        }
+      ) {
+        """
+        WITH "incompleteReminders" AS (SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title" FROM "reminders" WHERE NOT ("reminders"."isCompleted")) UPDATE "reminders" SET "title" = upper("reminders"."title") WHERE ("reminders"."title" IN (SELECT "incompleteReminders"."title" FROM "incompleteReminders")) RETURNING "reminders"."title"
+        """
+      } results: {
+        """
+        ┌────────────────────────────┐
+        │ "GROCERIES"                │
+        │ "HAIRCUT"                  │
+        │ "DOCTOR APPOINTMENT"       │
+        │ "BUY CONCERT TICKETS"      │
+        │ "PICK UP KIDS FROM SCHOOL" │
+        │ "TAKE OUT TRASH"           │
+        │ "CALL ACCOUNTANT"          │
+        └────────────────────────────┘
+        """
+      }
+    }
+
+    @Test func delete() {
+      assertQuery(
+        With {
+          Reminder
+            .where { !$0.isCompleted }
+            .select { IncompleteReminder.Columns(isFlagged: $0.isFlagged, title: $0.title) }
+        } query: {
+          Reminder
+            .where { $0.title.in(IncompleteReminder.select(\.title)) }
+            .delete()
+            .returning(\.title)
+        }
+      ) {
+        """
+        WITH "incompleteReminders" AS (SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title" FROM "reminders" WHERE NOT ("reminders"."isCompleted")) DELETE FROM "reminders" WHERE ("reminders"."title" IN (SELECT "incompleteReminders"."title" FROM "incompleteReminders")) RETURNING "reminders"."title"
+        """
+      } results: {
+        """
+        ┌────────────────────────────┐
+        │ "Groceries"                │
+        │ "Haircut"                  │
+        │ "Doctor appointment"       │
+        │ "Buy concert tickets"      │
+        │ "Pick up kids from school" │
+        │ "Take out trash"           │
+        │ "Call accountant"          │
+        └────────────────────────────┘
+        """
+      }
+    }
   }
 }
 
