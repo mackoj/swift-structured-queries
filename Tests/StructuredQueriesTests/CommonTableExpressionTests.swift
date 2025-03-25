@@ -7,12 +7,14 @@ extension SnapshotTests {
   @Suite struct CommonTableExpressionTests {
     @Test func basics() {
       assertQuery(
-        with(
+        with {
           Reminder
             .where { !$0.isCompleted }
             .select { IncompleteReminder.Columns(isFlagged: $0.isFlagged, title: $0.title) }
-        )
-        .where { $0.title.collate(.nocase).contains("groceries") }
+        } select: {
+          IncompleteReminder
+            .where { $0.title.collate(.nocase).contains("groceries") }
+        }
       ) {
         """
         WITH "incompleteReminders" AS (SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title" FROM "reminders" WHERE NOT ("reminders"."isCompleted")) SELECT "incompleteReminders"."isFlagged", "incompleteReminders"."title" FROM "incompleteReminders" WHERE (("incompleteReminders"."title" COLLATE NOCASE) LIKE '%groceries%')

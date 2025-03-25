@@ -220,7 +220,7 @@ public struct Select<Columns, From: Table, Joins> {
   }
   @CopyOnWrite private var clauses = Clauses()
 
-  fileprivate var ctes: [CommonTableExpressionClause] {
+  var ctes: [CommonTableExpressionClause] {
     get { clauses.ctes }
     set { clauses.ctes = newValue }
     _modify { yield &clauses.ctes }

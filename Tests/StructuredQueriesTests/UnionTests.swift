@@ -41,12 +41,13 @@ extension SnapshotTests {
 
     @Test func commonTableExpression() {
       assertQuery(
-        with(
+        with {
           Reminder.select { Name.Columns(type: "reminder", value: $0.title) }
             .union(RemindersList.select { Name.Columns(type: "list", value: $0.name) })
             .union(Tag.select { Name.Columns(type: "tag", value: $0.name) })
-        )
-        .order { ($0.type.desc(), $0.value.asc()) }
+        } select: {
+          Name.order { ($0.type.desc(), $0.value.asc()) }
+        }
       ) {
         """
         WITH "names" AS (SELECT 'reminder' AS "type", "reminders"."title" AS "value" FROM "reminders" UNION SELECT 'list' AS "type", "remindersLists"."name" AS "value" FROM "remindersLists" UNION SELECT 'tag' AS "type", "tags"."name" AS "value" FROM "tags") SELECT "names"."type", "names"."value" FROM "names" ORDER BY "names"."type" DESC, "names"."value" ASC
