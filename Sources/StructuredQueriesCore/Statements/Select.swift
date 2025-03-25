@@ -208,7 +208,6 @@ extension Table {
 public struct Select<Columns, From: Table, Joins> {
   // NB: A parameter pack compiler crash forces us to heap-allocate this storage.
   private struct Clauses {
-    var ctes: [CommonTableExpressionClause] = []
     var distinct = false
     var columns: [any QueryExpression] = []
     var joins: [JoinClause] = []
@@ -220,11 +219,6 @@ public struct Select<Columns, From: Table, Joins> {
   }
   @CopyOnWrite private var clauses = Clauses()
 
-  var ctes: [CommonTableExpressionClause] {
-    get { clauses.ctes }
-    set { clauses.ctes = newValue }
-    _modify { yield &clauses.ctes }
-  }
   fileprivate var distinct: Bool {
     get { clauses.distinct }
     set { clauses.distinct = newValue }
@@ -267,7 +261,6 @@ public struct Select<Columns, From: Table, Joins> {
   }
 
   fileprivate init(
-    ctes: [CommonTableExpressionClause],
     distinct: Bool,
     columns: [any QueryExpression],
     joins: [JoinClause],
@@ -278,7 +271,6 @@ public struct Select<Columns, From: Table, Joins> {
     limit: LimitClause?
   ) {
     self.columns = columns
-    self.ctes = ctes
     self.distinct = distinct
     self.joins = joins
     self.where = `where`
@@ -290,10 +282,6 @@ public struct Select<Columns, From: Table, Joins> {
 }
 
 extension Select {
-  init(ctes: [CommonTableExpressionClause]) {
-    self.ctes = ctes
-  }
-
   init(where: [QueryFragment] = []) {
     self.where = `where`
   }
@@ -410,7 +398,6 @@ extension Select {
     Joins == (repeat each J)
   {
     Select<(repeat each C1, repeat (each C2).QueryValue), From, (repeat each J)>(
-      ctes: ctes,
       distinct: distinct,
       columns: columns + Array(repeat each selection((From.columns, repeat (each J).columns))),
       joins: joins,
@@ -454,7 +441,6 @@ extension Select {
       )
     )
     return Select<(repeat each C1, repeat each C2), From, (repeat each J1, F, repeat each J2)>(
-      ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -485,7 +471,6 @@ extension Select {
       )
     )
     return Select<(repeat each C1, repeat each C2), From, (repeat each J, F)>(
-      ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -531,7 +516,6 @@ extension Select {
       From,
       (repeat each J1, F._Optionalized, repeat (each J2)._Optionalized)
     >(
-      ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -570,7 +554,6 @@ extension Select {
       From,
       (repeat each J, F._Optionalized)
     >(
-      ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -616,7 +599,6 @@ extension Select {
       From._Optionalized,
       (repeat (each J1)._Optionalized, F, repeat each J2)
     >(
-      ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -655,7 +637,6 @@ extension Select {
       From._Optionalized,
       (repeat (each J)._Optionalized, F)
     >(
-      ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -701,7 +682,6 @@ extension Select {
       From._Optionalized,
       (repeat (each J1)._Optionalized, F._Optionalized, repeat (each J2)._Optionalized)
     >(
-      ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -740,7 +720,6 @@ extension Select {
       From._Optionalized,
       (repeat (each J)._Optionalized, F._Optionalized)
     >(
-      ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -867,7 +846,6 @@ extension Select {
       SQLQueryExpression(iterator.next()!.queryFragment)
     }
     return Select<(repeat (each C2).QueryValue), From, Joins>(
-      ctes: ctes,
       distinct: distinct,
       columns: Array(repeat each transform(repeat { _ in next() }((each C1).self))),
       joins: joins,
@@ -898,7 +876,6 @@ public func + <
   return Select<
     (repeat each C1, repeat each C2), From, (repeat each J1, repeat each J2)
   >(
-    ctes: lhs.ctes + rhs.ctes,  // TODO: get test coverage
     distinct: lhs.distinct || rhs.distinct,
     columns: lhs.columns + rhs.columns,
     joins: lhs.joins + rhs.joins,
@@ -918,17 +895,11 @@ extension Select: SelectStatement {
   }
 
   public var query: QueryFragment {
-    var query: QueryFragment = ""
-    if !ctes.isEmpty {
-      query.append("WITH ")
-      query.append(ctes.map(\.queryFragment).joined(separator: ", "))
-      query.append(" ")
-    }
+    var query: QueryFragment = "SELECT"
     let columns =
       columns.isEmpty
       ? [From.columns.queryFragment] + joins.map { $0.table.columns.queryFragment }
       : columns.map(\.queryFragment)
-    query.append("SELECT")
     if distinct {
       query.append(" DISTINCT")
     }

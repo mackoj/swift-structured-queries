@@ -7,11 +7,11 @@ extension SnapshotTests {
   @Suite struct CommonTableExpressionTests {
     @Test func basics() {
       assertQuery(
-        with {
+        With {
           Reminder
             .where { !$0.isCompleted }
             .select { IncompleteReminder.Columns(isFlagged: $0.isFlagged, title: $0.title) }
-        } select: {
+        } do: {
           IncompleteReminder
             .where { $0.title.collate(.nocase).contains("groceries") }
         }

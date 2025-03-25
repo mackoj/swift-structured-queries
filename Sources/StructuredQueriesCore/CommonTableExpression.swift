@@ -1,19 +1,33 @@
-// TODO: Make builder variant?
-//   with {
-//     Reminder.all().…
-//     Reminder.all().…
-//     Reminder.all().…
-//   }
-//   .select { … }
-// TODO: Support cross/back-referencing?
-// TODO: Support in 'INSERT', 'UPDATE', 'DELETE', etc.?
-public func with<S: SelectStatement>(
-  @CommonTableExpressionBuilder _ ctes: () -> [CommonTableExpressionClause],
-  select: () -> S
-) -> Select<S.QueryValue, S.From, S.Joins> {
-  var select = select().all()
-  select.ctes = ctes()
-  return select
+public struct With<QueryValue>: Statement {
+  public typealias From = Never
+
+  var ctes: [CommonTableExpressionClause]
+  var statement: QueryFragment
+
+  @_disfavoredOverload
+  public init(
+    @CommonTableExpressionBuilder _ ctes: () -> [CommonTableExpressionClause],
+    do statement: () -> some Statement<QueryValue>
+  ) {
+    self.ctes = ctes()
+    self.statement = statement().query
+  }
+
+  public init<S: SelectStatement, each J: Table>(
+    @CommonTableExpressionBuilder _ ctes: () -> [CommonTableExpressionClause],
+    do statement: () -> S
+  ) where
+    S.QueryValue == (),
+    S.Joins == (repeat each J),
+    QueryValue == (S.From, repeat each J)
+  {
+    self.ctes = ctes()
+    self.statement = statement().query
+  }
+
+  public var query: QueryFragment {
+    "WITH \(ctes.map(\.queryFragment).joined(separator: ", ")) \(statement)"
+  }
 }
 
 public struct CommonTableExpressionClause: QueryExpression {
@@ -34,8 +48,21 @@ public enum CommonTableExpressionBuilder {
   }
 
   public static func buildBlock(
-    _ components: CommonTableExpressionClause...
+    _ component: CommonTableExpressionClause
   ) -> [CommonTableExpressionClause] {
-    components
+    [component]
+  }
+
+  public static func buildPartialBlock(
+    first: CommonTableExpressionClause
+  ) -> [CommonTableExpressionClause] {
+    [first]
+  }
+
+  public static func buildPartialBlock(
+    accumulated: [CommonTableExpressionClause],
+    next: CommonTableExpressionClause
+  ) -> [CommonTableExpressionClause] {
+    accumulated + [next]
   }
 }

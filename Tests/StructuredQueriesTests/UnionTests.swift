@@ -41,11 +41,11 @@ extension SnapshotTests {
 
     @Test func commonTableExpression() {
       assertQuery(
-        with {
+        With {
           Reminder.select { Name.Columns(type: "reminder", value: $0.title) }
             .union(RemindersList.select { Name.Columns(type: "list", value: $0.name) })
             .union(Tag.select { Name.Columns(type: "tag", value: $0.name) })
-        } select: {
+        } do: {
           Name.order { ($0.type.desc(), $0.value.asc()) }
         }
       ) {
