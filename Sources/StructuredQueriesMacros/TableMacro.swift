@@ -498,8 +498,13 @@ extension TableMacro: ExtensionMacro {
     if declaration.hasMacroApplication("Selection") {
       conformances.append("\(moduleName)._SelectStatement")
       typeAliases.append(contentsOf: [
-        "\npublic typealias QueryValue = Self",
-        "public typealias From = Swift.Never",
+        """
+
+        public typealias QueryValue = Self
+        """,
+        """
+        public typealias From = Swift.Never
+        """,
       ])
     } else {
       initDecoder = """
