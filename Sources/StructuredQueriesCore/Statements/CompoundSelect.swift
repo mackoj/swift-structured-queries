@@ -20,8 +20,8 @@ extension _SelectStatement {
 }
 
 public struct CompoundSelect<QueryValue>: _SelectStatement {
-  public typealias Joins = Never
   public typealias From = Never
+  public typealias Joins = Never
 
   fileprivate struct Operator {
     static var except: Self { Self(queryFragment: "EXCEPT") }
@@ -43,24 +43,5 @@ public struct CompoundSelect<QueryValue>: _SelectStatement {
 
   public var query: QueryFragment {
     "\(lhs) \(`operator`) \(rhs)"
-  }
-
-  public func union<F, J>(
-    all: Bool = false,
-    _ other: some SelectStatement<QueryValue, F, J>
-  ) -> CompoundSelect<QueryValue> {
-    CompoundSelect(lhs: self, operator: all ? .unionAll : .union, rhs: other)
-  }
-
-  public func intersect<F, J>(
-    _ other: some SelectStatement<QueryValue, F, J>
-  ) -> CompoundSelect<QueryValue> {
-    CompoundSelect(lhs: self, operator: .intersect, rhs: other)
-  }
-
-  public func except<F, J>(
-    _ other: some SelectStatement<QueryValue, F, J>
-  ) -> CompoundSelect<QueryValue> {
-    CompoundSelect(lhs: self, operator: .except, rhs: other)
   }
 }
