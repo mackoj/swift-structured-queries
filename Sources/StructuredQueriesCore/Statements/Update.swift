@@ -15,7 +15,7 @@ extension PrimaryKeyedTable {
     _ row: Self
   ) -> Update<Self, ()> {
     update(or: conflictResolution) { record in
-      for column in columns.allColumns where column.name != columns.primaryKey.name {
+      for column in TableColumns.allColumns where column.name != columns.primaryKey.name {
         func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) {
           record.updates.append(
             (

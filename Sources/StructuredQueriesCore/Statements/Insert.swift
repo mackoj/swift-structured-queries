@@ -77,13 +77,13 @@ extension Table {
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
   ) -> Insert<Self, ()> {
     var columnNames: [String] = []
-    for column in Self.columns.allColumns {
+    for column in Self.TableColumns.allColumns {
       columnNames.append(column.name)
     }
     var values: [[QueryFragment]] = []
     for row in rows() {
       var value: [QueryFragment] = []
-      for column in Self.columns.allColumns {
+      for column in Self.TableColumns.allColumns {
         func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
           Value(queryOutput: (row as! Root)[keyPath: column.keyPath]).queryFragment
         }
@@ -329,13 +329,13 @@ extension PrimaryKeyedTable {
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
   ) -> Insert<Self, ()> {
     var columnNames: [String] = []
-    for column in Draft.columns.allColumns {
+    for column in Draft.TableColumns.allColumns {
       columnNames.append(column.name)
     }
     var values: [[QueryFragment]] = []
     for row in rows() {
       var value: [QueryFragment] = []
-      for column in Draft.columns.allColumns {
+      for column in Draft.TableColumns.allColumns {
         func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
           Value(queryOutput: (row as! Root)[keyPath: column.keyPath]).queryFragment
         }

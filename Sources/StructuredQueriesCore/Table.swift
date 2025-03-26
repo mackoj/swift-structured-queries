@@ -13,26 +13,6 @@ extension Table {
   }
 }
 
-extension Never: Table {
-  public struct TableColumns: Schema {
-    public typealias QueryValue = Never
-
-    public var allColumns: [any TableColumnExpression] { [] }
-  }
-
-  public static var columns: TableColumns {
-    TableColumns()
-  }
-
-  public static let tableName = "nevers"
-
-  public init(decoder: inout some QueryDecoder) throws {
-    throw DecodingError()
-  }
-
-  private struct DecodingError: Error {}
-}
-
 // TODO: Explore?
 // @dynamicMemberLookup
 // struct TableColumns<Base: Table> {

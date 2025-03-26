@@ -523,8 +523,8 @@ extension TableMacro: ExtensionMacro {
         public struct TableColumns: \(schemaConformances, separator: ", ") {
         public typealias QueryValue = \(type.trimmed)
         \(columnsProperties, separator: "\n")
-        public var allColumns: [any \(moduleName).TableColumnExpression] { \
-        [\(allColumns.map { "self.\($0)" as ExprSyntax }, separator: ", ")]
+        public static var allColumns: [any \(moduleName).TableColumnExpression] { \
+        [\(allColumns.map { "QueryValue.columns.\($0)" as ExprSyntax }, separator: ", ")]
         }
         }\(draft)\(typeAliases, separator: "\n")
         public static let columns = TableColumns()

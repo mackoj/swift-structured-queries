@@ -8,7 +8,7 @@ extension _SelectStatement where Self: Table, QueryValue == Self {
       let value = Value(queryOutput: root[keyPath: column.keyPath])
       return "\(value) AS \(quote: column.name)"
     }
-    query.append(Self.columns.allColumns.map { open($0) }.joined(separator: ", "))
+    query.append(Self.TableColumns.allColumns.map { open($0) }.joined(separator: ", "))
     return query
   }
 }

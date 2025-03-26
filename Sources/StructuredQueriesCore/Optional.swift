@@ -85,8 +85,8 @@ extension Optional: Table where Wrapped: Table {
   public struct TableColumns: Schema {
     public typealias QueryValue = Optional
 
-    public var allColumns: [any TableColumnExpression] {
-      Wrapped.columns.allColumns
+    public static var allColumns: [any TableColumnExpression] {
+      Wrapped.TableColumns.allColumns
     }
 
     public subscript<Member>(
