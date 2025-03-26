@@ -146,16 +146,20 @@ extension SnapshotTests {
         }
       ) {
         """
-        WITH "counts" AS (SELECT 1 AS "value" UNION SELECT ("counts"."value" + 1) AS "value" FROM "counts") SELECT "counts"."value" FROM "counts" LIMIT 4
+        WITH "counts" AS (\
+        SELECT 1 AS "value" \
+        UNION SELECT ("counts"."value" + 1) AS "value" FROM "counts"\
+        ) \
+        SELECT "counts"."value" FROM "counts" LIMIT 4
         """
       } results: {
         """
-        ┌─────────────────┐
-        │ Count(value: 1) │
-        │ Count(value: 2) │
-        │ Count(value: 3) │
-        │ Count(value: 4) │
-        └─────────────────┘
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        │ 3 │
+        │ 4 │
+        └───┘
         """
       }
     }
@@ -293,6 +297,15 @@ private struct IncompleteReminder {
 @Table @Selection
 private struct Count {
   let value: Int
+}
+
+extension Count {
+  init(queryOutput: Int) {
+    value = queryOutput
+  }
+  var queryOutput: Int {
+    value
+  }
 }
 
 @Table
