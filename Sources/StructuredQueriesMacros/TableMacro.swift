@@ -493,15 +493,23 @@ extension TableMacro: ExtensionMacro {
       return []
     }
 
-    let initDecoder: DeclSyntax? =
-      declaration.hasMacroApplication("Selection")
-      ? nil
-      : """
+    var typeAliases: [DeclSyntax] = []
+    var initDecoder: DeclSyntax?
+    if declaration.hasMacroApplication("Selection") {
+      conformances.append("\(moduleName)._SelectStatement")
+      typeAliases.append(contentsOf: [
+        "\npublic typealias QueryValue = Self",
+        "public typealias From = Swift.Never",
+      ])
+    } else {
+      initDecoder = """
 
-      public init(decoder: inout some \(moduleName).QueryDecoder) throws {
-      \(raw: (decodings + decodingUnwrappings + decodingAssignments).joined(separator: "\n"))
-      }
-      """
+        public init(decoder: inout some \(moduleName).QueryDecoder) throws {
+        \(raw: (decodings + decodingUnwrappings + decodingAssignments).joined(separator: "\n"))
+        }
+        """
+    }
+
     return [
       DeclSyntax(
         """
@@ -513,7 +521,7 @@ extension TableMacro: ExtensionMacro {
         public var allColumns: [any \(moduleName).TableColumnExpression] { \
         [\(allColumns.map { "self.\($0)" as ExprSyntax }, separator: ", ")]
         }
-        }\(draft)
+        }\(draft)\(typeAliases, separator: "\n")
         public static let columns = TableColumns()
         public static let tableName = \(tableName)\(initDecoder)\(initFromOther)
         }

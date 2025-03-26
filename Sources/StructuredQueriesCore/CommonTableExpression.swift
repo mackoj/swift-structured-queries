@@ -17,7 +17,7 @@ public struct With<QueryValue>: Statement {
   }
 
   public init<S: SelectStatement, each J: Table>(
-    recursive: Bool = false,
+    recursive: Bool = false,  // TODO: Is this even needed?
     @CommonTableExpressionBuilder _ ctes: () -> [CommonTableExpressionClause],
     query statement: () -> S
   ) where
@@ -31,12 +31,12 @@ public struct With<QueryValue>: Statement {
   }
 
   public var query: QueryFragment {
-    var sql: QueryFragment = "WITH "
+    var query: QueryFragment = "WITH "
     if recursive {
-      sql.append("RECURSIVE ")
+      query.append("RECURSIVE ")
     }
-    sql.append("\(ctes.map(\.queryFragment).joined(separator: ", ")) \(statement)")
-    return sql
+    query.append("\(ctes.map(\.queryFragment).joined(separator: ", ")) \(statement)")
+    return query
   }
 }
 

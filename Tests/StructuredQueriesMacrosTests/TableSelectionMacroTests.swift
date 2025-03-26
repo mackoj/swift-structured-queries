@@ -21,7 +21,7 @@ extension SnapshotTests {
           let remindersCount: Int
         }
 
-        extension ReminderListWithCount: StructuredQueries.Table {
+        extension ReminderListWithCount: StructuredQueries.Table, StructuredQueries._SelectStatement {
           public struct TableColumns: StructuredQueries.Schema {
             public typealias QueryValue = ReminderListWithCount
             public let reminderList = StructuredQueries.TableColumn<QueryValue, ReminderList>("reminderList", keyPath: \QueryValue.reminderList)
@@ -30,6 +30,8 @@ extension SnapshotTests {
               [self.reminderList, self.remindersCount]
             }
           }
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public static let columns = TableColumns()
           public static let tableName = "reminderListWithCounts"
         }

@@ -7,12 +7,15 @@ import StructuredQueriesCore
 @attached(
   extension,
   conformances: Table,
+  _SelectStatement,
   PrimaryKeyedTable,
   names: named(TableColumns),
+  named(From),
   named(Draft),
   named(columns),
   named(init(_:)),
   named(init(decoder:)),
+  named(QueryValue),
   named(tableName)
 )
 @attached(

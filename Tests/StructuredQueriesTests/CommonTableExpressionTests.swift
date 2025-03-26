@@ -290,65 +290,21 @@ private struct IncompleteReminder {
 //   let remindersCount: Int
 // }
 
-// TODO: Should '@Table @Selection' automatically add _SelectStatement conformance? Or can we do with protocol extension?
 @Table @Selection
-private struct Count: _SelectStatement {
-  typealias From = Never
-  typealias QueryValue = Self
+private struct Count {
   let value: Int
-  var queryFragment: StructuredQueriesCore.QueryFragment {
-    "\(value) AS \"value\""
-  }
-  var query: QueryFragment {
-    "SELECT \(queryFragment)"
-  }
 }
 
-@Table struct Employee {
+@Table
+struct Employee {
   let id: Int
   let name: String
   let bossID: Int?
   let height: Int
 }
-@Table @Selection struct WorksForAlice {
+
+@Table @Selection
+struct WorksForAlice {
   let id: Int
   let name: String
-}
-extension WorksForAlice: _SelectStatement, QueryExpression {
-  typealias From = Never
-
-  //  var queryFragment: StructuredQueriesCore.QueryFragment {
-  //    #"\#(id) AS "id", \#(bind: name) AS "name""#
-  //  }
-  var query: QueryFragment {
-    """
-    SELECT \(id) AS "id", \(bind: name) AS "name"
-    """
-  }
-  typealias QueryValue = Self
-}
-
-//extension Table where Self: QueryExpression {
-//  public typealias QueryValue = Self
-//  public var queryFragment: QueryFragment {
-//    func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
-//      let root = self as! Root
-//      let value = Value(queryOutput: root[keyPath: column.keyPath])
-//      return "\(value) AS \(quote: column.name)"
-//    }
-//    return Self.columns.allColumns.map { open($0) }.joined(separator: ", ")
-//  }
-//}
-
-extension Select {
-  @_documentation(visibility: private)
-  public func _join<F: Table, each J: Table>(
-    // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
-    _ other: any SelectStatement<(), F, (repeat each J)>,
-    on constraint: (
-      (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
-    ) -> some QueryExpression<Bool>
-  ) -> Select<QueryValue, From, (F, repeat each J)> where QueryValue: QueryRepresentable {
-    fatalError()
-  }
 }
