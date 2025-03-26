@@ -14,6 +14,11 @@ public struct SQLQueryExpression<QueryValue>: Statement {
   }
 
   @_disfavoredOverload
+  public init(_ queryFragment: QueryFragment) where QueryValue == () {
+    self.queryFragment = queryFragment
+  }
+
+  @_disfavoredOverload
   public init(_ expression: some QueryExpression<QueryValue>) {
     self.queryFragment = expression.queryFragment
   }
