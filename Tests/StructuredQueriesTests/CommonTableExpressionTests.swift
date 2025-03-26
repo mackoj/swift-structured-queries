@@ -223,11 +223,11 @@ extension SnapshotTests {
         } query: {
           Employee
             .select { $0.height.avg() }
-            .where { $0.name.in(WorksForAlice.select(\.name)) && $0.id.neq(2) }
+            .where { $0.id.neq(2) && $0.name.in(WorksForAlice.select(\.name)) }
         }
       ) {
         """
-        WITH "worksForAlices" AS (SELECT 2 AS "id", 'Alice' AS "name" UNION SELECT "employees"."id" AS "id", "employees"."name" AS "name" FROM "employees" JOIN "worksForAlices" ON ("employees"."bossID" = "worksForAlices"."id")) SELECT avg("employees"."height") FROM "employees" WHERE (("employees"."name" IN (SELECT "worksForAlices"."name" FROM "worksForAlices")) AND ("employees"."id" <> 2))
+        WITH "worksForAlices" AS (SELECT 2 AS "id", 'Alice' AS "name" UNION SELECT "employees"."id" AS "id", "employees"."name" AS "name" FROM "employees" JOIN "worksForAlices" ON ("employees"."bossID" = "worksForAlices"."id")) SELECT avg("employees"."height") FROM "employees" WHERE (("employees"."id" <> 2) AND ("employees"."name" IN (SELECT "worksForAlices"."name" FROM "worksForAlices")))
         """
       } results: {
         """
@@ -238,11 +238,10 @@ extension SnapshotTests {
       }
 
       assertQuery(
-        // TODO: figure out ".query" subtlety, query vs queryFragment
         #sql(
           """
           WITH \(WorksForAlice.self) AS (
-            \(WorksForAlice(id: 2, name: "Alice").query)
+            \(WorksForAlice(id: 2, name: "Alice"))
             UNION 
             SELECT \(Employee.id), \(Employee.name)
             FROM \(Employee.self) 
@@ -250,7 +249,8 @@ extension SnapshotTests {
           ) 
           SELECT \(Employee.height.avg())
           FROM \(Employee.self) 
-          WHERE \(Employee.name) IN \(WorksForAlice.select(\.name)) AND \(Employee.id) <> 2
+          WHERE \(Employee.name) IN (\(WorksForAlice.select(\.name)))
+          AND \(Employee.id) <> 2
           """,
           as: Double.self
         )
@@ -265,7 +265,8 @@ extension SnapshotTests {
         ) 
         SELECT avg("employees"."height")
         FROM "employees" 
-        WHERE "employees"."name" IN (SELECT "worksForAlices"."name" FROM "worksForAlices") AND "employees"."id" <> 2
+        WHERE "employees"."name" IN (SELECT "worksForAlices"."name" FROM "worksForAlices")
+        AND "employees"."id" <> 2
         """
       } results: {
         """

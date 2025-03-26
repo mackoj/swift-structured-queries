@@ -58,7 +58,7 @@ extension UInt32: QueryBindable {
 extension UInt64: QueryBindable {
   public var queryBinding: QueryBinding {
     if self > UInt64(Int64.max) {
-      return .failure(QueryBindingError(underlyingError: OverflowError()))
+      return .invalid(OverflowError())
     } else {
       return .int(Int64(self))
     }

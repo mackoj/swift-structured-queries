@@ -109,7 +109,7 @@ public struct Database {
           sqlite3_bind_null(statement, index)
         case let .text(text):
           sqlite3_bind_text(statement, index, text, -1, SQLITE_TRANSIENT)
-        case .failure(let error):
+        case let ._invalid(error):
           // TODO: Include more information about the query binding that caused this error.
           throw error.underlyingError
         }

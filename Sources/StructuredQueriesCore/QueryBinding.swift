@@ -4,7 +4,11 @@ public enum QueryBinding: Hashable, Sendable {
   case int(Int64)
   case null
   case text(String)
-  case failure(QueryBindingError)
+  case _invalid(QueryBindingError)
+
+  static func invalid(_ error: any Error) -> Self {
+    ._invalid(QueryBindingError(underlyingError: error))
+  }
 }
 
 public struct QueryBindingError: Error, Hashable {
@@ -33,7 +37,7 @@ extension QueryBinding: CustomDebugStringConvertible {
       return "NULL"
     case let .text(string):
       return string.quoted("'")
-    case .failure(let error):
+    case let ._invalid(error):
       return "<\(error.underlyingError.localizedDescription)>"
     }
   }

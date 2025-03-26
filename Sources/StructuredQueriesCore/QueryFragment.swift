@@ -125,6 +125,10 @@ extension QueryFragment: ExpressibleByStringInterpolation {
       appendInterpolation(expression.queryFragment)
     }
 
+    public mutating func appendInterpolation(_ expression: some Statement) {
+      appendInterpolation(expression.query)
+    }
+
     public mutating func appendInterpolation<T: Table>(_ table: T.Type) {
       appendInterpolation(quote: table.tableName)
     }

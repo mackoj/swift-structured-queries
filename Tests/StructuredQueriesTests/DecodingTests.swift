@@ -114,6 +114,36 @@ extension SnapshotTests {
       )
     }
 
+    @Test func jsonCodable() throws {
+      struct User: StaticCodable {
+        let id: Int
+        var name: String
+      }
+      assertQuery(
+        SimpleSelect {
+          #sql(
+            """
+            '{"id":1,"name":"Blob"}'
+            """,
+            as: JSONRepresentation<User>.self
+          )
+        }
+      ) {
+        """
+        SELECT '{"id":1,"name":"Blob"}'
+        """
+      } results: {
+        """
+        ┌───────────────────────────────────┐
+        │ SnapshotTests.DecodingTests.User( │
+        │   id: 1,                          │
+        │   name: "Blob"                    │
+        │ )                                 │
+        └───────────────────────────────────┘
+        """
+      }
+    }
+
     func compileTime() throws {
       _ = try #require(
         try db.execute(
