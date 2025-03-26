@@ -241,7 +241,7 @@ extension SnapshotTests {
         // TODO: figure out ".query" subtlety, query vs queryFragment
         #sql(
           """
-          WITH "worksForAlices" AS (
+          WITH \(WorksForAlice.self) AS (
             \(WorksForAlice(id: 2, name: "Alice").query)
             UNION 
             SELECT \(Employee.id), \(Employee.name)
