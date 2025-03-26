@@ -20,7 +20,8 @@ public struct With<QueryValue>: Statement {
     recursive: Bool = false,  // TODO: Is this even needed?
     @CommonTableExpressionBuilder _ ctes: () -> [CommonTableExpressionClause],
     query statement: () -> S
-  ) where
+  )
+  where
     S.QueryValue == (),
     S.Joins == (repeat each J),
     QueryValue == (S.From, repeat each J)
@@ -35,7 +36,9 @@ public struct With<QueryValue>: Statement {
     if recursive {
       query.append("RECURSIVE ")
     }
-    query.append("\(ctes.map(\.queryFragment).joined(separator: ", ")) \(statement)")
+    query.append(
+      "\(ctes.map(\.queryFragment).joined(separator: ", "))\(.newlineOrSpace)\(statement)"
+    )
     return query
   }
 }
@@ -45,7 +48,7 @@ public struct CommonTableExpressionClause: QueryExpression {
   let tableName: String
   let select: QueryFragment
   public var queryFragment: QueryFragment {
-    "\(quote: tableName) AS (\(select))"
+    "\(quote: tableName) AS (\(.newline)\(select)\(.newline))"
   }
 }
 

@@ -143,7 +143,8 @@ extension SnapshotTests {
       }
       assertInlineSnapshot(of: Row.update { $0.bool.toggle() }, as: .sql) {
         """
-        UPDATE "rows" SET "bool" = NOT ("rows"."bool")
+        UPDATE "rows"
+        SET "bool" = NOT ("rows"."bool")
         """
       }
     }
@@ -181,37 +182,44 @@ extension SnapshotTests {
       }
       assertInlineSnapshot(of: Row.update { $0.c += 1 }, as: .sql) {
         """
-        UPDATE "rows" SET "c" = ("rows"."c" + 1)
+        UPDATE "rows"
+        SET "c" = ("rows"."c" + 1)
         """
       }
       assertInlineSnapshot(of: Row.update { $0.c -= 2 }, as: .sql) {
         """
-        UPDATE "rows" SET "c" = ("rows"."c" - 2)
+        UPDATE "rows"
+        SET "c" = ("rows"."c" - 2)
         """
       }
       assertInlineSnapshot(of: Row.update { $0.c *= 3 }, as: .sql) {
         """
-        UPDATE "rows" SET "c" = ("rows"."c" * 3)
+        UPDATE "rows"
+        SET "c" = ("rows"."c" * 3)
         """
       }
       assertInlineSnapshot(of: Row.update { $0.c /= 4 }, as: .sql) {
         """
-        UPDATE "rows" SET "c" = ("rows"."c" / 4)
+        UPDATE "rows"
+        SET "c" = ("rows"."c" / 4)
         """
       }
       assertInlineSnapshot(of: Row.update { $0.c = -$0.c }, as: .sql) {
         """
-        UPDATE "rows" SET "c" = -("rows"."c")
+        UPDATE "rows"
+        SET "c" = -("rows"."c")
         """
       }
       assertInlineSnapshot(of: Row.update { $0.c = +$0.c }, as: .sql) {
         """
-        UPDATE "rows" SET "c" = +("rows"."c")
+        UPDATE "rows"
+        SET "c" = +("rows"."c")
         """
       }
       assertInlineSnapshot(of: Row.update { $0.c.negate() }, as: .sql) {
         """
-        UPDATE "rows" SET "c" = -("rows"."c")
+        UPDATE "rows"
+        SET "c" = -("rows"."c")
         """
       }
     }
@@ -249,32 +257,38 @@ extension SnapshotTests {
       }
       assertInlineSnapshot(of: Row.update { $0.c %= 1 }, as: .sql) {
         """
-        UPDATE "rows" SET "c" = ("rows"."c" % 1)
+        UPDATE "rows"
+        SET "c" = ("rows"."c" % 1)
         """
       }
       assertInlineSnapshot(of: Row.update { $0.c &= 2 }, as: .sql) {
         """
-        UPDATE "rows" SET "c" = ("rows"."c" & 2)
+        UPDATE "rows"
+        SET "c" = ("rows"."c" & 2)
         """
       }
       assertInlineSnapshot(of: Row.update { $0.c |= 3 }, as: .sql) {
         """
-        UPDATE "rows" SET "c" = ("rows"."c" | 3)
+        UPDATE "rows"
+        SET "c" = ("rows"."c" | 3)
         """
       }
       assertInlineSnapshot(of: Row.update { $0.c <<= 4 }, as: .sql) {
         """
-        UPDATE "rows" SET "c" = ("rows"."c" << 4)
+        UPDATE "rows"
+        SET "c" = ("rows"."c" << 4)
         """
       }
       assertInlineSnapshot(of: Row.update { $0.c >>= 5 }, as: .sql) {
         """
-        UPDATE "rows" SET "c" = ("rows"."c" >> 5)
+        UPDATE "rows"
+        SET "c" = ("rows"."c" >> 5)
         """
       }
       assertInlineSnapshot(of: Row.update { $0.c = ~$0.c }, as: .sql) {
         """
-        UPDATE "rows" SET "c" = ~("rows"."c")
+        UPDATE "rows"
+        SET "c" = ~("rows"."c")
         """
       }
     }
@@ -330,17 +344,20 @@ extension SnapshotTests {
       }
       assertInlineSnapshot(of: Row.update { $0.string += "!" }, as: .sql) {
         """
-        UPDATE "rows" SET "string" = ("rows"."string" || '!')
+        UPDATE "rows"
+        SET "string" = ("rows"."string" || '!')
         """
       }
       assertInlineSnapshot(of: Row.update { $0.string.append("!") }, as: .sql) {
         """
-        UPDATE "rows" SET "string" = ("rows"."string" || '!')
+        UPDATE "rows"
+        SET "string" = ("rows"."string" || '!')
         """
       }
       assertInlineSnapshot(of: Row.update { $0.string.append(contentsOf: "!") }, as: .sql) {
         """
-        UPDATE "rows" SET "string" = ("rows"."string" || '!')
+        UPDATE "rows"
+        SET "string" = ("rows"."string" || '!')
         """
       }
     }
@@ -359,7 +376,8 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        ("rows"."c" IN (SELECT "rows"."c" FROM "rows"))
+        ("rows"."c" IN (SELECT "rows"."c"
+        FROM "rows"))
         """
       }
       assertInlineSnapshot(
@@ -375,7 +393,8 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        ("rows"."c" IN (SELECT "rows"."c" FROM "rows"))
+        ("rows"."c" IN (SELECT "rows"."c"
+        FROM "rows"))
         """
       }
     }
@@ -405,7 +424,9 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        SELECT "rows"."a", (SELECT count(*) FROM "rows") FROM "rows"
+        SELECT "rows"."a", (SELECT count(*)
+        FROM "rows")
+        FROM "rows"
         """
       }
     }
@@ -418,7 +439,10 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool", "rows"."string" FROM "rows" WHERE ("rows"."c" IN (SELECT CAST("rows"."bool" AS NUMERIC) FROM "rows"))
+        SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool", "rows"."string"
+        FROM "rows"
+        WHERE ("rows"."c" IN (SELECT CAST("rows"."bool" AS NUMERIC)
+        FROM "rows"))
         """
       }
       assertInlineSnapshot(
@@ -428,7 +452,10 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool", "rows"."string" FROM "rows" WHERE ((CAST("rows"."c" AS NUMERIC) >= (SELECT coalesce(avg("rows"."c"), 0.0) FROM "rows")) AND (CAST("rows"."c" AS NUMERIC) > 1.0))
+        SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool", "rows"."string"
+        FROM "rows"
+        WHERE ((CAST("rows"."c" AS NUMERIC) >= (SELECT coalesce(avg("rows"."c"), 0.0)
+        FROM "rows")) AND (CAST("rows"."c" AS NUMERIC) > 1.0))
         """
       }
     }
@@ -438,7 +465,9 @@ extension SnapshotTests {
         Reminder.select { $0.id }.where { [1, 2].contains($0.id) }
       ) {
         """
-        SELECT "reminders"."id" FROM "reminders" WHERE ("reminders"."id" IN (1, 2))
+        SELECT "reminders"."id"
+        FROM "reminders"
+        WHERE ("reminders"."id" IN (1, 2))
         """
       } results: {
         """

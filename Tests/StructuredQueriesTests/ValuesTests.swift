@@ -28,7 +28,9 @@ extension SnapshotTests {
           .union(Values(2, "Goodbye", false))
       ) {
         """
-        SELECT 1, 'Hello', 1 UNION SELECT 2, 'Goodbye', 0
+        SELECT 1, 'Hello', 1
+        UNION
+        SELECT 2, 'Goodbye', 0
         """
       } results: {
         """

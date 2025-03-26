@@ -27,7 +27,8 @@ extension SnapshotTests {
       }
       assertQuery(Reminder.select { $0.id.avg() }) {
         """
-        SELECT avg("reminders"."id") FROM "reminders"
+        SELECT avg("reminders"."id")
+        FROM "reminders"
         """
       } results: {
         """
@@ -51,7 +52,8 @@ extension SnapshotTests {
       }
       assertQuery(Reminder.select { $0.id.count() }) {
         """
-        SELECT count("reminders"."id") FROM "reminders"
+        SELECT count("reminders"."id")
+        FROM "reminders"
         """
       } results: {
         """
@@ -62,7 +64,8 @@ extension SnapshotTests {
       }
       assertQuery(Reminder.select { $0.priority.count(distinct: true) }) {
         """
-        SELECT count(DISTINCT "reminders"."priority") FROM "reminders"
+        SELECT count(DISTINCT "reminders"."priority")
+        FROM "reminders"
         """
       } results: {
         """
@@ -76,12 +79,15 @@ extension SnapshotTests {
     @Test func unqualifiedCount() {
       assertInlineSnapshot(of: User.all().select { _ in .count() }, as: .sql) {
         """
-        SELECT count(*) FROM "users"
+        SELECT count(*)
+        FROM "users"
         """
       }
       assertInlineSnapshot(of: User.where(\.isAdmin).count(), as: .sql) {
         """
-        SELECT count(*) FROM "users" WHERE "users"."isAdmin"
+        SELECT count(*)
+        FROM "users"
+        WHERE "users"."isAdmin"
         """
       }
     }
@@ -94,7 +100,8 @@ extension SnapshotTests {
       }
       assertQuery(Reminder.select { $0.id.max() }) {
         """
-        SELECT max("reminders"."id") FROM "reminders"
+        SELECT max("reminders"."id")
+        FROM "reminders"
         """
       } results: {
         """
@@ -113,7 +120,8 @@ extension SnapshotTests {
       }
       assertQuery(Reminder.select { $0.priority.min() }) {
         """
-        SELECT min("reminders"."priority") FROM "reminders"
+        SELECT min("reminders"."priority")
+        FROM "reminders"
         """
       } results: {
         """
@@ -137,7 +145,8 @@ extension SnapshotTests {
       }
       assertQuery(Reminder.select { #sql("sum(\($0.id))", as: Int?.self) }) {
         """
-        SELECT sum("reminders"."id") FROM "reminders"
+        SELECT sum("reminders"."id")
+        FROM "reminders"
         """
       } results: {
         """
@@ -148,7 +157,9 @@ extension SnapshotTests {
       }
       assertQuery(Reminder.select { $0.id.sum() }.where { _ in false }) {
         """
-        SELECT sum("reminders"."id") FROM "reminders" WHERE 0
+        SELECT sum("reminders"."id")
+        FROM "reminders"
+        WHERE 0
         """
       } results: {
         """
@@ -172,7 +183,8 @@ extension SnapshotTests {
       }
       assertQuery(Reminder.select { $0.id.total() }) {
         """
-        SELECT total("reminders"."id") FROM "reminders"
+        SELECT total("reminders"."id")
+        FROM "reminders"
         """
       } results: {
         """
@@ -189,7 +201,8 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        SELECT group_concat("users"."name") FROM "users"
+        SELECT group_concat("users"."name")
+        FROM "users"
         """
       }
 
@@ -198,7 +211,8 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        SELECT group_concat("users"."name", '-') FROM "users"
+        SELECT group_concat("users"."name", '-')
+        FROM "users"
         """
       }
 
@@ -207,7 +221,8 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        SELECT group_concat("users"."name", "users"."id") FROM "users"
+        SELECT group_concat("users"."name", "users"."id")
+        FROM "users"
         """
       }
 
@@ -216,7 +231,8 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        SELECT group_concat("users"."name" ORDER BY "users"."isAdmin" DESC) FROM "users"
+        SELECT group_concat("users"."name" ORDER BY "users"."isAdmin" DESC)
+        FROM "users"
         """
       }
 
@@ -225,13 +241,16 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        SELECT group_concat("users"."name") FILTER (WHERE "users"."isAdmin") FROM "users"
+        SELECT group_concat("users"."name") FILTER (WHERE "users"."isAdmin")
+        FROM "users"
         """
       }
 
       assertQuery(Tag.select { $0.name.groupConcat() }.order(by: \.name)) {
         """
-        SELECT group_concat("tags"."name") FROM "tags" ORDER BY "tags"."name"
+        SELECT group_concat("tags"."name")
+        FROM "tags"
+        ORDER BY "tags"."name"
         """
       } results: {
         """
@@ -248,7 +267,9 @@ extension SnapshotTests {
           .order(by: \.name)
       ) {
         """
-        SELECT group_concat(iif((length("tags"."name") > 5), "tags"."name", NULL)) FROM "tags" ORDER BY "tags"."name"
+        SELECT group_concat(iif((length("tags"."name") > 5), "tags"."name", NULL))
+        FROM "tags"
+        ORDER BY "tags"."name"
         """
       } results: {
         """
@@ -274,7 +295,8 @@ extension SnapshotTests {
 
       assertQuery(Reminder.select { $0.title.length().count(distinct: true) }) {
         """
-        SELECT count(DISTINCT length("reminders"."title")) FROM "reminders"
+        SELECT count(DISTINCT length("reminders"."title"))
+        FROM "reminders"
         """
       } results: {
         """
@@ -285,7 +307,8 @@ extension SnapshotTests {
       }
       assertQuery(Tag.select { ($0.name + "!").groupConcat(", ") }) {
         """
-        SELECT group_concat(("tags"."name" || '!'), ', ') FROM "tags"
+        SELECT group_concat(("tags"."name" || '!'), ', ')
+        FROM "tags"
         """
       } results: {
         """

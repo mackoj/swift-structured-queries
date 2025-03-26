@@ -358,7 +358,7 @@ extension PrimaryKeyedTable {
   }
 }
 
-fileprivate enum InsertValues {
+private enum InsertValues {
   case `default`
   case values([[QueryFragment]])
   case select(QueryFragment)
@@ -404,18 +404,20 @@ extension Insert: Statement {
     }
     query.append(" INTO \(Into.self)")
     if !columnNames.isEmpty {
-      query.append(" (\(columnNames.map { "\(quote: $0)" }.joined(separator: ", ")))")
+      query.append(
+        "\(.newlineOrSpace)(\(columnNames.map { "\(quote: $0)" }.joined(separator: ", ")))"
+      )
     }
     switch values {
     case .default:
-      query.append(" DEFAULT VALUES")
+      query.append("\(.newlineOrSpace)DEFAULT VALUES")
 
     case let .select(select):
-      query.append(" \(select)")
+      query.append("\(.newlineOrSpace)\(select)")
 
     case .values(let values):
       guard !values.isEmpty else { return "" }
-      query.append(" VALUES ")
+      query.append("\(.newlineOrSpace)VALUES\(.newlineOrSpace)")
       let values: [QueryFragment] = values.map {
         var value: QueryFragment = "("
         value.append($0.joined(separator: ", "))
@@ -426,12 +428,11 @@ extension Insert: Statement {
     }
 
     if let record {
-      query.append(
-        " ON CONFLICT DO \(record.updates.isEmpty ? "NOTHING" : "UPDATE \(bind: record)")"
-      )
+      query.append("\(.newlineOrSpace)ON CONFLICT DO ")
+      query.append(record.updates.isEmpty ? "NOTHING" : "UPDATE \(bind: record)")
     }
     if !returning.isEmpty {
-      query.append(" RETURNING \(returning.joined(separator: ", "))")
+      query.append("\(.newlineOrSpace)RETURNING \(returning.joined(separator: ", "))")
     }
     return query
   }

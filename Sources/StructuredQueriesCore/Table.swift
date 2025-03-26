@@ -22,4 +22,3 @@ extension Table {
 //     Base.columns[keyPath: keyPath]
 //   }
 // }
-

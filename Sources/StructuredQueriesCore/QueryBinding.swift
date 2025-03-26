@@ -38,7 +38,7 @@ extension QueryBinding: CustomDebugStringConvertible {
     case let .text(string):
       return string.quoted("'")
     case let ._invalid(error):
-      return "<\(error.underlyingError.localizedDescription)>"
+      return "<invalid: \(error.underlyingError.localizedDescription)>"
     }
   }
 }

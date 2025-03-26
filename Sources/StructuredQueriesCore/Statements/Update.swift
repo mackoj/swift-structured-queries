@@ -68,12 +68,12 @@ extension Update: Statement {
     if let conflictResolution {
       query.append(" OR \(conflictResolution.rawValue)")
     }
-    query.append(" \(From.self) \(record)")
+    query.append(" \(From.self)\(.newlineOrSpace)\(record)")
     if !`where`.isEmpty {
-      query.append(" WHERE \(`where`.joined(separator: " AND "))")
+      query.append("\(.newlineOrSpace)WHERE \(`where`.joined(separator: " AND "))")
     }
     if !returning.isEmpty {
-      query.append(" RETURNING \(returning.joined(separator: ", "))")
+      query.append("\(.newlineOrSpace)RETURNING \(returning.joined(separator: ", "))")
     }
     return query
   }

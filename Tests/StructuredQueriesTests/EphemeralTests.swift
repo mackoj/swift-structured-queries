@@ -12,7 +12,8 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        SELECT (("testTables"."firstName" || ', ') || "testTables"."lastName") FROM "testTables"
+        SELECT (("testTables"."firstName" || ', ') || "testTables"."lastName")
+        FROM "testTables"
         """
       }
     }

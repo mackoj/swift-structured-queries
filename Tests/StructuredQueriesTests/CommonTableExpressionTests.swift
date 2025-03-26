@@ -20,7 +20,14 @@ extension SnapshotTests {
         }
       ) {
         """
-        WITH "incompleteReminders" AS (SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title" FROM "reminders" WHERE NOT ("reminders"."isCompleted")) SELECT "incompleteReminders"."isFlagged", "incompleteReminders"."title" FROM "incompleteReminders" WHERE (("incompleteReminders"."title" COLLATE NOCASE) LIKE '%groceries%')
+        WITH "incompleteReminders" AS (
+        SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
+        FROM "reminders"
+        WHERE NOT ("reminders"."isCompleted")
+        )
+        SELECT "incompleteReminders"."isFlagged", "incompleteReminders"."title"
+        FROM "incompleteReminders"
+        WHERE (("incompleteReminders"."title" COLLATE NOCASE) LIKE '%groceries%')
         """
       } results: {
         """
@@ -53,7 +60,18 @@ extension SnapshotTests {
         }
       ) {
         """
-        WITH "incompleteReminders" AS (SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title" FROM "reminders" WHERE NOT ("reminders"."isCompleted")) INSERT INTO "reminders" ("remindersListID", "title", "isFlagged", "isCompleted") SELECT "reminders"."remindersListID", "incompleteReminders"."title", NOT ("incompleteReminders"."isFlagged"), 1 FROM "incompleteReminders" JOIN "reminders" ON ("incompleteReminders"."title" = "reminders"."title") LIMIT 1 RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        WITH "incompleteReminders" AS (
+        SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
+        FROM "reminders"
+        WHERE NOT ("reminders"."isCompleted")
+        )
+        INSERT INTO "reminders"
+        ("remindersListID", "title", "isFlagged", "isCompleted")
+        SELECT "reminders"."remindersListID", "incompleteReminders"."title", NOT ("incompleteReminders"."isFlagged"), 1
+        FROM "incompleteReminders"
+        JOIN "reminders" ON ("incompleteReminders"."title" = "reminders"."title")
+        LIMIT 1
+        RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
         """
       } results: {
         """
@@ -88,7 +106,16 @@ extension SnapshotTests {
         }
       ) {
         """
-        WITH "incompleteReminders" AS (SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title" FROM "reminders" WHERE NOT ("reminders"."isCompleted")) UPDATE "reminders" SET "title" = upper("reminders"."title") WHERE ("reminders"."title" IN (SELECT "incompleteReminders"."title" FROM "incompleteReminders")) RETURNING "reminders"."title"
+        WITH "incompleteReminders" AS (
+        SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
+        FROM "reminders"
+        WHERE NOT ("reminders"."isCompleted")
+        )
+        UPDATE "reminders"
+        SET "title" = upper("reminders"."title")
+        WHERE ("reminders"."title" IN (SELECT "incompleteReminders"."title"
+        FROM "incompleteReminders"))
+        RETURNING "reminders"."title"
         """
       } results: {
         """
@@ -119,7 +146,15 @@ extension SnapshotTests {
         }
       ) {
         """
-        WITH "incompleteReminders" AS (SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title" FROM "reminders" WHERE NOT ("reminders"."isCompleted")) DELETE FROM "reminders" WHERE ("reminders"."title" IN (SELECT "incompleteReminders"."title" FROM "incompleteReminders")) RETURNING "reminders"."title"
+        WITH "incompleteReminders" AS (
+        SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
+        FROM "reminders"
+        WHERE NOT ("reminders"."isCompleted")
+        )
+        DELETE FROM "reminders"
+        WHERE ("reminders"."title" IN (SELECT "incompleteReminders"."title"
+        FROM "incompleteReminders"))
+        RETURNING "reminders"."title"
         """
       } results: {
         """
@@ -146,11 +181,15 @@ extension SnapshotTests {
         }
       ) {
         """
-        WITH "counts" AS (\
-        SELECT 1 AS "value" \
-        UNION SELECT ("counts"."value" + 1) AS "value" FROM "counts"\
-        ) \
-        SELECT "counts"."value" FROM "counts" LIMIT 4
+        WITH "counts" AS (
+        SELECT 1 AS "value"
+        UNION
+        SELECT ("counts"."value" + 1) AS "value"
+        FROM "counts"
+        )
+        SELECT "counts"."value"
+        FROM "counts"
+        LIMIT 4
         """
       } results: {
         """
@@ -177,7 +216,14 @@ extension SnapshotTests {
         }
       ) {
         """
-        WITH "incompleteReminders" AS (SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title" FROM "reminders" WHERE NOT ("reminders"."isCompleted")) SELECT "incompleteReminders"."isFlagged" FROM "incompleteReminders" WHERE (("incompleteReminders"."title" COLLATE NOCASE) LIKE '%groceries%')
+        WITH "incompleteReminders" AS (
+        SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
+        FROM "reminders"
+        WHERE NOT ("reminders"."isCompleted")
+        )
+        SELECT "incompleteReminders"."isFlagged"
+        FROM "incompleteReminders"
+        WHERE (("incompleteReminders"."title" COLLATE NOCASE) LIKE '%groceries%')
         """
       } results: {
         """
@@ -227,7 +273,17 @@ extension SnapshotTests {
         }
       ) {
         """
-        WITH "worksForAlices" AS (SELECT 2 AS "id", 'Alice' AS "name" UNION SELECT "employees"."id" AS "id", "employees"."name" AS "name" FROM "employees" JOIN "worksForAlices" ON ("employees"."bossID" = "worksForAlices"."id")) SELECT avg("employees"."height") FROM "employees" WHERE (("employees"."id" <> 2) AND ("employees"."name" IN (SELECT "worksForAlices"."name" FROM "worksForAlices")))
+        WITH "worksForAlices" AS (
+        SELECT 2 AS "id", 'Alice' AS "name"
+        UNION
+        SELECT "employees"."id" AS "id", "employees"."name" AS "name"
+        FROM "employees"
+        JOIN "worksForAlices" ON ("employees"."bossID" = "worksForAlices"."id")
+        )
+        SELECT avg("employees"."height")
+        FROM "employees"
+        WHERE (("employees"."id" <> 2) AND ("employees"."name" IN (SELECT "worksForAlices"."name"
+        FROM "worksForAlices")))
         """
       } results: {
         """
@@ -265,7 +321,8 @@ extension SnapshotTests {
         ) 
         SELECT avg("employees"."height")
         FROM "employees" 
-        WHERE "employees"."name" IN (SELECT "worksForAlices"."name" FROM "worksForAlices")
+        WHERE "employees"."name" IN (SELECT "worksForAlices"."name"
+        FROM "worksForAlices")
         AND "employees"."id" <> 2
         """
       } results: {

@@ -463,7 +463,9 @@ extension Select {
 
   // NB: Optimization
   @_documentation(visibility: private)
-  public func join<each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table, each J: Table>(
+  public func join<
+    each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table, each J: Table
+  >(
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(repeat each C2), F, ()>,
     on constraint: (
@@ -1037,24 +1039,24 @@ extension Select: SelectStatement {
       query.append(" DISTINCT")
     }
     query.append(" \(columns.joined(separator: ", "))")
-    query.append(" FROM \(From.self)")
+    query.append("\(.newlineOrSpace)FROM \(From.self)")
     for join in joins {
-      query.append(" \(join)")
+      query.append("\(.newlineOrSpace)\(join)")
     }
     if !`where`.isEmpty {
-      query.append(" WHERE \(`where`.joined(separator: " AND "))")
+      query.append("\(.newlineOrSpace)WHERE \(`where`.joined(separator: " AND "))")
     }
     if !group.isEmpty {
-      query.append(" GROUP BY \(group.joined(separator: ", "))")
+      query.append("\(.newlineOrSpace)GROUP BY \(group.joined(separator: ", "))")
     }
     if !having.isEmpty {
-      query.append(" HAVING \(having.joined(separator: " AND "))")
+      query.append("\(.newlineOrSpace)HAVING \(having.joined(separator: " AND "))")
     }
     if !order.isEmpty {
-      query.append(" ORDER BY \(order.joined(separator: ", "))")
+      query.append("\(.newlineOrSpace)ORDER BY \(order.joined(separator: ", "))")
     }
     if let limit {
-      query.append(" \(limit)")
+      query.append("\(.newlineOrSpace)\(limit)")
     }
     return query
   }
@@ -1104,7 +1106,9 @@ private struct LimitClause: QueryExpression {
   let maxLength: QueryFragment
   let offset: QueryFragment?
 
-  init(maxLength: some QueryExpression, offset: (some QueryExpression)? = _EmptyQueryExpression?.none) {
+  init(
+    maxLength: some QueryExpression, offset: (some QueryExpression)? = _EmptyQueryExpression?.none
+  ) {
     self.maxLength = maxLength.queryFragment
     self.offset = offset?.queryFragment
   }

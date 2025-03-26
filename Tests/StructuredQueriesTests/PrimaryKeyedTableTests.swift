@@ -8,7 +8,8 @@ extension SnapshotTests {
     @Test func count() {
       assertQuery(Reminder.select { $0.count() }) {
         """
-        SELECT count("reminders"."id") FROM "reminders"
+        SELECT count("reminders"."id")
+        FROM "reminders"
         """
       } results: {
         """

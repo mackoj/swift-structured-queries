@@ -12,7 +12,14 @@ extension SnapshotTests {
           .union(Tag.select { ("tag", $0.name) })
       ) {
         """
-        SELECT 'reminder', "reminders"."title" FROM "reminders" UNION SELECT 'list', "remindersLists"."name" FROM "remindersLists" UNION SELECT 'tag', "tags"."name" FROM "tags"
+        SELECT 'reminder', "reminders"."title"
+        FROM "reminders"
+        UNION
+        SELECT 'list', "remindersLists"."name"
+        FROM "remindersLists"
+        UNION
+        SELECT 'tag', "tags"."name"
+        FROM "tags"
         """
       } results: {
         """
@@ -50,7 +57,16 @@ extension SnapshotTests {
         }
       ) {
         """
-        WITH "names" AS (SELECT 'reminder' AS "type", "reminders"."title" AS "value" FROM "reminders" UNION SELECT 'list' AS "type", "remindersLists"."name" AS "value" FROM "remindersLists" UNION SELECT 'tag' AS "type", "tags"."name" AS "value" FROM "tags") SELECT "names"."type", "names"."value" FROM "names" ORDER BY "names"."type" DESC, "names"."value" ASC
+        WITH "names" AS (SELECT 'reminder' AS "type", "reminders"."title" AS "value"
+        FROM "reminders"
+        UNION
+        SELECT 'list' AS "type", "remindersLists"."name" AS "value"
+        FROM "remindersLists"
+        UNION
+        SELECT 'tag' AS "type", "tags"."name" AS "value"
+        FROM "tags") SELECT "names"."type", "names"."value"
+        FROM "names"
+        ORDER BY "names"."type" DESC, "names"."value" ASC
         """
       } results: {
         """

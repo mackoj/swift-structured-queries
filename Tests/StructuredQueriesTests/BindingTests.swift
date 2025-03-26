@@ -27,9 +27,13 @@ extension SnapshotTests {
           .returning(\.self)
       ) {
         #"""
-        INSERT INTO "records" ("id", "name", "duration") VALUES ('\u{07AD}��ޭ��ޭ��ޭ��', 'Blob', 0) RETURNING "records"."id", "records"."name", "records"."duration"
+        INSERT INTO "records"
+        ("id", "name", "duration")
+        VALUES
+        ('\u{07AD}��ޭ��ޭ��ޭ��', 'Blob', 0)
+        RETURNING "records"."id", "records"."name", "records"."duration"
         """#
-      }results: {
+      } results: {
         """
         ┌───────────────────────────────────────────────────┐
         │ Record(                                           │
@@ -54,9 +58,13 @@ extension SnapshotTests {
           .returning(\.self)
       ) {
         #"""
-        INSERT INTO "records" ("id", "name", "duration") VALUES ('\u{07AD}��ޭ��ޭ��ޭ��', '', <The operation couldn’t be completed. (StructuredQueriesCore.OverflowError error 1.)>) RETURNING "records"."id", "records"."name", "records"."duration"
+        INSERT INTO "records"
+        ("id", "name", "duration")
+        VALUES
+        ('\u{07AD}��ޭ��ޭ��ޭ��', '', <The operation couldn’t be completed. (StructuredQueriesCore.OverflowError error 1.)>)
+        RETURNING "records"."id", "records"."name", "records"."duration"
         """#
-      }results: {
+      } results: {
         """
         The operation couldn’t be completed. (StructuredQueriesCore.OverflowError error 1.)
         """
