@@ -452,7 +452,7 @@ extension SQLQueryExpression<String> {
 }
 
 extension QueryExpression where QueryValue: QueryBindable {
-  public func `in`(_ expression: [QueryValue]) -> some QueryExpression<Bool> {
+  public func `in`(_ expression: [some QueryExpression<QueryValue>]) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: "IN", rhs: Array.Expression(elements: expression))
   }
 
@@ -478,7 +478,7 @@ extension QueryExpression where QueryValue: QueryBindable {
 
 extension Array where Element: QueryBindable {
   public func contains(
-    _ element: some QueryExpression<Element>
+    _ element: some QueryExpression<Element.QueryValue>
   ) -> some QueryExpression<Bool> {
     element.in(self)
   }
@@ -556,7 +556,7 @@ private struct LikeOperator<
   }
 }
 
-extension Array where Element: QueryBindable {
+extension Array where Element: QueryExpression, Element.QueryValue: QueryBindable {
   fileprivate struct Expression: QueryExpression {
     typealias QueryValue = Array
 

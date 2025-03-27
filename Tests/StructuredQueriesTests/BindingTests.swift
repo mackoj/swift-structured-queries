@@ -70,6 +70,25 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func uuids() throws {
+      assertQuery(
+        SimpleSelect {
+          #bind(UUID(0), as: UUID.LowercasedRepresentation.self)
+            .in([UUID(1), UUID(2)].map { #bind($0) })
+        }
+      ) {
+        """
+        SELECT ('00000000-0000-0000-0000-000000000000' IN ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002'))
+        """
+      } results: {
+        """
+        ┌───────┐
+        │ false │
+        └───────┘
+        """
+      }
+    }
   }
 }
 
