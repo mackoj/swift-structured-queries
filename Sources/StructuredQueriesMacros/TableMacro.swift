@@ -25,7 +25,9 @@ extension TableMacro: ExtensionMacro {
     }
     var allColumns: [TokenSyntax] = []
     var columnsProperties: [DeclSyntax] = []
-    var decodings: [ExprSyntax] = []
+    var decodings: [String] = []
+    var decodingUnwrappings: [String] = []
+    var decodingAssignments: [String] = []
     var diagnostics: [Diagnostic] = []
 
     // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
@@ -273,9 +275,7 @@ extension TableMacro: ExtensionMacro {
         )
       }
 
-      let defaultValue = (binding.initializer?.value).map {
-        ", default: \(selfRewriter.rewrite($0).trimmedDescription)"
-      }
+      let defaultValue = binding.initializer?.value.rewritten(selfRewriter)
       columnsProperties.append(
         """
         public let \(identifier) = \(moduleName).TableColumn<\
@@ -283,16 +283,42 @@ extension TableMacro: ExtensionMacro {
         \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
         >(\
         \(columnName), \
-        keyPath: \\QueryValue.\(identifier)\(raw: defaultValue ?? "")\
+        keyPath: \\QueryValue.\(identifier)\(defaultValue.map { ", default: \($0)" } ?? "")\
         )
         """
       )
       allColumns.append(identifier)
-      decodings.append(
-        """
-        self.\(identifier) = try decoder.decode(\(columnQueryValueType.map { "\($0).self" } ?? ""))
-        """
-      )
+      let decodedType = columnQueryValueType?.asNonOptionalType()
+      if let defaultValue {
+        decodings.append(
+          """
+          self.\(identifier) = try decoder.decode(\(decodedType.map { "\($0).self" } ?? "")) \
+          ?? \(defaultValue)
+          """
+        )
+      } else if columnQueryValueType.map({ $0.isOptionalType }) ?? false {
+        decodings.append(
+          """
+          self.\(identifier) = try decoder.decode(\(decodedType.map { "\($0).self" } ?? ""))
+          """
+        )
+      } else {
+        decodings.append(
+          """
+          let \(identifier) = try decoder.decode(\(decodedType.map { "\($0).self" } ?? ""))
+          """
+        )
+        decodingUnwrappings.append(
+          """
+          guard let \(identifier) else { throw QueryDecodingError.missingRequiredColumn }
+          """
+        )
+        decodingAssignments.append(
+          """
+          self.\(identifier) = \(identifier)
+          """
+        )
+      }
 
       if let primaryKey, primaryKey.identifier == identifier {
         var hasColumnAttribute = false
@@ -467,6 +493,28 @@ extension TableMacro: ExtensionMacro {
       return []
     }
 
+    var typeAliases: [DeclSyntax] = []
+    var initDecoder: DeclSyntax?
+    if declaration.hasMacroApplication("Selection") {
+      conformances.append("\(moduleName)._SelectStatement")
+      typeAliases.append(contentsOf: [
+        """
+
+        public typealias QueryValue = Self
+        """,
+        """
+        public typealias From = Swift.Never
+        """,
+      ])
+    } else {
+      initDecoder = """
+
+        public init(decoder: inout some \(moduleName).QueryDecoder) throws {
+        \(raw: (decodings + decodingUnwrappings + decodingAssignments).joined(separator: "\n"))
+        }
+        """
+    }
+
     return [
       DeclSyntax(
         """
@@ -474,19 +522,13 @@ extension TableMacro: ExtensionMacro {
         \(conformances.isEmpty ? "" : ": \(conformances, separator: ", ")") {
         public struct TableColumns: \(schemaConformances, separator: ", ") {
         public typealias QueryValue = \(type.trimmed)
-        public static var count: Int {\
-        \(IntegerLiteralExprSyntax(integerLiteral: allColumns.count))\
-        }
         \(columnsProperties, separator: "\n")
-        public var allColumns: [any \(moduleName).TableColumnExpression] { \
-        [\(allColumns.map { "self.\($0)" as ExprSyntax }, separator: ", ")]
+        public static var allColumns: [any \(moduleName).TableColumnExpression] { \
+        [\(allColumns.map { "QueryValue.columns.\($0)" as ExprSyntax }, separator: ", ")]
         }
-        }\(draft)
+        }\(draft)\(typeAliases, separator: "\n")
         public static let columns = TableColumns()
-        public static let tableName = \(tableName)
-        public init(decoder: some \(moduleName).QueryDecoder) throws {
-        \(decodings, separator: "\n")
-        }\(initFromOther)
+        public static let tableName = \(tableName)\(initDecoder)\(initFromOther)
         }
         """
       )

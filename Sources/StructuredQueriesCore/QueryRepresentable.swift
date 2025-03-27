@@ -20,6 +20,8 @@ extension QueryRepresentable where Self: QueryDecodable, Self == QueryOutput {
   }
 }
 
+extension [UInt8]: QueryRepresentable {}
+
 extension Bool: QueryRepresentable {}
 
 extension Double: QueryRepresentable {}
@@ -43,5 +45,3 @@ extension UInt8: QueryRepresentable {}
 extension UInt16: QueryRepresentable {}
 
 extension UInt32: QueryRepresentable {}
-
-extension ContiguousArray<UInt8>: QueryRepresentable {}

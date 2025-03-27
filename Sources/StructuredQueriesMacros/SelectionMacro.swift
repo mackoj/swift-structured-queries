@@ -24,7 +24,9 @@ extension SelectionMacro: ExtensionMacro {
       return []
     }
     var allColumns: [(name: TokenSyntax, type: TypeSyntax?)] = []
-    var decodings: [ExprSyntax] = []
+    var decodings: [String] = []
+    var decodingUnwrappings: [String] = []
+    var decodingAssignments: [String] = []
     var diagnostics: [Diagnostic] = []
 
     let selfRewriter = SelfRewriter(
@@ -192,9 +194,22 @@ extension SelectionMacro: ExtensionMacro {
       }
 
       allColumns.append((identifier, columnQueryValueType))
+      let decodedType = columnQueryValueType?.asNonOptionalType()
       decodings.append(
         """
-        self.\(identifier) = try decoder.decode(\(columnQueryValueType.map { "\($0).self" } ?? ""))
+        let \(identifier) = try decoder.decode(\(decodedType.map { "\($0).self" } ?? ""))
+        """
+      )
+      if columnQueryValueType.map({ !$0.isOptionalType }) ?? true {
+        decodingUnwrappings.append(
+          """
+          guard let \(identifier) else { throw QueryDecodingError.missingRequiredColumn }
+          """
+        )
+      }
+      decodingAssignments.append(
+        """
+        self.\(identifier) = \(identifier)
         """
       )
     }
@@ -227,13 +242,10 @@ extension SelectionMacro: ExtensionMacro {
       allColumns
       .map { #"\(\#($0.name).queryFragment) AS \#($0.name.text.quoted())"# }
 
-    let initDecoder: DeclSyntax? =
-      declaration.hasMacroApplication("Table")
-      ? nil
-      : """
+    let initDecoder: DeclSyntax = """
 
-      public init(decoder: some \(moduleName).QueryDecoder) throws {
-      \(decodings, separator: "\n")
+      public init(decoder: inout some \(moduleName).QueryDecoder) throws {
+      \(raw: (decodings + decodingUnwrappings + decodingAssignments).joined(separator: "\n"))
       }
       """
     return [

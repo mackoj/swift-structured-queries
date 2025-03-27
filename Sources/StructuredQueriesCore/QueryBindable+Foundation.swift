@@ -4,11 +4,11 @@ import Foundation
 
 extension Data: QueryBindable {
   public var queryBinding: QueryBinding {
-    .blob(ContiguousArray(self))
+    .blob([UInt8](self))
   }
 
-  public init(decoder: some QueryDecoder) throws {
-    try self.init(decoder.decode(ContiguousArray.self))
+  public init(decoder: inout some QueryDecoder) throws {
+    try self.init([UInt8](decoder: &decoder))
   }
 }
 
@@ -17,8 +17,8 @@ extension URL: QueryBindable {
     .text(absoluteString)
   }
 
-  public init(decoder: some QueryDecoder) throws {
-    guard let url = Self(string: try decoder.decode(String.self)) else {
+  public init(decoder: inout some QueryDecoder) throws {
+    guard let url = Self(string: try String(decoder: &decoder)) else {
       throw InvalidURL()
     }
     self = url

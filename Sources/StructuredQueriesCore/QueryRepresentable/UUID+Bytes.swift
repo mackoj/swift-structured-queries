@@ -12,13 +12,13 @@ extension UUID {
 
 extension UUID.BytesRepresentation: QueryBindable {
   public var queryBinding: QueryBinding {
-    .blob(withUnsafeBytes(of: queryOutput.uuid, ContiguousArray<UInt8>.init(_:)))
+    .blob(withUnsafeBytes(of: queryOutput.uuid, [UInt8].init))
   }
 }
 
 extension UUID.BytesRepresentation: QueryDecodable {
-  public init(decoder: some QueryDecoder) throws {
-    let queryOutput = try decoder.decode(ContiguousArray<UInt8>.self)
+  public init(decoder: inout some QueryDecoder) throws {
+    let queryOutput = try [UInt8](decoder: &decoder)
     guard queryOutput.count == 16 else {
       throw InvalidBytes()
     }
@@ -34,6 +34,6 @@ extension UUID.BytesRepresentation: QueryDecodable {
 
 extension UUID.BytesRepresentation: SQLiteType {
   public static var typeAffinity: SQLiteTypeAffinity {
-    ContiguousArray.typeAffinity
+    [UInt8].typeAffinity
   }
 }

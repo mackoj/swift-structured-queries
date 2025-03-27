@@ -1,6 +1,6 @@
 import StructuredQueries
 
-struct SimpleSelect<QueryValue>: Statement {
+struct SimpleSelect<QueryValue>: _SelectStatement {
   typealias From = Never
 
   var query: QueryFragment
@@ -11,6 +11,7 @@ struct SimpleSelect<QueryValue>: Statement {
     query = "SELECT \(selection().queryFragment)"
   }
 
+  @_disfavoredOverload
   init<each C: QueryExpression>(
     _ selection: () -> (repeat each C)
   )

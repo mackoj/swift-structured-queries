@@ -18,7 +18,12 @@ extension SnapshotTests {
         .returning(\.self)
       ) {
         """
-        INSERT INTO "reminders" ("remindersListID", "title", "isCompleted", "date", "priority") VALUES (1, 'Groceries', 1, '2001-01-01 00:00:00.000', 3), (2, 'Haircut', 0, '1970-01-01 00:00:00.000', 1) ON CONFLICT DO UPDATE SET "title" = ("reminders"."title" || ' Copy') RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        INSERT INTO "reminders"
+        ("remindersListID", "title", "isCompleted", "date", "priority")
+        VALUES
+        (1, 'Groceries', 1, '2001-01-01 00:00:00.000', 3), (2, 'Haircut', 0, '1970-01-01 00:00:00.000', 1)
+        ON CONFLICT DO UPDATE SET "title" = ("reminders"."title" || ' Copy')
+        RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
         """
       } results: {
         """
@@ -58,7 +63,11 @@ extension SnapshotTests {
           .returning(\.self)
       ) {
         """
-        INSERT INTO "reminders" ("remindersListID") VALUES (1) RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        INSERT INTO "reminders"
+        ("remindersListID")
+        VALUES
+        (1)
+        RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
         """
       } results: {
         """
@@ -104,7 +113,11 @@ extension SnapshotTests {
         .returning(\.id)
       ) {
         """
-        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (100, NULL, NULL, 0, 0, '', NULL, 1, 'Check email') RETURNING "reminders"."id"
+        INSERT INTO "reminders"
+        ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
+        VALUES
+        (100, NULL, NULL, 0, 0, '', NULL, 1, 'Check email')
+        RETURNING "reminders"."id"
         """
       } results: {
         """
@@ -120,7 +133,11 @@ extension SnapshotTests {
         .returning(\.id)
       ) {
         """
-        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (101, NULL, NULL, 0, 0, '', NULL, 1, 'Check voicemail') RETURNING "reminders"."id"
+        INSERT INTO "reminders"
+        ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
+        VALUES
+        (101, NULL, NULL, 0, 0, '', NULL, 1, 'Check voicemail')
+        RETURNING "reminders"."id"
         """
       } results: {
         """
@@ -137,7 +154,11 @@ extension SnapshotTests {
         .returning(\.id)
       ) {
         """
-        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (102, NULL, NULL, 0, 0, '', NULL, 1, 'Check mailbox'), (103, NULL, NULL, 0, 0, '', NULL, 1, 'Check Slack') RETURNING "reminders"."id"
+        INSERT INTO "reminders"
+        ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
+        VALUES
+        (102, NULL, NULL, 0, 0, '', NULL, 1, 'Check mailbox'), (103, NULL, NULL, 0, 0, '', NULL, 1, 'Check Slack')
+        RETURNING "reminders"."id"
         """
       } results: {
         """
@@ -154,7 +175,11 @@ extension SnapshotTests {
         .returning(\.id)
       ) {
         """
-        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (104, NULL, NULL, 0, 0, '', NULL, 1, 'Check pager') RETURNING "reminders"."id"
+        INSERT INTO "reminders"
+        ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
+        VALUES
+        (104, NULL, NULL, 0, 0, '', NULL, 1, 'Check pager')
+        RETURNING "reminders"."id"
         """
       } results: {
         """
@@ -175,7 +200,11 @@ extension SnapshotTests {
         .returning(\.self)
       ) {
         """
-        INSERT INTO "tags" ("name") SELECT lower("remindersLists"."name") FROM "remindersLists" RETURNING "tags"."id", "tags"."name"
+        INSERT INTO "tags"
+        ("name")
+        SELECT lower("remindersLists"."name")
+        FROM "remindersLists"
+        RETURNING "tags"."id", "tags"."name"
         """
       } results: {
         """
@@ -207,7 +236,11 @@ extension SnapshotTests {
         .returning(\.id)
       ) {
         """
-        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check email') RETURNING "reminders"."id"
+        INSERT INTO "reminders"
+        ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
+        VALUES
+        (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check email')
+        RETURNING "reminders"."id"
         """
       } results: {
         """
@@ -224,7 +257,11 @@ extension SnapshotTests {
         .returning(\.id)
       ) {
         """
-        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check voicemail') RETURNING "reminders"."id"
+        INSERT INTO "reminders"
+        ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
+        VALUES
+        (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check voicemail')
+        RETURNING "reminders"."id"
         """
       } results: {
         """
@@ -244,7 +281,11 @@ extension SnapshotTests {
         .returning(\.id)
       ) {
         """
-        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check mailbox'), (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check Slack') RETURNING "reminders"."id"
+        INSERT INTO "reminders"
+        ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
+        VALUES
+        (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check mailbox'), (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check Slack')
+        RETURNING "reminders"."id"
         """
       } results: {
         """
@@ -259,7 +300,9 @@ extension SnapshotTests {
     @Test func upsertWithID() {
       assertQuery(Reminder.where { $0.id == 1 }) {
         """
-        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "reminders" WHERE ("reminders"."id" = 1)
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        FROM "reminders"
+        WHERE ("reminders"."id" = 1)
         """
       } results: {
         """
@@ -284,7 +327,12 @@ extension SnapshotTests {
           .returning(\.self)
       ) {
         """
-        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (1, NULL, NULL, 0, 0, '', NULL, 1, 'Cash check') ON CONFLICT DO UPDATE SET "assignedUserID" = excluded."assignedUserID", "date" = excluded."date", "isCompleted" = excluded."isCompleted", "isFlagged" = excluded."isFlagged", "notes" = excluded."notes", "priority" = excluded."priority", "remindersListID" = excluded."remindersListID", "title" = excluded."title" RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        INSERT INTO "reminders"
+        ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
+        VALUES
+        (1, NULL, NULL, 0, 0, '', NULL, 1, 'Cash check')
+        ON CONFLICT DO UPDATE SET "assignedUserID" = "excluded"."assignedUserID", "date" = "excluded"."date", "isCompleted" = "excluded"."isCompleted", "isFlagged" = "excluded"."isFlagged", "notes" = "excluded"."notes", "priority" = "excluded"."priority", "remindersListID" = "excluded"."remindersListID", "title" = "excluded"."title"
+        RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
         """
       } results: {
         """
@@ -308,7 +356,8 @@ extension SnapshotTests {
     @Test func upsertWithoutID() {
       assertQuery(Reminder.select { $0.id.max() }) {
         """
-        SELECT max("reminders"."id") FROM "reminders"
+        SELECT max("reminders"."id")
+        FROM "reminders"
         """
       } results: {
         """
@@ -322,7 +371,12 @@ extension SnapshotTests {
           .returning(\.self)
       ) {
         """
-        INSERT INTO "reminders" ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title") VALUES (NULL, NULL, NULL, 0, 0, '', NULL, 1, '') ON CONFLICT DO UPDATE SET "assignedUserID" = excluded."assignedUserID", "date" = excluded."date", "isCompleted" = excluded."isCompleted", "isFlagged" = excluded."isFlagged", "notes" = excluded."notes", "priority" = excluded."priority", "remindersListID" = excluded."remindersListID", "title" = excluded."title" RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        INSERT INTO "reminders"
+        ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
+        VALUES
+        (NULL, NULL, NULL, 0, 0, '', NULL, 1, '')
+        ON CONFLICT DO UPDATE SET "assignedUserID" = "excluded"."assignedUserID", "date" = "excluded"."date", "isCompleted" = "excluded"."isCompleted", "isFlagged" = "excluded"."isFlagged", "notes" = "excluded"."notes", "priority" = "excluded"."priority", "remindersListID" = "excluded"."remindersListID", "title" = "excluded"."title"
+        RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
         """
       } results: {
         """

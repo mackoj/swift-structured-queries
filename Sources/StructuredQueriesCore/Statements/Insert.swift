@@ -77,13 +77,13 @@ extension Table {
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
   ) -> Insert<Self, ()> {
     var columnNames: [String] = []
-    for column in Self.columns.allColumns {
+    for column in Self.TableColumns.allColumns {
       columnNames.append(column.name)
     }
     var values: [[QueryFragment]] = []
     for row in rows() {
       var value: [QueryFragment] = []
-      for column in Self.columns.allColumns {
+      for column in Self.TableColumns.allColumns {
         func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
           Value(queryOutput: (row as! Root)[keyPath: column.keyPath]).queryFragment
         }
@@ -329,13 +329,13 @@ extension PrimaryKeyedTable {
     onConflict updates: ((inout Record<Self>) -> Void)? = nil
   ) -> Insert<Self, ()> {
     var columnNames: [String] = []
-    for column in Draft.columns.allColumns {
+    for column in Draft.TableColumns.allColumns {
       columnNames.append(column.name)
     }
     var values: [[QueryFragment]] = []
     for row in rows() {
       var value: [QueryFragment] = []
-      for column in Draft.columns.allColumns {
+      for column in Draft.TableColumns.allColumns {
         func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
           Value(queryOutput: (row as! Root)[keyPath: column.keyPath]).queryFragment
         }
@@ -358,6 +358,12 @@ extension PrimaryKeyedTable {
   }
 }
 
+private enum InsertValues {
+  case `default`
+  case values([[QueryFragment]])
+  case select(QueryFragment)
+}
+
 /// An `INSERT` statement.
 ///
 /// This type of statement is returned from ``Table/insert(or:_:values:onConflict:)-6zwu9`` and
@@ -365,7 +371,7 @@ extension PrimaryKeyedTable {
 public struct Insert<Into: Table, Returning> {
   var conflictResolution: ConflictResolution?
   var columnNames: [String] = []
-  var values: Values
+  fileprivate var values: InsertValues
   var record: Record<Into>?
   var returning: [QueryFragment] = []
 
@@ -387,12 +393,6 @@ public struct Insert<Into: Table, Returning> {
   }
 }
 
-enum Values {
-  case `default`
-  case values([[QueryFragment]])
-  case select(QueryFragment)
-}
-
 extension Insert: Statement {
   public typealias QueryValue = Returning
   public typealias From = Into
@@ -404,18 +404,20 @@ extension Insert: Statement {
     }
     query.append(" INTO \(Into.self)")
     if !columnNames.isEmpty {
-      query.append(" (\(columnNames.map { "\(quote: $0)" }.joined(separator: ", ")))")
+      query.append(
+        "\(.newlineOrSpace)(\(columnNames.map { "\(quote: $0)" }.joined(separator: ", ")))"
+      )
     }
     switch values {
     case .default:
-      query.append(" DEFAULT VALUES")
+      query.append("\(.newlineOrSpace)DEFAULT VALUES")
 
     case let .select(select):
-      query.append(" \(select)")
+      query.append("\(.newlineOrSpace)\(select)")
 
     case .values(let values):
       guard !values.isEmpty else { return "" }
-      query.append(" VALUES ")
+      query.append("\(.newlineOrSpace)VALUES\(.newlineOrSpace)")
       let values: [QueryFragment] = values.map {
         var value: QueryFragment = "("
         value.append($0.joined(separator: ", "))
@@ -426,12 +428,11 @@ extension Insert: Statement {
     }
 
     if let record {
-      query.append(
-        " ON CONFLICT DO \(record.updates.isEmpty ? "NOTHING" : "UPDATE \(bind: record)")"
-      )
+      query.append("\(.newlineOrSpace)ON CONFLICT DO ")
+      query.append(record.updates.isEmpty ? "NOTHING" : "UPDATE \(bind: record)")
     }
     if !returning.isEmpty {
-      query.append(" RETURNING \(returning.joined(separator: ", "))")
+      query.append("\(.newlineOrSpace)RETURNING \(returning.joined(separator: ", "))")
     }
     return query
   }

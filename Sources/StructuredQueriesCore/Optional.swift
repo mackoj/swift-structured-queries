@@ -15,6 +15,8 @@ extension Optional: _OptionalPromotable {
   public typealias _Optionalized = Self
 }
 
+extension [UInt8]: _OptionalPromotable where Element: _OptionalPromotable {}
+
 extension Optional: QueryBindable where Wrapped: QueryBindable {
   public typealias QueryValue = Wrapped.QueryValue?
 
@@ -26,11 +28,11 @@ extension Optional: QueryBindable where Wrapped: QueryBindable {
 extension Optional: QueryDecodable where Wrapped: QueryDecodable {
   @inlinable
   @inline(__always)
-  public init(decoder: some QueryDecoder) throws {
-    if try decoder.decodeNil() {
-      self = .none
-    } else {
-      self = try decoder.decode(Wrapped.self)
+  public init(decoder: inout some QueryDecoder) throws {
+    do {
+      self = try Wrapped(decoder: &decoder)
+    } catch QueryDecodingError.missingRequiredColumn {
+      self = nil
     }
   }
 }
@@ -60,5 +62,53 @@ extension Optional: QueryRepresentable where Wrapped: QueryRepresentable {
   @inline(__always)
   public var queryOutput: Wrapped.QueryOutput? {
     self?.queryOutput
+  }
+}
+
+extension Optional: Table where Wrapped: Table {
+  public static var tableName: String {
+    Wrapped.tableName
+  }
+
+  public static var columns: TableColumns {
+    TableColumns()
+  }
+
+  fileprivate subscript<Member: QueryRepresentable>(
+    member _: KeyPath<Member, Member> & Sendable,
+    column keyPath: KeyPath<Wrapped, Member.QueryOutput> & Sendable
+  ) -> Member.QueryOutput? {
+    self?[keyPath: keyPath]
+  }
+
+  @dynamicMemberLookup
+  public struct TableColumns: Schema {
+    public typealias QueryValue = Optional
+
+    public static var allColumns: [any TableColumnExpression] {
+      Wrapped.TableColumns.allColumns
+    }
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Wrapped.TableColumns, TableColumn<Wrapped, Member>>
+    ) -> TableColumn<Optional, Member?> {
+      let column = Wrapped.columns[keyPath: keyPath]
+      return TableColumn<Optional, Member?>(
+        column.name,
+        keyPath: \.[member: \Member.self, column: column._keyPath]
+      )
+    }
+  }
+}
+
+extension Optional: PrimaryKeyedTable where Wrapped: PrimaryKeyedTable {
+  public typealias Draft = Wrapped.Draft?
+}
+
+extension Optional.TableColumns: PrimaryKeyedSchema where Wrapped.TableColumns: PrimaryKeyedSchema {
+  public typealias PrimaryKey = Wrapped.TableColumns.PrimaryKey?
+
+  public var primaryKey: TableColumn<Optional, Wrapped.TableColumns.PrimaryKey.QueryValue?> {
+    self[dynamicMember: \.primaryKey]
   }
 }

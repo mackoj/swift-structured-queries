@@ -37,7 +37,7 @@ extension Table {
   }
 
   public static func join<
-    each C: QueryDecodable,
+    each C: QueryRepresentable,
     F: Table,
     each J: Table
   >(
@@ -51,7 +51,7 @@ extension Table {
 
   // NB: Optimization
   @_documentation(visibility: private)
-  public static func join<each C: QueryDecodable, F: Table>(
+  public static func join<each C: QueryRepresentable, F: Table>(
     _ other: Select<(repeat each C), F, ()>,
     on constraint: (
       (TableColumns, F.TableColumns)
@@ -61,59 +61,7 @@ extension Table {
   }
 
   public static func leftJoin<
-    each C: QueryDecodable,
-    F: Table,
-    each J: Table
-  >(
-    _ other: Select<(repeat each C), F, (repeat each J)>,
-    on constraint: (
-      (TableColumns, F.TableColumns, repeat (each J).TableColumns)
-    ) -> some QueryExpression<Bool>
-  ) -> Select<(repeat (each C)._Optionalized), Self, (Outer<F>, repeat Outer<each J>)> {
-    let select = all().leftJoin(other, on: constraint)
-    return select
-  }
-
-  // NB: Optimization
-  @_documentation(visibility: private)
-  public static func leftJoin<each C: QueryDecodable, F: Table>(
-    _ other: Select<(repeat each C), F, ()>,
-    on constraint: (
-      (TableColumns, F.TableColumns)
-    ) -> some QueryExpression<Bool>
-  ) -> Select<(repeat (each C)._Optionalized), Self, Outer<F>> {
-    let select = all().leftJoin(other, on: constraint)
-    return select
-  }
-
-  public static func rightJoin<
-    each C: QueryDecodable,
-    F: Table,
-    each J: Table
-  >(
-    _ other: Select<(repeat each C), F, (repeat each J)>,
-    on constraint: (
-      (TableColumns, F.TableColumns, repeat (each J).TableColumns)
-    ) -> some QueryExpression<Bool>
-  ) -> Select<(repeat each C), Outer<Self>, (F, repeat each J)> {
-    let select = all().rightJoin(other, on: constraint)
-    return select
-  }
-
-  // NB: Optimization
-  @_documentation(visibility: private)
-  public static func rightJoin<each C: QueryDecodable, F: Table>(
-    _ other: Select<(repeat each C), F, ()>,
-    on constraint: (
-      (TableColumns, F.TableColumns)
-    ) -> some QueryExpression<Bool>
-  ) -> Select<(repeat each C), Outer<Self>, F> {
-    let select = all().rightJoin(other, on: constraint)
-    return select
-  }
-
-  public static func fullJoin<
-    each C: QueryDecodable,
+    each C: QueryRepresentable,
     F: Table,
     each J: Table
   >(
@@ -123,8 +71,64 @@ extension Table {
     ) -> some QueryExpression<Bool>
   ) -> Select<
     (repeat (each C)._Optionalized),
-    Outer<Self>,
-    (Outer<F>, repeat Outer<each J>)
+    Self,
+    (F._Optionalized, repeat (each J)._Optionalized)
+  > {
+    let select = all().leftJoin(other, on: constraint)
+    return select
+  }
+
+  // NB: Optimization
+  @_documentation(visibility: private)
+  public static func leftJoin<each C: QueryRepresentable, F: Table>(
+    _ other: Select<(repeat each C), F, ()>,
+    on constraint: (
+      (TableColumns, F.TableColumns)
+    ) -> some QueryExpression<Bool>
+  ) -> Select<(repeat (each C)._Optionalized), Self, F._Optionalized> {
+    let select = all().leftJoin(other, on: constraint)
+    return select
+  }
+
+  public static func rightJoin<
+    each C: QueryRepresentable,
+    F: Table,
+    each J: Table
+  >(
+    _ other: Select<(repeat each C), F, (repeat each J)>,
+    on constraint: (
+      (TableColumns, F.TableColumns, repeat (each J).TableColumns)
+    ) -> some QueryExpression<Bool>
+  ) -> Select<(repeat each C), Self._Optionalized, (F, repeat each J)> {
+    let select = all().rightJoin(other, on: constraint)
+    return select
+  }
+
+  // NB: Optimization
+  @_documentation(visibility: private)
+  public static func rightJoin<each C: QueryRepresentable, F: Table>(
+    _ other: Select<(repeat each C), F, ()>,
+    on constraint: (
+      (TableColumns, F.TableColumns)
+    ) -> some QueryExpression<Bool>
+  ) -> Select<(repeat each C), Self._Optionalized, F> {
+    let select = all().rightJoin(other, on: constraint)
+    return select
+  }
+
+  public static func fullJoin<
+    each C: QueryRepresentable,
+    F: Table,
+    each J: Table
+  >(
+    _ other: Select<(repeat each C), F, (repeat each J)>,
+    on constraint: (
+      (TableColumns, F.TableColumns, repeat (each J).TableColumns)
+    ) -> some QueryExpression<Bool>
+  ) -> Select<
+    (repeat (each C)._Optionalized),
+    Self._Optionalized,
+    (F._Optionalized, repeat (each J)._Optionalized)
   > {
     let select = all().fullJoin(other, on: constraint)
     return select
@@ -132,12 +136,12 @@ extension Table {
 
   // NB: Optimization
   @_documentation(visibility: private)
-  public static func fullJoin<each C: QueryDecodable, F: Table>(
+  public static func fullJoin<each C: QueryRepresentable, F: Table>(
     _ other: Select<(repeat each C), F, ()>,
     on constraint: (
       (TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
-  ) -> Select<(repeat (each C)._Optionalized), Outer<Self>, Outer<F>> {
+  ) -> Select<(repeat (each C)._Optionalized), Self._Optionalized, F._Optionalized> {
     let select = all().fullJoin(other, on: constraint)
     return select
   }
@@ -204,7 +208,6 @@ extension Table {
 public struct Select<Columns, From: Table, Joins> {
   // NB: A parameter pack compiler crash forces us to heap-allocate this storage.
   private struct Clauses {
-    var ctes: [CommonTableExpressionClause] = []
     var distinct = false
     var columns: [any QueryExpression] = []
     var joins: [JoinClause] = []
@@ -216,11 +219,6 @@ public struct Select<Columns, From: Table, Joins> {
   }
   @CopyOnWrite private var clauses = Clauses()
 
-  fileprivate var ctes: [CommonTableExpressionClause] {
-    get { clauses.ctes }
-    set { clauses.ctes = newValue }
-    _modify { yield &clauses.ctes }
-  }
   fileprivate var distinct: Bool {
     get { clauses.distinct }
     set { clauses.distinct = newValue }
@@ -263,7 +261,6 @@ public struct Select<Columns, From: Table, Joins> {
   }
 
   fileprivate init(
-    ctes: [CommonTableExpressionClause],
     distinct: Bool,
     columns: [any QueryExpression],
     joins: [JoinClause],
@@ -274,7 +271,6 @@ public struct Select<Columns, From: Table, Joins> {
     limit: LimitClause?
   ) {
     self.columns = columns
-    self.ctes = ctes
     self.distinct = distinct
     self.joins = joins
     self.where = `where`
@@ -286,10 +282,6 @@ public struct Select<Columns, From: Table, Joins> {
 }
 
 extension Select {
-  init(ctes: [CommonTableExpressionClause]) {
-    self.ctes = ctes
-  }
-
   init(where: [QueryFragment] = []) {
     self.where = `where`
   }
@@ -322,6 +314,15 @@ extension Select {
   ) -> Select<(repeat each C1, C2.QueryValue), From, ()>
   where Columns == (repeat each C1), C2.QueryValue: QueryRepresentable, Joins == () {
     select { $0[keyPath: selection] }
+  }
+
+  // NB: This overload is required for common table expressions with join clauses to avoid compiler bug
+  @_disfavoredOverload
+  public func select<C: QueryExpression, each J: Table>(
+    _ selection: ((From.TableColumns, repeat (each J).TableColumns)) -> C
+  ) -> Select<C.QueryValue, From, (repeat each J)>
+  where Columns == (), C.QueryValue: QueryRepresentable, Joins == (repeat each J) {
+    _select(selection)
   }
 
   public func select<each C1: QueryRepresentable, C2: QueryExpression>(
@@ -406,7 +407,6 @@ extension Select {
     Joins == (repeat each J)
   {
     Select<(repeat each C1, repeat (each C2).QueryValue), From, (repeat each J)>(
-      ctes: ctes,
       distinct: distinct,
       columns: columns + Array(repeat each selection((From.columns, repeat (each J).columns))),
       joins: joins,
@@ -425,8 +425,8 @@ extension Select {
   }
 
   public func join<
-    each C1: QueryDecodable,
-    each C2: QueryDecodable,
+    each C1: QueryRepresentable,
+    each C2: QueryRepresentable,
     F: Table,
     each J1: Table,
     each J2: Table
@@ -450,7 +450,6 @@ extension Select {
       )
     )
     return Select<(repeat each C1, repeat each C2), From, (repeat each J1, F, repeat each J2)>(
-      ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -464,7 +463,9 @@ extension Select {
 
   // NB: Optimization
   @_documentation(visibility: private)
-  public func join<each C1: QueryDecodable, each C2: QueryDecodable, F: Table, each J: Table>(
+  public func join<
+    each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table, each J: Table
+  >(
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(repeat each C2), F, ()>,
     on constraint: (
@@ -481,7 +482,34 @@ extension Select {
       )
     )
     return Select<(repeat each C1, repeat each C2), From, (repeat each J, F)>(
-      ctes: ctes + other.ctes,  // TODO: get test coverage
+      distinct: distinct || other.distinct,
+      columns: columns + other.columns,
+      joins: joins + [join] + other.joins,
+      where: `where` + other.where,
+      group: group + other.group,
+      having: having + other.having,
+      order: order + other.order,
+      limit: other.limit ?? limit
+    )
+  }
+
+  @_documentation(visibility: private)
+  public func join<F: Table, each J: Table>(
+    // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
+    _ other: any SelectStatement<(), F, (repeat each J)>,
+    on constraint: (
+      (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
+    ) -> some QueryExpression<Bool>
+  ) -> Select<QueryValue, From, (F, repeat each J)> where QueryValue: QueryRepresentable {
+    let other = other.all()
+    let join = JoinClause(
+      operator: nil,
+      table: F.self,
+      constraint: constraint(
+        (From.columns, F.columns, repeat (each J).columns)
+      )
+    )
+    return Select<QueryValue, From, (F, repeat each J)>(
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -494,8 +522,8 @@ extension Select {
   }
 
   public func leftJoin<
-    each C1: QueryDecodable,
-    each C2: QueryDecodable,
+    each C1: QueryRepresentable,
+    each C2: QueryRepresentable,
     F: Table,
     each J1: Table,
     each J2: Table
@@ -511,7 +539,7 @@ extension Select {
   ) -> Select<
     (repeat each C1, repeat (each C2)._Optionalized),
     From,
-    (repeat each J1, Outer<F>, repeat Outer<each J2>)
+    (repeat each J1, F._Optionalized, repeat (each J2)._Optionalized)
   >
   where Columns == (repeat each C1), Joins == (repeat each J1) {
     let other = other.all()
@@ -525,9 +553,8 @@ extension Select {
     return Select<
       (repeat each C1, repeat (each C2)._Optionalized),
       From,
-      (repeat each J1, Outer<F>, repeat Outer<(each J2)>)
+      (repeat each J1, F._Optionalized, repeat (each J2)._Optionalized)
     >(
-      ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -541,7 +568,9 @@ extension Select {
 
   // NB: Optimization
   @_documentation(visibility: private)
-  public func leftJoin<each C1: QueryDecodable, each C2: QueryDecodable, F: Table, each J: Table>(
+  public func leftJoin<
+    each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table, each J: Table
+  >(
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(repeat each C2), F, ()>,
     on constraint: (
@@ -550,7 +579,7 @@ extension Select {
   ) -> Select<
     (repeat each C1, repeat (each C2)._Optionalized),
     From,
-    (repeat each J, Outer<F>)
+    (repeat each J, F._Optionalized)
   >
   where Columns == (repeat each C1), Joins == (repeat each J) {
     let other = other.all()
@@ -564,9 +593,38 @@ extension Select {
     return Select<
       (repeat each C1, repeat (each C2)._Optionalized),
       From,
-      (repeat each J, Outer<F>)
+      (repeat each J, F._Optionalized)
     >(
-      ctes: ctes + other.ctes,  // TODO: get test coverage
+      distinct: distinct || other.distinct,
+      columns: columns + other.columns,
+      joins: joins + [join] + other.joins,
+      where: `where` + other.where,
+      group: group + other.group,
+      having: having + other.having,
+      order: order + other.order,
+      limit: other.limit ?? limit
+    )
+  }
+
+  // NB: Optimization
+  @_documentation(visibility: private)
+  public func leftJoin<F: Table, each J: Table>(
+    // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
+    _ other: any SelectStatement<(), F, (repeat each J)>,
+    on constraint: (
+      (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
+    ) -> some QueryExpression<Bool>
+  ) -> Select<QueryValue, From, (F._Optionalized, repeat (each J)._Optionalized)>
+  where QueryValue: QueryRepresentable {
+    let other = other.all()
+    let join = JoinClause(
+      operator: .left,
+      table: F.self,
+      constraint: constraint(
+        (From.columns, F.columns, repeat (each J).columns)
+      )
+    )
+    return Select<QueryValue, From, (F._Optionalized, repeat (each J)._Optionalized)>(
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -579,8 +637,8 @@ extension Select {
   }
 
   public func rightJoin<
-    each C1: QueryDecodable,
-    each C2: QueryDecodable,
+    each C1: QueryRepresentable,
+    each C2: QueryRepresentable,
     F: Table,
     each J1: Table,
     each J2: Table
@@ -595,8 +653,8 @@ extension Select {
     ) -> some QueryExpression<Bool>
   ) -> Select<
     (repeat (each C1)._Optionalized, repeat each C2),
-    Outer<From>,
-    (repeat Outer<each J1>, F, repeat each J2)
+    From._Optionalized,
+    (repeat (each J1)._Optionalized, F, repeat each J2)
   >
   where Columns == (repeat each C1), Joins == (repeat each J1) {
     let other = other.all()
@@ -609,10 +667,9 @@ extension Select {
     )
     return Select<
       (repeat (each C1)._Optionalized, repeat each C2),
-      Outer<From>,
-      (repeat Outer<each J1>, F, repeat each J2)
+      From._Optionalized,
+      (repeat (each J1)._Optionalized, F, repeat each J2)
     >(
-      ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -626,7 +683,9 @@ extension Select {
 
   // NB: Optimization
   @_documentation(visibility: private)
-  public func rightJoin<each C1: QueryDecodable, each C2: QueryDecodable, F: Table, each J: Table>(
+  public func rightJoin<
+    each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table, each J: Table
+  >(
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(repeat each C2), F, ()>,
     on constraint: (
@@ -634,8 +693,8 @@ extension Select {
     ) -> some QueryExpression<Bool>
   ) -> Select<
     (repeat (each C1)._Optionalized, repeat each C2),
-    Outer<From>,
-    (repeat Outer<each J>, F)
+    From._Optionalized,
+    (repeat (each J)._Optionalized, F)
   >
   where Columns == (repeat each C1), Joins == (repeat each J) {
     let other = other.all()
@@ -648,10 +707,39 @@ extension Select {
     )
     return Select<
       (repeat (each C1)._Optionalized, repeat each C2),
-      Outer<From>,
-      (repeat Outer<each J>, F)
+      From._Optionalized,
+      (repeat (each J)._Optionalized, F)
     >(
-      ctes: ctes + other.ctes,  // TODO: get test coverage
+      distinct: distinct || other.distinct,
+      columns: columns + other.columns,
+      joins: joins + [join] + other.joins,
+      where: `where` + other.where,
+      group: group + other.group,
+      having: having + other.having,
+      order: order + other.order,
+      limit: other.limit ?? limit
+    )
+  }
+
+  // NB: Optimization
+  @_documentation(visibility: private)
+  public func rightJoin<F: Table, each J: Table>(
+    // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
+    _ other: any SelectStatement<(), F, (repeat each J)>,
+    on constraint: (
+      (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
+    ) -> some QueryExpression<Bool>
+  ) -> Select<QueryValue, From._Optionalized, (F, repeat each J)>
+  where QueryValue: QueryRepresentable {
+    let other = other.all()
+    let join = JoinClause(
+      operator: .right,
+      table: F.self,
+      constraint: constraint(
+        (From.columns, F.columns, repeat (each J).columns)
+      )
+    )
+    return Select<QueryValue, From._Optionalized, (F, repeat each J)>(
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -664,8 +752,8 @@ extension Select {
   }
 
   public func fullJoin<
-    each C1: QueryDecodable,
-    each C2: QueryDecodable,
+    each C1: QueryRepresentable,
+    each C2: QueryRepresentable,
     F: Table,
     each J1: Table,
     each J2: Table
@@ -680,8 +768,8 @@ extension Select {
     ) -> some QueryExpression<Bool>
   ) -> Select<
     (repeat (each C1)._Optionalized, repeat (each C2)._Optionalized),
-    Outer<From>,
-    (repeat Outer<each J1>, Outer<F>, repeat Outer<each J2>)
+    From._Optionalized,
+    (repeat (each J1)._Optionalized, F._Optionalized, repeat (each J2)._Optionalized)
   >
   where Columns == (repeat each C1), Joins == (repeat each J1) {
     let other = other.all()
@@ -694,10 +782,9 @@ extension Select {
     )
     return Select<
       (repeat (each C1)._Optionalized, repeat (each C2)._Optionalized),
-      Outer<From>,
-      (repeat Outer<each J1>, Outer<F>, repeat Outer<each J2>)
+      From._Optionalized,
+      (repeat (each J1)._Optionalized, F._Optionalized, repeat (each J2)._Optionalized)
     >(
-      ctes: ctes + other.ctes,  // TODO: get test coverage
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -711,7 +798,9 @@ extension Select {
 
   // NB: Optimization
   @_documentation(visibility: private)
-  public func fullJoin<each C1: QueryDecodable, each C2: QueryDecodable, F: Table, each J: Table>(
+  public func fullJoin<
+    each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table, each J: Table
+  >(
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(repeat each C2), F, ()>,
     on constraint: (
@@ -719,8 +808,8 @@ extension Select {
     ) -> some QueryExpression<Bool>
   ) -> Select<
     (repeat (each C1)._Optionalized, repeat (each C2)._Optionalized),
-    Outer<From>,
-    (repeat Outer<each J>, Outer<F>)
+    From._Optionalized,
+    (repeat (each J)._Optionalized, F._Optionalized)
   >
   where Columns == (repeat each C1), Joins == (repeat each J) {
     let other = other.all()
@@ -733,10 +822,39 @@ extension Select {
     )
     return Select<
       (repeat (each C1)._Optionalized, repeat (each C2)._Optionalized),
-      Outer<From>,
-      (repeat Outer<each J>, Outer<F>)
+      From._Optionalized,
+      (repeat (each J)._Optionalized, F._Optionalized)
     >(
-      ctes: ctes + other.ctes,  // TODO: get test coverage
+      distinct: distinct || other.distinct,
+      columns: columns + other.columns,
+      joins: joins + [join] + other.joins,
+      where: `where` + other.where,
+      group: group + other.group,
+      having: having + other.having,
+      order: order + other.order,
+      limit: other.limit ?? limit
+    )
+  }
+
+  // NB: Optimization
+  @_documentation(visibility: private)
+  public func fullJoin<F: Table, each J: Table>(
+    // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
+    _ other: any SelectStatement<(), F, (repeat each J)>,
+    on constraint: (
+      (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
+    ) -> some QueryExpression<Bool>
+  ) -> Select<QueryValue, From._Optionalized, (F._Optionalized, repeat (each J)._Optionalized)>
+  where QueryValue: QueryRepresentable {
+    let other = other.all()
+    let join = JoinClause(
+      operator: .full,
+      table: F.self,
+      constraint: constraint(
+        (From.columns, F.columns, repeat (each J).columns)
+      )
+    )
+    return Select<QueryValue, From._Optionalized, (F._Optionalized, repeat (each J)._Optionalized)>(
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -863,7 +981,6 @@ extension Select {
       SQLQueryExpression(iterator.next()!.queryFragment)
     }
     return Select<(repeat (each C2).QueryValue), From, Joins>(
-      ctes: ctes,
       distinct: distinct,
       columns: Array(repeat each transform(repeat { _ in next() }((each C1).self))),
       joins: joins,
@@ -894,7 +1011,6 @@ public func + <
   return Select<
     (repeat each C1, repeat each C2), From, (repeat each J1, repeat each J2)
   >(
-    ctes: lhs.ctes + rhs.ctes,  // TODO: get test coverage
     distinct: lhs.distinct || rhs.distinct,
     columns: lhs.columns + rhs.columns,
     joins: lhs.joins + rhs.joins,
@@ -914,42 +1030,36 @@ extension Select: SelectStatement {
   }
 
   public var query: QueryFragment {
-    var query: QueryFragment = ""
-    if !ctes.isEmpty {
-      query.append("WITH ")
-      query.append(ctes.map(\.queryFragment).joined(separator: ", "))
-      query.append(" ")
-    }
+    var query: QueryFragment = "SELECT"
     let columns =
       columns.isEmpty
       ? [From.columns.queryFragment] + joins.map { $0.table.columns.queryFragment }
       : columns.map(\.queryFragment)
-    query.append("SELECT")
     if distinct {
       query.append(" DISTINCT")
     }
     query.append(" \(columns.joined(separator: ", "))")
-    query.append(" FROM \(quote: From.tableName)")
+    query.append("\(.newlineOrSpace)FROM \(quote: From.tableName)")
     if let tableAlias = From.tableAlias {
       query.append(" AS \(quote: tableAlias)")
     }
     for join in joins {
-      query.append(" \(join)")
+      query.append("\(.newlineOrSpace)\(join)")
     }
     if !`where`.isEmpty {
-      query.append(" WHERE \(`where`.joined(separator: " AND "))")
+      query.append("\(.newlineOrSpace)WHERE \(`where`.joined(separator: " AND "))")
     }
     if !group.isEmpty {
-      query.append(" GROUP BY \(group.joined(separator: ", "))")
+      query.append("\(.newlineOrSpace)GROUP BY \(group.joined(separator: ", "))")
     }
     if !having.isEmpty {
-      query.append(" HAVING \(having.joined(separator: " AND "))")
+      query.append("\(.newlineOrSpace)HAVING \(having.joined(separator: " AND "))")
     }
     if !order.isEmpty {
-      query.append(" ORDER BY \(order.joined(separator: ", "))")
+      query.append("\(.newlineOrSpace)ORDER BY \(order.joined(separator: ", "))")
     }
     if let limit {
-      query.append(" \(limit)")
+      query.append("\(.newlineOrSpace)\(limit)")
     }
     return query
   }
@@ -1003,7 +1113,9 @@ private struct LimitClause: QueryExpression {
   let maxLength: QueryFragment
   let offset: QueryFragment?
 
-  init(maxLength: some QueryExpression, offset: (some QueryExpression)? = Never?.none) {
+  init(
+    maxLength: some QueryExpression, offset: (some QueryExpression)? = _EmptyQueryExpression?.none
+  ) {
     self.maxLength = maxLength.queryFragment
     self.offset = offset?.queryFragment
   }

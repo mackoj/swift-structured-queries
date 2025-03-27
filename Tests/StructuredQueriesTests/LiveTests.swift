@@ -9,7 +9,8 @@ extension SnapshotTests {
     @Test func selectAll() {
       assertQuery(Reminder.all()) {
         """
-        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "reminders"
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        FROM "reminders"
         """
       } results: {
         #"""
@@ -147,11 +148,16 @@ extension SnapshotTests {
       assertQuery(
         Reminder
           .select { ($0.title, $0.priority, averagePriority) }
-          .where { #sql("\($0.priority) < \(averagePriority)") || $0.priority == nil }
+          .where { #sql("\($0.priority) < (\(averagePriority))") || $0.priority == nil }
           .order { $0.priority.desc() }
       ) {
         """
-        SELECT "reminders"."title", "reminders"."priority", (SELECT avg(CAST("reminders"."priority" AS NUMERIC)) FROM "reminders") FROM "reminders" WHERE ("reminders"."priority" < (SELECT avg(CAST("reminders"."priority" AS NUMERIC)) FROM "reminders") OR ("reminders"."priority" IS NULL)) ORDER BY "reminders"."priority" DESC
+        SELECT "reminders"."title", "reminders"."priority", (SELECT avg(CAST("reminders"."priority" AS NUMERIC))
+        FROM "reminders")
+        FROM "reminders"
+        WHERE ("reminders"."priority" < (SELECT avg(CAST("reminders"."priority" AS NUMERIC))
+        FROM "reminders") OR ("reminders"."priority" IS NULL))
+        ORDER BY "reminders"."priority" DESC
         """
       } results: {
         """
@@ -176,7 +182,10 @@ extension SnapshotTests {
           .select { ($0, $1.id.count()) }
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", count("reminders"."id") FROM "remindersLists" JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID") GROUP BY "remindersLists"."id"
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", count("reminders"."id")
+        FROM "remindersLists"
+        JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        GROUP BY "remindersLists"."id"
         """
       } results: {
         """
@@ -212,7 +221,11 @@ extension SnapshotTests {
           .select { ($0, $2.name.groupConcat()) }
       ) {
         """
-        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", group_concat("tags"."name") FROM "reminders" JOIN "remindersTags" ON ("reminders"."id" = "remindersTags"."reminderID") JOIN "tags" ON ("remindersTags"."tagID" = "tags"."id") GROUP BY "reminders"."id"
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", group_concat("tags"."name")
+        FROM "reminders"
+        JOIN "remindersTags" ON ("reminders"."id" = "remindersTags"."reminderID")
+        JOIN "tags" ON ("remindersTags"."tagID" = "tags"."id")
+        GROUP BY "reminders"."id"
         """
       } results: {
         """

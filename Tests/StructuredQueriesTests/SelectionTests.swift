@@ -6,7 +6,8 @@ import Testing
 extension SnapshotTests {
   @Suite struct SelectionTests {
     @Test func remindersListAndReminderCount() {
-      let baseQuery = RemindersList
+      let baseQuery =
+        RemindersList
         .group(by: \.id)
         .limit(2)
         .join(Reminder.all()) { $0.id.eq($1.remindersListID) }
@@ -18,7 +19,11 @@ extension SnapshotTests {
           }
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name" AS "remindersList", count("reminders"."id") AS "remindersCount" FROM "remindersLists" JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID") GROUP BY "remindersLists"."id" LIMIT 2
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name" AS "remindersList", count("reminders"."id") AS "remindersCount"
+        FROM "remindersLists"
+        JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        GROUP BY "remindersLists"."id"
+        LIMIT 2
         """
       } results: {
         """
@@ -49,7 +54,11 @@ extension SnapshotTests {
           .map { RemindersListAndReminderCount.Columns(remindersList: $1, remindersCount: $0) }
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name" AS "remindersList", count("reminders"."id") AS "remindersCount" FROM "remindersLists" JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID") GROUP BY "remindersLists"."id" LIMIT 2
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name" AS "remindersList", count("reminders"."id") AS "remindersCount"
+        FROM "remindersLists"
+        JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        GROUP BY "remindersLists"."id"
+        LIMIT 2
         """
       } results: {
         """
@@ -89,7 +98,10 @@ extension SnapshotTests {
           }
       ) {
         """
-        SELECT "reminders"."title" AS "reminderTitle", "users"."name" AS "assignedUserName" FROM "reminders" LEFT JOIN "users" ON ("reminders"."assignedUserID" = "users"."id") LIMIT 2
+        SELECT "reminders"."title" AS "reminderTitle", "users"."name" AS "assignedUserName"
+        FROM "reminders"
+        LEFT JOIN "users" ON ("reminders"."assignedUserID" = "users"."id")
+        LIMIT 2
         """
       } results: {
         """
@@ -115,7 +127,8 @@ extension SnapshotTests {
         }
       ) {
         """
-        SELECT "reminders"."date" AS "date" FROM "reminders"
+        SELECT "reminders"."date" AS "date"
+        FROM "reminders"
         """
       } results: {
         """

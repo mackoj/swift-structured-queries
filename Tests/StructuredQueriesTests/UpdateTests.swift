@@ -15,7 +15,9 @@ extension SnapshotTests {
           .returning { ($0.title, $0.priority, $0.isCompleted) }
       ) {
         """
-        UPDATE "reminders" SET "isCompleted" = NOT ("reminders"."isCompleted") RETURNING "reminders"."title", "reminders"."priority", "reminders"."isCompleted"
+        UPDATE "reminders"
+        SET "isCompleted" = NOT ("reminders"."isCompleted")
+        RETURNING "reminders"."title", "reminders"."priority", "reminders"."isCompleted"
         """
       } results: {
         """
@@ -40,7 +42,10 @@ extension SnapshotTests {
           .returning { ($0.title, $0.priority, $0.isCompleted) }
       ) {
         """
-        UPDATE "reminders" SET "isCompleted" = 1 WHERE ("reminders"."priority" IS NULL) RETURNING "reminders"."title", "reminders"."priority", "reminders"."isCompleted"
+        UPDATE "reminders"
+        SET "isCompleted" = 1
+        WHERE ("reminders"."priority" IS NULL)
+        RETURNING "reminders"."title", "reminders"."priority", "reminders"."isCompleted"
         """
       } results: {
         """
@@ -64,7 +69,10 @@ extension SnapshotTests {
           .returning(\.self)
       ) {
         """
-        UPDATE "reminders" SET "assignedUserID" = 1, "date" = '2001-01-01 00:00:00.000', "isCompleted" = 1, "isFlagged" = 0, "notes" = 'Milk, Eggs, Apples', "priority" = NULL, "remindersListID" = 1, "title" = 'Groceries' WHERE ("reminders"."id" = 1) RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        UPDATE "reminders"
+        SET "assignedUserID" = 1, "date" = '2001-01-01 00:00:00.000', "isCompleted" = 1, "isFlagged" = 0, "notes" = 'Milk, Eggs, Apples', "priority" = NULL, "remindersListID" = 1, "title" = 'Groceries'
+        WHERE ("reminders"."id" = 1)
+        RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
         """
       } results: {
         """
@@ -93,7 +101,8 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        UPDATE "reminders" SET "isCompleted" = NOT ("reminders"."isCompleted")
+        UPDATE "reminders"
+        SET "isCompleted" = NOT ("reminders"."isCompleted")
         """
       }
     }
@@ -104,7 +113,8 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        UPDATE "reminders" SET "isCompleted" = NOT ("reminders"."isCompleted")
+        UPDATE "reminders"
+        SET "isCompleted" = NOT ("reminders"."isCompleted")
         """
       }
     }
@@ -118,7 +128,8 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        UPDATE "reminders" SET "title" = ("reminders"."title" || '!'), "title" = ("reminders"."title" || '?')
+        UPDATE "reminders"
+        SET "title" = ("reminders"."title" || '!'), "title" = ("reminders"."title" || '?')
         """
       }
     }
@@ -129,7 +140,8 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        UPDATE OR ABORT "reminders" SET "isCompleted" = 1
+        UPDATE OR ABORT "reminders"
+        SET "isCompleted" = 1
         """
       }
       assertInlineSnapshot(
@@ -137,7 +149,8 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        UPDATE OR FAIL "reminders" SET "isCompleted" = 1
+        UPDATE OR FAIL "reminders"
+        SET "isCompleted" = 1
         """
       }
       assertInlineSnapshot(
@@ -145,7 +158,8 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        UPDATE OR IGNORE "reminders" SET "isCompleted" = 1
+        UPDATE OR IGNORE "reminders"
+        SET "isCompleted" = 1
         """
       }
       assertInlineSnapshot(
@@ -153,7 +167,8 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        UPDATE OR REPLACE "reminders" SET "isCompleted" = 1
+        UPDATE OR REPLACE "reminders"
+        SET "isCompleted" = 1
         """
       }
       assertInlineSnapshot(
@@ -161,7 +176,8 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        UPDATE OR ROLLBACK "reminders" SET "isCompleted" = 1
+        UPDATE OR ROLLBACK "reminders"
+        SET "isCompleted" = 1
         """
       }
     }
@@ -174,7 +190,8 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        UPDATE "reminders" SET "date" = CURRENT_TIMESTAMP
+        UPDATE "reminders"
+        SET "date" = CURRENT_TIMESTAMP
         """
       }
     }

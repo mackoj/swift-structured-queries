@@ -33,9 +33,17 @@ extension SnapshotTests {
               """
             }
           }
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.player = try decoder.decode(Player.self)
-            self.team = try decoder.decode(Team.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let player = try decoder.decode(Player.self)
+            let team = try decoder.decode(Team.self)
+            guard let player else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            guard let team else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.player = player
+            self.team = team
           }
         }
         """#
@@ -87,9 +95,14 @@ extension SnapshotTests {
               """
             }
           }
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.reminderTitle = try decoder.decode(String.self)
-            self.listTitle = try decoder.decode(String?.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let reminderTitle = try decoder.decode(String.self)
+            let listTitle = try decoder.decode(String.self)
+            guard let reminderTitle else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.reminderTitle = reminderTitle
+            self.listTitle = listTitle
           }
         }
         """#
@@ -122,8 +135,12 @@ extension SnapshotTests {
               """
             }
           }
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.date = try decoder.decode(Date.ISO8601Representation.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let date = try decoder.decode(Date.ISO8601Representation.self)
+            guard let date else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.date = date
           }
         }
         """#
@@ -173,8 +190,12 @@ extension SnapshotTests {
               """
             }
           }
-          public init(decoder: some StructuredQueries.QueryDecoder) throws {
-            self.date = try decoder.decode(Date.ISO8601Representation.self)
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let date = try decoder.decode(Date.ISO8601Representation.self)
+            guard let date else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.date = date
           }
         }
         """#

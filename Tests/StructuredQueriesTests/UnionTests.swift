@@ -12,7 +12,14 @@ extension SnapshotTests {
           .union(Tag.select { ("tag", $0.name) })
       ) {
         """
-        SELECT 'reminder', "reminders"."title" FROM "reminders" UNION SELECT 'list', "remindersLists"."name" FROM "remindersLists" UNION SELECT 'tag', "tags"."name" FROM "tags"
+        SELECT 'reminder', "reminders"."title"
+        FROM "reminders"
+          UNION
+        SELECT 'list', "remindersLists"."name"
+        FROM "remindersLists"
+          UNION
+        SELECT 'tag', "tags"."name"
+        FROM "tags"
         """
       } results: {
         """
@@ -41,15 +48,28 @@ extension SnapshotTests {
 
     @Test func commonTableExpression() {
       assertQuery(
-        with(
+        With {
           Reminder.select { Name.Columns(type: "reminder", value: $0.title) }
             .union(RemindersList.select { Name.Columns(type: "list", value: $0.name) })
             .union(Tag.select { Name.Columns(type: "tag", value: $0.name) })
-        )
-        .order { ($0.type.desc(), $0.value.asc()) }
+        } query: {
+          Name.order { ($0.type.desc(), $0.value.asc()) }
+        }
       ) {
         """
-        WITH "names" AS (SELECT 'reminder' AS "type", "reminders"."title" AS "value" FROM "reminders" UNION SELECT 'list' AS "type", "remindersLists"."name" AS "value" FROM "remindersLists" UNION SELECT 'tag' AS "type", "tags"."name" AS "value" FROM "tags") SELECT "names"."type", "names"."value" FROM "names" ORDER BY "names"."type" DESC, "names"."value" ASC
+        WITH "names" AS (
+          SELECT 'reminder' AS "type", "reminders"."title" AS "value"
+          FROM "reminders"
+            UNION
+          SELECT 'list' AS "type", "remindersLists"."name" AS "value"
+          FROM "remindersLists"
+            UNION
+          SELECT 'tag' AS "type", "tags"."name" AS "value"
+          FROM "tags"
+        )
+        SELECT "names"."type", "names"."value"
+        FROM "names"
+        ORDER BY "names"."type" DESC, "names"."value" ASC
         """
       } results: {
         """

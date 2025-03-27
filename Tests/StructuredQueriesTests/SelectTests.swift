@@ -20,7 +20,8 @@ extension SnapshotTests {
     @Test func selectAll() {
       assertQuery(Tag.all()) {
         """
-        SELECT "tags"."id", "tags"."name" FROM "tags"
+        SELECT "tags"."id", "tags"."name"
+        FROM "tags"
         """
       } results: {
         """
@@ -52,7 +53,8 @@ extension SnapshotTests {
     @Test func selectDistinct() {
       assertQuery(Reminder.distinct().select(\.priority)) {
         """
-        SELECT DISTINCT "reminders"."priority" FROM "reminders"
+        SELECT DISTINCT "reminders"."priority"
+        FROM "reminders"
         """
       } results: {
         """
@@ -69,7 +71,8 @@ extension SnapshotTests {
     @Test func select() {
       assertQuery(Reminder.select { ($0.id, $0.title) }) {
         """
-        SELECT "reminders"."id", "reminders"."title" FROM "reminders"
+        SELECT "reminders"."id", "reminders"."title"
+        FROM "reminders"
         """
       } results: {
         """
@@ -92,7 +95,8 @@ extension SnapshotTests {
     @Test func selectSingleColumn() {
       assertQuery(Tag.select(\.name)) {
         """
-        SELECT "tags"."name" FROM "tags"
+        SELECT "tags"."name"
+        FROM "tags"
         """
       } results: {
         """
@@ -109,7 +113,8 @@ extension SnapshotTests {
     @Test func selectChaining() {
       assertQuery(Tag.select(\.id).select(\.name)) {
         """
-        SELECT "tags"."id", "tags"."name" FROM "tags"
+        SELECT "tags"."id", "tags"."name"
+        FROM "tags"
         """
       } results: {
         """
@@ -130,7 +135,9 @@ extension SnapshotTests {
           .join(RemindersList.select(\.id)) { $0.remindersListID.eq($1.id) }
       ) {
         """
-        SELECT "reminders"."id", "remindersLists"."id" FROM "reminders" JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
+        SELECT "reminders"."id", "remindersLists"."id"
+        FROM "reminders"
+        JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
         """
       } results: {
         """
@@ -156,7 +163,9 @@ extension SnapshotTests {
           .join(RemindersList.all()) { $0.remindersListID.eq($1.id) }
       ) {
         """
-        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "remindersLists"."id", "remindersLists"."color", "remindersLists"."name" FROM "reminders" JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "remindersLists"."id", "remindersLists"."color", "remindersLists"."name"
+        FROM "reminders"
+        JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
         """
       } results: {
         #"""
@@ -294,7 +303,9 @@ extension SnapshotTests {
           .select { ($0.name, $1.title) }
       ) {
         """
-        SELECT "remindersLists"."name", "reminders"."title" FROM "remindersLists" JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        SELECT "remindersLists"."name", "reminders"."title"
+        FROM "remindersLists"
+        JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         """
       } results: {
         """
@@ -320,7 +331,10 @@ extension SnapshotTests {
           .limit(2)
       ) {
         """
-        SELECT "reminders"."title", "users"."name" FROM "reminders" LEFT JOIN "users" ON ("reminders"."assignedUserID" = "users"."id") LIMIT 2
+        SELECT "reminders"."title", "users"."name"
+        FROM "reminders"
+        LEFT JOIN "users" ON ("reminders"."assignedUserID" = "users"."id")
+        LIMIT 2
         """
       } results: {
         """
@@ -337,7 +351,10 @@ extension SnapshotTests {
           .limit(2)
       ) {
         """
-        SELECT "users"."id", "users"."name", "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "users" RIGHT JOIN "reminders" ON ("users"."id" IS "reminders"."assignedUserID") LIMIT 2
+        SELECT "users"."id", "users"."name", "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        FROM "users"
+        RIGHT JOIN "reminders" ON ("users"."id" IS "reminders"."assignedUserID")
+        LIMIT 2
         """
       } results: {
         """
@@ -376,7 +393,10 @@ extension SnapshotTests {
           .select { ($0, $1) }
       ) {
         """
-        SELECT "users"."id", "users"."name", "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "users" RIGHT JOIN "reminders" ON ("users"."id" IS "reminders"."assignedUserID") LIMIT 2
+        SELECT "users"."id", "users"."name", "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        FROM "users"
+        RIGHT JOIN "reminders" ON ("users"."id" IS "reminders"."assignedUserID")
+        LIMIT 2
         """
       } results: {
         """
@@ -415,7 +435,10 @@ extension SnapshotTests {
           .limit(2)
       ) {
         """
-        SELECT "reminders"."title", "users"."name" FROM "users" RIGHT JOIN "reminders" ON ("users"."id" IS "reminders"."assignedUserID") LIMIT 2
+        SELECT "reminders"."title", "users"."name"
+        FROM "users"
+        RIGHT JOIN "reminders" ON ("users"."id" IS "reminders"."assignedUserID")
+        LIMIT 2
         """
       } results: {
         """
@@ -433,7 +456,10 @@ extension SnapshotTests {
           .limit(2)
       ) {
         """
-        SELECT "reminders"."title", "users"."name" FROM "reminders" FULL JOIN "users" ON ("reminders"."assignedUserID" = "users"."id") LIMIT 2
+        SELECT "reminders"."title", "users"."name"
+        FROM "reminders"
+        FULL JOIN "users" ON ("reminders"."assignedUserID" = "users"."id")
+        LIMIT 2
         """
       } results: {
         """
@@ -450,7 +476,9 @@ extension SnapshotTests {
         Reminder.where(\.isCompleted)
       ) {
         """
-        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "reminders" WHERE "reminders"."isCompleted"
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        FROM "reminders"
+        WHERE "reminders"."isCompleted"
         """
       } results: {
         """
@@ -500,7 +528,9 @@ extension SnapshotTests {
         Reminder.select { ($0.isCompleted, $0.id.count()) }.group(by: \.isCompleted)
       ) {
         """
-        SELECT "reminders"."isCompleted", count("reminders"."id") FROM "reminders" GROUP BY "reminders"."isCompleted"
+        SELECT "reminders"."isCompleted", count("reminders"."id")
+        FROM "reminders"
+        GROUP BY "reminders"."isCompleted"
         """
       } results: {
         """
@@ -520,7 +550,10 @@ extension SnapshotTests {
           .having { $0.id.count() > 3 }
       ) {
         """
-        SELECT "reminders"."isCompleted", count("reminders"."id") FROM "reminders" GROUP BY "reminders"."isCompleted" HAVING (count("reminders"."id") > 3)
+        SELECT "reminders"."isCompleted", count("reminders"."id")
+        FROM "reminders"
+        GROUP BY "reminders"."isCompleted"
+        HAVING (count("reminders"."id") > 3)
         """
       } results: {
         """
@@ -538,7 +571,9 @@ extension SnapshotTests {
           .order(by: \.title)
       ) {
         """
-        SELECT "reminders"."title" FROM "reminders" ORDER BY "reminders"."title"
+        SELECT "reminders"."title"
+        FROM "reminders"
+        ORDER BY "reminders"."title"
         """
       } results: {
         """
@@ -562,7 +597,9 @@ extension SnapshotTests {
           .order { ($0.isCompleted.asc(), $0.date.desc()) }
       ) {
         """
-        SELECT "reminders"."isCompleted", "reminders"."date" FROM "reminders" ORDER BY "reminders"."isCompleted" ASC, "reminders"."date" DESC
+        SELECT "reminders"."isCompleted", "reminders"."date"
+        FROM "reminders"
+        ORDER BY "reminders"."isCompleted" ASC, "reminders"."date" DESC
         """
       } results: {
         """
@@ -594,7 +631,9 @@ extension SnapshotTests {
           }
       ) {
         """
-        SELECT "reminders"."priority", "reminders"."date" FROM "reminders" ORDER BY "reminders"."priority" ASC NULLS LAST, "reminders"."date" DESC NULLS FIRST, ("reminders"."title" COLLATE NOCASE) DESC
+        SELECT "reminders"."priority", "reminders"."date"
+        FROM "reminders"
+        ORDER BY "reminders"."priority" ASC NULLS LAST, "reminders"."date" DESC NULLS FIRST, ("reminders"."title" COLLATE NOCASE) DESC
         """
       } results: {
         """
@@ -617,7 +656,9 @@ extension SnapshotTests {
     @Test func limit() {
       assertQuery(Reminder.select(\.id).limit(2)) {
         """
-        SELECT "reminders"."id" FROM "reminders" LIMIT 2
+        SELECT "reminders"."id"
+        FROM "reminders"
+        LIMIT 2
         """
       } results: {
         """
@@ -629,7 +670,9 @@ extension SnapshotTests {
       }
       assertQuery(Reminder.select(\.id).limit(2, offset: 2)) {
         """
-        SELECT "reminders"."id" FROM "reminders" LIMIT 2 OFFSET 2
+        SELECT "reminders"."id"
+        FROM "reminders"
+        LIMIT 2 OFFSET 2
         """
       } results: {
         """
@@ -644,7 +687,8 @@ extension SnapshotTests {
     @Test func count() {
       assertQuery(Reminder.count()) {
         """
-        SELECT count(*) FROM "reminders"
+        SELECT count(*)
+        FROM "reminders"
         """
       } results: {
         """
@@ -658,7 +702,9 @@ extension SnapshotTests {
     @Test func map() {
       assertQuery(Reminder.limit(1).select { ($0.id, $0.title) }.map { ($1, $0) }) {
         """
-        SELECT "reminders"."title", "reminders"."id" FROM "reminders" LIMIT 1
+        SELECT "reminders"."title", "reminders"."id"
+        FROM "reminders"
+        LIMIT 1
         """
       } results: {
         """
@@ -669,7 +715,9 @@ extension SnapshotTests {
       }
       assertQuery(Reminder.limit(1).select { ($0.id, $0.title) }.map { _, _ in }) {
         """
-        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" FROM "reminders" LIMIT 1
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        FROM "reminders"
+        LIMIT 1
         """
       } results: {
         """
@@ -690,7 +738,9 @@ extension SnapshotTests {
       }
       assertQuery(Reminder.limit(1).select { ($0.id, $0.title) }.map { ($1, $0) }) {
         """
-        SELECT "reminders"."title", "reminders"."id" FROM "reminders" LIMIT 1
+        SELECT "reminders"."title", "reminders"."id"
+        FROM "reminders"
+        LIMIT 1
         """
       } results: {
         """
@@ -710,7 +760,11 @@ extension SnapshotTests {
             .withReminderCount
         ) {
           """
-          SELECT "remindersLists"."name", count("reminders"."id") FROM "remindersLists" JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID") GROUP BY "remindersLists"."id" LIMIT 1
+          SELECT "remindersLists"."name", count("reminders"."id")
+          FROM "remindersLists"
+          JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+          GROUP BY "remindersLists"."id"
+          LIMIT 1
           """
         } results: {
           """

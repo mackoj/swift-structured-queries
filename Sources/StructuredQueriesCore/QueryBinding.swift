@@ -1,11 +1,23 @@
-public enum QueryBinding: Codable, Hashable, Sendable {
-  // TODO: Should this be '[UInt8]'?
-  // It would mean getting rid of '[QueryExpression]: QueryExpression', but maybe that's good
-  case blob(ContiguousArray<UInt8>)
+public enum QueryBinding: Hashable, Sendable {
+  case blob([UInt8])
   case double(Double)
   case int(Int64)
   case null
   case text(String)
+  case _invalid(QueryBindingError)
+
+  static func invalid(_ error: any Error) -> Self {
+    ._invalid(QueryBindingError(underlyingError: error))
+  }
+}
+
+public struct QueryBindingError: Error, Hashable {
+  public let underlyingError: any Error
+  public init(underlyingError: any Error) {
+    self.underlyingError = underlyingError
+  }
+  public static func == (lhs: Self, rhs: Self) -> Bool { true }
+  public func hash(into hasher: inout Hasher) {}
 }
 
 extension QueryBinding: CustomDebugStringConvertible {
@@ -25,6 +37,8 @@ extension QueryBinding: CustomDebugStringConvertible {
       return "NULL"
     case let .text(string):
       return string.quoted("'")
+    case let ._invalid(error):
+      return "<invalid: \(error.underlyingError.localizedDescription)>"
     }
   }
 }

@@ -9,7 +9,8 @@ extension SnapshotTests {
     @Test func deleteAll() {
       assertQuery(Reminder.delete().returning(\.id)) {
         """
-        DELETE FROM "reminders" RETURNING "reminders"."id"
+        DELETE FROM "reminders"
+        RETURNING "reminders"."id"
         """
       } results: {
         """
@@ -29,7 +30,8 @@ extension SnapshotTests {
       }
       assertQuery(Reminder.count()) {
         """
-        SELECT count(*) FROM "reminders"
+        SELECT count(*)
+        FROM "reminders"
         """
       } results: {
         """
@@ -43,7 +45,9 @@ extension SnapshotTests {
     @Test func deleteID1() {
       assertQuery(Reminder.delete().where { $0.id == 1 }.returning(\.self)) {
         """
-        DELETE FROM "reminders" WHERE ("reminders"."id" = 1) RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        DELETE FROM "reminders"
+        WHERE ("reminders"."id" = 1)
+        RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
         """
       } results: {
         """
@@ -64,7 +68,8 @@ extension SnapshotTests {
       }
       assertQuery(Reminder.count()) {
         """
-        SELECT count(*) FROM "reminders"
+        SELECT count(*)
+        FROM "reminders"
         """
       } results: {
         """
@@ -78,12 +83,14 @@ extension SnapshotTests {
     @Test func primaryKey() {
       assertQuery(Reminder.delete(Reminder(id: 1, remindersListID: 1))) {
         """
-        DELETE FROM "reminders" WHERE ("reminders"."id" = 1)
+        DELETE FROM "reminders"
+        WHERE ("reminders"."id" = 1)
         """
       }
       assertQuery(Reminder.count()) {
         """
-        SELECT count(*) FROM "reminders"
+        SELECT count(*)
+        FROM "reminders"
         """
       } results: {
         """

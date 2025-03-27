@@ -17,4 +17,8 @@ extension TypeSyntax {
         .with(\.trailingTrivia, trailingTrivia)
     )
   }
+
+  func asNonOptionalType() -> Self {
+    self.as(OptionalTypeSyntax.self)?.wrappedType ?? self
+  }
 }

@@ -28,15 +28,14 @@ extension SnapshotTests {
     }
 
     @Test func blob() throws {
-      #expect(
+      let bytes = try #require(
         try db.execute(
           SimpleSelect { "deadbeef".unhex() }
         )
         .first
-          == ContiguousArray<UInt8>([
-            0xDE, 0xAD, 0xBE, 0xEF,
-          ])
       )
+
+      #expect(bytes == [0xDE, 0xAD, 0xBE, 0xEF])
     }
 
     @Test func rawRepresentable() throws {
@@ -98,7 +97,8 @@ extension SnapshotTests {
         try db.execute(
           SimpleSelect {
             "deadbeef-dead-beef-dead-beefdeadbeef".unhex("-").cast(
-              as: UUID.BytesRepresentation.self)
+              as: UUID.BytesRepresentation.self
+            )
           }
         )
         .first
@@ -112,6 +112,36 @@ extension SnapshotTests {
             )
           )
       )
+    }
+
+    @Test func jsonCodable() throws {
+      struct User: StaticCodable {
+        let id: Int
+        var name: String
+      }
+      assertQuery(
+        SimpleSelect {
+          #sql(
+            """
+            '{"id":1,"name":"Blob"}'
+            """,
+            as: JSONRepresentation<User>.self
+          )
+        }
+      ) {
+        """
+        SELECT '{"id":1,"name":"Blob"}'
+        """
+      } results: {
+        """
+        ┌───────────────────────────────────┐
+        │ SnapshotTests.DecodingTests.User( │
+        │   id: 1,                          │
+        │   name: "Blob"                    │
+        │ )                                 │
+        └───────────────────────────────────┘
+        """
+      }
     }
 
     func compileTime() throws {

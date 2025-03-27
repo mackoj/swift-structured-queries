@@ -22,8 +22,8 @@ extension Date.ISO8601Representation: QueryBindable {
 
 @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
 extension Date.ISO8601Representation: QueryDecodable {
-  public init(decoder: some QueryDecoder) throws {
-    let queryOutput = try decoder.decode(String.self)
+  public init(decoder: inout some QueryDecoder) throws {
+    let queryOutput = try String(decoder: &decoder)
     do {
       self.init(
         queryOutput: try Date(

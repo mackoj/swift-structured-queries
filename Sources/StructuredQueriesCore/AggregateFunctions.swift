@@ -70,8 +70,8 @@ private struct AggregateFunction<QueryValue>: QueryExpression {
     _ name: QueryFragment,
     isDistinct: Bool = false,
     _ arguments: repeat each Argument,
-    order: (some QueryExpression)? = Never?.none,
-    filter: (some QueryExpression)? = Never?.none
+    order: (some QueryExpression)? = _EmptyQueryExpression?.none,
+    filter: (some QueryExpression)? = _EmptyQueryExpression?.none
   ) {
     self.name = name
     self.isDistinct = isDistinct
@@ -95,4 +95,9 @@ private struct AggregateFunction<QueryValue>: QueryExpression {
     }
     return query
   }
+}
+
+struct _EmptyQueryExpression: QueryExpression {
+  public typealias QueryValue = Never
+  public var queryFragment: QueryFragment { "" }
 }

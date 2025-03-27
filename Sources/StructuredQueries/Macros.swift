@@ -7,12 +7,15 @@ import StructuredQueriesCore
 @attached(
   extension,
   conformances: Table,
+  _SelectStatement,
   PrimaryKeyedTable,
   names: named(TableColumns),
+  named(From),
   named(Draft),
   named(columns),
   named(init(_:)),
   named(init(decoder:)),
+  named(QueryValue),
   named(tableName)
 )
 @attached(
@@ -127,7 +130,7 @@ public macro bind<QueryValue: QueryBindable>(
 
 /// Introduces a raw SQL fragment to a query.
 ///
-/// The `#sql` macro also performs rudimentary validation to detect invalid and partial query
+/// The `#sql` macro also performs rudimentary parsing to detect invalid and partial query
 /// fragments, _e.g._ unmatched parentheses and quotations. To opt out of this validation, use
 /// `SQLQueryExpression.init(_:)`, instead.
 ///
