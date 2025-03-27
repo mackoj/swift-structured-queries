@@ -73,15 +73,16 @@ let package = Package(
         .product(name: "Dependencies", package: "swift-dependencies"),
         .product(name: "DependenciesTestSupport", package: "swift-dependencies"),
         .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
-      ],
-      swiftSettings: [
-        .unsafeFlags([
-          "-Xfrontend",
-          "-warn-long-function-bodies=50",
-          "-Xfrontend",
-          "-warn-long-expression-type-checking=50",
-        ])
       ]
+//      ,
+//      swiftSettings: [
+//        .unsafeFlags([
+//          "-Xfrontend",
+//          "-warn-long-function-bodies=50",
+//          "-Xfrontend",
+//          "-warn-long-expression-type-checking=50",
+//        ])
+//      ]
     ),
   ],
   swiftLanguageModes: [.v6]
