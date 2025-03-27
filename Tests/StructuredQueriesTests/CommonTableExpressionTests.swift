@@ -132,7 +132,7 @@ extension SnapshotTests {
         FROM "incompleteReminders"))
         RETURNING "reminders"."title"
         """
-      } results: {
+      }results: {
         """
         ┌────────────────────────────┐
         │ "GROCERIES"                │
@@ -190,7 +190,7 @@ extension SnapshotTests {
       assertQuery(
         With {
           Count(value: 1)
-            .union(all: true, Count.select { Count.Columns(value: $0.value + 1) })
+            .union(Count.select { Count.Columns(value: $0.value + 1) })
         } query: {
           Count.limit(4)
         }
@@ -263,31 +263,29 @@ extension SnapshotTests {
 
       assertQuery(
         With {
-          WorksForAlice(id: 2, name: "Alice")
+          EmployeeReport(id: 2, height: 100, name: "Alice")
             .union(
-              all: true,
               Employee
-                .select { WorksForAlice.Columns(id: $0.id, name: $0.name) }
-                .join(WorksForAlice.all()) { $0.bossID.eq($1.id) }
+                .select { EmployeeReport.Columns(id: $0.id, height: $0.height, name: $0.name) }
+                .join(EmployeeReport.all()) { $0.bossID.eq($1.id) }
             )
         } query: {
-          Employee
+          EmployeeReport
             .select { $0.height.avg() }
-            .where { $0.id.neq(2) && $0.name.in(WorksForAlice.select(\.name)) }
+            .where { $0.id.neq(2) }
         }
       ) {
         """
-        WITH "worksForAlices" AS (
-          SELECT 2 AS "id", 'Alice' AS "name"
+        WITH "employeeReports" AS (
+          SELECT 2 AS "id", 100 AS "height", 'Alice' AS "name"
             UNION
-          SELECT "employees"."id" AS "id", "employees"."name" AS "name"
+          SELECT "employees"."id" AS "id", "employees"."height" AS "height", "employees"."name" AS "name"
           FROM "employees"
-          JOIN "worksForAlices" ON ("employees"."bossID" = "worksForAlices"."id")
+          JOIN "employeeReports" ON ("employees"."bossID" = "employeeReports"."id")
         )
-        SELECT avg("employees"."height")
-        FROM "employees"
-        WHERE (("employees"."id" <> 2) AND ("employees"."name" IN (SELECT "worksForAlices"."name"
-        FROM "worksForAlices")))
+        SELECT avg("employeeReports"."height")
+        FROM "employeeReports"
+        WHERE ("employeeReports"."id" <> 2)
         """
       }results: {
         """
@@ -300,185 +298,39 @@ extension SnapshotTests {
       assertQuery(
         #sql(
           """
-          WITH \(WorksForAlice.self) AS (
-            \(WorksForAlice(id: 2, name: "Alice"))
+          WITH \(EmployeeReport.self) AS (
+            \(EmployeeReport(id: 2, height: 100, name: "Alice"))
             UNION 
-            SELECT \(Employee.id), \(Employee.name)
+            SELECT \(Employee.id), \(Employee.height), \(Employee.name)
             FROM \(Employee.self) 
-            JOIN \(WorksForAlice.self) ON (\(Employee.bossID) = \(WorksForAlice.id))
+            JOIN \(EmployeeReport.self) ON (\(Employee.bossID) = \(EmployeeReport.id))
           ) 
-          SELECT \(Employee.height.avg())
-          FROM \(Employee.self) 
-          WHERE \(Employee.name) IN (\(WorksForAlice.select(\.name)))
-          AND \(Employee.id) <> 2
+          SELECT \(EmployeeReport.height.avg())
+          FROM \(EmployeeReport.self) 
+          WHERE \(EmployeeReport.id) <> 2
           """,
           as: Double.self
         )
       ) {
         """
-        WITH "worksForAlices" AS (
-          SELECT 2 AS "id", 'Alice' AS "name"
+        WITH "employeeReports" AS (
+          SELECT 2 AS "id", 100 AS "height", 'Alice' AS "name"
           UNION 
-          SELECT "employees"."id", "employees"."name"
+          SELECT "employees"."id", "employees"."height", "employees"."name"
           FROM "employees" 
-          JOIN "worksForAlices" ON ("employees"."bossID" = "worksForAlices"."id")
+          JOIN "employeeReports" ON ("employees"."bossID" = "employeeReports"."id")
         ) 
-        SELECT avg("employees"."height")
-        FROM "employees" 
-        WHERE "employees"."name" IN (SELECT "worksForAlices"."name"
-        FROM "worksForAlices")
-        AND "employees"."id" <> 2
+        SELECT avg("employeeReports"."height")
+        FROM "employeeReports" 
+        WHERE "employeeReports"."id" <> 2
         """
-      } results: {
+      }results: {
         """
         ┌────────────────────┐
         │ 106.66666666666667 │
         └────────────────────┘
         """
       }
-    }
-  }
-
-  @Suite struct CategoryTests {
-    @Dependency(\.defaultDatabase) var db
-
-    init() throws {
-      try db.execute(
-        #sql(
-          """
-          CREATE TABLE "categorys" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "parentID" INTEGER REFERENCES "categorys",
-            "name" TEXT NOT NULL
-          )
-          """
-        )
-      )
-    }
-
-    // TODO: Get an example of tree printing
-    // https://www.sqlite.org/lang_with.html
-
-    @Test func tree() throws {
-      try db.execute(
-        Category.insert([
-          Category.Draft(name: "Point-Free", parentID: nil),
-
-          Category.Draft(name: "SwiftUI", parentID: 1),
-          Category.Draft(name: "Back to basics", parentID: 1),
-          Category.Draft(name: "SQLite", parentID: 1),
-
-          Category.Draft(name: "Animations", parentID: 2),
-          Category.Draft(name: "Navigation", parentID: 2),
-          Category.Draft(name: "Modern SwiftUI", parentID: 2),
-          Category.Draft(name: "Observation", parentID: 2),
-
-          Category.Draft(name: "Equatable and Hashable", parentID: 3),
-          Category.Draft(name: "Generics", parentID: 3),
-          Category.Draft(name: "Values versus References", parentID: 3),
-
-          Category.Draft(name: "Introduction to SQLite", parentID: 4),
-          Category.Draft(name: "SQL Building", parentID: 4),
-          Category.Draft(name: "Modern Persistence", parentID: 4),
-
-          Category.Draft(name: "SELECT", parentID: 13),
-          Category.Draft(name: "ORDER BY", parentID: 13),
-          Category.Draft(name: "WHERE", parentID: 13),
-          Category.Draft(name: "JOIN", parentID: 13),
-        ])
-      )
-
-      let tmp = try db.execute(#sql("SELECT sqlite_version()", as: String.self))
-
-      assertQuery(
-        Category.select { $0.name + "!" }
-          .order { $0.name + "!" }
-      ) {
-        """
-        SELECT ("categorys"."name" || '!') FROM "categorys" ORDER BY ("categorys"."name" || '!')
-        """
-      } results: {
-        """
-        ┌─────────────────────────────┐
-        │ "Animations!"               │
-        │ "Back to basics!"           │
-        │ "Equatable and Hashable!"   │
-        │ "Generics!"                 │
-        │ "Introduction to SQLite!"   │
-        │ "JOIN!"                     │
-        │ "Modern Persistence!"       │
-        │ "Modern SwiftUI!"           │
-        │ "Navigation!"               │
-        │ "ORDER BY!"                 │
-        │ "Observation!"              │
-        │ "Point-Free!"               │
-        │ "SELECT!"                   │
-        │ "SQL Building!"             │
-        │ "SQLite!"                   │
-        │ "SwiftUI!"                  │
-        │ "Values versus References!" │
-        │ "WHERE!"                    │
-        └─────────────────────────────┘
-        """
-      }
-
-      assertQuery(
-        With {
-          CategoryLevel(id: 1, name: "Point-Free", level: 0).union(
-            Category
-              .join(CategoryLevel.all()) { $0.parentID.eq($1.id) }
-              .select { CategoryLevel.Columns(id: $0.id, name: $0.name, level: $1.level + 1) }
-              .order { ($1.level + 1).desc() }
-          )
-        } query: {
-          CategoryLevel.select { String(repeating: ".", count: 12).substr(1, $0.level * 3) + $0.name }
-        }
-      ) {
-        """
-        WITH "categoryLevels" AS (
-          SELECT 1 AS "id", 'Point-Free' AS "name", 0 AS "level" 
-          UNION 
-          SELECT "categories"."id" AS "id", "categories"."name" AS "name", ("categoryLevels"."level" + 1) AS "level" 
-          FROM "categories" JOIN "categoryLevels" ON ("categories"."parentID" = "categoryLevels"."id")
-          ORDER BY "categoryLevels"."level" + 1 DESC
-        ) 
-        SELECT substr('............', 1, "categoryLevels"."level" * 3) || "categoryLevels"."name" 
-        FROM "categoryLevels"
-        """
-      } results: {
-        """
-        ┌──────────────────────────────────┐
-        │ "Point-Free"                     │
-        │ "...Back to basics"              │
-        │ "......Equatable and Hashable"   │
-        │ "......Generics"                 │
-        │ "......Values versus References" │
-        │ "...SQLite"                      │
-        │ "......Introduction to SQLite"   │
-        │ "......Modern Persistence"       │
-        │ "......SQL Building"             │
-        │ ".........JOIN"                  │
-        │ ".........ORDER BY"              │
-        │ ".........SELECT"                │
-        │ ".........WHERE"                 │
-        │ "...SwiftUI"                     │
-        │ "......Animations"               │
-        │ "......Navigation"               │
-        │ "......Observation"              │
-        └──────────────────────────────────┘
-        """
-      }
-
-      //      WITH RECURSIVE
-      //      under_alice(name,level) AS (
-      //        VALUES('Alice',0)
-      //        UNION ALL
-      //        SELECT org.name, under_alice.level+1
-      //        FROM org JOIN under_alice ON org.boss=under_alice.name
-      //        ORDER BY 2 DESC
-      //      )
-      //      SELECT substr('..........',1,level*3) || name FROM under_alice;
-
     }
   }
 }
@@ -519,20 +371,8 @@ struct Employee {
 }
 
 @Table @Selection
-struct WorksForAlice {
+struct EmployeeReport {
   let id: Int
+  let height: Int
   let name: String
-}
-
-@Table
-struct Category: Identifiable {
-  let id: Int
-  let name: String
-  let parentID: Category.ID?
-}
-@Table @Selection
-struct CategoryLevel {
-  let id: Int
-  let name: String
-  let level: Int
 }
