@@ -23,6 +23,42 @@ extension SnapshotTests {
       )
     }
 
+    @Test func countTwoTables() {
+      assertQuery(
+        With {
+          Reminder.select {
+            ReminderCount.Columns(count: $0.count())
+          }
+          RemindersList.select {
+            RemindersListCount.Columns(count: $0.count())
+          }
+        } query: {
+          ReminderCount
+            .join(RemindersListCount.all()) { _, _ in true }
+        }
+      ) {
+        """
+        WITH "reminderCounts" AS (
+          SELECT count("reminders"."id") AS "count"
+          FROM "reminders"
+        ), "remindersListCounts" AS (
+          SELECT count("remindersLists"."id") AS "count"
+          FROM "remindersLists"
+        )
+        SELECT "reminderCounts"."count", "remindersListCounts"."count"
+        FROM "reminderCounts"
+        JOIN "remindersListCounts" ON 1
+        """
+      } results: {
+        """
+        ┌────┬───┐
+        │ 10 │ 3 │
+        └────┴───┘
+        """
+      }
+
+    }
+
     @Test func basics() {
       assertQuery(
         With {
@@ -375,4 +411,23 @@ struct EmployeeReport {
   let id: Int
   let height: Int
   let name: String
+}
+
+@Table @Selection struct ReminderCount {
+  let count: Int
+  var queryOutput: Int {
+    count
+  }
+  init(queryOutput: Int) {
+    count = queryOutput
+  }
+}
+@Table @Selection struct RemindersListCount {
+  let count: Int
+  var queryOutput: Int {
+    count
+  }
+  init(queryOutput: Int) {
+    count = queryOutput
+  }
 }
