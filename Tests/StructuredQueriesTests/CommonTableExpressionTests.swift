@@ -21,9 +21,9 @@ extension SnapshotTests {
       ) {
         """
         WITH "incompleteReminders" AS (
-        SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
-        FROM "reminders"
-        WHERE NOT ("reminders"."isCompleted")
+          SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
+          FROM "reminders"
+          WHERE NOT ("reminders"."isCompleted")
         )
         SELECT "incompleteReminders"."isFlagged", "incompleteReminders"."title"
         FROM "incompleteReminders"
@@ -61,9 +61,9 @@ extension SnapshotTests {
       ) {
         """
         WITH "incompleteReminders" AS (
-        SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
-        FROM "reminders"
-        WHERE NOT ("reminders"."isCompleted")
+          SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
+          FROM "reminders"
+          WHERE NOT ("reminders"."isCompleted")
         )
         INSERT INTO "reminders"
         ("remindersListID", "title", "isFlagged", "isCompleted")
@@ -107,9 +107,9 @@ extension SnapshotTests {
       ) {
         """
         WITH "incompleteReminders" AS (
-        SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
-        FROM "reminders"
-        WHERE NOT ("reminders"."isCompleted")
+          SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
+          FROM "reminders"
+          WHERE NOT ("reminders"."isCompleted")
         )
         UPDATE "reminders"
         SET "title" = upper("reminders"."title")
@@ -147,9 +147,9 @@ extension SnapshotTests {
       ) {
         """
         WITH "incompleteReminders" AS (
-        SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
-        FROM "reminders"
-        WHERE NOT ("reminders"."isCompleted")
+          SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
+          FROM "reminders"
+          WHERE NOT ("reminders"."isCompleted")
         )
         DELETE FROM "reminders"
         WHERE ("reminders"."title" IN (SELECT "incompleteReminders"."title"
@@ -182,10 +182,10 @@ extension SnapshotTests {
       ) {
         """
         WITH "counts" AS (
-        SELECT 1 AS "value"
-        UNION
-        SELECT ("counts"."value" + 1) AS "value"
-        FROM "counts"
+          SELECT 1 AS "value"
+            UNION
+          SELECT ("counts"."value" + 1) AS "value"
+          FROM "counts"
         )
         SELECT "counts"."value"
         FROM "counts"
@@ -217,9 +217,9 @@ extension SnapshotTests {
       ) {
         """
         WITH "incompleteReminders" AS (
-        SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
-        FROM "reminders"
-        WHERE NOT ("reminders"."isCompleted")
+          SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
+          FROM "reminders"
+          WHERE NOT ("reminders"."isCompleted")
         )
         SELECT "incompleteReminders"."isFlagged"
         FROM "incompleteReminders"
@@ -274,11 +274,11 @@ extension SnapshotTests {
       ) {
         """
         WITH "worksForAlices" AS (
-        SELECT 2 AS "id", 'Alice' AS "name"
-        UNION
-        SELECT "employees"."id" AS "id", "employees"."name" AS "name"
-        FROM "employees"
-        JOIN "worksForAlices" ON ("employees"."bossID" = "worksForAlices"."id")
+          SELECT 2 AS "id", 'Alice' AS "name"
+            UNION
+          SELECT "employees"."id" AS "id", "employees"."name" AS "name"
+          FROM "employees"
+          JOIN "worksForAlices" ON ("employees"."bossID" = "worksForAlices"."id")
         )
         SELECT avg("employees"."height")
         FROM "employees"

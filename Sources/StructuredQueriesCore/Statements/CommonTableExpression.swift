@@ -48,7 +48,7 @@ public struct CommonTableExpressionClause: QueryExpression {
   let tableName: String
   let select: QueryFragment
   public var queryFragment: QueryFragment {
-    "\(quote: tableName) AS (\(.newline)\(select)\(.newline))"
+    "\(quote: tableName) AS (\(.newline)\(select.indented())\(.newline))"
   }
 }
 

@@ -29,7 +29,7 @@ extension SnapshotTests {
       ) {
         """
         SELECT 1, 'Hello', 1
-        UNION
+          UNION
         SELECT 2, 'Goodbye', 0
         """
       } results: {

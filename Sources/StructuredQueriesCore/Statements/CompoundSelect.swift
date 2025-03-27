@@ -42,6 +42,6 @@ public struct CompoundSelect<QueryValue>: _SelectStatement {
   }
 
   public var query: QueryFragment {
-    "\(lhs)\(.newlineOrSpace)\(`operator`)\(.newlineOrSpace)\(rhs)"
+    "\(lhs)\(.newlineOrSpace)\(`operator`.indented())\(.newlineOrSpace)\(rhs)"
   }
 }
