@@ -5,6 +5,8 @@ extension String {
     return prefix.lowercased() + dropFirst(prefix.count)
   }
 
+  // This implementation is very basic but could be expanded to support more cases:
+  // https://github.com/rails/rails/blob/main/activesupport/lib/active_support/inflections.rb
   package func pluralized() -> String {
     var bytes = self[...].utf8
     guard !bytes.isEmpty else { return self }
