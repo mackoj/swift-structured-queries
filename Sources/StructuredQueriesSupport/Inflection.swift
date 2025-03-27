@@ -11,9 +11,7 @@ extension String {
 
     switch bytes.removeLast() {
     case UInt8(ascii: "h"):
-      guard !bytes.isEmpty else { break }
-
-      switch bytes.removeLast() {
+      switch bytes.last {
       case UInt8(ascii: "c"), UInt8(ascii: "s"):
         return "\(self)es"
       default:
