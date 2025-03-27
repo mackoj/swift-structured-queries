@@ -39,12 +39,8 @@ public struct TableAlias<Base: Table, Name: AliasName>: _OptionalPromotable, Tab
 
   @dynamicMemberLookup
   public struct TableColumns: Schema {
-    public var allColumns: [any TableColumnExpression] {
-      Base.columns.allColumns.map { $0._aliased(Name.self) }
-    }
-
-    public static var count: Int {
-      Base.TableColumns.count
+    public static var allColumns: [any TableColumnExpression] {
+      Base.TableColumns.allColumns.map { $0._aliased(Name.self) }
     }
 
     public typealias QueryValue = TableAlias
@@ -88,8 +84,8 @@ extension TableAlias: QueryBindable where Base: QueryBindable {
 }
 
 extension TableAlias: QueryDecodable where Base: QueryDecodable {
-  public init(decoder: some QueryDecoder) throws {
-    self.init(base: try decoder.decodeColumns(Base.self))
+  public init(decoder: inout some QueryDecoder) throws {
+    try self.init(base: Base(decoder: &decoder))
   }
 }
 

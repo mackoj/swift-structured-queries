@@ -781,12 +781,14 @@ extension SnapshotTests {
       enum R2: AliasName {}
       assertQuery(
         Reminder.as(R1.self)
-          // TODO: Should we have 'join' overloads that take 'Table.Type'?
           .join(Reminder.as(R2.self).all()) { $0.id.eq($1.id) }
           .limit(1)
       ) {
         """
-        SELECT "r1s"."id", "r1s"."assignedUserID", "r1s"."date", "r1s"."isCompleted", "r1s"."isFlagged", "r1s"."notes", "r1s"."priority", "r1s"."remindersListID", "r1s"."title", "r2s"."id", "r2s"."assignedUserID", "r2s"."date", "r2s"."isCompleted", "r2s"."isFlagged", "r2s"."notes", "r2s"."priority", "r2s"."remindersListID", "r2s"."title" FROM "reminders" AS "r1s" JOIN "reminders" AS "r2s" ON ("r1s"."id" = "r2s"."id") LIMIT 1
+        SELECT "r1s"."id", "r1s"."assignedUserID", "r1s"."date", "r1s"."isCompleted", "r1s"."isFlagged", "r1s"."notes", "r1s"."priority", "r1s"."remindersListID", "r1s"."title", "r2s"."id", "r2s"."assignedUserID", "r2s"."date", "r2s"."isCompleted", "r2s"."isFlagged", "r2s"."notes", "r2s"."priority", "r2s"."remindersListID", "r2s"."title"
+        FROM "reminders" AS "r1s"
+        JOIN "reminders" AS "r2s" ON ("r1s"."id" = "r2s"."id")
+        LIMIT 1
         """
       }results: {
         """
