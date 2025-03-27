@@ -9,15 +9,6 @@ extension String {
     var bytes = self[...].utf8
     guard !bytes.isEmpty else { return self }
 
-    let vowels = [
-      UInt8(ascii: "a"),
-      UInt8(ascii: "e"),
-      UInt8(ascii: "i"),
-      UInt8(ascii: "o"),
-      UInt8(ascii: "u"),
-      UInt8(ascii: "y"),
-    ]
-
     switch bytes.removeLast() {
     case UInt8(ascii: "h"):
       switch bytes.last {
@@ -31,9 +22,15 @@ extension String {
       return "\(self)es"
 
     case UInt8(ascii: "y"):
-      if let byte = bytes.last, vowels.contains(byte) {
+      switch bytes.last {
+      case UInt8(ascii: "a"),
+        UInt8(ascii: "e"),
+        UInt8(ascii: "i"),
+        UInt8(ascii: "o"),
+        UInt8(ascii: "u"),
+        UInt8(ascii: "y"):
         break
-      } else {
+      default:
         return "\(dropLast())ies"
       }
 
