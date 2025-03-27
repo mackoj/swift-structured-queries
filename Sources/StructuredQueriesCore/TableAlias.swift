@@ -40,7 +40,14 @@ public struct TableAlias<Base: Table, Name: AliasName>: _OptionalPromotable, Tab
   @dynamicMemberLookup
   public struct TableColumns: Schema {
     public static var allColumns: [any TableColumnExpression] {
-      Base.TableColumns.allColumns.map { $0._aliased(Name.self) }
+      #if compiler(>=6.1)
+        return Base.TableColumns.allColumns.map { $0._aliased(Name.self) }
+      #else
+        func open(_ column: some TableColumnExpression) -> any TableColumnExpression {
+          column._aliased(Name.self)
+        }
+        return Base.TableColumns.allColumns.map { open($0) }
+      #endif
     }
 
     public typealias QueryValue = TableAlias
