@@ -5,11 +5,18 @@ extension String {
     return prefix.lowercased() + dropFirst(prefix.count)
   }
 
-  // This implementation is very basic but could be expanded to support more cases:
-  // https://github.com/rails/rails/blob/main/activesupport/lib/active_support/inflections.rb
   package func pluralized() -> String {
     var bytes = self[...].utf8
     guard !bytes.isEmpty else { return self }
+
+    let vowels = [
+      UInt8(ascii: "a"),
+      UInt8(ascii: "e"),
+      UInt8(ascii: "i"),
+      UInt8(ascii: "o"),
+      UInt8(ascii: "u"),
+      UInt8(ascii: "y"),
+    ]
 
     switch bytes.removeLast() {
     case UInt8(ascii: "h"):
@@ -20,11 +27,15 @@ extension String {
         break
       }
 
-    case UInt8(ascii: "s"):
+    case UInt8(ascii: "s"), UInt8(ascii: "x"), UInt8(ascii: "z"):
       return "\(self)es"
 
     case UInt8(ascii: "y"):
-      return "\(dropLast())ies"
+      if let byte = bytes.last, vowels.contains(byte) {
+        break
+      } else {
+        return "\(dropLast())ies"
+      }
 
     default:
       break
