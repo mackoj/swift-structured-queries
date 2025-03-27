@@ -356,7 +356,8 @@ extension TableMacro: ExtensionMacro {
             )
             arguments.append(
               LabeledExprSyntax(
-                label: "primaryKey", expression: BooleanLiteralExprSyntax(false)
+                label: "primaryKey",
+                expression: BooleanLiteralExprSyntax(false)
               )
             )
           }
@@ -432,6 +433,51 @@ extension TableMacro: ExtensionMacro {
       let memberwiseAssignments =
         memberwiseArguments
         .map { $0.trimmed.pattern.cast(IdentifierPatternSyntax.self).identifier }
+      for argument in memberwiseArguments {
+        if argument.typeAnnotation == nil {
+          let identifier =
+            (argument.pattern.as(IdentifierPatternSyntax.self)?.identifier.description)
+            .map { "'\($0)'" }
+            ?? "field"
+          diagnostics.append(
+            Diagnostic(
+              node: argument,
+              message: MacroExpansionErrorMessage(
+                """
+                '@Table' requires \(identifier) to have a type annotation in order to \
+                generate a memberwise initializer
+                """
+              ),
+              fixIts: [
+                FixIt(
+                  message: MacroExpansionFixItMessage(
+                    """
+                    Insert ': <#Type#>'
+                    """
+                  ),
+                  changes: [
+                    .replace(
+                      oldNode: Syntax(argument),
+                      newNode: Syntax(
+                        argument
+                          .with(\.pattern.trailingTrivia, "")
+                          .with(
+                            \.typeAnnotation,
+                            TypeAnnotationSyntax(
+                              colon: .colonToken(trailingTrivia: .space),
+                              type: IdentifierTypeSyntax(name: "<#Type#>"),
+                              trailingTrivia: .space
+                            )
+                          )
+                      )
+                    )
+                  ]
+                )
+              ]
+            )
+          )
+        }
+      }
       let memberwiseInit: DeclSyntax = """
         public init(
         \(memberwiseArguments, separator: ",\n")

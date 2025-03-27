@@ -65,6 +65,7 @@ let package = Package(
       dependencies: [
         "StructuredQueries",
         "StructuredQueriesMacros",
+        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
         .product(name: "MacroTesting", package: "swift-macro-testing"),
       ]
     ),

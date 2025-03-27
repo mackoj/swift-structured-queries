@@ -790,33 +790,95 @@ extension SnapshotTests {
       }
     }
 
-    // NB: This test shows that invalid Swift code is generated when providing a default with an
-    //     expression and not specifying a type.
     @Test func noType() {
       assertMacro {
         """
         @Table struct SyncUp {
+          let id: Int
           var seconds = 60 * 5
+        }
+        """
+      } diagnostics: {
+        """
+        @Table struct SyncUp {
+          let id: Int
+          var seconds = 60 * 5
+              ╰─ 🛑 '@Table' requires 'seconds' to have a type annotation in order to generate a memberwise initializer
+                 ✏️ Insert ': <#Type#>'
+        }
+        """
+      } fixes: {
+        """
+        @Table struct SyncUp {
+          let id: Int
+          var seconds: <#Type#> = 60 * 55
         }
         """
       } expansion: {
         #"""
         struct SyncUp {
-          var seconds = 60 * 5
+          let id: Int
+          var seconds: <#Type#> = 60 * 55
         }
 
-        extension SyncUp: StructuredQueries.Table {
-          public struct TableColumns: StructuredQueries.Schema {
+        extension SyncUp: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
+          public struct TableColumns: StructuredQueries.Schema, StructuredQueries.PrimaryKeyedSchema {
             public typealias QueryValue = SyncUp
-            public let seconds = StructuredQueries.TableColumn<QueryValue, _>("seconds", keyPath: \QueryValue.seconds, default: 60 * 5)
+            public let id = StructuredQueries.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
+            public let seconds = StructuredQueries.TableColumn<QueryValue, <#Type#>>("seconds", keyPath: \QueryValue.seconds, default: 60 * 55)
+            public var primaryKey: StructuredQueries.TableColumn<QueryValue, Int> {
+              self.id
+            }
             public static var allColumns: [any StructuredQueries.TableColumnExpression] {
-              [QueryValue.columns.seconds]
+              [QueryValue.columns.id, QueryValue.columns.seconds]
+            }
+          }
+          public struct Draft: StructuredQueries.Table {
+            @Column(primaryKey: false)
+            let id: Int?
+            var seconds: <#Type#> = 60 * 55
+            public struct TableColumns: StructuredQueries.Schema {
+              public typealias QueryValue = SyncUp.Draft
+              public let id = StructuredQueries.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public let seconds = StructuredQueries.TableColumn<QueryValue, <#Type#>>("seconds", keyPath: \QueryValue.seconds, default: 60 * 55)
+              public static var allColumns: [any StructuredQueries.TableColumnExpression] {
+                [QueryValue.columns.id, QueryValue.columns.seconds]
+              }
+            }
+            public static let columns = TableColumns()
+            public static let tableName = SyncUp.tableName
+            public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+              self.id = try decoder.decode(Int.self)
+              self.seconds = try decoder.decode(<#Type#>.self) ?? 60 * 55
+            }
+            public init(_ other: SyncUp) {
+              self.id = other.id
+              self.seconds = other.seconds
+            }
+            public init(
+              id: Int? = nil,
+              seconds: <#Type#> = 60 * 55
+            ) {
+              self.id = id
+              self.seconds = seconds
             }
           }
           public static let columns = TableColumns()
           public static let tableName = "syncUps"
           public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
-            self.seconds = try decoder.decode() ?? 60 * 5
+            let id = try decoder.decode(Int.self)
+            self.seconds = try decoder.decode(<#Type#>.self) ?? 60 * 55
+            guard let id else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
+          }
+          public init?(_ other: Draft) {
+            guard let id = other.id else {
+              return nil
+            }
+            self.id = id
+            self.seconds = other.seconds
           }
         }
         """#
