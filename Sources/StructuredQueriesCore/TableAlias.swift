@@ -1,3 +1,5 @@
+import StructuredQueriesSupport
+
 public protocol AliasName {
   static var aliasName: String { get }
 }

@@ -1,3 +1,4 @@
+import StructuredQueriesSupport
 import SwiftDiagnostics
 import SwiftSyntax
 import SwiftSyntaxMacros
@@ -292,11 +293,5 @@ extension SelectionMacro: MemberAttributeMacro {
       @Column
       """
     ]
-  }
-}
-
-extension String {
-  fileprivate func quoted(_ delimiter: String = "\"") -> String {
-    delimiter + replacingOccurrences(of: delimiter, with: delimiter + delimiter) + delimiter
   }
 }

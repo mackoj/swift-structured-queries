@@ -1,3 +1,4 @@
+import StructuredQueriesSupport
 import SwiftDiagnostics
 import SwiftSyntax
 import SwiftSyntaxMacros
@@ -444,8 +445,8 @@ extension TableMacro: ExtensionMacro {
               node: argument,
               message: MacroExpansionErrorMessage(
                 """
-                '@Table' requires \(identifier) to have a type annotation in order to \
-                generate a memberwise initializer
+                '@Table' requires \(identifier) to have a type annotation in order to generate a \
+                memberwise initializer
                 """
               ),
               fixIts: [

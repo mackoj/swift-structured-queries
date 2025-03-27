@@ -37,6 +37,7 @@ let package = Package(
     .target(
       name: "StructuredQueriesCore",
       dependencies: [
+        "StructuredQueriesSupport",
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
       ]
     ),
@@ -50,6 +51,7 @@ let package = Package(
     .macro(
       name: "StructuredQueriesMacros",
       dependencies: [
+        "StructuredQueriesSupport",
         .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
         .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
       ]
@@ -88,6 +90,8 @@ let package = Package(
       //   ])
       // ]
     ),
+
+    .target(name: "StructuredQueriesSupport"),
   ],
   swiftLanguageModes: [.v6]
 )
