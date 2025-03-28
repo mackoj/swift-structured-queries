@@ -10,6 +10,21 @@ extension StaticCodable {
   public static var jsonEncoder: JSONEncoder { JSONEncoder() }
 }
 
+extension Bool: StaticCodable {}
+extension Double: StaticCodable {}
+extension Float: StaticCodable {}
+extension Int: StaticCodable {}
+extension Int8: StaticCodable {}
+extension Int16: StaticCodable {}
+extension Int32: StaticCodable {}
+extension Int64: StaticCodable {}
+extension UInt: StaticCodable {}
+extension UInt8: StaticCodable {}
+extension UInt16: StaticCodable {}
+extension UInt32: StaticCodable {}
+extension UInt64: StaticCodable {}
+extension Array: StaticCodable where Element: StaticCodable {}
+
 // TODO: Figure out 'JSONBRepresentation'?
 
 public struct JSONRepresentation<QueryOutput: StaticCodable>: QueryRepresentable {

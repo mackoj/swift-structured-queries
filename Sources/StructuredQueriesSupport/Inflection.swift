@@ -5,6 +5,9 @@ extension String {
     return prefix.lowercased() + dropFirst(prefix.count)
   }
 
+  // NB: This is a minimal attempt to provide common pluralizations.
+  //     We don't plan/want to cover every corner case.
+  //     Instead, folks should leverage '@Table("name")'.
   package func pluralized() -> String {
     var bytes = self[...].utf8
     guard !bytes.isEmpty else { return self }

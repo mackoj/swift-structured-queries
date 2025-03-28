@@ -808,5 +808,32 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Table @Selection
+    struct VecExample {
+      let rowid: Int
+      let distance: Double
+    }
+
+    @Test func vec0() {
+      let xs = [0.890, 0.544, 0.825, 0.961, 0.358, 0.0196, 0.521, 0.175]
+      assertInlineSnapshot(
+        of: VecExample
+          .where { _ in
+            #sql("sample_embedding match \(#bind(xs, as: JSONRepresentation.self))")
+          }
+          .order(by: \.distance)
+          .limit(2),
+        as: .sql
+      ) {
+        """
+        SELECT "vecExamples"."rowid", "vecExamples"."distance"
+        FROM "vecExamples"
+        WHERE sample_embedding match '[0.89,0.544,0.825,0.961,0.358,0.0196,0.521,0.175]'
+        ORDER BY "vecExamples"."distance"
+        LIMIT 2
+        """
+      }
+    }
   }
 }
