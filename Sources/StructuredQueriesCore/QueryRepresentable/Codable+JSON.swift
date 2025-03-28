@@ -23,7 +23,17 @@ extension UInt8: StaticCodable {}
 extension UInt16: StaticCodable {}
 extension UInt32: StaticCodable {}
 extension UInt64: StaticCodable {}
+
+extension Collection where Self: StaticCodable, Element: StaticCodable {
+  public static var jsonDecoder: JSONDecoder { Element.jsonDecoder }
+  public static var jsonEncoder: JSONEncoder { Element.jsonEncoder }
+}
 extension Array: StaticCodable where Element: StaticCodable {}
+
+extension RawRepresentable where Self: StaticCodable, RawValue: StaticCodable {
+  public static var jsonDecoder: JSONDecoder { RawValue.jsonDecoder }
+  public static var jsonEncoder: JSONEncoder { RawValue.jsonEncoder }
+}
 
 // TODO: Figure out 'JSONBRepresentation'?
 

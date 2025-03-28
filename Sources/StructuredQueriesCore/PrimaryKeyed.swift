@@ -9,7 +9,9 @@ public protocol PrimaryKeyedSchema<PrimaryKey>: Schema where QueryValue: Primary
 }
 
 extension PrimaryKeyedSchema {
-  public func count() -> some QueryExpression<Int> {
-    primaryKey.count()
+  public func count(
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> some QueryExpression<Int> {
+    primaryKey.count(filter: filter)
   }
 }

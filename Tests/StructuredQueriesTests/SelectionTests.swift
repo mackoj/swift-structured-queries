@@ -147,6 +147,33 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func multiAggregate() {
+      assertQuery(
+        Reminder.select {
+          Stats.Columns(
+            completedCount: $0.count(filter: $0.isCompleted),
+            flaggedCount: $0.count(filter: $0.isFlagged),
+            totalCount: $0.count()
+          )
+        }
+      ) {
+        """
+        SELECT count("reminders"."id") FILTER (WHERE "reminders"."isCompleted") AS "completedCount", count("reminders"."id") FILTER (WHERE "reminders"."isFlagged") AS "flaggedCount", count("reminders"."id") AS "totalCount"
+        FROM "reminders"
+        """
+      } results: {
+        """
+        ┌──────────────────────┐
+        │ Stats(               │
+        │   completedCount: 3, │
+        │   flaggedCount: 2,   │
+        │   totalCount: 10     │
+        │ )                    │
+        └──────────────────────┘
+        """
+      }
+    }
   }
 }
 
@@ -162,7 +189,15 @@ struct ReminderTitleAndAssignedUserName {
   let assignedUserName: String?
 }
 
-@Selection struct RemindersListAndReminderCount {
+@Selection
+struct RemindersListAndReminderCount {
   let remindersList: RemindersList
   let remindersCount: Int
+}
+
+@Selection
+struct Stats {
+  let completedCount: Int
+  let flaggedCount: Int
+  let totalCount: Int
 }

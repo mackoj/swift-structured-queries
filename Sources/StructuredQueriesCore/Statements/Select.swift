@@ -197,8 +197,10 @@ extension Table {
     all().limit(maxLength, offset: offset)
   }
 
-  public static func count() -> Select<Int, Self, ()> {
-    all().count()
+  public static func count(
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> Select<Int, Self, ()> {
+    all().count(filter: filter)
   }
 }
 
@@ -962,11 +964,13 @@ extension Select {
     return select
   }
 
-  public func count<each C: QueryRepresentable, each J: Table>() -> Select<
+  public func count<each C: QueryRepresentable, each J: Table>(
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> Select<
     (repeat each C, Int), From, (repeat each J)
   >
   where Columns == (repeat each C), Joins == (repeat each J) {
-    select { _ in .count() }
+    select { _ in .count(filter: filter) }
   }
 
   public func map<each C1: QueryRepresentable, each C2: QueryExpression>(
@@ -1114,7 +1118,8 @@ private struct LimitClause: QueryExpression {
   let offset: QueryFragment?
 
   init(
-    maxLength: some QueryExpression, offset: (some QueryExpression)? = _EmptyQueryExpression?.none
+    maxLength: some QueryExpression,
+    offset: (some QueryExpression)? = Int?.none
   ) {
     self.maxLength = maxLength.queryFragment
     self.offset = offset?.queryFragment

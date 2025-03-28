@@ -168,7 +168,7 @@ extension SnapshotTests {
         FROM "incompleteReminders"))
         RETURNING "reminders"."title"
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────────────┐
         │ "GROCERIES"                │
@@ -242,7 +242,7 @@ extension SnapshotTests {
         FROM "counts"
         LIMIT 4
         """
-      }results: {
+      } results: {
         """
         ┌───┐
         │ 1 │
@@ -323,7 +323,7 @@ extension SnapshotTests {
         FROM "employeeReports"
         WHERE ("employeeReports"."id" <> 2)
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────┐
         │ 106.66666666666667 │
@@ -360,7 +360,7 @@ extension SnapshotTests {
         FROM "employeeReports" 
         WHERE "employeeReports"."id" <> 2
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────┐
         │ 106.66666666666667 │

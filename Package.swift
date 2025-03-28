@@ -80,7 +80,7 @@ let package = Package(
         .product(name: "Dependencies", package: "swift-dependencies"),
         .product(name: "DependenciesTestSupport", package: "swift-dependencies"),
         .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
-      ] // ,
+      ]  // ,
       // swiftSettings: [
       //   .unsafeFlags([
       //     "-Xfrontend",

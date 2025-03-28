@@ -231,8 +231,10 @@ extension Where: SelectStatement {
     all().limit(maxLength, offset: offset)
   }
 
-  public func count() -> Select<Int, From, ()> {
-    all().count()
+  public func count(
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> Select<Int, From, ()> {
+    all().count(filter: filter)
   }
 
   public func delete() -> DeleteOf<From> {

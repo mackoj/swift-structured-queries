@@ -790,7 +790,7 @@ extension SnapshotTests {
         JOIN "reminders" AS "r2s" ON ("r1s"."id" = "r2s"."id")
         LIMIT 1
         """
-      }results: {
+      } results: {
         """
         ┌─────────────────────────────────────────┬─────────────────────────────────────────┐
         │ Reminder(                               │ Reminder(                               │
@@ -818,7 +818,8 @@ extension SnapshotTests {
     @Test func vec0() {
       let xs = [0.890, 0.544, 0.825, 0.961, 0.358, 0.0196, 0.521, 0.175]
       assertInlineSnapshot(
-        of: VecExample
+        of:
+          VecExample
           .where { _ in
             #sql("sample_embedding match \(#bind(xs, as: JSONRepresentation.self))")
           }
