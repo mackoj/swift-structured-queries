@@ -13,7 +13,6 @@ public struct SQLQueryExpression<QueryValue>: Statement {
     self.queryFragment = queryFragment
   }
 
-  @_disfavoredOverload
   public init(_ queryFragment: QueryFragment) where QueryValue == () {
     self.queryFragment = queryFragment
   }

@@ -97,7 +97,7 @@ extension SnapshotTests {
         try db.execute(
           SimpleSelect {
             "deadbeef-dead-beef-dead-beefdeadbeef".unhex("-").cast(
-              as: UUID.BytesRepresentation.self
+              as: UUID.BytesRepresentation?.self
             )
           }
         )

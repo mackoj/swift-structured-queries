@@ -188,11 +188,6 @@ extension QueryExpression where Self == AggregateFunction<Int> {
   }
 }
 
-public struct CountExpression: QueryExpression {
-  public typealias QueryValue = Int
-  public var queryFragment: QueryFragment { "count(*)" }
-}
-
 public struct AggregateFunction<QueryValue>: QueryExpression {
   var name: QueryFragment
   var isDistinct: Bool
