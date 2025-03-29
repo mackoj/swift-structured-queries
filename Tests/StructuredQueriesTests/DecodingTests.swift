@@ -115,7 +115,7 @@ extension SnapshotTests {
     }
 
     @Test func jsonCodable() throws {
-      struct User: StaticCodable {
+      struct User: Codable {
         let id: Int
         var name: String
       }
@@ -133,6 +133,41 @@ extension SnapshotTests {
         SELECT '{"id":1,"name":"Blob"}'
         """
       } results: {
+        """
+        ┌───────────────────────────────────┐
+        │ SnapshotTests.DecodingTests.User( │
+        │   id: 1,                          │
+        │   name: "Blob"                    │
+        │ )                                 │
+        └───────────────────────────────────┘
+        """
+      }
+    }
+
+    @Test func jsonCodableCustomKeys() throws {
+      struct User: Codable {
+        let id: Int
+        var name: String
+
+        enum CodingKeys: String, CodingKey {
+          case id = "user_id"
+          case name = "user_name"
+        }
+      }
+      assertQuery(
+        SimpleSelect {
+          #sql(
+            """
+            '{"user_id":1,"user_name":"Blob"}'
+            """,
+            as: JSONRepresentation<User>.self
+          )
+        }
+      ) {
+        """
+        SELECT '{"user_id":1,"user_name":"Blob"}'
+        """
+      }results: {
         """
         ┌───────────────────────────────────┐
         │ SnapshotTests.DecodingTests.User( │
