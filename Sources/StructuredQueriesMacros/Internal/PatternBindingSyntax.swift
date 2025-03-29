@@ -2,16 +2,15 @@ import SwiftSyntax
 
 extension PatternBindingSyntax {
   func annotated() -> PatternBindingSyntax {
-    var annotated = with(\.pattern.trailingTrivia, "")
-      .with(
-        \.typeAnnotation,
-        typeAnnotation
-          ?? initializer?.value.literalType.map {
-            TypeAnnotationSyntax(
-              type: $0.with(\.trailingTrivia, .space)
-            )
-          }
-      )
+    var annotated = with(
+      \.typeAnnotation,
+      typeAnnotation
+        ?? initializer?.value.literalType.map {
+          TypeAnnotationSyntax(
+            type: $0.with(\.trailingTrivia, .space)
+          )
+        }
+    )
     annotated.accessorBlock = nil
     guard annotated.typeAnnotation?.type.isOptionalType == true
     else {

@@ -16,7 +16,7 @@ extension Table {
   }
 }
 
-// TODO: Use value generic to tag name in a more predictable way when available in Swift?
+// NB: Ideally we can use a value generic to tag the name in a more predictable way.
 public struct TableAlias<Base: Table, Name: AliasName>: _OptionalPromotable, Table {
   public static var columns: TableColumns {
     TableColumns()

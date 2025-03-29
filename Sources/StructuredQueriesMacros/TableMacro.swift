@@ -430,14 +430,13 @@ extension TableMacro: ExtensionMacro {
         in: context
       )
       .compactMap(\.memberBlock.members.trimmed)
-      let memberwiseArguments = draftBindings.map { $0.annotated().rewritten(selfRewriter) }
-      let memberwiseAssignments =
-        memberwiseArguments
-        .map { $0.trimmed.pattern.cast(IdentifierPatternSyntax.self).identifier }
-      for argument in memberwiseArguments {
+      var memberwiseArguments: [PatternBindingSyntax] = []
+      var memberwiseAssignments: [TokenSyntax] = []
+      for binding in draftBindings {
+        let argument = binding.annotated().rewritten(selfRewriter)
         if argument.typeAnnotation == nil {
           let identifier =
-            (argument.pattern.as(IdentifierPatternSyntax.self)?.identifier.description)
+            (argument.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmedDescription)
             .map { "'\($0)'" }
             ?? "field"
           diagnostics.append(
@@ -477,7 +476,12 @@ extension TableMacro: ExtensionMacro {
               ]
             )
           )
+          continue
         }
+        memberwiseArguments.append(argument)
+        memberwiseAssignments.append(
+          argument.trimmed.pattern.cast(IdentifierPatternSyntax.self).identifier
+        )
       }
       let memberwiseInit: DeclSyntax = """
         public init(

@@ -803,6 +803,7 @@ extension SnapshotTests {
         @Table struct SyncUp {
           let id: Int
           var seconds = 60 * 5
+              ┬───────────────
               ╰─ 🛑 '@Table' requires 'seconds' to have a type annotation in order to generate a memberwise initializer
                  ✏️ Insert ': <#Type#>'
         }
@@ -811,21 +812,21 @@ extension SnapshotTests {
         """
         @Table struct SyncUp {
           let id: Int
-          var seconds: <#Type#> = 60 * 55
+          var seconds: <#Type#> = 60 * 5
         }
         """
       } expansion: {
         #"""
         struct SyncUp {
           let id: Int
-          var seconds: <#Type#> = 60 * 55
+          var seconds: <#Type#> = 60 * 5
         }
 
         extension SyncUp: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
           public struct TableColumns: StructuredQueries.Schema, StructuredQueries.PrimaryKeyedSchema {
             public typealias QueryValue = SyncUp
             public let id = StructuredQueries.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
-            public let seconds = StructuredQueries.TableColumn<QueryValue, <#Type#>>("seconds", keyPath: \QueryValue.seconds, default: 60 * 55)
+            public let seconds = StructuredQueries.TableColumn<QueryValue, <#Type#>>("seconds", keyPath: \QueryValue.seconds, default: 60 * 5)
             public var primaryKey: StructuredQueries.TableColumn<QueryValue, Int> {
               self.id
             }
@@ -836,11 +837,11 @@ extension SnapshotTests {
           public struct Draft: StructuredQueries.Table {
             @Column(primaryKey: false)
             let id: Int?
-            var seconds: <#Type#> = 60 * 55
+            var seconds: <#Type#> = 60 * 5
             public struct TableColumns: StructuredQueries.Schema {
               public typealias QueryValue = SyncUp.Draft
               public let id = StructuredQueries.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
-              public let seconds = StructuredQueries.TableColumn<QueryValue, <#Type#>>("seconds", keyPath: \QueryValue.seconds, default: 60 * 55)
+              public let seconds = StructuredQueries.TableColumn<QueryValue, <#Type#>>("seconds", keyPath: \QueryValue.seconds, default: 60 * 5)
               public static var allColumns: [any StructuredQueries.TableColumnExpression] {
                 [QueryValue.columns.id, QueryValue.columns.seconds]
               }
@@ -849,7 +850,7 @@ extension SnapshotTests {
             public static let tableName = SyncUp.tableName
             public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
               self.id = try decoder.decode(Int.self)
-              self.seconds = try decoder.decode(<#Type#>.self) ?? 60 * 55
+              self.seconds = try decoder.decode(<#Type#>.self) ?? 60 * 5
             }
             public init(_ other: SyncUp) {
               self.id = other.id
@@ -857,7 +858,7 @@ extension SnapshotTests {
             }
             public init(
               id: Int? = nil,
-              seconds: <#Type#> = 60 * 55
+              seconds: <#Type#> = 60 * 5
             ) {
               self.id = id
               self.seconds = seconds
@@ -867,7 +868,7 @@ extension SnapshotTests {
           public static let tableName = "syncUps"
           public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
-            self.seconds = try decoder.decode(<#Type#>.self) ?? 60 * 55
+            self.seconds = try decoder.decode(<#Type#>.self) ?? 60 * 5
             guard let id else {
               throw QueryDecodingError.missingRequiredColumn
             }

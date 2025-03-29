@@ -22,8 +22,9 @@ extension SnapshotTests {
       #expect(try db.execute(SimpleSelect { #sql("7", as: UInt8.self) }).first == UInt8(7))
       #expect(try db.execute(SimpleSelect { #sql("8", as: UInt16.self) }).first == UInt16(8))
       #expect(try db.execute(SimpleSelect { #sql("9", as: UInt32.self) }).first == UInt32(9))
-      #expect(try db.execute(SimpleSelect { #sql("10", as: Float.self) }).first == Float(10))
-      #expect(try db.execute(SimpleSelect { #sql("11", as: Double.self) }).first == 11.0)
+      #expect(try db.execute(SimpleSelect { #sql("10", as: UInt64.self) }).first == UInt64(10))
+      #expect(try db.execute(SimpleSelect { #sql("11.12", as: Float.self) }).first == Float(11.12))
+      #expect(try db.execute(SimpleSelect { #sql("13.14", as: Double.self) }).first == 13.14)
       #expect(try db.execute(SimpleSelect { #sql("'Blob'", as: String.self) }).first == "Blob")
     }
 
@@ -167,7 +168,7 @@ extension SnapshotTests {
         """
         SELECT '{"user_id":1,"user_name":"Blob"}'
         """
-      }results: {
+      } results: {
         """
         ┌───────────────────────────────────┐
         │ SnapshotTests.DecodingTests.User( │

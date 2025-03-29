@@ -1,6 +1,10 @@
 import Foundation
 
 extension QueryExpression where QueryValue == Bool {
+  /// Wraps this expression with the `likelihood` function given a probability.
+  ///
+  /// - Parameter probability: A probability hint for the given expression.
+  /// - Returns: Arguments unchanged.
   public func likelihood(
     _ probability: some QueryExpression<some FloatingPoint>
   ) -> some QueryExpression<QueryValue> {

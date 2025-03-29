@@ -1,5 +1,10 @@
 extension QueryExpression where QueryValue: QueryBindable {
-  /// Returns a predicate expression indicating whether two query expressions are equal.
+  /// A predicate expression indicating whether two query expressions are equal.
+  ///
+  /// ```swift
+  /// Reminder.where { $0.title == "Buy milk" }
+  /// // SELECT * FROM "reminders" WHERE "reminders"."title" = 'Buy milk'
+  /// ```
   ///
   /// > Important: Overloaded operators can strain the Swift compiler's type checking ability.
   /// > Consider using ``eq``, instead.
@@ -14,7 +19,12 @@ extension QueryExpression where QueryValue: QueryBindable {
     lhs.eq(rhs)
   }
 
-  /// Returns a predicate expression indicating whether two query expressions are not equal.
+  /// A predicate expression indicating whether two query expressions are not equal.
+  ///
+  /// ```swift
+  /// Reminder.where { $0.title != "Buy milk" }
+  /// // SELECT * FROM "reminders" WHERE "reminders"."title" <> 'Buy milk'
+  /// ```
   ///
   /// > Important: Overloaded operators can strain the Swift compiler's type checking ability.
   /// > Consider using ``neq``, instead.
@@ -30,6 +40,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   }
 
   @_disfavoredOverload
+  @_documentation(visibility: private)
   public static func == (
     lhs: Self, rhs: some QueryExpression<QueryValue?>
   ) -> some QueryExpression<Bool> {
@@ -37,16 +48,39 @@ extension QueryExpression where QueryValue: QueryBindable {
   }
 
   @_disfavoredOverload
+  @_documentation(visibility: private)
   public static func != (
     lhs: Self, rhs: some QueryExpression<QueryValue?>
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: isNull(rhs) ? "IS NOT" : "<>", rhs: rhs)
   }
 
+  /// Returns a predicate expression indicating whether two query expressions are equal.
+  ///
+  /// ```swift
+  /// Reminder.where { $0.title.eq("Buy milk") }
+  /// // SELECT * FROM "reminders" WHERE "reminders"."title" = 'Buy milk'
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - lhs: An expression to compare.
+  ///   - rhs: Another expression to compare.
+  /// - Returns: A predicate expression.
   public func eq(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: "=", rhs: other)
   }
 
+  /// Returns a predicate expression indicating whether two query expressions are not equal.
+  ///
+  /// ```swift
+  /// Reminder.where { $0.title.neq("Buy milk") }
+  /// // SELECT * FROM "reminders" WHERE "reminders"."title" <> 'Buy milk'
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - lhs: An expression to compare.
+  ///   - rhs: Another expression to compare.
+  /// - Returns: A predicate expression.
   public func neq(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: "<>", rhs: other)
   }
@@ -413,22 +447,47 @@ extension QueryExpression where QueryValue == String {
     )
   }
 
+  /// A predicate expression from this string expression matched against another _via_ the `GLOB`
+  /// operator.
+  ///
+  /// - Parameter pattern: A string expression describing the `GLOB` pattern.
+  /// - Returns: A predicate expression.
   public func glob(_ pattern: QueryValue) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: "GLOB", rhs: pattern)
   }
 
+  /// A predicate expression from this string expression matched against another _via_ the `LIKE`
+  /// operator.
+  ///
+  /// - Parameter pattern: A string expression describing the `LIKE` pattern.
+  /// - Returns: A predicate expression.
   public func like(_ pattern: QueryValue, escape: Character? = nil) -> some QueryExpression<Bool> {
     LikeOperator(string: self, pattern: pattern, escape: escape)
   }
 
+  /// A predicate expression from this string expression matched against another _via_ the `LIKE`
+  /// operator given a prefix.
+  ///
+  /// - Parameter pattern: A string expression describing the prefix.
+  /// - Returns: A predicate expression.
   public func hasPrefix(_ other: QueryValue) -> some QueryExpression<Bool> {
     like("\(other)%")
   }
 
+  /// A predicate expression from this string expression matched against another _via_ the `LIKE`
+  /// operator given a suffix.
+  ///
+  /// - Parameter pattern: A string expression describing the suffix.
+  /// - Returns: A predicate expression.
   public func hasSuffix(_ other: QueryValue) -> some QueryExpression<Bool> {
     like("%\(other)")
   }
 
+  /// A predicate expression from this string expression matched against another _via_ the `LIKE`
+  /// operator given an infix.
+  ///
+  /// - Parameter pattern: A string expression describing the infix.
+  /// - Returns: A predicate expression.
   @_disfavoredOverload
   public func contains(_ other: QueryValue) -> some QueryExpression<Bool> {
     like("%\(other)%")
