@@ -28,7 +28,7 @@ extension QueryBinding: CustomDebugStringConvertible {
         .debugDescription
         .dropLast()
         .dropFirst()
-        .quoted("'")
+        .quoted(.text)
     case let .double(value):
       return "\(value)"
     case let .int(value):
@@ -36,7 +36,7 @@ extension QueryBinding: CustomDebugStringConvertible {
     case .null:
       return "NULL"
     case let .text(string):
-      return string.quoted("'")
+      return string.quoted(.text)
     case let ._invalid(error):
       return "<invalid: \(error.underlyingError.localizedDescription)>"
     }

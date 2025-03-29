@@ -97,8 +97,11 @@ extension QueryFragment: ExpressibleByStringInterpolation {
       string.append(literal)
     }
 
-    public mutating func appendInterpolation(quote sql: String) {
-      string.append(sql.quoted())
+    public mutating func appendInterpolation(
+      quote sql: String,
+      delimiter: QuoteDelimiter = .identifier
+    ) {
+      string.append(sql.quoted(delimiter))
     }
 
     public mutating func appendInterpolation(raw sql: String) {
