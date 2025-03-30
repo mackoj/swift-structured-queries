@@ -149,7 +149,7 @@ public macro sql<QueryValue>(
 @Table struct User {
   var isDeleted: Bool
 
-  static func all() -> Select<(), User, ()> {
+  static var all: SelectOf<User> {
     unscoped.where { !$0.isDeleted }
   }
 }
