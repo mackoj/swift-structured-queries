@@ -17,7 +17,7 @@ extension SnapshotTests {
         """
         UPDATE "reminders"
         SET "isCompleted" = NOT ("reminders"."isCompleted")
-        RETURNING "reminders"."title", "reminders"."priority", "reminders"."isCompleted"
+        RETURNING "title", "priority", "isCompleted"
         """
       } results: {
         """
@@ -45,7 +45,7 @@ extension SnapshotTests {
         UPDATE "reminders"
         SET "isCompleted" = 1
         WHERE ("reminders"."priority" IS NULL)
-        RETURNING "reminders"."title", "reminders"."priority", "reminders"."isCompleted"
+        RETURNING "title", "priority", "isCompleted"
         """
       } results: {
         """
@@ -72,7 +72,7 @@ extension SnapshotTests {
         UPDATE "reminders"
         SET "assignedUserID" = 1, "date" = '2001-01-01 00:00:00.000', "isCompleted" = 1, "isFlagged" = 0, "notes" = 'Milk, Eggs, Apples', "priority" = NULL, "remindersListID" = 1, "title" = 'Groceries'
         WHERE ("reminders"."id" = 1)
-        RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        RETURNING "id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
       } results: {
         """
@@ -192,6 +192,39 @@ extension SnapshotTests {
         """
         UPDATE "reminders"
         SET "date" = CURRENT_TIMESTAMP
+        """
+      }
+    }
+
+    @Test func aliasName() {
+      enum R: AliasName {}
+      assertQuery(
+        Reminder.as(R.self)
+          .where { $0.id.eq(1) }
+          .update { $0.title += " 2" }
+          .returning(\.self)
+      ) {
+        """
+        UPDATE "reminders" AS "rs"
+        SET "title" = ("rs"."title" || ' 2')
+        WHERE ("rs"."id" = 1)
+        RETURNING "id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────────┐
+        │ Reminder(                               │
+        │   id: 1,                                │
+        │   assignedUserID: 1,                    │
+        │   date: Date(2001-01-01T00:00:00.000Z), │
+        │   isCompleted: false,                   │
+        │   isFlagged: false,                     │
+        │   notes: "Milk, Eggs, Apples",          │
+        │   priority: nil,                        │
+        │   remindersListID: 1,                   │
+        │   title: "Groceries 2"                  │
+        │ )                                       │
+        └─────────────────────────────────────────┘
         """
       }
     }

@@ -31,7 +31,7 @@ extension SnapshotTests {
         ("id", "name", "duration")
         VALUES
         ('\u{07AD}��ޭ��ޭ��ޭ��', 'Blob', 0)
-        RETURNING "records"."id", "records"."name", "records"."duration"
+        RETURNING "id", "name", "duration"
         """#
       } results: {
         """
@@ -62,7 +62,7 @@ extension SnapshotTests {
         ("id", "name", "duration")
         VALUES
         ('\u{07AD}��ޭ��ޭ��ޭ��', '', <invalid: The operation couldn’t be completed. (StructuredQueriesCore.OverflowError error 1.)>)
-        RETURNING "records"."id", "records"."name", "records"."duration"
+        RETURNING "id", "name", "duration"
         """#
       } results: {
         """

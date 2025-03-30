@@ -23,7 +23,7 @@ extension SnapshotTests {
         VALUES
         (1, 'Groceries', 1, '2001-01-01 00:00:00.000', 3), (2, 'Haircut', 0, '1970-01-01 00:00:00.000', 1)
         ON CONFLICT DO UPDATE SET "title" = ("reminders"."title" || ' Copy')
-        RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        RETURNING "id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
       } results: {
         """
@@ -67,7 +67,7 @@ extension SnapshotTests {
         ("remindersListID")
         VALUES
         (1)
-        RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        RETURNING "id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
       } results: {
         """
@@ -117,7 +117,7 @@ extension SnapshotTests {
         ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
         VALUES
         (100, NULL, NULL, 0, 0, '', NULL, 1, 'Check email')
-        RETURNING "reminders"."id"
+        RETURNING "id"
         """
       } results: {
         """
@@ -137,7 +137,7 @@ extension SnapshotTests {
         ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
         VALUES
         (101, NULL, NULL, 0, 0, '', NULL, 1, 'Check voicemail')
-        RETURNING "reminders"."id"
+        RETURNING "id"
         """
       } results: {
         """
@@ -158,7 +158,7 @@ extension SnapshotTests {
         ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
         VALUES
         (102, NULL, NULL, 0, 0, '', NULL, 1, 'Check mailbox'), (103, NULL, NULL, 0, 0, '', NULL, 1, 'Check Slack')
-        RETURNING "reminders"."id"
+        RETURNING "id"
         """
       } results: {
         """
@@ -179,7 +179,7 @@ extension SnapshotTests {
         ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
         VALUES
         (104, NULL, NULL, 0, 0, '', NULL, 1, 'Check pager')
-        RETURNING "reminders"."id"
+        RETURNING "id"
         """
       } results: {
         """
@@ -204,7 +204,7 @@ extension SnapshotTests {
         ("name")
         SELECT lower("remindersLists"."name")
         FROM "remindersLists"
-        RETURNING "tags"."id", "tags"."name"
+        RETURNING "id", "name"
         """
       } results: {
         """
@@ -240,7 +240,7 @@ extension SnapshotTests {
         ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
         VALUES
         (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check email')
-        RETURNING "reminders"."id"
+        RETURNING "id"
         """
       } results: {
         """
@@ -261,7 +261,7 @@ extension SnapshotTests {
         ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
         VALUES
         (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check voicemail')
-        RETURNING "reminders"."id"
+        RETURNING "id"
         """
       } results: {
         """
@@ -285,7 +285,7 @@ extension SnapshotTests {
         ("id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
         VALUES
         (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check mailbox'), (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check Slack')
-        RETURNING "reminders"."id"
+        RETURNING "id"
         """
       } results: {
         """
@@ -332,7 +332,7 @@ extension SnapshotTests {
         VALUES
         (1, NULL, NULL, 0, 0, '', NULL, 1, 'Cash check')
         ON CONFLICT DO UPDATE SET "assignedUserID" = "excluded"."assignedUserID", "date" = "excluded"."date", "isCompleted" = "excluded"."isCompleted", "isFlagged" = "excluded"."isFlagged", "notes" = "excluded"."notes", "priority" = "excluded"."priority", "remindersListID" = "excluded"."remindersListID", "title" = "excluded"."title"
-        RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        RETURNING "id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
       } results: {
         """
@@ -376,7 +376,7 @@ extension SnapshotTests {
         VALUES
         (NULL, NULL, NULL, 0, 0, '', NULL, 1, '')
         ON CONFLICT DO UPDATE SET "assignedUserID" = "excluded"."assignedUserID", "date" = "excluded"."date", "isCompleted" = "excluded"."isCompleted", "isFlagged" = "excluded"."isFlagged", "notes" = "excluded"."notes", "priority" = "excluded"."priority", "remindersListID" = "excluded"."remindersListID", "title" = "excluded"."title"
-        RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        RETURNING "id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
       } results: {
         """
@@ -421,6 +421,36 @@ extension SnapshotTests {
         │   name: "office" │
         │ )                │
         └──────────────────┘
+        """
+      }
+    }
+
+    @Test func aliasName() {
+      enum R: AliasName {}
+      assertQuery(
+        RemindersList.as(R.self).insert {
+          $0.name
+        } values: {
+          "cruise"
+        }
+        .returning(\.self)
+      ) {
+        """
+        INSERT INTO "remindersLists" AS "rs"
+        ("name")
+        VALUES
+        ('cruise')
+        RETURNING "id", "color", "name"
+        """
+      } results: {
+        """
+        ┌───────────────────┐
+        │ RemindersList(    │
+        │   id: 4,          │
+        │   color: 4889071, │
+        │   name: "cruise"  │
+        │ )                 │
+        └───────────────────┘
         """
       }
     }

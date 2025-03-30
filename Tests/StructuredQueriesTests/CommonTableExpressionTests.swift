@@ -122,7 +122,7 @@ extension SnapshotTests {
         FROM "incompleteReminders"
         JOIN "reminders" ON ("incompleteReminders"."title" = "reminders"."title")
         LIMIT 1
-        RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        RETURNING "id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
       } results: {
         """
@@ -166,7 +166,7 @@ extension SnapshotTests {
         SET "title" = upper("reminders"."title")
         WHERE ("reminders"."title" IN (SELECT "incompleteReminders"."title"
         FROM "incompleteReminders"))
-        RETURNING "reminders"."title"
+        RETURNING "title"
         """
       } results: {
         """

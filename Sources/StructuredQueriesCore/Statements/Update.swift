@@ -45,15 +45,33 @@ public struct Update<From: Table, Returning> {
     return update
   }
 
-  public func returning<each ResultColumn: QueryExpression>(
-    _ selection: (From.TableColumns) -> (repeat each ResultColumn)
-  ) -> Update<From, (repeat (each ResultColumn).QueryValue)>
-  where repeat (each ResultColumn).QueryValue: QueryDecodable {
-    Update<From, (repeat (each ResultColumn).QueryValue)>(
+  public func returning(
+    _ selection: (From.TableColumns) -> From.TableColumns
+  ) -> Update<From, From> {
+    var returning: [QueryFragment] = []
+    for resultColumn in From.TableColumns.allColumns {
+      returning.append("\(quote: resultColumn.name)")
+    }
+    return Update<From, From>(
       conflictResolution: conflictResolution,
       record: record,
       where: `where`,
-      returning: Array(repeat each selection(From.columns))
+      returning: returning
+    )
+  }
+
+  public func returning<each QueryValue: QueryRepresentable>(
+    _ selection: (From.TableColumns) -> (repeat TableColumn<From, each QueryValue>)
+  ) -> Update<From, (repeat (each QueryValue).QueryOutput)> {
+    var returning: [QueryFragment] = []
+    for resultColumn in repeat each selection(From.columns) {
+      returning.append("\(quote: resultColumn.name)")
+    }
+    return Update<From, (repeat (each QueryValue).QueryOutput)>(
+      conflictResolution: conflictResolution,
+      record: record,
+      where: `where`,
+      returning: returning
     )
   }
 }
@@ -68,7 +86,11 @@ extension Update: Statement {
     if let conflictResolution {
       query.append(" OR \(conflictResolution.rawValue)")
     }
-    query.append(" \(From.self)\(.newlineOrSpace)\(record)")
+    query.append(" \(quote: From.tableName)")
+    if let tableAlias = From.tableAlias {
+      query.append(" AS \(quote: tableAlias)")
+    }
+    query.append("\(.newlineOrSpace)\(record)")
     if !`where`.isEmpty {
       query.append("\(.newlineOrSpace)WHERE \(`where`.joined(separator: " AND "))")
     }

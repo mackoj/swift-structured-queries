@@ -379,16 +379,35 @@ public struct Insert<Into: Table, Returning> {
   ///
   /// - Parameter selection: Columns to return.
   /// - Returns: A statement with a returning clause.
-  public func returning<each ResultColumn: QueryExpression>(
-    _ selection: (Into.TableColumns) -> (repeat each ResultColumn)
-  ) -> Insert<Into, (repeat (each ResultColumn).QueryValue)>
-  where repeat (each ResultColumn).QueryValue: QueryDecodable {
-    Insert<Into, (repeat (each ResultColumn).QueryValue)>(
+  public func returning<each QueryValue: QueryRepresentable>(
+    _ selection: (From.TableColumns) -> (repeat TableColumn<From, each QueryValue>)
+  ) -> Insert<Into, (repeat (each QueryValue).QueryOutput)> {
+    var returning: [QueryFragment] = []
+    for resultColumn in repeat each selection(From.columns) {
+      returning.append("\(quote: resultColumn.name)")
+    }
+    return Insert<Into, (repeat (each QueryValue).QueryOutput)>(
       conflictResolution: conflictResolution,
       columnNames: columnNames,
       values: values,
       record: record,
-      returning: Array(repeat each selection(Into.columns))
+      returning: returning
+    )
+  }
+
+  public func returning(
+    _ selection: (Into.TableColumns) -> Into.TableColumns
+  ) -> Insert<Into, Into> {
+    var returning: [QueryFragment] = []
+    for resultColumn in From.TableColumns.allColumns {
+      returning.append("\(quote: resultColumn.name)")
+    }
+    return Insert<Into, Into>(
+      conflictResolution: conflictResolution,
+      columnNames: columnNames,
+      values: values,
+      record: record,
+      returning: returning
     )
   }
 }
@@ -402,7 +421,10 @@ extension Insert: Statement {
     if let conflictResolution {
       query.append(" OR \(conflictResolution.rawValue)")
     }
-    query.append(" INTO \(Into.self)")
+    query.append(" INTO \(quote: Into.tableName)")
+    if let tableAlias = Into.tableAlias {
+      query.append(" AS \(quote: tableAlias)")
+    }
     if !columnNames.isEmpty {
       query.append(
         "\(.newlineOrSpace)(\(columnNames.map { "\(quote: $0)" }.joined(separator: ", ")))"

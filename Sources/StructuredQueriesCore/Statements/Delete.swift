@@ -46,13 +46,29 @@ public struct Delete<From: Table, Returning> {
   ///
   /// - Parameter selection: Columns to return.
   /// - Returns: A statement with a returning clause.
-  public func returning<each ResultColumn: QueryExpression>(
-    _ selection: (From.TableColumns) -> (repeat each ResultColumn)
-  ) -> Delete<From, (repeat (each ResultColumn).QueryValue)>
-  where repeat (each ResultColumn).QueryValue: QueryDecodable {
-    Delete<From, (repeat (each ResultColumn).QueryValue)>(
+  public func returning<each QueryValue: QueryRepresentable>(
+    _ selection: (From.TableColumns) -> (repeat TableColumn<From, each QueryValue>)
+  ) -> Delete<From, (repeat (each QueryValue).QueryOutput)> {
+    var returning: [QueryFragment] = []
+    for resultColumn in repeat each selection(From.columns) {
+      returning.append("\(quote: resultColumn.name)")
+    }
+    return Delete<From, (repeat (each QueryValue).QueryOutput)>(
       where: `where`,
       returning: Array(repeat each selection(From.columns))
+    )
+  }
+
+  public func returning(
+    _ selection: (From.TableColumns) -> From.TableColumns
+  ) -> Delete<From, From> {
+    var returning: [QueryFragment] = []
+    for resultColumn in From.TableColumns.allColumns {
+      returning.append("\(quote: resultColumn.name)")
+    }
+    return Delete<From, From>(
+      where: `where`,
+      returning: returning
     )
   }
 }
@@ -63,7 +79,10 @@ extension Delete: Statement {
   public typealias QueryValue = Returning
 
   public var query: QueryFragment {
-    var query: QueryFragment = "DELETE FROM \(From.self)"
+    var query: QueryFragment = "DELETE FROM \(quote: From.tableName)"
+    if let tableAlias = From.tableAlias {
+      query.append(" AS \(quote: tableAlias)")
+    }
     if !`where`.isEmpty {
       query.append("\(.newlineOrSpace)WHERE \(`where`.joined(separator: " AND "))")
     }

@@ -7,7 +7,7 @@
 public struct Collation: RawRepresentable, Sendable {
   /// A query fragment representing the collating sequence name.
   public let rawValue: QueryFragment
-  
+
   /// Initializes a collating sequence name from a query fragment.
   ///
   /// ```swift

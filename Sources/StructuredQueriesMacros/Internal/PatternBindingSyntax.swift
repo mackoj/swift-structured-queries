@@ -11,6 +11,9 @@ extension PatternBindingSyntax {
           )
         }
     )
+    if annotated.typeAnnotation != nil {
+      annotated.pattern.trailingTrivia = ""
+    }
     annotated.accessorBlock = nil
     guard annotated.typeAnnotation?.type.isOptionalType == true
     else {

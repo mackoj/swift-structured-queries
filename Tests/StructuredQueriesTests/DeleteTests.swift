@@ -47,7 +47,7 @@ extension SnapshotTests {
         """
         DELETE FROM "reminders"
         WHERE ("reminders"."id" = 1)
-        RETURNING "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        RETURNING "id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
       } results: {
         """
@@ -97,6 +97,32 @@ extension SnapshotTests {
         ┌───┐
         │ 9 │
         └───┘
+        """
+      }
+    }
+
+    @Test func aliasName() {
+      enum R: AliasName {}
+      assertQuery(
+        RemindersList.as(R.self)
+          .where { $0.id == 1 }
+          .delete()
+          .returning(\.self)
+      ) {
+        """
+        DELETE FROM "remindersLists" AS "rs"
+        WHERE ("rs"."id" = 1)
+        RETURNING "id", "color", "name"
+        """
+      } results: {
+        """
+        ┌────────────────────┐
+        │ RemindersList(     │
+        │   id: 1,           │
+        │   color: 4889071,  │
+        │   name: "Personal" │
+        │ )                  │
+        └────────────────────┘
         """
       }
     }
