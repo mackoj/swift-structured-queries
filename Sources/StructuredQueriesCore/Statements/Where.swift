@@ -15,13 +15,7 @@ extension Table {
   /// // WHERE ("users"."email" LIKE '%@pointfree.co')
   /// ```
   ///
-  /// If executed directly, `WHERE` is applied to an otherwise bare `SELECT` statement:
-  ///
-  /// ```swift
-  /// try db.execute(User.where { $0.id == 1 })
-  /// // SELECT "users"."id", "users"."email" FROM "users"
-  /// // WHERE "users"."id" = 1
-  /// ```
+  /// See <doc:WhereClauses> for more.
   ///
   /// - Parameter predicate: A predicate used to generate the `WHERE` clause.
   /// - Returns: A `WHERE` clause.

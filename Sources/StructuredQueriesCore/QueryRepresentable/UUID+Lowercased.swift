@@ -1,6 +1,18 @@
 import Foundation
 
 extension UUID {
+  /// A query expression representing a UUID as a lowercased string.
+  ///
+  /// ```swift
+  /// @Table
+  /// struct Item {
+  ///   @Column(as: UUID.LowercasedRepresentation.self)
+  ///   let id: UUID
+  /// }
+  ///
+  /// Item.insert { $0.id } values: { UUID() }
+  /// // INSERT INTO "items" ("id") VALUES ('deadbeef-dead-beef-dead-deadbeefdead')
+  /// ```
   public struct LowercasedRepresentation: QueryRepresentable {
     public var queryOutput: UUID
 

@@ -368,6 +368,8 @@ private enum InsertValues {
 ///
 /// This type of statement is returned from ``Table/insert(or:_:values:onConflict:)-6zwu9`` and
 /// related functions.
+///
+/// To learn more, see <doc:Inserts>.
 public struct Insert<Into: Table, Returning> {
   var conflictResolution: ConflictResolution?
   var columnNames: [String] = []
@@ -395,6 +397,8 @@ public struct Insert<Into: Table, Returning> {
     )
   }
 
+  // NB: This overload allows for 'returning(\.self)'.
+  @_documentation(visibility: private)
   public func returning(
     _ selection: (Into.TableColumns) -> Into.TableColumns
   ) -> Insert<Into, Into> {

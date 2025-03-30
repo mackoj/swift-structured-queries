@@ -1,5 +1,6 @@
 import Foundation
 
+/// A query expression representing codable JSON.
 public struct JSONRepresentation<QueryOutput: Codable & Sendable>: QueryRepresentable {
   public var queryOutput: QueryOutput
 

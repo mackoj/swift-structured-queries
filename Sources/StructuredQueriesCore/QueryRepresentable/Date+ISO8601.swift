@@ -3,6 +3,18 @@ import Foundation
 // TODO: iOS <15 support
 
 extension Date {
+  /// A query expression representing a date as an ISO-8601-formatted string (in RFC 3339 format).
+  ///
+  /// ```swift
+  /// @Table
+  /// struct Item {
+  ///   @Column(as: Date.ISO8601Representation.self)
+  ///   var date: Date
+  /// }
+  ///
+  /// Item.insert { $0.date } values: { Date() }
+  /// // INSERT INTO "items" ("date") VALUES ('2018-01-29 00:08:00.000')
+  /// ```
   @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
   public struct ISO8601Representation: QueryRepresentable {
     public var queryOutput: Date

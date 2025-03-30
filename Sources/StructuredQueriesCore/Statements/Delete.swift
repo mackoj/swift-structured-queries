@@ -1,6 +1,11 @@
 extension Table {
   /// A delete statement for a table.
   ///
+  /// ```swift
+  /// Reminder.delete()
+  /// // DELETE FROM "reminders"
+  /// ```
+  ///
   /// - Returns: A delete statement.
   public static func delete() -> Delete<Self, Void> {
     Delete()
@@ -28,11 +33,18 @@ extension PrimaryKeyedTable {
 /// A `DELETE` statement.
 ///
 /// This type of statement is constructed from ``Table/delete()`` and ``Where/delete()``.
+///
+/// To learn more, see <doc:Deletes>.
 public struct Delete<From: Table, Returning> {
   var `where`: [QueryFragment] = []
   var returning: [QueryFragment] = []
 
   /// Adds a condition to a delete statement.
+  ///
+  /// ```swift
+  /// Reminder.delete().where(\.isCompleted)
+  /// // DELETE FROM "reminders" WHERE "reminders"."isCompleted"
+  /// ```
   ///
   /// - Parameter predicate: A predicate to add.
   /// - Returns: A statement with the added predicate.
@@ -43,6 +55,14 @@ public struct Delete<From: Table, Returning> {
   }
 
   /// Adds a returning clause to a delete statement.
+  ///
+  /// ```swift
+  /// Reminder.delete().returning { ($0.id, $0.title) }
+  /// // DELETE FROM "reminders" RETURNING "id", "title"
+  ///
+  /// Reminder.delete().returning(\.self)
+  /// // DELETE FROM "reminders" RETURNING …
+  /// ```
   ///
   /// - Parameter selection: Columns to return.
   /// - Returns: A statement with a returning clause.
@@ -59,6 +79,8 @@ public struct Delete<From: Table, Returning> {
     )
   }
 
+  // NB: This overload allows for 'returning(\.self)'.
+  @_documentation(visibility: private)
   public func returning(
     _ selection: (From.TableColumns) -> From.TableColumns
   ) -> Delete<From, From> {

@@ -1,6 +1,18 @@
 import Foundation
 
 extension Date {
+  /// A query expression representing a date as the integer number of seconds past the unix epoch.
+  ///
+  /// ```swift
+  /// @Table
+  /// struct Item {
+  ///   @Column(as: Date.UnixTimeRepresentation.self)
+  ///   var date: Date
+  /// }
+  ///
+  /// Item.insert { $0.date } values: { Date() }
+  /// // INSERT INTO "items" ("date") VALUES (1517212800)
+  /// ```
   public struct UnixTimeRepresentation: QueryRepresentable {
     public var queryOutput: Date
 

@@ -1,6 +1,18 @@
 import Foundation
 
 extension UUID {
+  /// A query expression representing a UUID as bytes.
+  ///
+  /// ```swift
+  /// @Table
+  /// struct Item {
+  ///   @Column(as: UUID.BytesRepresentation.self)
+  ///   let id: UUID
+  /// }
+  ///
+  /// Item.insert { $0.id } values: { UUID() }
+  /// // INSERT INTO "items" ("id") VALUES (<blob>)
+  /// ```
   public struct BytesRepresentation: QueryRepresentable {
     public var queryOutput: UUID
 
