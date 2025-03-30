@@ -5,14 +5,14 @@ public protocol Table: QueryRepresentable where TableColumns.QueryValue == Self 
   static var tableName: String { get }
   static var tableAlias: String? { get }
 
-  static var all: Select<(), Self, ()> { get }
+  static var all: SelectOf<Self> { get }
 }
 
 extension Table {
-  public static var all: Select<(), Self, ()> {
+  public static var all: SelectOf<Self> {
     Select()
   }
-  public static var unscoped: Select<(), Self, ()> {
+  public static var unscoped: SelectOf<Self> {
     Select()
   }
 }

@@ -143,13 +143,3 @@ public macro sql<QueryValue>(
   as queryValueType: QueryValue.Type = QueryValue.self
 ) -> SQLQueryExpression<QueryValue> =
   #externalMacro(module: "StructuredQueriesMacros", type: "SQLMacro")
-
-
-
-@Table struct User {
-  var isDeleted: Bool
-
-  static var all: SelectOf<User> {
-    unscoped.where { !$0.isDeleted }
-  }
-}
