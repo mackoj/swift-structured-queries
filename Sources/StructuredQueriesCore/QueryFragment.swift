@@ -84,6 +84,13 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     self.init(value)
   }
 
+  public init(
+    quote sql: String,
+    delimiter: QuoteDelimiter = .identifier
+  ) {
+    self.init(sql.quoted(delimiter))
+  }
+
   public struct StringInterpolation: StringInterpolationProtocol {
     public var string = ""
     public var bindings: [QueryBinding] = []

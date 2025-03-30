@@ -1,6 +1,23 @@
 import StructuredQueriesSupport
 
+/// A type identifying a table alias.
+///
+/// Conform to this protocol to provide an alias to a table.
+///
+/// This protocol contains a single, optional requirement, ``aliasName``, which is the string used
+/// to use in the SQL `AS` clause. When left omitted, it will default to the same strategy applied
+/// to table names in the `@Table` macro, which is a lowercased, pluralized version of the type
+/// name.
+///
+/// ```swift
+/// enum Referrer: AliasName {}
+///
+/// Referrer.aliasName  // "referrers"
+/// ```
+///
+/// See ``Table/as(_:)`` for more information on using this conformance.
 public protocol AliasName {
+  /// The string used to alias a table, _e.g._ `"tableName" AS "aliasName"`.
   static var aliasName: String { get }
 }
 
@@ -11,7 +28,38 @@ extension AliasName {
 }
 
 extension Table {
-  public static func `as`<Name: AliasName>(_ alias: Name.Type) -> TableAlias<Self, Name>.Type {
+  /// A table alias of this table type.
+  ///
+  /// This is useful for building queries where a table is joined multiple times. For example, a
+  /// "users" table may have an optional `referrerID` column that points to another row in the
+  /// table, and you may want to join on this constraint:
+  ///
+  /// ```swift
+  /// @Table
+  /// struct User {
+  ///   let id: Int
+  ///   var name = ""
+  ///   var referrerID: Int?
+  /// }
+  /// ```
+  ///
+  /// To do so, define an ``AliasName`` for referrers and then build the appropriate query:
+  ///
+  /// ```swift
+  /// enum Referrer: AliasName {}
+  ///
+  /// let usersWithReferrers = User
+  ///   .join(User.as(Referrer.self).all()) { $0.referrerID == $1.id }
+  ///   .select { ($0.name, $1.name) }
+  /// // SELECT "users"."name", "referrers.name"
+  /// // FROM "users"
+  /// // JOIN "users" AS "referrers"
+  /// // ON "users"."referrerID" = "referrers"."id"
+  /// ```
+  ///
+  /// - Parameter aliasName: An alias name for this table.
+  /// - Returns: A table alias of this table type.
+  public static func `as`<Name: AliasName>(_ aliasName: Name.Type) -> TableAlias<Self, Name>.Type {
     TableAlias.self
   }
 }

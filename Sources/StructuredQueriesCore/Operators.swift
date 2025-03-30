@@ -3,7 +3,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   ///
   /// ```swift
   /// Reminder.where { $0.title == "Buy milk" }
-  /// // SELECT * FROM "reminders" WHERE "reminders"."title" = 'Buy milk'
+  /// // SELECT … FROM "reminders" WHERE "reminders"."title" = 'Buy milk'
   /// ```
   ///
   /// > Important: Overloaded operators can strain the Swift compiler's type checking ability.
@@ -23,7 +23,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   ///
   /// ```swift
   /// Reminder.where { $0.title != "Buy milk" }
-  /// // SELECT * FROM "reminders" WHERE "reminders"."title" <> 'Buy milk'
+  /// // SELECT … FROM "reminders" WHERE "reminders"."title" <> 'Buy milk'
   /// ```
   ///
   /// > Important: Overloaded operators can strain the Swift compiler's type checking ability.
@@ -59,7 +59,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   ///
   /// ```swift
   /// Reminder.where { $0.title.eq("Buy milk") }
-  /// // SELECT * FROM "reminders" WHERE "reminders"."title" = 'Buy milk'
+  /// // SELECT … FROM "reminders" WHERE "reminders"."title" = 'Buy milk'
   /// ```
   ///
   /// - Parameters:
@@ -74,7 +74,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   ///
   /// ```swift
   /// Reminder.where { $0.title.neq("Buy milk") }
-  /// // SELECT * FROM "reminders" WHERE "reminders"."title" <> 'Buy milk'
+  /// // SELECT … FROM "reminders" WHERE "reminders"."title" <> 'Buy milk'
   /// ```
   ///
   /// - Parameters:
@@ -450,6 +450,11 @@ extension QueryExpression where QueryValue == String {
   /// A predicate expression from this string expression matched against another _via_ the `GLOB`
   /// operator.
   ///
+  /// ```swift
+  /// Asset.where { $0.path.glob("Resources/*.png") }
+  /// // SELECT … FROM "assets" WHERE ("assets"."path" GLOB 'Resources/*.png')
+  /// ```
+  ///
   /// - Parameter pattern: A string expression describing the `GLOB` pattern.
   /// - Returns: A predicate expression.
   public func glob(_ pattern: QueryValue) -> some QueryExpression<Bool> {
@@ -459,14 +464,38 @@ extension QueryExpression where QueryValue == String {
   /// A predicate expression from this string expression matched against another _via_ the `LIKE`
   /// operator.
   ///
+  /// ```swift
+  /// Reminder.where { $0.title.like("%get%") }
+  /// // SELECT … FROM "reminders" WHERE ("reminders"."title" LIKE '%get%')
+  /// ```
+  ///
   /// - Parameter pattern: A string expression describing the `LIKE` pattern.
   /// - Returns: A predicate expression.
   public func like(_ pattern: QueryValue, escape: Character? = nil) -> some QueryExpression<Bool> {
     LikeOperator(string: self, pattern: pattern, escape: escape)
   }
 
+  /// A predicate expression from this string expression matched against another _via_ the `MATCH`
+  /// operator.
+  ///
+  /// ```swift
+  /// Reminder.where { $0.title.match("get") }
+  /// // SELECT … FROM "reminders" WHERE ("reminders"."title" MATCH 'get')
+  /// ```
+  ///
+  /// - Parameter pattern: A string expression describing the `MATCH` pattern.
+  /// - Returns: A predicate expression.
+  public func match(_ pattern: QueryValue) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "MATCH", rhs: pattern)
+  }
+
   /// A predicate expression from this string expression matched against another _via_ the `LIKE`
   /// operator given a prefix.
+  ///
+  /// ```swift
+  /// Reminder.where { $0.title.hasPrefix("get") }
+  /// // SELECT … FROM "reminders" WHERE ("reminders"."title" LIKE 'get%')
+  /// ```
   ///
   /// - Parameter pattern: A string expression describing the prefix.
   /// - Returns: A predicate expression.
@@ -477,6 +506,11 @@ extension QueryExpression where QueryValue == String {
   /// A predicate expression from this string expression matched against another _via_ the `LIKE`
   /// operator given a suffix.
   ///
+  /// ```swift
+  /// Reminder.where { $0.title.hasSuffix("get") }
+  /// // SELECT … FROM "reminders" WHERE ("reminders"."title" LIKE '%get')
+  /// ```
+  ///
   /// - Parameter pattern: A string expression describing the suffix.
   /// - Returns: A predicate expression.
   public func hasSuffix(_ other: QueryValue) -> some QueryExpression<Bool> {
@@ -485,6 +519,11 @@ extension QueryExpression where QueryValue == String {
 
   /// A predicate expression from this string expression matched against another _via_ the `LIKE`
   /// operator given an infix.
+  ///
+  /// ```swift
+  /// Reminder.where { $0.title.contains("get") }
+  /// // SELECT … FROM "reminders" WHERE ("reminders"."title" LIKE '%get%')
+  /// ```
   ///
   /// - Parameter pattern: A string expression describing the infix.
   /// - Returns: A predicate expression.
@@ -495,6 +534,18 @@ extension QueryExpression where QueryValue == String {
 }
 
 extension SQLQueryExpression<String> {
+  /// Appends a string expression in an update clause.
+  ///
+  /// Can be used in an `UPDATE` clause to append an existing column:
+  ///
+  /// ```swift
+  /// Reminder.update { $0.title += " 2" }
+  /// // UPDATE "reminders" SET "title" = ("reminders"."title" || " 2")
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - lhs: The column to append.
+  ///   - rhs: The appended text.
   public static func += (
     lhs: inout Self, rhs: some QueryExpression<QueryValue>
   ) {
