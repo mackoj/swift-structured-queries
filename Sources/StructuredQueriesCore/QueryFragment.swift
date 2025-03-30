@@ -1,6 +1,6 @@
 import StructuredQueriesSupport
 
-/// A type representing a SQL statement and its bindings.
+/// A type representing a SQL string and its bindings.
 ///
 /// You will typically create instances of this type using string literals, where bindings are
 /// directly interpolated into the string.
@@ -13,19 +13,25 @@ public struct QueryFragment: Hashable, Sendable, CustomDebugStringConvertible {
     self.bindings = bindings
   }
 
+  /// A Boolean value indicating whether the query fragment is empty.
+  public var isEmpty: Bool {
+    return string.isEmpty && bindings.isEmpty
+  }
+
+  /// Appends the given fragment to this query fragment.
+  ///
+  /// - Parameter other: Another query fragment.
   public mutating func append(_ other: Self) {
     string.append(other.string)
     bindings.append(contentsOf: other.bindings)
   }
 
-  public var isEmpty: Bool {
-    string.isEmpty && bindings.isEmpty
-  }
-
+  /// Appends a given query fragment to another fragment.
   public static func += (lhs: inout Self, rhs: Self) {
     lhs.append(rhs)
   }
 
+  /// Creates a new query fragment by concatenating two fragments.
   public static func + (lhs: Self, rhs: Self) -> Self {
     var query = lhs
     query += rhs
@@ -65,6 +71,12 @@ public struct QueryFragment: Hashable, Sendable, CustomDebugStringConvertible {
 }
 
 extension [QueryFragment] {
+  /// Returns a new query fragment by concatenating the elements of the sequence, adding the given
+  /// separator between each element.
+  ///
+  /// - Parameter separator: A query fragment to insert between each of the elements in this
+  ///   sequence. The default separator is an empty fragment.
+  /// - Returns: A single, concatenated fragment.
   public func joined(separator: QueryFragment = "") -> QueryFragment {
     guard var joined = first else { return QueryFragment() }
     for fragment in dropFirst() {
@@ -84,6 +96,20 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     self.init(value)
   }
 
+  /// Creates a query fragment by quoting the given SQL string.
+  ///
+  /// ```swift
+  /// QueryFragment(quote: "myTable")
+  /// // "myTable"
+  ///
+  /// QueryFragment(quote: #"The "best" table"#)
+  /// // "The ""best"" table"
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - sql: A query string to be quoted.
+  ///   - delimiter: The delimiter used for quoting. Defaults to `.identifier`, which uses `"` for
+  ///     quoting.
   public init(
     quote sql: String,
     delimiter: QuoteDelimiter = .identifier
@@ -104,6 +130,20 @@ extension QueryFragment: ExpressibleByStringInterpolation {
       string.append(literal)
     }
 
+    /// Append a quoted fragment to the interpolation.
+    ///
+    /// ```swift
+    /// #sql("SELECT * FROM \(quote: "reminders")", as: Reminder.self)
+    /// // SELECT * FROM "reminders"
+    ///
+    /// #sql("CREATE TABLE t (c TEXT DEFAULT \(quote: "Blob's world", delimiter: .text))")
+    /// // SELECT TABLE t (c TEXT DEFAULT 'Blob''s world')
+    /// ```
+    ///
+    /// - Parameters:
+    ///   - sql: A query string to be quoted.
+    ///   - delimiter: The delimiter used for quoting. Defaults to `.identifier`, which uses `"` for
+    ///     quoting.
     public mutating func appendInterpolation(
       quote sql: String,
       delimiter: QuoteDelimiter = .identifier
@@ -111,36 +151,100 @@ extension QueryFragment: ExpressibleByStringInterpolation {
       string.append(sql.quoted(delimiter))
     }
 
+    /// Append a raw SQL string to the interpolation.
+    ///
+    /// > Warning: Avoid introducing raw SQL and potential injection attacks. Instead, append
+    /// > query fragments that safely bind data via interpolation.
+    ///
+    /// - Parameter sql: A raw query string.
     public mutating func appendInterpolation(raw sql: String) {
       string.append(sql)
     }
 
+    /// Append a raw lossless string to the interpolation.
+    ///
+    /// This can be used to interpolate values into statements in which they cannot be bound.
+    ///
+    /// ```swift
+    /// #sql("CREATE TABLE t (c INTEGER DEFAULT \(raw: 0))")
+    /// // CREATE TABLE t (c INTEGER DEFAULT 0)
+    /// ```
+    ///
+    /// > Warning: Avoid introducing raw SQL and potential injection attacks. Instead, append
+    /// > query fragments that safely bind data via interpolation.
+    ///
+    /// - Parameter sql: A raw query string.
     public mutating func appendInterpolation(raw sql: some LosslessStringConvertible) {
       string.append(sql.description)
     }
 
+    /// Append a query binding to the interpolation.
+    ///
+    /// - Parameter binding: A query binding.
     public mutating func appendInterpolation(_ binding: QueryBinding) {
       string.append("?")
       bindings.append(binding)
     }
 
+    /// Append a query fragment to the interpolation.
+    ///
+    /// - Parameter fragment: A query fragment.
     public mutating func appendInterpolation(_ fragment: QueryFragment) {
       string.append(fragment.string)
       bindings.append(contentsOf: fragment.bindings)
     }
 
+    /// Append a query expression to the interpolation.
+    ///
+    /// - Parameter expression: A query expression.
     public mutating func appendInterpolation(bind expression: some QueryExpression) {
       appendInterpolation(expression.queryFragment)
     }
 
+    /// Append a query expression to the interpolation.
+    ///
+    /// - Parameter expression: A query expression.
     public mutating func appendInterpolation(_ expression: some QueryExpression) {
       appendInterpolation(expression.queryFragment)
     }
 
-    public mutating func appendInterpolation(_ expression: some Statement) {
-      appendInterpolation(expression.query)
+    /// Append a statement to the interpolation.
+    ///
+    /// The statement is directly interpolated into the query fragment, without parentheses. When
+    /// introducing a statement into a query fragment as a subquery, be sure to explicitly
+    /// parenthesize the interpolation:
+    ///
+    /// ```swift
+    /// let averagePriority = Reminder.select { $0.priority.avg() }
+    ///
+    /// #sql(
+    ///   """
+    ///   SELECT title FROM reminders
+    ///   WHERE priority > (\(averagePriority))
+    ///   """,
+    ///   as: String.self
+    /// )
+    /// // SELECT title FROM reminders
+    /// // WHERE priority > (SELECT avg("reminders"."priority) FROM "reminders")
+    /// ```
+    ///
+    /// - Parameter statement: A statement.
+    public mutating func appendInterpolation(_ statement: some _SelectStatement) {
+      appendInterpolation(statement.query)
     }
 
+    /// Append a table's alias or name to the interpolation.
+    ///
+    /// ```swift
+    /// #sql("SELECT title FROM \(Reminder.self)), as: String.self)
+    /// // SELECT title FROM "reminders"
+    ///
+    /// enum R: AliasName {}
+    /// #sql("SELECT title FROM \(Reminder.as(R.self))", as: String.self)
+    /// // SELECT title FROM "r"
+    /// ```
+    ///
+    /// - Parameter table: A table.
     public mutating func appendInterpolation<T: Table>(_ table: T.Type) {
       appendInterpolation(quote: table.tableAlias ?? table.tableName)
     }

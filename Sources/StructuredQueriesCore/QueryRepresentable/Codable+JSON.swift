@@ -1,6 +1,17 @@
 import Foundation
 
 /// A query expression representing codable JSON.
+///
+/// ```swift
+/// @Table
+/// struct Item {
+///   @Column(as: JSONRepresentation.self)
+///   var notes: [String]
+/// }
+///
+/// Item.insert { $0.notes } values: { ["First post", "An update"] }
+/// // INSERT INTO "items" ("notes") VALUES ('["First post","An update"]')
+/// ```
 public struct JSONRepresentation<QueryOutput: Codable & Sendable>: QueryRepresentable {
   public var queryOutput: QueryOutput
 
