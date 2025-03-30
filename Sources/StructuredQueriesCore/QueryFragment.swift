@@ -241,7 +241,7 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     ///
     /// enum R: AliasName {}
     /// #sql("SELECT title FROM \(Reminder.as(R.self))", as: String.self)
-    /// // SELECT title FROM "r"
+    /// // SELECT title FROM "rs"
     /// ```
     ///
     /// - Parameter table: A table.
