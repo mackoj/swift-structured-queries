@@ -1,5 +1,5 @@
-/// Creates a [common table expression](https://www.sqlite.org/lang_with.html) that can be used
-/// to factor subqueries, or create hierarchical or recursive queries of trees and graphs.
+/// Creates a common table expression that can be used to factor subqueries, or create hierarchical
+/// or recursive queries of trees and graphs.
 public struct With<QueryValue>: Statement {
   public typealias From = Never
 
