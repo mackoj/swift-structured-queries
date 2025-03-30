@@ -1,8 +1,10 @@
 extension Table {
+  /// A select statement for this table.
   public static func all() -> Select<(), Self, ()> {
     Select()
   }
 
+  /// A select statement for a column of this table.
   public static func select<ResultColumn: QueryExpression>(
     _ selection: KeyPath<TableColumns, ResultColumn>
   ) -> Select<ResultColumn.QueryValue, Self, ()>
@@ -10,6 +12,7 @@ extension Table {
     all().select(selection)
   }
 
+  /// A select statement for a column of this table.
   public static func select<ResultColumn: QueryExpression>(
     _ selection: (TableColumns) -> ResultColumn
   ) -> Select<ResultColumn.QueryValue, Self, ()>
@@ -17,6 +20,7 @@ extension Table {
     all().select(selection)
   }
 
+  /// A select statement for columns of this table.
   public static func select<
     C1: QueryExpression,
     C2: QueryExpression,
@@ -32,10 +36,12 @@ extension Table {
     all().select(selection)
   }
 
+  /// A distinct select statement for this table.
   public static func distinct(_ isDistinct: Bool = true) -> Select<(), Self, ()> {
     all().distinct(isDistinct)
   }
 
+  /// A select statement for this table joined to another table.
   public static func join<
     each C: QueryRepresentable,
     F: Table,
@@ -60,6 +66,7 @@ extension Table {
     all().join(other, on: constraint)
   }
 
+  /// A select statement for this table left-joined to another table.
   public static func leftJoin<
     each C: QueryRepresentable,
     F: Table,
@@ -90,6 +97,7 @@ extension Table {
     return select
   }
 
+  /// A select statement for this table right-joined to another table.
   public static func rightJoin<
     each C: QueryRepresentable,
     F: Table,
@@ -116,6 +124,7 @@ extension Table {
     return select
   }
 
+  /// A select statement for this table full-joined to another table.
   public static func fullJoin<
     each C: QueryRepresentable,
     F: Table,
@@ -146,12 +155,14 @@ extension Table {
     return select
   }
 
+  /// A select statement for this table grouped by the given column.
   public static func group<C: QueryExpression>(
     by grouping: (TableColumns) -> C
   ) -> Select<(), Self, ()> where C.QueryValue: QueryDecodable {
     all().group(by: grouping)
   }
 
+  /// A select statement for this table grouped by the given columns.
   public static func group<
     C1: QueryExpression,
     C2: QueryExpression,
@@ -167,18 +178,21 @@ extension Table {
     all().group(by: grouping)
   }
 
+  /// A select statement for this table with the given `HAVING` clause.
   public static func having(
     _ predicate: (TableColumns) -> some QueryExpression<Bool>
   ) -> Select<(), Self, ()> {
     all().having(predicate)
   }
 
+  /// A select statement for this table ordered by the given column.
   public static func order(
     by ordering: KeyPath<TableColumns, some QueryExpression>
   ) -> Select<(), Self, ()> {
     all().order(by: ordering)
   }
 
+  /// A select statement for this table ordered by the given columns.
   public static func order(
     @QueryFragmentBuilder
     by ordering: (TableColumns) -> [QueryFragment]
@@ -186,6 +200,7 @@ extension Table {
     all().order(by: ordering)
   }
 
+  /// A select statement for this table with a limit and optional offset.
   public static func limit(
     _ maxLength: (TableColumns) -> some QueryExpression<Int>,
     offset: ((TableColumns) -> some QueryExpression<Int>)? = nil
@@ -193,10 +208,12 @@ extension Table {
     all().limit(maxLength, offset: offset)
   }
 
+  /// A select statement for this table with a limit and optional offset.
   public static func limit(_ maxLength: Int, offset: Int? = nil) -> Select<(), Self, ()> {
     all().limit(maxLength, offset: offset)
   }
 
+  /// A select statement for this table's row count.
   public static func count(
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> Select<Int, Self, ()> {
@@ -204,6 +221,12 @@ extension Table {
   }
 }
 
+/// A `SELECT` statement.
+///
+/// This type of statement is constructed from ``Table/all()``, ``Where/all()``, and static aliases
+/// to methods on the `Select` type, like `select`, `join`, `group(by:)`, `order(by:)`, and more.
+///
+/// To learn more, see <doc:Selects>.
 #if compiler(>=6.1)
   @dynamicMemberLookup
 #endif

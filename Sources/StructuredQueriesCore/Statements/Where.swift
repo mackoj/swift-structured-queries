@@ -55,10 +55,12 @@ public struct Where<From: Table> {
 extension Where: SelectStatement {
   public typealias QueryValue = ()
 
+  /// A select statement filtered by this where clause.
   public func all() -> Select<(), From, ()> {
     Select(where: predicates)
   }
 
+  /// A select statement for a column of the filtered table.
   public func select<C: QueryExpression>(
     _ selection: KeyPath<From.TableColumns, C>
   ) -> Select<C.QueryValue, From, ()>
@@ -66,6 +68,7 @@ extension Where: SelectStatement {
     all().select(selection)
   }
 
+  /// A select statement for a column of the filtered table.
   public func select<C: QueryExpression>(
     _ selection: (From.TableColumns) -> C
   ) -> Select<C.QueryValue, From, ()>
@@ -73,6 +76,7 @@ extension Where: SelectStatement {
     all().select(selection)
   }
 
+  /// A select statement for columns of the filtered table.
   public func select<C1: QueryExpression, C2: QueryExpression, each C3: QueryExpression>(
     _ selection: (From.TableColumns) -> (C1, C2, repeat each C3)
   ) -> Select<(C1.QueryValue, C2.QueryValue, repeat (each C3).QueryValue), From, ()>
@@ -84,10 +88,12 @@ extension Where: SelectStatement {
     all().select(selection)
   }
 
+  /// A distinct select statement for the filtered table.
   public func distinct(_ isDistinct: Bool = true) -> Select<(), From, ()> {
     all().distinct(isDistinct)
   }
 
+  /// A select statement for the filtered table joined to another table.
   public func join<each C: QueryRepresentable, F: Table, each J: Table>(
     _ other: any SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
@@ -106,6 +112,7 @@ extension Where: SelectStatement {
     all().join(other, on: constraint)
   }
 
+  /// A select statement for the filtered table left-joined to another table.
   public func leftJoin<each C: QueryRepresentable, F: Table, each J: Table>(
     _ other: any SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
@@ -129,6 +136,7 @@ extension Where: SelectStatement {
     all().leftJoin(other, on: constraint)
   }
 
+  /// A select statement for the filtered table right-joined to another table.
   public func rightJoin<each C: QueryRepresentable, F: Table, each J: Table>(
     _ other: any SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
@@ -148,6 +156,7 @@ extension Where: SelectStatement {
     all().rightJoin(other, on: constraint)
   }
 
+  /// A select statement for the filtered table full-joined to another table.
   public func fullJoin<each C: QueryRepresentable, F: Table, each J: Table>(
     _ other: any SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
@@ -171,12 +180,26 @@ extension Where: SelectStatement {
     all().fullJoin(other, on: constraint)
   }
 
+  /// Adds a condition to a where clause.
+  ///
+  /// ```swift
+  /// extension Reminder {
+  ///   static let flagged = Self.where(\.isFlagged)
+  /// }
+  ///
+  /// Reminder.flagged.where(\.isCompleted)
+  /// // WHERE "reminders"."isFlagged" AND "reminders"."isCompleted"
+  /// ```
+  ///
+  /// - Parameter predicate: A predicate to add.
+  /// - Returns: A where clause with the added predicate.
   public func `where`(_ predicate: (From.TableColumns) -> some QueryExpression<Bool>) -> Self {
     var `where` = self
     `where`.predicates.append(predicate(From.columns).queryFragment)
     return `where`
   }
 
+  /// A select statement for the filtered table grouped by the given column.
   public func group<C: QueryExpression>(by grouping: (From.TableColumns) -> C) -> Select<
     (), From, ()
   >
@@ -184,6 +207,7 @@ extension Where: SelectStatement {
     all().group(by: grouping)
   }
 
+  /// A select statement for the filtered table grouped by the given columns.
   public func group<C1: QueryExpression, C2: QueryExpression, each C3: QueryExpression>(
     by grouping: (From.TableColumns) -> (C1, C2, repeat each C3)
   ) -> Select<(), From, ()>
@@ -195,18 +219,21 @@ extension Where: SelectStatement {
     all().group(by: grouping)
   }
 
+  /// A select statement for the filtered table with the given `HAVING` clause.
   public func having(
     _ predicate: (From.TableColumns) -> some QueryExpression<Bool>
   ) -> Select<(), From, ()> {
     all().having(predicate)
   }
 
+  /// A select statement for the filtered table ordered by the given column.
   public func order(
     by ordering: KeyPath<From.TableColumns, some QueryExpression>
   ) -> Select<(), From, ()> {
     all().order(by: ordering)
   }
 
+  /// A select statement for the filtered table grouped by the given columns.
   public func order(
     @QueryFragmentBuilder
     by ordering: (From.TableColumns) -> [QueryFragment]
@@ -214,6 +241,7 @@ extension Where: SelectStatement {
     all().order(by: ordering)
   }
 
+  /// A select statement for the filtered table with a limit and optional offset.
   public func limit(
     _ maxLength: (From.TableColumns) -> some QueryExpression<Int>,
     offset: ((From.TableColumns) -> some QueryExpression<Int>)? = nil
@@ -221,20 +249,24 @@ extension Where: SelectStatement {
     all().limit(maxLength, offset: offset)
   }
 
+  /// A select statement for the filtered table with a limit and optional offset.
   public func limit(_ maxLength: Int, offset: Int? = nil) -> Select<(), From, ()> {
     all().limit(maxLength, offset: offset)
   }
 
+  /// A select statement for the filtered table's row count.
   public func count(
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> Select<Int, From, ()> {
     all().count(filter: filter)
   }
 
+  /// A delete statement for the filtered table.
   public func delete() -> DeleteOf<From> {
     Delete(where: predicates)
   }
 
+  /// An update statement for the filtered table.
   public func update(
     or conflictResolution: ConflictResolution? = nil,
     set updates: (inout Record<From>) -> Void
