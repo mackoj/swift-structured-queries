@@ -4,7 +4,6 @@ public protocol QueryDecodable: _OptionalPromotable {
 
 extension [UInt8]: QueryDecodable {
   @inlinable
-  @inline(__always)
   public init(decoder: inout some QueryDecoder) throws {
     guard let result = try decoder.decode([UInt8].self)
     else { throw QueryDecodingError.missingRequiredColumn }
@@ -14,7 +13,6 @@ extension [UInt8]: QueryDecodable {
 
 extension Double: QueryDecodable {
   @inlinable
-  @inline(__always)
   public init(decoder: inout some QueryDecoder) throws {
     guard let result = try decoder.decode(Double.self)
     else { throw QueryDecodingError.missingRequiredColumn }
@@ -24,7 +22,6 @@ extension Double: QueryDecodable {
 
 extension Int64: QueryDecodable {
   @inlinable
-  @inline(__always)
   public init(decoder: inout some QueryDecoder) throws {
     guard let result = try decoder.decode(Int64.self)
     else { throw QueryDecodingError.missingRequiredColumn }
@@ -34,7 +31,6 @@ extension Int64: QueryDecodable {
 
 extension String: QueryDecodable {
   @inlinable
-  @inline(__always)
   public init(decoder: inout some QueryDecoder) throws {
     guard let result = try decoder.decode(String.self)
     else { throw QueryDecodingError.missingRequiredColumn }

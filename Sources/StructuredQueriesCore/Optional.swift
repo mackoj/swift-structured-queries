@@ -27,7 +27,6 @@ extension Optional: QueryBindable where Wrapped: QueryBindable {
 
 extension Optional: QueryDecodable where Wrapped: QueryDecodable {
   @inlinable
-  @inline(__always)
   public init(decoder: inout some QueryDecoder) throws {
     do {
       self = try Wrapped(decoder: &decoder)
@@ -49,7 +48,6 @@ extension Optional: QueryRepresentable where Wrapped: QueryRepresentable {
   public typealias QueryOutput = Wrapped.QueryOutput?
 
   @inlinable
-  @inline(__always)
   public init(queryOutput: Wrapped.QueryOutput?) {
     if let queryOutput {
       self = Wrapped(queryOutput: queryOutput)
@@ -59,7 +57,6 @@ extension Optional: QueryRepresentable where Wrapped: QueryRepresentable {
   }
 
   @inlinable
-  @inline(__always)
   public var queryOutput: Wrapped.QueryOutput? {
     self?.queryOutput
   }

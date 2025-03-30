@@ -3,7 +3,8 @@ import SQLite3
 import StructuredQueries
 
 public struct Database {
-  private let storage: Storage
+  @usableFromInline
+  let storage: Storage
 
   public init(_ ptr: OpaquePointer) {
     self.storage = .unowned(ptr)
@@ -21,6 +22,7 @@ public struct Database {
     self.storage = .owned(Storage.Autoreleasing(handle))
   }
 
+  @inlinable
   public func execute(
     _ sql: String
   ) throws {
@@ -28,10 +30,12 @@ public struct Database {
     else { throw SQLiteError(db: storage.handle) }
   }
 
+  @inlinable
   public func execute(_ query: some Statement<()>) throws {
     _ = try execute(query) as [()]
   }
 
+  @inlinable
   public func execute<QueryValue: QueryRepresentable>(
     _ query: some Statement<QueryValue>
   ) throws -> [QueryValue.QueryOutput] {
@@ -56,6 +60,7 @@ public struct Database {
     }
   }
 
+  @inlinable
   public func execute<each V: QueryRepresentable>(
     _ query: some Statement<(repeat each V)>
   ) throws -> [(repeat (each V).QueryOutput)] {
@@ -81,6 +86,7 @@ public struct Database {
     }
   }
 
+  @inlinable
   public func execute<S: SelectStatement, each J: Table>(
     _ query: S
   ) throws -> [(S.From.QueryOutput, repeat (each J).QueryOutput)]
@@ -88,7 +94,8 @@ public struct Database {
     try execute(query.selectStar())
   }
 
-  private func withStatement<R>(
+  @usableFromInline
+  func withStatement<R>(
     _ query: QueryFragment, body: (OpaquePointer) throws -> R
   ) throws -> R {
     var statement: OpaquePointer?
@@ -118,10 +125,12 @@ public struct Database {
     return try body(statement)
   }
 
-  private enum Storage {
+  @usableFromInline
+  enum Storage {
     case owned(Autoreleasing)
     case unowned(OpaquePointer)
 
+    @usableFromInline
     var handle: OpaquePointer {
       switch self {
       case let .owned(storage):
@@ -131,6 +140,7 @@ public struct Database {
       }
     }
 
+    @usableFromInline
     final class Autoreleasing {
       fileprivate var handle: OpaquePointer
 
@@ -149,9 +159,11 @@ private struct InvalidBindingError: Error {}
 
 private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
+@usableFromInline
 struct SQLiteError: LocalizedError {
   let message: String
 
+  @usableFromInline
   init(db handle: OpaquePointer?) {
     self.message = String(cString: sqlite3_errmsg(handle))
   }
@@ -160,6 +172,7 @@ struct SQLiteError: LocalizedError {
     self.message = String(cString: sqlite3_errstr(code))
   }
 
+  @usableFromInline
   var errorDescription: String? {
     message
   }
