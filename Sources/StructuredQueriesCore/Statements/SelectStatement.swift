@@ -1,3 +1,6 @@
+// TODO: Publicize this as 'ReadOnlyStatement'?
+// TODO: Or as 'SelectStatement' renaming the other to 'SelectCoreStatement'?
+
 public protocol _SelectStatement<QueryValue>: Statement {}
 
 extension _SelectStatement where Self: Table, QueryValue == Self {
@@ -13,11 +16,18 @@ extension _SelectStatement where Self: Table, QueryValue == Self {
   }
 }
 
+/// A type representing a `SELECT` statement.
 public protocol SelectStatement<QueryValue, From, Joins>: _SelectStatement {
+  /// Creates a ``Select`` statement from this statement.
+  ///
+  /// - Returns: A select statement.
   func all() -> Select<QueryValue, From, Joins>
 }
 
 extension SelectStatement {
+  /// Explicitly selects all columns and tables from this statement.
+  ///
+  /// - Returns: A select statement.
   public func selectStar<each J: Table>() -> Select<
     (From, repeat each J), From, (repeat each J)
   > where Joins == (repeat each J) {
