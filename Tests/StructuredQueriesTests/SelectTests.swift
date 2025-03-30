@@ -9,16 +9,16 @@ extension SnapshotTests {
       _ = Reminder.select(\.id)
       _ = Reminder.select { $0.id }
       _ = Reminder.select { ($0.id, $0.isCompleted) }
-      _ = Reminder.all().select(\.id)
-      _ = Reminder.all().select { $0.id }
-      _ = Reminder.all().select { ($0.id, $0.isCompleted) }
+      _ = Reminder.all.select(\.id)
+      _ = Reminder.all.select { $0.id }
+      _ = Reminder.all.select { ($0.id, $0.isCompleted) }
       _ = Reminder.where(\.isCompleted).select(\.id)
       _ = Reminder.where(\.isCompleted).select { $0.id }
       _ = Reminder.where(\.isCompleted).select { ($0.id, $0.isCompleted) }
     }
 
     @Test func selectAll() {
-      assertQuery(Tag.all()) {
+      assertQuery(Tag.all) {
         """
         SELECT "tags"."id", "tags"."name"
         FROM "tags"
@@ -160,7 +160,7 @@ extension SnapshotTests {
     @Test func join() {
       assertQuery(
         Reminder
-          .join(RemindersList.all()) { $0.remindersListID.eq($1.id) }
+          .join(RemindersList.all) { $0.remindersListID.eq($1.id) }
       ) {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "remindersLists"."id", "remindersLists"."color", "remindersLists"."name"
@@ -299,7 +299,7 @@ extension SnapshotTests {
 
       assertQuery(
         RemindersList
-          .join(Reminder.all()) { $0.id.eq($1.remindersListID) }
+          .join(Reminder.all) { $0.id.eq($1.remindersListID) }
           .select { ($0.name, $1.title) }
       ) {
         """
@@ -325,8 +325,8 @@ extension SnapshotTests {
       }
 
       assertQuery(
-        Reminder.all()
-          .leftJoin(User.all()) { $0.assignedUserID.eq($1.id) }
+        Reminder.all
+          .leftJoin(User.all) { $0.assignedUserID.eq($1.id) }
           .select { ($0.title, $1.name) }
           .limit(2)
       ) {
@@ -346,8 +346,8 @@ extension SnapshotTests {
       }
 
       assertQuery(
-        User.all()
-          .rightJoin(Reminder.all()) { $0.id.is($1.assignedUserID) }
+        User.all
+          .rightJoin(Reminder.all) { $0.id.is($1.assignedUserID) }
           .limit(2)
       ) {
         """
@@ -387,8 +387,8 @@ extension SnapshotTests {
       }
 
       assertQuery(
-        User.all()
-          .rightJoin(Reminder.all()) { $0.id.is($1.assignedUserID) }
+        User.all
+          .rightJoin(Reminder.all) { $0.id.is($1.assignedUserID) }
           .limit(2)
           .select { ($0, $1) }
       ) {
@@ -429,8 +429,8 @@ extension SnapshotTests {
       }
 
       assertQuery(
-        User.all()
-          .rightJoin(Reminder.all()) { $0.id.is($1.assignedUserID) }
+        User.all
+          .rightJoin(Reminder.all) { $0.id.is($1.assignedUserID) }
           .select { ($1.title, $0.name) }
           .limit(2)
       ) {
@@ -450,8 +450,8 @@ extension SnapshotTests {
       }
 
       assertQuery(
-        Reminder.all()
-          .fullJoin(User.all()) { $0.assignedUserID.eq($1.id) }
+        Reminder.all
+          .fullJoin(User.all) { $0.assignedUserID.eq($1.id) }
           .select { ($0.title, $1.name) }
           .limit(2)
       ) {
@@ -781,7 +781,7 @@ extension SnapshotTests {
       enum R2: AliasName {}
       assertQuery(
         Reminder.as(R1.self)
-          .join(Reminder.as(R2.self).all()) { $0.id.eq($1.id) }
+          .join(Reminder.as(R2.self).all) { $0.id.eq($1.id) }
           .limit(1)
       ) {
         """

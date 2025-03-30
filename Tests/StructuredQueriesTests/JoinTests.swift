@@ -7,7 +7,7 @@ extension SnapshotTests {
   @Suite struct JoinTests {
     @Test func basics() {
       assertQuery(
-        Reminder.join(RemindersList.all()) { $0.remindersListID.eq($1.id) }
+        Reminder.join(RemindersList.all) { $0.remindersListID.eq($1.id) }
           .order { reminders, _ in reminders.date.desc() }
           .select { ($0.title, $1.name) }
       ) {

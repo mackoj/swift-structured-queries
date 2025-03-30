@@ -61,7 +61,7 @@ extension SnapshotTests {
     }
 
     @Test func primaryKey() throws {
-      var reminder = try #require(try db.execute(Reminder.all()).first)
+      var reminder = try #require(try db.execute(Reminder.all).first)
       reminder.isCompleted.toggle()
       assertQuery(
         Reminder

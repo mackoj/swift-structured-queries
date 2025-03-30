@@ -1,20 +1,16 @@
 extension Table {
-  public static func all() -> Select<(), Self, ()> {
-    Select()
-  }
-
   public static func select<ResultColumn: QueryExpression>(
     _ selection: KeyPath<TableColumns, ResultColumn>
   ) -> Select<ResultColumn.QueryValue, Self, ()>
   where ResultColumn.QueryValue: QueryRepresentable {
-    all().select(selection)
+    all.select(selection)
   }
 
   public static func select<ResultColumn: QueryExpression>(
     _ selection: (TableColumns) -> ResultColumn
   ) -> Select<ResultColumn.QueryValue, Self, ()>
   where ResultColumn.QueryValue: QueryRepresentable {
-    all().select(selection)
+    all.select(selection)
   }
 
   public static func select<
@@ -29,11 +25,11 @@ extension Table {
     C2.QueryValue: QueryRepresentable,
     repeat (each C3).QueryValue: QueryRepresentable
   {
-    all().select(selection)
+    all.select(selection)
   }
 
   public static func distinct(_ isDistinct: Bool = true) -> Select<(), Self, ()> {
-    all().distinct(isDistinct)
+    all.distinct(isDistinct)
   }
 
   public static func join<
@@ -46,7 +42,7 @@ extension Table {
       (TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C), Self, (F, repeat each J)> {
-    all().join(other, on: constraint)
+    all.join(other, on: constraint)
   }
 
   // NB: Optimization
@@ -57,7 +53,7 @@ extension Table {
       (TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C), Self, F> {
-    all().join(other, on: constraint)
+    all.join(other, on: constraint)
   }
 
   public static func leftJoin<
@@ -74,7 +70,7 @@ extension Table {
     Self,
     (F._Optionalized, repeat (each J)._Optionalized)
   > {
-    let select = all().leftJoin(other, on: constraint)
+    let select = all.leftJoin(other, on: constraint)
     return select
   }
 
@@ -86,7 +82,7 @@ extension Table {
       (TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat (each C)._Optionalized), Self, F._Optionalized> {
-    let select = all().leftJoin(other, on: constraint)
+    let select = all.leftJoin(other, on: constraint)
     return select
   }
 
@@ -100,7 +96,7 @@ extension Table {
       (TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C), Self._Optionalized, (F, repeat each J)> {
-    let select = all().rightJoin(other, on: constraint)
+    let select = all.rightJoin(other, on: constraint)
     return select
   }
 
@@ -112,7 +108,7 @@ extension Table {
       (TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C), Self._Optionalized, F> {
-    let select = all().rightJoin(other, on: constraint)
+    let select = all.rightJoin(other, on: constraint)
     return select
   }
 
@@ -130,7 +126,7 @@ extension Table {
     Self._Optionalized,
     (F._Optionalized, repeat (each J)._Optionalized)
   > {
-    let select = all().fullJoin(other, on: constraint)
+    let select = all.fullJoin(other, on: constraint)
     return select
   }
 
@@ -142,14 +138,14 @@ extension Table {
       (TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat (each C)._Optionalized), Self._Optionalized, F._Optionalized> {
-    let select = all().fullJoin(other, on: constraint)
+    let select = all.fullJoin(other, on: constraint)
     return select
   }
 
   public static func group<C: QueryExpression>(
     by grouping: (TableColumns) -> C
   ) -> Select<(), Self, ()> where C.QueryValue: QueryDecodable {
-    all().group(by: grouping)
+    all.group(by: grouping)
   }
 
   public static func group<
@@ -164,43 +160,43 @@ extension Table {
     C2.QueryValue: QueryDecodable,
     repeat (each C3).QueryValue: QueryDecodable
   {
-    all().group(by: grouping)
+    all.group(by: grouping)
   }
 
   public static func having(
     _ predicate: (TableColumns) -> some QueryExpression<Bool>
   ) -> Select<(), Self, ()> {
-    all().having(predicate)
+    all.having(predicate)
   }
 
   public static func order(
     by ordering: KeyPath<TableColumns, some QueryExpression>
   ) -> Select<(), Self, ()> {
-    all().order(by: ordering)
+    all.order(by: ordering)
   }
 
   public static func order(
     @QueryFragmentBuilder
     by ordering: (TableColumns) -> [QueryFragment]
   ) -> Select<(), Self, ()> {
-    all().order(by: ordering)
+    all.order(by: ordering)
   }
 
   public static func limit(
     _ maxLength: (TableColumns) -> some QueryExpression<Int>,
     offset: ((TableColumns) -> some QueryExpression<Int>)? = nil
   ) -> Select<(), Self, ()> {
-    all().limit(maxLength, offset: offset)
+    all.limit(maxLength, offset: offset)
   }
 
   public static func limit(_ maxLength: Int, offset: Int? = nil) -> Select<(), Self, ()> {
-    all().limit(maxLength, offset: offset)
+    all.limit(maxLength, offset: offset)
   }
 
   public static func count(
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> Select<Int, Self, ()> {
-    all().count(filter: filter)
+    all.count(filter: filter)
   }
 }
 

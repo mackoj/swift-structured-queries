@@ -7,7 +7,7 @@ import StructuredQueriesSQLite
 @Table
 struct RemindersList: Equatable, Identifiable {
   static let withReminderCount = group(by: \.id)
-    .join(Reminder.all()) { $0.id.eq($1.remindersListID) }
+    .join(Reminder.all) { $0.id.eq($1.remindersListID) }
     .select { $1.id.count() }
 
   let id: Int

@@ -4,6 +4,17 @@ public protocol Table: QueryRepresentable where TableColumns.QueryValue == Self 
   static var columns: TableColumns { get }
   static var tableName: String { get }
   static var tableAlias: String? { get }
+
+  static var all: Select<(), Self, ()> { get }
+}
+
+extension Table {
+  public static var all: Select<(), Self, ()> {
+    Select()
+  }
+  public static var unscoped: Select<(), Self, ()> {
+    Select()
+  }
 }
 
 extension Table {

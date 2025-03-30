@@ -10,7 +10,7 @@ extension SnapshotTests {
         RemindersList
         .group(by: \.id)
         .limit(2)
-        .join(Reminder.all()) { $0.id.eq($1.remindersListID) }
+        .join(Reminder.all) { $0.id.eq($1.remindersListID) }
 
       assertQuery(
         baseQuery
@@ -89,7 +89,7 @@ extension SnapshotTests {
       assertQuery(
         Reminder
           .limit(2)
-          .leftJoin(User.all()) { $0.assignedUserID.eq($1.id) }
+          .leftJoin(User.all) { $0.assignedUserID.eq($1.id) }
           .select {
             ReminderTitleAndAssignedUserName.Columns(
               reminderTitle: $0.title,

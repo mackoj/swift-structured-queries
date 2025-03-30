@@ -34,7 +34,7 @@ extension SnapshotTests {
           }
         } query: {
           ReminderCount
-            .join(RemindersListCount.all()) { _, _ in true }
+            .join(RemindersListCount.all) { _, _ in true }
         }
       ) {
         """
@@ -103,7 +103,7 @@ extension SnapshotTests {
             ($0.remindersListID, $0.title, $0.isFlagged, $0.isCompleted)
           } select: {
             IncompleteReminder
-              .join(Reminder.all()) { $0.title.eq($1.title) }
+              .join(Reminder.all) { $0.title.eq($1.title) }
               .select { ($1.remindersListID, $0.title, !$0.isFlagged, true) }
               .limit(1)
           }
@@ -303,7 +303,7 @@ extension SnapshotTests {
             .union(
               Employee
                 .select { EmployeeReport.Columns(id: $0.id, height: $0.height, name: $0.name) }
-                .join(EmployeeReport.all()) { $0.bossID.eq($1.id) }
+                .join(EmployeeReport.all) { $0.bossID.eq($1.id) }
             )
         } query: {
           EmployeeReport

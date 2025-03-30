@@ -7,7 +7,7 @@ import Testing
 extension SnapshotTests {
   @Suite struct LiveTests {
     @Test func selectAll() {
-      assertQuery(Reminder.all()) {
+      assertQuery(Reminder.all) {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
         FROM "reminders"
@@ -178,7 +178,7 @@ extension SnapshotTests {
       assertQuery(
         RemindersList
           .group(by: \.id)
-          .join(Reminder.all()) { $0.id.eq($1.remindersListID) }
+          .join(Reminder.all) { $0.id.eq($1.remindersListID) }
           .select { ($0, $1.id.count()) }
       ) {
         """
@@ -216,8 +216,8 @@ extension SnapshotTests {
       assertQuery(
         Reminder
           .group(by: \.id)
-          .join(ReminderTag.all()) { $0.id.eq($1.reminderID) }
-          .join(Tag.all()) { $1.tagID.eq($2.id) }
+          .join(ReminderTag.all) { $0.id.eq($1.reminderID) }
+          .join(Tag.all) { $1.tagID.eq($2.id) }
           .select { ($0, $2.name.groupConcat()) }
       ) {
         """
@@ -301,13 +301,13 @@ extension SnapshotTests {
       )
       #expect(
         try #require(
-          try db.execute(SyncUp.all().select(\.createdAt)).first
+          try db.execute(SyncUp.all.select(\.createdAt)).first
         )
         .timeIntervalSinceNow < 1
       )
 
       #expect(
-        try #require(try db.execute(SyncUp.all()).first).id == 1
+        try #require(try db.execute(SyncUp.all).first).id == 1
       )
     }
 

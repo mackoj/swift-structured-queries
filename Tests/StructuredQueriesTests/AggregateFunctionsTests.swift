@@ -77,7 +77,7 @@ extension SnapshotTests {
     }
 
     @Test func unqualifiedCount() {
-      assertInlineSnapshot(of: User.all().select { _ in .count() }, as: .sql) {
+      assertInlineSnapshot(of: User.all.select { _ in .count() }, as: .sql) {
         """
         SELECT count(*)
         FROM "users"
