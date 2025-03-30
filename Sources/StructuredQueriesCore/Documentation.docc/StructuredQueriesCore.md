@@ -1,12 +1,18 @@
 # ``StructuredQueriesCore``
 
-<!--@START_MENU_TOKEN@-->Summary<!--@END_MENU_TOKEN@-->
+A library for building SQL in a type-safe, expressive, and composable manner.
 
 ## Overview
 
 <!--@START_MENU_TOKEN@-->Text<!--@END_MENU_TOKEN@-->
 
 ## Topics
+
+### Essentials
+
+- <doc:GettingStarted>
+- <doc:CompilerPerformance>
+- <doc:AdvancedQueries>
 
 ### Query building
 
@@ -15,6 +21,7 @@
 - <doc:Updates>
 - <doc:Deletes>
 - <doc:WhereClauses>
+- <doc:CommonTableExpressions>
 
 ### Schema definition
 

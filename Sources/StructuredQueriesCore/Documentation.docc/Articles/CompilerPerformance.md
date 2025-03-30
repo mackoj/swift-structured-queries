@@ -1,4 +1,4 @@
-# Compiler Performance
+# Compiler performance
 
 Learn how to write complex queries that do not tax the compiler too much in order to keep compile
 times quick.

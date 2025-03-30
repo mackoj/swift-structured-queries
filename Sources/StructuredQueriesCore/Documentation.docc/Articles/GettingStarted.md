@@ -1,4 +1,4 @@
-# Getting Started
+# Getting started
 
 Learn how to quickly become familiar with the basic tools of the library.
 
