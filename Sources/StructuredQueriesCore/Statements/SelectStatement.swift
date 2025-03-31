@@ -34,3 +34,6 @@ extension SelectStatement {
     unsafeBitCast(all(), to: Select<(From, repeat each J), From, (repeat each J)>.self)
   }
 }
+
+public typealias SelectStatementOf<From: Table, each Join: Table> =
+  SelectStatement<(), From, (repeat each Join)>

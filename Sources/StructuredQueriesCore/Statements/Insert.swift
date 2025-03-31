@@ -398,6 +398,10 @@ public struct Insert<Into: Table, Returning> {
   }
 
   // NB: This overload allows for 'returning(\.self)'.
+  /// Adds a returning clause to an insert statement.
+  ///
+  /// - Parameter selection: Columns to return.
+  /// - Returns: A statement with a returning clause.
   @_documentation(visibility: private)
   public func returning(
     _ selection: (Into.TableColumns) -> Into.TableColumns

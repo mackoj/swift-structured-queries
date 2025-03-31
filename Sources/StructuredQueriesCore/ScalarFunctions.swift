@@ -3,34 +3,85 @@ import Foundation
 extension QueryExpression where QueryValue == Bool {
   /// Wraps this expression with the `likelihood` function given a probability.
   ///
+  /// ```swift
+  /// Reminder.where { ($0.probability == .high).likelihood(0.75) }
+  /// // SELECT … FROM "reminders"
+  /// // WHERE likelihood("reminders"."probability" = 3, 0.75)
+  /// ```
+  ///
   /// - Parameter probability: A probability hint for the given expression.
-  /// - Returns: Arguments unchanged.
+  /// - Returns: A Boolean expression of the given likelihood.
   public func likelihood(
     _ probability: some QueryExpression<some FloatingPoint>
   ) -> some QueryExpression<QueryValue> {
     QueryFunction("likelihood", self, probability)
   }
 
+  /// Wraps this expression with the `likely` function.
+  ///
+  /// ```swift
+  /// Reminder.where { ($0.probability == .high).likely() }
+  /// // SELECT … FROM "reminders"
+  /// // WHERE likely("reminders"."probability" = 3)
+  /// ```
+  ///
+  /// - Returns: A likely Boolean expression.
   public func likely() -> some QueryExpression<QueryValue> {
     QueryFunction("likely", self)
   }
 
+  /// Wraps this expression with the `unlikely` function.
+  ///
+  /// ```swift
+  /// Reminder.where { ($0.probability == .high).unlikely() }
+  /// // SELECT … FROM "reminders"
+  /// // WHERE unlikely("reminders"."probability" = 3)
+  /// ```
+  ///
+  /// - Returns: An unlikely Boolean expression.
   public func unlikely() -> some QueryExpression<QueryValue> {
     QueryFunction("unlikely", self)
   }
 }
 
 extension QueryExpression where QueryValue: BinaryInteger {
+  /// Creates an expression invoking the `randomblob` function with the given integer expression.
+  ///
+  /// ```swift
+  /// Asset.insert { $0.bytes } values: { 1_024.randomblob() }
+  /// // INSERT INTO "assets" ("bytes") VALUES (randomblob(1024))
+  /// ```
+  ///
+  /// - Returns: A blob expression of the `randomblob` function wrapping the given integer.
   public func randomblob() -> some QueryExpression<[UInt8]> {
     QueryFunction("randomblob", self)
   }
 
+  /// Creates an expression invoking the `zeroblob` function with the given integer expression.
+  ///
+  /// ```swift
+  /// Asset.insert { $0.bytes } values: { 1_024.zeroblob() }
+  /// // INSERT INTO "assets" ("bytes") VALUES (zeroblob(1024))
+  /// ```
+  ///
+  /// - Returns: A blob expression of the `zeroblob` function wrapping the given integer.
   public func zeroblob() -> some QueryExpression<[UInt8]> {
     QueryFunction("zeroblob", self)
   }
 }
 
 extension QueryExpression where QueryValue: Collection {
+  /// Wraps this expression with the `length` function.
+  ///
+  /// ```swift
+  /// Reminder.select { $0.title.length() }
+  /// // SELECT length("reminders"."title") FROM "reminders"
+  ///
+  /// Asset.select { $0.bytes.length() }
+  /// // SELECT length("assets"."bytes") FROM "assets
+  /// ```
+  ///
+  /// - Returns: An integer expression of the `length` function wrapping this expression.
   public func length() -> some QueryExpression<Int> {
     QueryFunction("length", self)
   }
@@ -46,38 +97,70 @@ extension QueryExpression where QueryValue: Collection {
 }
 
 extension QueryExpression where QueryValue: FloatingPoint {
-  public func round(_ k: some QueryExpression<Int>) -> some QueryExpression<QueryValue> {
-    QueryFunction("round", self, k)
-  }
-
-  public func round() -> some QueryExpression<QueryValue> {
-    QueryFunction("round", self)
+  /// Wraps this floating point query expression with the `round` function.
+  ///
+  /// ```swift
+  /// Item.select { $0.price.round() }
+  /// // SELECT round("items"."price") FROM "items"
+  ///
+  /// Item.select { $0.price.avg().round(2) }
+  /// // SELECT round(avg("items"."price"), 2) FROM "items"
+  /// ```
+  ///
+  /// - Parameter precision: The number of digits to the right of the decimal point to round to.
+  /// - Returns: An expression wrapped with the `round` function.
+  public func round(
+    _ precision: (some QueryExpression<Int>)? = Int?.none
+  ) -> some QueryExpression<QueryValue> {
+    if let precision {
+      return QueryFunction("round", self, precision)
+    } else {
+      return QueryFunction("round", self)
+    }
   }
 }
 
 extension QueryExpression where QueryValue: Numeric {
+  /// Wraps this numeric query expression with the `abs` function.
+  ///
+  /// - Returns: An expression wrapped with the `abs` function.
   public func abs() -> some QueryExpression<QueryValue> {
     QueryFunction("abs", self)
   }
 
+  /// Wraps this numeric query expression with the `sign` function.
+  ///
+  /// - Returns: An expression wrapped with the `sign` function.
   public func sign() -> some QueryExpression<QueryValue> {
     QueryFunction("sign", self)
   }
 }
 
 extension QueryExpression where QueryValue: _OptionalProtocol {
+  /// Wraps this optional query expression with the `ifnull` function.
+  ///
+  /// - Returns: A non-optional expression of the `ifnull` function wrapping this expression.
   public func ifnull(
     _ other: some QueryExpression<QueryValue.Wrapped>
   ) -> some QueryExpression<QueryValue.Wrapped> {
     QueryFunction("ifnull", self, other)
   }
 
+  /// Wraps this optional query expression with the `ifnull` function.
+  ///
+  /// - Returns: An optional expression of the `ifnull` function wrapping this expression.
   public func ifnull(
     _ other: some QueryExpression<QueryValue>
   ) -> some QueryExpression<QueryValue> {
     QueryFunction("ifnull", self, other)
   }
 
+  /// Applies each side of the operator to the `coalesce` function
+  ///
+  /// - Parameters:
+  ///   - lhs: An optional query expression.
+  ///   - rhs: A non-optional query expression
+  /// - Returns: A non-optional query expression of the `coalesce` function wrapping both arguments.
   public static func ?? (
     lhs: Self,
     rhs: some QueryExpression<QueryValue.Wrapped>
@@ -85,6 +168,12 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
     CoalesceFunction([lhs.queryFragment, rhs.queryFragment])
   }
 
+  /// Applies each side of the operator to the `coalesce` function
+  ///
+  /// - Parameters:
+  ///   - lhs: An optional query expression.
+  ///   - rhs: Another optional query expression
+  /// - Returns: An optional query expression of the `coalesce` function wrapping both arguments.
   public static func ?? (
     lhs: Self,
     rhs: some QueryExpression<QueryValue>
@@ -123,32 +212,55 @@ extension QueryExpression {
 
 // TODO: Worth aliasing Swift methods like 'contains', 'lowercased', 'trimming', 'replacing'...?
 extension QueryExpression where QueryValue == String {
+  /// Wraps this optional query expression with the `ifnull` function.
+  ///
+  /// - Returns: An integer expression of the `instr` function wrapping this expression.
   public func instr(_ occurrence: some QueryExpression<QueryValue>) -> some QueryExpression<Int> {
     QueryFunction("instr", self, occurrence)
   }
 
+  /// Wraps this string expression with the `lower` function.
+  ///
+  /// - Returns: An expression wrapped with the `lower` function.
   public func lower() -> some QueryExpression<QueryValue> {
     QueryFunction("lower", self)
   }
 
-  public func ltrim() -> some QueryExpression<QueryValue> {
-    QueryFunction("ltrim", self)
-  }
-
+  /// Wraps this string expression with the `ltrim` function.
+  ///
+  /// - Parameter characters: Characters to trim.
+  /// - Returns: An expression wrapped with the `ltrim` function.
   public func ltrim(
-    _ characters: some QueryExpression<QueryValue>
+    _ characters: (some QueryExpression<QueryValue>)? = QueryValue?.none
   ) -> some QueryExpression<QueryValue> {
-    QueryFunction("ltrim", self, characters)
+    if let characters {
+      return QueryFunction("ltrim", self, characters)
+    } else {
+      return QueryFunction("ltrim", self)
+    }
   }
 
+  /// Creates an expression invoking the `octet_length` function with the given string expression.
+  ///
+  /// - Returns: An integer expression of the `octet_length` function wrapping the given string.
   public func octetLength() -> some QueryExpression<Int> {
     QueryFunction("octet_length", self)
   }
 
+  /// Wraps this string expression with the `quote` function.
+  ///
+  /// - Returns: An expression wrapped with the `quote` function.
   public func quote() -> some QueryExpression<QueryValue> {
     QueryFunction("quote", self)
   }
 
+  /// Creates an expression invoking the `replace` function.
+  ///
+  /// - Parameters:
+  ///   - other: The substring to be replaced.
+  ///   - replacement: The replacement string.
+  /// - Returns: An expression of the `replace` function wrapping the given string, a substring to
+  ///   replace, and the replacement.
   public func replace(
     _ other: some QueryExpression<QueryValue>,
     _ replacement: some QueryExpression<QueryValue>
@@ -156,65 +268,91 @@ extension QueryExpression where QueryValue == String {
     QueryFunction("replace", self, other, replacement)
   }
 
-  public func rtrim() -> some QueryExpression<QueryValue> {
-    QueryFunction("rtrim", self)
-  }
-
+  /// Wraps this string expression with the `rtrim` function.
+  ///
+  /// - Parameter characters: Characters to trim.
+  /// - Returns: An expression wrapped with the `rtrim` function.
   public func rtrim(
-    _ characters: some QueryExpression<QueryValue>
+    _ characters: (some QueryExpression<QueryValue>)? = QueryValue?.none
   ) -> some QueryExpression<QueryValue> {
-    QueryFunction("rtrim", self, characters)
+    if let characters {
+      return QueryFunction("rtrim", self, characters)
+    } else {
+      return QueryFunction("rtrim", self)
+    }
   }
 
+  /// Creates an expression invoking the `substr` function.
+  ///
+  /// - Parameters:
+  ///   - offset: The substring to be replaced.
+  ///   - length: The replacement string.
+  /// - Returns: An expression of the `substr` function wrapping the given string, an offset, and
+  ///   length.
   public func substr(
     _ offset: some QueryExpression<Int>,
-    _ length: some QueryExpression<Int>
+    _ length: (some QueryExpression<Int>)? = Int?.none
   ) -> some QueryExpression<QueryValue> {
-    QueryFunction("substr", self, offset, length)
+    if let length {
+      return QueryFunction("substr", self, offset, length)
+    } else {
+      return QueryFunction("substr", self, offset)
+    }
   }
 
-  public func substr(
-    _ offset: some QueryExpression<Int>
-  ) -> some QueryExpression<QueryValue> {
-    QueryFunction("substr", self, offset)
-  }
-
-  public func trim() -> some QueryExpression<QueryValue> {
-    QueryFunction("trim", self)
-  }
-
+  /// Wraps this string expression with the `trim` function.
+  ///
+  /// - Parameter characters: Characters to trim.
+  /// - Returns: An expression wrapped with the `trim` function.
   public func trim(
-    _ characters: some QueryExpression<QueryValue>
+    _ characters: (some QueryExpression<QueryValue>)? = QueryValue?.none
   ) -> some QueryExpression<QueryValue> {
-    QueryFunction("trim", self, characters)
+    if let characters {
+      return QueryFunction("trim", self, characters)
+    } else {
+      return QueryFunction("trim", self)
+    }
   }
 
-  public func unhex() -> some QueryExpression<[UInt8]?> {
-    QueryFunction("unhex", self)
-  }
-
+  /// Wraps this string query expression with the `unhex` function.
+  ///
+  /// - Parameter characters: Non-hexadecimal characters to skip.
+  /// - Returns: An optional blob expression of the `unhex` function wrapping this expression.
   public func unhex(
-    _ characters: some QueryExpression<QueryValue>
+    _ characters: (some QueryExpression<QueryValue>)? = QueryValue?.none
   ) -> some QueryExpression<[UInt8]?> {
-    QueryFunction("unhex", self, characters)
+    if let characters {
+      return QueryFunction("unhex", self, characters)
+    } else {
+      return QueryFunction("unhex", self)
+    }
   }
 
+  /// Wraps this string query expression with the `unicode` function.
+  ///
+  /// - Returns: An optional integer expression of the `unicode` function wrapping this expression.
   public func unicode() -> some QueryExpression<Int?> {
     QueryFunction("unicode", self)
   }
 
+  /// Wraps this string expression with the `upper` function.
+  ///
+  /// - Returns: An expression wrapped with the `upper` function.
   public func upper() -> some QueryExpression<QueryValue> {
     QueryFunction("upper", self)
   }
 }
 
 extension QueryExpression where QueryValue == [UInt8] {
+  /// Wraps this blob query expression with the `hex` function.
+  ///
+  /// - Returns: A string expression of the `hex` function wrapping this expression.
   public func hex() -> some QueryExpression<String> {
     QueryFunction("hex", self)
   }
 }
 
-struct QueryFunction<QueryValue>: QueryExpression {
+public struct QueryFunction<QueryValue>: QueryExpression {
   let name: QueryFragment
   let arguments: [QueryFragment]
 
@@ -223,7 +361,7 @@ struct QueryFunction<QueryValue>: QueryExpression {
     self.arguments = Array(repeat each arguments)
   }
 
-  var queryFragment: QueryFragment {
+  public var queryFragment: QueryFragment {
     "\(name)(\(arguments.joined(separator: ", ")))"
   }
 }

@@ -80,6 +80,10 @@ public struct Delete<From: Table, Returning> {
   }
 
   // NB: This overload allows for 'returning(\.self)'.
+  /// Adds a returning clause to a delete statement.
+  ///
+  /// - Parameter selection: Columns to return.
+  /// - Returns: A statement with a returning clause.
   @_documentation(visibility: private)
   public func returning(
     _ selection: (From.TableColumns) -> From.TableColumns

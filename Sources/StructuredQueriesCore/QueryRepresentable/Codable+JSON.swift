@@ -6,7 +6,7 @@ import Foundation
 /// @Table
 /// struct Item {
 ///   @Column(as: JSONRepresentation.self)
-///   var notes: [String]
+///   var notes: [String] = []
 /// }
 ///
 /// Item.insert { $0.notes } values: { ["First post", "An update"] }

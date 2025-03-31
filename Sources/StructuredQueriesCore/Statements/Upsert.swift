@@ -6,8 +6,8 @@ extension PrimaryKeyedTable {
   ///
   /// ```swift
   /// Reminder.upsert(draft)
-  /// // INSERT INTO "reminders" ("id", "remindersListID")
-  /// // VALUES (1, 1)
+  /// // INSERT INTO "reminders" ("id", …)
+  /// // VALUES (1, …)
   /// // ON CONFLICT DO UPDATE SET "…" = "excluded"."…", …
   /// ```
   ///

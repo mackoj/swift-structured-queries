@@ -814,7 +814,7 @@ extension SnapshotTests {
       enum R2: AliasName {}
       assertQuery(
         Reminder.as(R1.self)
-          .leftJoin(Reminder.as(R2.self).all) { $0.id.eq($1.id) }
+          .leftJoin(Reminder.as(R2.self).all()) { $0.id.eq($1.id) }
           .limit(1)
           .select { ($0.id, $1.id) }
       ) {

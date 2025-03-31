@@ -118,6 +118,10 @@ public struct Update<From: Table, Returning> {
   }
 
   // NB: This overload allows for 'returning(\.self)'.
+  /// Adds a returning clause to an update statement.
+  ///
+  /// - Parameter selection: Columns to return.
+  /// - Returns: A statement with a returning clause.
   @_documentation(visibility: private)
   public func returning<each QueryValue: QueryRepresentable>(
     _ selection: (From.TableColumns) -> (repeat TableColumn<From, each QueryValue>)
