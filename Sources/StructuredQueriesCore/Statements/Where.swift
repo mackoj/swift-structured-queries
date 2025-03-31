@@ -283,6 +283,9 @@ extension Where: SelectStatement {
   }
 
   /// A select statement for the filtered table ordered by the given column.
+  ///
+  /// - Parameter ordering: A key path to a column to order by.
+  /// - Returns: A select statement that is ordered by the given column.
   public func order(
     by ordering: KeyPath<From.TableColumns, some QueryExpression>
   ) -> Select<(), From, ()> {
@@ -290,6 +293,9 @@ extension Where: SelectStatement {
   }
 
   /// A select statement for the filtered table grouped by the given columns.
+  ///
+  /// - Parameter ordering: A result builder closure that returns columns to order by.
+  /// - Returns: A select statement that is ordered by the given columns.
   public func order(
     @QueryFragmentBuilder
     by ordering: (From.TableColumns) -> [QueryFragment]
@@ -298,6 +304,11 @@ extension Where: SelectStatement {
   }
 
   /// A select statement for the filtered table with a limit and optional offset.
+  ///
+  /// - Parameters:
+  ///   - maxLength: A closure that produces a `LIMIT` expression from this table's columns.
+  ///   - offset: A closure that produces an `OFFSET` expression from this table's columns.
+  /// - Returns: A select statement with a limit and optional offset.
   public func limit(
     _ maxLength: (From.TableColumns) -> some QueryExpression<Int>,
     offset: ((From.TableColumns) -> some QueryExpression<Int>)? = nil
@@ -306,11 +317,19 @@ extension Where: SelectStatement {
   }
 
   /// A select statement for the filtered table with a limit and optional offset.
+  ///
+  /// - Parameters:
+  ///   - maxLength: An integer limit for the select's `LIMIT` clause.
+  ///   - offset: An optional integer offset of the select's `OFFSET` clause.
+  /// - Returns: A select statement with a limit and optional offset.
   public func limit(_ maxLength: Int, offset: Int? = nil) -> Select<(), From, ()> {
     all().limit(maxLength, offset: offset)
   }
 
   /// A select statement for the filtered table's row count.
+  ///
+  /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: A select statement that selects `count(*)`.
   public func count(
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> Select<Int, From, ()> {
@@ -323,6 +342,11 @@ extension Where: SelectStatement {
   }
 
   /// An update statement for the filtered table.
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - updates: A closure describing column-wise updates to perform.
+  /// - Returns: An update statement.
   public func update(
     or conflictResolution: ConflictResolution? = nil,
     set updates: (inout Record<From>) -> Void

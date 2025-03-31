@@ -17,7 +17,7 @@ extension Table {
 
   /// A select statement for a column of this table.
   ///
-  /// - Parameter selection: A closure that selects a result column from this table.
+  /// - Parameter selection: A closure that selects a result column from this table's columns.
   /// - Returns: A select statement that selects the given column.
   public static func select<ResultColumn: QueryExpression>(
     _ selection: (TableColumns) -> ResultColumn
@@ -28,7 +28,7 @@ extension Table {
 
   /// A select statement for columns of this table.
   ///
-  /// - Parameter selection: A closure that selects result columns from this table.
+  /// - Parameter selection: A closure that selects result columns from this table's columns.
   /// - Returns: A select statement that selects the given columns.
   public static func select<
     C1: QueryExpression,
@@ -212,6 +212,9 @@ extension Table {
   }
 
   /// A select statement for this table grouped by the given column.
+  ///
+  /// - Parameter grouping: A closure that returns a column to group by from this table's columns.
+  /// - Returns: A select statement that groups by the given column.
   public static func group<C: QueryExpression>(
     by grouping: (TableColumns) -> C
   ) -> Select<(), Self, ()> where C.QueryValue: QueryDecodable {
@@ -219,6 +222,9 @@ extension Table {
   }
 
   /// A select statement for this table grouped by the given columns.
+  ///
+  /// - Parameter grouping: A closure that returns columns to group by from this table's columns.
+  /// - Returns: A select statement that groups by the given column.
   public static func group<
     C1: QueryExpression,
     C2: QueryExpression,
@@ -235,6 +241,10 @@ extension Table {
   }
 
   /// A select statement for this table with the given `HAVING` clause.
+  ///
+  /// - Parameter predicate: A closure that produces a Boolean query expression from this table's
+  ///   columns.
+  /// - Returns: A select statement that is filtered by the given predicate.
   public static func having(
     _ predicate: (TableColumns) -> some QueryExpression<Bool>
   ) -> Select<(), Self, ()> {
@@ -242,6 +252,9 @@ extension Table {
   }
 
   /// A select statement for this table ordered by the given column.
+  ///
+  /// - Parameter ordering: A key path to a column to order by.
+  /// - Returns: A select statement that is ordered by the given column.
   public static func order(
     by ordering: KeyPath<TableColumns, some QueryExpression>
   ) -> Select<(), Self, ()> {
@@ -249,6 +262,9 @@ extension Table {
   }
 
   /// A select statement for this table ordered by the given columns.
+  ///
+  /// - Parameter ordering: A result builder closure that returns columns to order by.
+  /// - Returns: A select statement that is ordered by the given columns.
   public static func order(
     @QueryFragmentBuilder
     by ordering: (TableColumns) -> [QueryFragment]
@@ -257,6 +273,11 @@ extension Table {
   }
 
   /// A select statement for this table with a limit and optional offset.
+  ///
+  /// - Parameters:
+  ///   - maxLength: A closure that produces a `LIMIT` expression from the filtered table's columns.
+  ///   - offset: A closure that produces an `OFFSET` expression from the filtered table's columns.
+  /// - Returns: A select statement with a limit and optional offset.
   public static func limit(
     _ maxLength: (TableColumns) -> some QueryExpression<Int>,
     offset: ((TableColumns) -> some QueryExpression<Int>)? = nil
@@ -265,11 +286,19 @@ extension Table {
   }
 
   /// A select statement for this table with a limit and optional offset.
+  ///
+  /// - Parameters:
+  ///   - maxLength: An integer limit for the select's `LIMIT` clause.
+  ///   - offset: An optional integer offset of the select's `OFFSET` clause.
+  /// - Returns: A select statement with a limit and optional offset.
   public static func limit(_ maxLength: Int, offset: Int? = nil) -> Select<(), Self, ()> {
     all().limit(maxLength, offset: offset)
   }
 
   /// A select statement for this table's row count.
+  ///
+  /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: A select statement that selects `count(*)`.
   public static func count(
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> Select<Int, Self, ()> {
@@ -1071,7 +1100,7 @@ extension Select {
 
   /// Creates a new select statement from this one by appending a predicate to its `WHERE` clause.
   ///
-  /// - Parameters predicate: A closure that produces a Boolean query expression from this select's
+  /// - Parameter predicate: A closure that produces a Boolean query expression from this select's
   ///   tables.
   /// - Returns: A new select statement that appends the given predicate to its `WHERE` clause.
   public func `where`<each J: Table>(
@@ -1137,7 +1166,7 @@ extension Select {
 
   /// Creates a new select statement from this one by appending a predicate to its `HAVING` clause.
   ///
-  /// - Parameters predicate: A closure that produces a Boolean query expression from this select's
+  /// - Parameter predicate: A closure that produces a Boolean query expression from this select's
   ///   tables.
   /// - Returns: A new select statement that appends the given predicate to its `HAVING` clause.
   public func having<each J: Table>(
@@ -1175,7 +1204,7 @@ extension Select {
 
   /// Creates a new select statement from this one by overriding its `LIMIT` and `OFFSET` clauses.
   ///
-  /// - Parameters
+  /// - Parameters:
   ///   - maxLength: A closure that produces a `LIMIT` expression from this select's tables.
   ///   - offset: A closure that produces an `OFFSET` expression from this select's tables.
   /// - Returns: A new select statement that overrides this one's `LIMIT` and `OFFSET` clauses.
@@ -1194,9 +1223,9 @@ extension Select {
 
   /// Creates a new select statement from this one by overriding its `LIMIT` and `OFFSET` clauses.
   ///
-  /// - Parameters
-  ///   - maxLength: A closure that produces a `LIMIT` expression from this select's tables.
-  ///   - offset: A closure that produces an `OFFSET` expression from this select's tables.
+  /// - Parameters:
+  ///   - maxLength: An integer limit for the select's `LIMIT` clause.
+  ///   - offset: An optional integer offset of the select's `OFFSET` clause.
   /// - Returns: A new select statement that overrides this one's `LIMIT` and `OFFSET` clauses.
   public func limit<each J: Table>(_ maxLength: Int, offset: Int? = nil) -> Self
   where Joins == (repeat each J) {
