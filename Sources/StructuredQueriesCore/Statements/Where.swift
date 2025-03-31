@@ -61,6 +61,9 @@ extension Where: SelectStatement {
   }
 
   /// A select statement for a column of the filtered table.
+  ///
+  /// - Parameter selection: A key path to a column to select.
+  /// - Returns: A select statement that selects the given column.
   public func select<C: QueryExpression>(
     _ selection: KeyPath<From.TableColumns, C>
   ) -> Select<C.QueryValue, From, ()>
@@ -69,6 +72,9 @@ extension Where: SelectStatement {
   }
 
   /// A select statement for a column of the filtered table.
+  ///
+  /// - Parameter selection: A closure that selects a result column from the filtered table.
+  /// - Returns: A select statement that selects the given column.
   public func select<C: QueryExpression>(
     _ selection: (From.TableColumns) -> C
   ) -> Select<C.QueryValue, From, ()>
@@ -77,6 +83,9 @@ extension Where: SelectStatement {
   }
 
   /// A select statement for columns of the filtered table.
+  ///
+  /// - Parameter selection: A closure that selects result columns from the filtered table.
+  /// - Returns: A select statement that selects the given columns.
   public func select<C1: QueryExpression, C2: QueryExpression, each C3: QueryExpression>(
     _ selection: (From.TableColumns) -> (C1, C2, repeat each C3)
   ) -> Select<(C1.QueryValue, C2.QueryValue, repeat (each C3).QueryValue), From, ()>
@@ -89,11 +98,19 @@ extension Where: SelectStatement {
   }
 
   /// A distinct select statement for the filtered table.
+  ///
+  /// - Parameter isDistinct: Whether or not to `SELECT DISTINCT`.
+  /// - Returns: A select statement with a `DISTINCT` clause determined by `isDistinct`.
   public func distinct(_ isDistinct: Bool = true) -> Select<(), From, ()> {
     all().distinct(isDistinct)
   }
 
   /// A select statement for the filtered table joined to another table.
+  ///
+  /// - Parameters:
+  ///   - other: A select statement for another table.
+  ///   - constraint: The constraint describing the join.
+  /// - Returns: A select statement that joins the given table.
   public func join<each C: QueryRepresentable, F: Table, each J: Table>(
     _ other: any SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
@@ -104,6 +121,12 @@ extension Where: SelectStatement {
   }
 
   // NB: Optimization
+  /// A select statement for the filtered table joined to another table.
+  ///
+  /// - Parameters:
+  ///   - other: A select statement for another table.
+  ///   - constraint: The constraint describing the join.
+  /// - Returns: A select statement that joins the given table.
   @_documentation(visibility: private)
   public func join<each C: QueryRepresentable, F: Table>(
     _ other: any SelectStatement<(repeat each C), F, ()>,
@@ -113,6 +136,11 @@ extension Where: SelectStatement {
   }
 
   /// A select statement for the filtered table left-joined to another table.
+  ///
+  /// - Parameters:
+  ///   - other: A select statement for another table.
+  ///   - constraint: The constraint describing the join.
+  /// - Returns: A select statement that left-joins the given table.
   public func leftJoin<each C: QueryRepresentable, F: Table, each J: Table>(
     _ other: any SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
@@ -128,6 +156,12 @@ extension Where: SelectStatement {
   }
 
   // NB: Optimization
+  /// A select statement for the filtered table left-joined to another table.
+  ///
+  /// - Parameters:
+  ///   - other: A select statement for another table.
+  ///   - constraint: The constraint describing the join.
+  /// - Returns: A select statement that left-joins the given table.
   @_documentation(visibility: private)
   public func leftJoin<each C: QueryRepresentable, F: Table>(
     _ other: any SelectStatement<(repeat each C), F, ()>,
@@ -137,6 +171,11 @@ extension Where: SelectStatement {
   }
 
   /// A select statement for the filtered table right-joined to another table.
+  ///
+  /// - Parameters:
+  ///   - other: A select statement for another table.
+  ///   - constraint: The constraint describing the join.
+  /// - Returns: A select statement that right-joins the given table.
   public func rightJoin<each C: QueryRepresentable, F: Table, each J: Table>(
     _ other: any SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
@@ -148,6 +187,12 @@ extension Where: SelectStatement {
   }
 
   // NB: Optimization
+  /// A select statement for the filtered table right-joined to another table.
+  ///
+  /// - Parameters:
+  ///   - other: A select statement for another table.
+  ///   - constraint: The constraint describing the join.
+  /// - Returns: A select statement that right-joins the given table.
   @_documentation(visibility: private)
   public func rightJoin<each C: QueryRepresentable, F: Table>(
     _ other: any SelectStatement<(repeat each C), F, ()>,
@@ -157,6 +202,11 @@ extension Where: SelectStatement {
   }
 
   /// A select statement for the filtered table full-joined to another table.
+  ///
+  /// - Parameters:
+  ///   - other: A select statement for another table.
+  ///   - constraint: The constraint describing the join.
+  /// - Returns: A select statement that full-joins the given table.
   public func fullJoin<each C: QueryRepresentable, F: Table, each J: Table>(
     _ other: any SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
@@ -172,6 +222,12 @@ extension Where: SelectStatement {
   }
 
   // NB: Optimization
+  /// A select statement for the filtered table full-joined to another table.
+  ///
+  /// - Parameters:
+  ///   - other: A select statement for another table.
+  ///   - constraint: The constraint describing the join.
+  /// - Returns: A select statement that full-joins the given table.
   @_documentation(visibility: private)
   public func fullJoin<each C: QueryRepresentable, F: Table>(
     _ other: any SelectStatement<(repeat each C), F, ()>,

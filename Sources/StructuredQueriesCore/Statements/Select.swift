@@ -5,6 +5,9 @@ extension Table {
   }
 
   /// A select statement for a column of this table.
+  ///
+  /// - Parameter selection: A key path to a column to select.
+  /// - Returns: A select statement that selects the given column.
   public static func select<ResultColumn: QueryExpression>(
     _ selection: KeyPath<TableColumns, ResultColumn>
   ) -> Select<ResultColumn.QueryValue, Self, ()>
@@ -13,6 +16,9 @@ extension Table {
   }
 
   /// A select statement for a column of this table.
+  ///
+  /// - Parameter selection: A closure that selects a result column from this table.
+  /// - Returns: A select statement that selects the given column.
   public static func select<ResultColumn: QueryExpression>(
     _ selection: (TableColumns) -> ResultColumn
   ) -> Select<ResultColumn.QueryValue, Self, ()>
@@ -21,6 +27,9 @@ extension Table {
   }
 
   /// A select statement for columns of this table.
+  ///
+  /// - Parameter selection: A closure that selects result columns from this table.
+  /// - Returns: A select statement that selects the given columns.
   public static func select<
     C1: QueryExpression,
     C2: QueryExpression,
@@ -37,11 +46,19 @@ extension Table {
   }
 
   /// A distinct select statement for this table.
+  ///
+  /// - Parameter isDistinct: Whether or not to `SELECT DISTINCT`.
+  /// - Returns: A select statement with a `DISTINCT` clause determined by `isDistinct`.
   public static func distinct(_ isDistinct: Bool = true) -> Select<(), Self, ()> {
     all().distinct(isDistinct)
   }
 
   /// A select statement for this table joined to another table.
+  ///
+  /// - Parameters:
+  ///   - other: A select statement for another table.
+  ///   - constraint: The constraint describing the join.
+  /// - Returns: A select statement that joins the given table.
   public static func join<
     each C: QueryRepresentable,
     F: Table,
@@ -56,6 +73,12 @@ extension Table {
   }
 
   // NB: Optimization
+  /// A select statement for this table joined to another table.
+  ///
+  /// - Parameters:
+  ///   - other: A select statement for another table.
+  ///   - constraint: The constraint describing the join.
+  /// - Returns: A select statement that joins the given table.
   @_documentation(visibility: private)
   public static func join<each C: QueryRepresentable, F: Table>(
     _ other: Select<(repeat each C), F, ()>,
@@ -67,6 +90,11 @@ extension Table {
   }
 
   /// A select statement for this table left-joined to another table.
+  ///
+  /// - Parameters:
+  ///   - other: A select statement for another table.
+  ///   - constraint: The constraint describing the join.
+  /// - Returns: A select statement that left-joins the given table.
   public static func leftJoin<
     each C: QueryRepresentable,
     F: Table,
@@ -86,6 +114,12 @@ extension Table {
   }
 
   // NB: Optimization
+  /// A select statement for this table left-joined to another table.
+  ///
+  /// - Parameters:
+  ///   - other: A select statement for another table.
+  ///   - constraint: The constraint describing the join.
+  /// - Returns: A select statement that left-joins the given table.
   @_documentation(visibility: private)
   public static func leftJoin<each C: QueryRepresentable, F: Table>(
     _ other: Select<(repeat each C), F, ()>,
@@ -98,6 +132,11 @@ extension Table {
   }
 
   /// A select statement for this table right-joined to another table.
+  ///
+  /// - Parameters:
+  ///   - other: A select statement for another table.
+  ///   - constraint: The constraint describing the join.
+  /// - Returns: A select statement that right-joins the given table.
   public static func rightJoin<
     each C: QueryRepresentable,
     F: Table,
@@ -113,6 +152,12 @@ extension Table {
   }
 
   // NB: Optimization
+  /// A select statement for this table right-joined to another table.
+  ///
+  /// - Parameters:
+  ///   - other: A select statement for another table.
+  ///   - constraint: The constraint describing the join.
+  /// - Returns: A select statement that right-joins the given table.
   @_documentation(visibility: private)
   public static func rightJoin<each C: QueryRepresentable, F: Table>(
     _ other: Select<(repeat each C), F, ()>,
@@ -125,6 +170,11 @@ extension Table {
   }
 
   /// A select statement for this table full-joined to another table.
+  ///
+  /// - Parameters:
+  ///   - other: A select statement for another table.
+  ///   - constraint: The constraint describing the join.
+  /// - Returns: A select statement that full-joins the given table.
   public static func fullJoin<
     each C: QueryRepresentable,
     F: Table,
@@ -144,6 +194,12 @@ extension Table {
   }
 
   // NB: Optimization
+  /// A select statement for this table full-joined to another table.
+  ///
+  /// - Parameters:
+  ///   - other: A select statement for another table.
+  ///   - constraint: The constraint describing the join.
+  /// - Returns: A select statement that full-joins the given table.
   @_documentation(visibility: private)
   public static func fullJoin<each C: QueryRepresentable, F: Table>(
     _ other: Select<(repeat each C), F, ()>,
@@ -349,7 +405,7 @@ extension Select {
   // NB: This overload is required for CTEs with join clauses to avoid a compiler bug.
   /// Creates a new select statement from this one by selecting the given result column.
   ///
-  /// - Parameter selection: A closure that selects a column from this select's tables.
+  /// - Parameter selection: A closure that selects a result column from this select's tables.
   /// - Returns: A new select statement that selects the given column.
   @_disfavoredOverload
   public func select<C: QueryExpression, each J: Table>(
@@ -362,7 +418,7 @@ extension Select {
   /// Creates a new select statement from this one by appending the given result column to its
   /// selection.
   ///
-  /// - Parameter selection: A closure that selects a column from this select's table.
+  /// - Parameter selection: A closure that selects a result column from this select's table.
   /// - Returns: A new select statement that selects the given column.
   public func select<each C1: QueryRepresentable, C2: QueryExpression>(
     _ selection: (From.TableColumns) -> C2
@@ -374,7 +430,7 @@ extension Select {
   /// Creates a new select statement from this one by appending the given result column to its
   /// selection.
   ///
-  /// - Parameter selection: A closure that selects a column from this select's tables.
+  /// - Parameter selection: A closure that selects a result column from this select's tables.
   /// - Returns: A new select statement that selects the given column.
   public func select<each C1: QueryRepresentable, C2: QueryExpression, each J: Table>(
     _ selection: ((From.TableColumns, repeat (each J).TableColumns)) -> C2
@@ -386,7 +442,7 @@ extension Select {
   /// Creates a new select statement from this one by appending the given result column to its
   /// selection.
   ///
-  /// - Parameter selection: A closure that selects a column from this select's tables.
+  /// - Parameter selection: A closure that selects a result column from this select's tables.
   /// - Returns: A new select statement that selects the given column.
   @_disfavoredOverload
   public func select<each C1: QueryRepresentable, C2: QueryExpression, each J: Table>(
