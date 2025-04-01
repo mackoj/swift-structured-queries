@@ -12,7 +12,7 @@ import StructuredQueriesCore
 /// assertQuery(
 ///   Reminder.select(\.title).order(by: \.title)
 /// ) {
-///   db.execute($0)
+///   try db.execute($0)
 /// } sql: {
 ///   """
 ///   SELECT "reminders"."title" FROM "reminders"
@@ -126,7 +126,7 @@ public func assertQuery<each V: QueryRepresentable, S: Statement<(repeat each V)
 /// assertQuery(
 ///   Reminder.select(\.title).order(by: \.title)
 /// ) {
-///   db.execute($0)
+///   try db.execute($0)
 /// } sql: {
 ///   """
 ///   SELECT "reminders"."title" FROM "reminders"
