@@ -525,8 +525,8 @@ extension TableMacro: ExtensionMacro {
       : ["Table"]
     let schemaConformances: [ExprSyntax] =
       primaryKey != nil
-      ? ["\(moduleName).Schema", "\(moduleName).PrimaryKeyedSchema"]
-      : ["\(moduleName).Schema"]
+      ? ["\(moduleName).TableDefinition", "\(moduleName).PrimaryKeyedTableDefinition"]
+      : ["\(moduleName).TableDefinition"]
     if let inheritanceClause = declaration.inheritanceClause {
       for type in protocolNames {
         if !inheritanceClause.inheritedTypes.contains(where: {

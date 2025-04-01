@@ -1,5 +1,5 @@
 extension Never: Table {
-  public struct TableColumns: Schema {
+  public struct TableColumns: TableDefinition {
     public typealias QueryValue = Never
 
     public static var allColumns: [any TableColumnExpression] { [] }

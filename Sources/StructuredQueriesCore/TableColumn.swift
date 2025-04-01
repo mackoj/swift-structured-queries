@@ -1,8 +1,14 @@
+/// A type representing a table column.
+///
+/// You should not conform to this protocol directly.
 public protocol TableColumnExpression<Root, Value>: QueryExpression where Value == QueryValue {
   associatedtype Root: Table
   associatedtype Value: QueryRepresentable & QueryBindable
 
+  /// The name of the table column.
   var name: String { get }
+
+  /// The table model key path associated with this table column.
   var keyPath: KeyPath<Root, Value.QueryOutput> { get }
 
   func _aliased<Name: AliasName>(

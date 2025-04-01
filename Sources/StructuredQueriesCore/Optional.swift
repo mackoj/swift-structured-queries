@@ -83,7 +83,7 @@ extension Optional: Table where Wrapped: Table {
   }
 
   @dynamicMemberLookup
-  public struct TableColumns: Schema {
+  public struct TableColumns: TableDefinition {
     public typealias QueryValue = Optional
 
     public static var allColumns: [any TableColumnExpression] {
@@ -106,7 +106,7 @@ extension Optional: PrimaryKeyedTable where Wrapped: PrimaryKeyedTable {
   public typealias Draft = Wrapped.Draft?
 }
 
-extension Optional.TableColumns: PrimaryKeyedSchema where Wrapped.TableColumns: PrimaryKeyedSchema {
+extension Optional.TableColumns: PrimaryKeyedTableDefinition where Wrapped.TableColumns: PrimaryKeyedTableDefinition {
   public typealias PrimaryKey = Wrapped.TableColumns.PrimaryKey?
 
   public var primaryKey: TableColumn<Optional, Wrapped.TableColumns.PrimaryKey.QueryValue?> {

@@ -18,9 +18,9 @@ extension PrimaryKeyedTable {
   ) -> Insert<Self, ()> {
     insert(
       row,
-      onConflict: { record in
+      onConflict: { updates in
         for column in Draft.TableColumns.allColumns where column.name != columns.primaryKey.name {
-          record.updates.append((column.name, #""excluded".\#(quote: column.name)"#))
+          updates.updates.append((column.name, #""excluded".\#(quote: column.name)"#))
         }
       }
     )

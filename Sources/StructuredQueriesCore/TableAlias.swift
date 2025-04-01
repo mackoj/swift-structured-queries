@@ -6,8 +6,8 @@ import StructuredQueriesSupport
 ///
 /// This protocol contains a single, optional requirement, ``aliasName``, which is the string used
 /// in the `AS` clause to identify the table alias. When this requirement is omitted, it will
-/// default to a lowercased, pluralized version of the type name, similar to how the `@Table` macro
-/// generates a default table name.
+/// default to a lowercase, plural version of the type name, similar to how the `@Table` macro
+/// generates a default table name (_e.g._ `RemindersList` becomes `"remindersLists"`).
 ///
 /// ```swift
 /// enum Referrer: AliasName {}
@@ -96,7 +96,7 @@ public struct TableAlias<
   }
 
   @dynamicMemberLookup
-  public struct TableColumns: Schema {
+  public struct TableColumns: TableDefinition {
     public static var allColumns: [any TableColumnExpression] {
       #if compiler(>=6.1)
         return Base.TableColumns.allColumns.map { $0._aliased(Name.self) }
@@ -126,7 +126,7 @@ extension TableAlias: PrimaryKeyedTable where Base: PrimaryKeyedTable {
   public typealias Draft = TableAlias<Base.Draft, Name>
 }
 
-extension TableAlias.TableColumns: PrimaryKeyedSchema where Base.TableColumns: PrimaryKeyedSchema {
+extension TableAlias.TableColumns: PrimaryKeyedTableDefinition where Base.TableColumns: PrimaryKeyedTableDefinition {
   public typealias PrimaryKey = Base.TableColumns.PrimaryKey
 
   public var primaryKey: TableColumn<TableAlias, Base.TableColumns.PrimaryKey.QueryValue> {

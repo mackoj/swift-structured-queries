@@ -5,7 +5,7 @@
 @dynamicMemberLookup
 public protocol Table: QueryRepresentable where TableColumns.QueryValue == Self {
   /// A type that describes this table's columns.
-  associatedtype TableColumns: Schema
+  associatedtype TableColumns: TableDefinition
 
   /// A value that describes this table's columns.
   static var columns: TableColumns { get }
