@@ -64,8 +64,13 @@ extension Table {
   }
 }
 
-// NB: Ideally we can use a value generic to tag the name in a more predictable way.
-public struct TableAlias<Base: Table, Name: AliasName>: _OptionalPromotable, Table {
+/// An aliased table.
+///
+/// This type is returned from ``Table/as(_:)``.
+public struct TableAlias<
+  Base: Table,
+  Name: AliasName  // We should use a value generic here when it's possible.
+>: _OptionalPromotable, Table {
   public static var columns: TableColumns {
     TableColumns()
   }

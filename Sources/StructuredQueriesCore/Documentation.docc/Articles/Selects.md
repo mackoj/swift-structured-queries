@@ -100,7 +100,7 @@ query.map { _, title, isCompleted in
 
 ## Topics
 
-### Statements
+### Statement types
 
 - ``Select``
 - ``SelectStatement``

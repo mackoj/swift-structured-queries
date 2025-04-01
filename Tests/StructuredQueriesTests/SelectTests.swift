@@ -809,6 +809,30 @@ extension SnapshotTests {
       }
     }
 
+    @Test func selfLeftJoinSelect() {
+      enum R1: AliasName {}
+      enum R2: AliasName {}
+      assertQuery(
+        Reminder.as(R1.self)
+          .leftJoin(Reminder.as(R2.self).all()) { $0.id.eq($1.id) }
+          .limit(1)
+          .select { ($0.id, $1.id) }
+      ) {
+        """
+        SELECT "r1s"."id", "r2s"."id"
+        FROM "reminders" AS "r1s"
+        LEFT JOIN "reminders" AS "r2s" ON ("r1s"."id" = "r2s"."id")
+        LIMIT 1
+        """
+      } results: {
+        """
+        ┌───┬───┐
+        │ 1 │ 1 │
+        └───┴───┘
+        """
+      }
+    }
+
     @Table @Selection
     struct VecExample {
       let rowid: Int

@@ -67,6 +67,10 @@ extension Optional: Table where Wrapped: Table {
     Wrapped.tableName
   }
 
+  public static var tableAlias: String? {
+    Wrapped.tableAlias
+  }
+
   public static var columns: TableColumns {
     TableColumns()
   }

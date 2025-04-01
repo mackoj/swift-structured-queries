@@ -1,6 +1,18 @@
 import Foundation
 
 extension Date {
+  /// A query expression representing a date as double Julian day number.
+  ///
+  /// ```swift
+  /// @Table
+  /// struct Item {
+  ///   @Column(as: Date.JulianDayRepresentation.self)
+  ///   var date: Date
+  /// }
+  ///
+  /// Item.insert { $0.date } values: { Date() }
+  /// // INSERT INTO "items" ("date") VALUES (2458147.5)
+  /// ```
   public struct JulianDayRepresentation: QueryRepresentable {
     public var queryOutput: Date
 

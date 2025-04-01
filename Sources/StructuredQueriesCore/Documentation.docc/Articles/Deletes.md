@@ -8,6 +8,11 @@ Learn how to build queries that delete data from a database.
 
 ## Topics
 
-### Statements
+### Building deletes
+
+- ``Table/delete()``
+- ``Where/delete()``
+
+### Statement types
 
 - ``Delete``
