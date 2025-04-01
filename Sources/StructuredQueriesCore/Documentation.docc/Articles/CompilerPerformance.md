@@ -38,7 +38,7 @@ when joining two tables, rather than checking for equality of a foreign key rela
 
 ```diff
  ReminderList
-   .join(Reminder.all()) {
+   .join(Reminder.all) {
 -    $0.id == $0.reminderListID
 +    $0.id.eq($0.reminderListID)
    }

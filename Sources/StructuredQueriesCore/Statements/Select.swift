@@ -303,7 +303,7 @@ extension Table {
 
 /// A `SELECT` statement.
 ///
-/// This type of statement is constructed from ``Table/all()``, ``Where/all()``, and static aliases
+/// This type of statement is constructed from ``Table/all``, ``Where/all``, and static aliases
 /// to methods on the `Select` type, like `select`, `join`, `group(by:)`, `order(by:)`, and more.
 ///
 /// To learn more, see <doc:Selects>.
@@ -591,7 +591,7 @@ extension Select {
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C1, repeat each C2), From, (repeat each J1, F, repeat each J2)>
   where Columns == (repeat each C1), Joins == (repeat each J1) {
-    let other = other.all()
+    let other = other.all
     let join = JoinClause(
       operator: nil,
       table: F.self,
@@ -630,7 +630,7 @@ extension Select {
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C1, repeat each C2), From, (repeat each J, F)>
   where Columns == (repeat each C1), Joins == (repeat each J) {
-    let other = other.all()
+    let other = other.all
     let join = JoinClause(
       operator: nil,
       table: F.self,
@@ -665,7 +665,7 @@ extension Select {
       (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<QueryValue, From, (F, repeat each J)> where QueryValue: QueryRepresentable {
-    let other = other.all()
+    let other = other.all
     let join = JoinClause(
       operator: nil,
       table: F.self,
@@ -713,7 +713,7 @@ extension Select {
     (repeat each J1, F._Optionalized, repeat (each J2)._Optionalized)
   >
   where Columns == (repeat each C1), Joins == (repeat each J1) {
-    let other = other.all()
+    let other = other.all
     let join = JoinClause(
       operator: .left,
       table: F.self,
@@ -760,7 +760,7 @@ extension Select {
     (repeat each J, F._Optionalized)
   >
   where Columns == (repeat each C1), Joins == (repeat each J) {
-    let other = other.all()
+    let other = other.all
     let join = JoinClause(
       operator: .left,
       table: F.self,
@@ -801,7 +801,7 @@ extension Select {
     ) -> some QueryExpression<Bool>
   ) -> Select<QueryValue, From, (F._Optionalized, repeat (each J)._Optionalized)>
   where QueryValue: QueryRepresentable {
-    let other = other.all()
+    let other = other.all
     let join = JoinClause(
       operator: .left,
       table: F.self,
@@ -849,7 +849,7 @@ extension Select {
     (repeat (each J1)._Optionalized, F, repeat each J2)
   >
   where Columns == (repeat each C1), Joins == (repeat each J1) {
-    let other = other.all()
+    let other = other.all
     let join = JoinClause(
       operator: .right,
       table: F.self,
@@ -896,7 +896,7 @@ extension Select {
     (repeat (each J)._Optionalized, F)
   >
   where Columns == (repeat each C1), Joins == (repeat each J) {
-    let other = other.all()
+    let other = other.all
     let join = JoinClause(
       operator: .right,
       table: F.self,
@@ -937,7 +937,7 @@ extension Select {
     ) -> some QueryExpression<Bool>
   ) -> Select<QueryValue, From._Optionalized, (F, repeat each J)>
   where QueryValue: QueryRepresentable {
-    let other = other.all()
+    let other = other.all
     let join = JoinClause(
       operator: .right,
       table: F.self,
@@ -985,7 +985,7 @@ extension Select {
     (repeat (each J1)._Optionalized, F._Optionalized, repeat (each J2)._Optionalized)
   >
   where Columns == (repeat each C1), Joins == (repeat each J1) {
-    let other = other.all()
+    let other = other.all
     let join = JoinClause(
       operator: .full,
       table: F.self,
@@ -1032,7 +1032,7 @@ extension Select {
     (repeat (each J)._Optionalized, F._Optionalized)
   >
   where Columns == (repeat each C1), Joins == (repeat each J) {
-    let other = other.all()
+    let other = other.all
     let join = JoinClause(
       operator: .full,
       table: F.self,
@@ -1073,7 +1073,7 @@ extension Select {
     ) -> some QueryExpression<Bool>
   ) -> Select<QueryValue, From._Optionalized, (F._Optionalized, repeat (each J)._Optionalized)>
   where QueryValue: QueryRepresentable {
-    let other = other.all()
+    let other = other.all
     let join = JoinClause(
       operator: .full,
       table: F.self,
@@ -1294,8 +1294,8 @@ public func + <
 ) -> Select<
   (repeat each C1, repeat each C2), From, (repeat each J1, repeat each J2)
 > {
-  let lhs = lhs.all()
-  let rhs = rhs.all()
+  let lhs = lhs.all
+  let rhs = rhs.all
   return Select<
     (repeat each C1, repeat each C2), From, (repeat each J1, repeat each J2)
   >(
@@ -1313,7 +1313,7 @@ public func + <
 extension Select: SelectStatement {
   public typealias QueryValue = Columns
 
-  public func all() -> Self {
+  public var all: Self {
     self
   }
 

@@ -56,7 +56,7 @@ extension Where: SelectStatement {
   public typealias QueryValue = ()
 
   /// A select statement filtered by this where clause.
-  public func all() -> Select<(), From, ()> {
+  public var all: Select<(), From, ()> {
     Select(where: predicates)
   }
 
@@ -68,7 +68,7 @@ extension Where: SelectStatement {
     _ selection: KeyPath<From.TableColumns, C>
   ) -> Select<C.QueryValue, From, ()>
   where C.QueryValue: QueryRepresentable {
-    all().select(selection)
+    all.select(selection)
   }
 
   /// A select statement for a column of the filtered table.
@@ -79,7 +79,7 @@ extension Where: SelectStatement {
     _ selection: (From.TableColumns) -> C
   ) -> Select<C.QueryValue, From, ()>
   where C.QueryValue: QueryRepresentable {
-    all().select(selection)
+    all.select(selection)
   }
 
   /// A select statement for columns of the filtered table.
@@ -94,7 +94,7 @@ extension Where: SelectStatement {
     C2.QueryValue: QueryRepresentable,
     repeat (each C3).QueryValue: QueryRepresentable
   {
-    all().select(selection)
+    all.select(selection)
   }
 
   /// A distinct select statement for the filtered table.
@@ -102,7 +102,7 @@ extension Where: SelectStatement {
   /// - Parameter isDistinct: Whether or not to `SELECT DISTINCT`.
   /// - Returns: A select statement with a `DISTINCT` clause determined by `isDistinct`.
   public func distinct(_ isDistinct: Bool = true) -> Select<(), From, ()> {
-    all().distinct(isDistinct)
+    all.distinct(isDistinct)
   }
 
   /// A select statement for the filtered table joined to another table.
@@ -117,7 +117,7 @@ extension Where: SelectStatement {
       (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C), From, (F, repeat each J)> {
-    all().join(other, on: constraint)
+    all.join(other, on: constraint)
   }
 
   // NB: Optimization
@@ -132,7 +132,7 @@ extension Where: SelectStatement {
     _ other: any SelectStatement<(repeat each C), F, ()>,
     on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C), From, F> {
-    all().join(other, on: constraint)
+    all.join(other, on: constraint)
   }
 
   /// A select statement for the filtered table left-joined to another table.
@@ -151,7 +151,7 @@ extension Where: SelectStatement {
     From,
     (F._Optionalized, repeat (each J)._Optionalized)
   > {
-    let joined = all().leftJoin(other, on: constraint)
+    let joined = all.leftJoin(other, on: constraint)
     return joined
   }
 
@@ -167,7 +167,7 @@ extension Where: SelectStatement {
     _ other: any SelectStatement<(repeat each C), F, ()>,
     on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
   ) -> Select<(repeat (each C)._Optionalized), From, F._Optionalized> {
-    all().leftJoin(other, on: constraint)
+    all.leftJoin(other, on: constraint)
   }
 
   /// A select statement for the filtered table right-joined to another table.
@@ -182,7 +182,7 @@ extension Where: SelectStatement {
       (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C), From._Optionalized, (F, repeat each J)> {
-    let joined = all().rightJoin(other, on: constraint)
+    let joined = all.rightJoin(other, on: constraint)
     return joined
   }
 
@@ -198,7 +198,7 @@ extension Where: SelectStatement {
     _ other: any SelectStatement<(repeat each C), F, ()>,
     on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C), From._Optionalized, F> {
-    all().rightJoin(other, on: constraint)
+    all.rightJoin(other, on: constraint)
   }
 
   /// A select statement for the filtered table full-joined to another table.
@@ -217,7 +217,7 @@ extension Where: SelectStatement {
     From._Optionalized,
     (F._Optionalized, repeat (each J)._Optionalized)
   > {
-    let joined = all().fullJoin(other, on: constraint)
+    let joined = all.fullJoin(other, on: constraint)
     return joined
   }
 
@@ -233,7 +233,7 @@ extension Where: SelectStatement {
     _ other: any SelectStatement<(repeat each C), F, ()>,
     on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
   ) -> Select<(repeat (each C)._Optionalized), From._Optionalized, F._Optionalized> {
-    all().fullJoin(other, on: constraint)
+    all.fullJoin(other, on: constraint)
   }
 
   /// Adds a condition to a where clause.
@@ -260,7 +260,7 @@ extension Where: SelectStatement {
     (), From, ()
   >
   where C.QueryValue: QueryDecodable {
-    all().group(by: grouping)
+    all.group(by: grouping)
   }
 
   /// A select statement for the filtered table grouped by the given columns.
@@ -272,14 +272,14 @@ extension Where: SelectStatement {
     C2.QueryValue: QueryDecodable,
     repeat (each C3).QueryValue: QueryDecodable
   {
-    all().group(by: grouping)
+    all.group(by: grouping)
   }
 
   /// A select statement for the filtered table with the given `HAVING` clause.
   public func having(
     _ predicate: (From.TableColumns) -> some QueryExpression<Bool>
   ) -> Select<(), From, ()> {
-    all().having(predicate)
+    all.having(predicate)
   }
 
   /// A select statement for the filtered table ordered by the given column.
@@ -289,7 +289,7 @@ extension Where: SelectStatement {
   public func order(
     by ordering: KeyPath<From.TableColumns, some QueryExpression>
   ) -> Select<(), From, ()> {
-    all().order(by: ordering)
+    all.order(by: ordering)
   }
 
   /// A select statement for the filtered table grouped by the given columns.
@@ -300,7 +300,7 @@ extension Where: SelectStatement {
     @QueryFragmentBuilder
     by ordering: (From.TableColumns) -> [QueryFragment]
   ) -> Select<(), From, ()> {
-    all().order(by: ordering)
+    all.order(by: ordering)
   }
 
   /// A select statement for the filtered table with a limit and optional offset.
@@ -313,7 +313,7 @@ extension Where: SelectStatement {
     _ maxLength: (From.TableColumns) -> some QueryExpression<Int>,
     offset: ((From.TableColumns) -> some QueryExpression<Int>)? = nil
   ) -> Select<(), From, ()> {
-    all().limit(maxLength, offset: offset)
+    all.limit(maxLength, offset: offset)
   }
 
   /// A select statement for the filtered table with a limit and optional offset.
@@ -323,7 +323,7 @@ extension Where: SelectStatement {
   ///   - offset: An optional integer offset of the select's `OFFSET` clause.
   /// - Returns: A select statement with a limit and optional offset.
   public func limit(_ maxLength: Int, offset: Int? = nil) -> Select<(), From, ()> {
-    all().limit(maxLength, offset: offset)
+    all.limit(maxLength, offset: offset)
   }
 
   /// A select statement for the filtered table's row count.
@@ -333,7 +333,7 @@ extension Where: SelectStatement {
   public func count(
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> Select<Int, From, ()> {
-    all().count(filter: filter)
+    all.count(filter: filter)
   }
 
   /// A delete statement for the filtered table.
@@ -357,6 +357,6 @@ extension Where: SelectStatement {
   }
 
   public var query: QueryFragment {
-    all().query
+    all.query
   }
 }
