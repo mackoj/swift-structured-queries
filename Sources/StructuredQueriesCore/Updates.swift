@@ -5,14 +5,21 @@
 /// To learn more, see <doc:Updates>.
 @dynamicMemberLookup
 public struct Updates<Base: Table> {
-  var updates: [(String, QueryFragment)] = []
+  private var updates: [(String, QueryFragment)] = []
+
+  init(_ body: (inout Self) -> Void) {
+    body(&self)
+  }
 
   var isEmpty: Bool {
     updates.isEmpty
   }
 
-  init(_ body: (inout Self) -> Void) {
-    body(&self)
+  mutating func set(
+    _ column: some TableColumnExpression,
+    _ value: QueryFragment
+  ) {
+    updates.append((column.name, value))
   }
 
   public subscript<Value>(

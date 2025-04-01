@@ -20,7 +20,7 @@ extension PrimaryKeyedTable {
       row,
       onConflict: { updates in
         for column in Draft.TableColumns.allColumns where column.name != columns.primaryKey.name {
-          updates.updates.append((column.name, #""excluded".\#(quote: column.name)"#))
+          updates.set(column, #""excluded".\#(quote: column.name)"#)
         }
       }
     )
