@@ -5,8 +5,36 @@ import StructuredQueriesCore
 
 /// An end-to-end snapshot testing helper for statements.
 ///
-/// This helper can be used to generate a snapshot of the given query, as well as the results of the
+/// This helper can be used to generate snapshots of both the given query and the results of the
 /// query decoded back into Swift.
+///
+/// ```swift
+/// assertQuery(
+///   Reminder.select(\.title).order(by: \.title)
+/// ) {
+///   db.execute($0)
+/// } sql: {
+///   """
+///   SELECT "reminders"."title" FROM "reminders"
+///   ORDER BY "reminders"."title"
+///   """
+/// } results: {
+///   """
+///   ┌────────────────────────────┐
+///   │ "Buy concert tickets"      │
+///   │ "Call accountant"          │
+///   │ "Doctor appointment"       │
+///   │ "Get laundry"              │
+///   │ "Groceries"                │
+///   │ "Haircut"                  │
+///   │ "Pick up kids from school" │
+///   │ "Send weekly emails"       │
+///   │ "Take a walk"              │
+///   │ "Take out trash"           │
+///   └────────────────────────────┘
+///   """
+/// }
+/// ```
 ///
 /// - Parameters:
 ///   - query: A statement.
@@ -91,8 +119,36 @@ public func assertQuery<each V: QueryRepresentable, S: Statement<(repeat each V)
 
 /// An end-to-end snapshot testing helper for statements.
 ///
-/// This helper can be used to generate a snapshot of the given query, as well as the results of the
+/// This helper can be used to generate snapshots of both the given query and the results of the
 /// query decoded back into Swift.
+///
+/// ```swift
+/// assertQuery(
+///   Reminder.select(\.title).order(by: \.title)
+/// ) {
+///   db.execute($0)
+/// } sql: {
+///   """
+///   SELECT "reminders"."title" FROM "reminders"
+///   ORDER BY "reminders"."title"
+///   """
+/// } results: {
+///   """
+///   ┌────────────────────────────┐
+///   │ "Buy concert tickets"      │
+///   │ "Call accountant"          │
+///   │ "Doctor appointment"       │
+///   │ "Get laundry"              │
+///   │ "Groceries"                │
+///   │ "Haircut"                  │
+///   │ "Pick up kids from school" │
+///   │ "Send weekly emails"       │
+///   │ "Take a walk"              │
+///   │ "Take out trash"           │
+///   └────────────────────────────┘
+///   """
+/// }
+/// ```
 ///
 /// - Parameters:
 ///   - query: A statement.
@@ -109,9 +165,9 @@ public func assertQuery<each V: QueryRepresentable, S: Statement<(repeat each V)
 ///   - column: The source `#column` associated with the assertion.
 public func assertQuery<S: SelectStatement, each J: Table>(
   _ query: S,
-  execute: (Select<(S.From, repeat each J), S.From, (repeat each J)>) throws -> [
-    (S.From.QueryOutput, repeat (each J).QueryOutput)
-  ],
+  execute: (Select<(S.From, repeat each J), S.From, (repeat each J)>) throws -> [(
+    S.From.QueryOutput, repeat (each J).QueryOutput
+  )],
   sql: (() -> String)? = nil,
   results: (() -> String)? = nil,
   snapshotTrailingClosureOffset: Int = 1,
