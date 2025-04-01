@@ -77,7 +77,7 @@ public macro _Draft<T: Table>(_: T.Type) =
 /// ```swift
 /// RemindersList
 ///   .group(by: \.id)
-///   .join(Reminder.all() { $0.id == $0.remindersListID }
+///   .join(Reminder.all()) { $0.id == $0.remindersListID }
 ///   .select { ($0, $1.count() }
 /// // [(RemindersList, Int)]
 /// ```
@@ -93,7 +93,7 @@ public macro _Draft<T: Table>(_: T.Type) =
 ///
 /// RemindersList
 ///   .group(by: \.id)
-///   .join(Reminder.all() { $0.id == $0.remindersListID }
+///   .join(Reminder.all()) { $0.id == $0.remindersListID }
 ///   .select { ListWithCount.Columns(list: $0, count: $1.count()) }
 /// // [RemindersListWithReminderCount]
 /// ```

@@ -5,9 +5,9 @@ import StructuredQueriesSupport
 /// Conform to this protocol to provide an alias to a table.
 ///
 /// This protocol contains a single, optional requirement, ``aliasName``, which is the string used
-/// to use in the SQL `AS` clause. When left omitted, it will default to the same strategy applied
-/// to table names in the `@Table` macro, which is a lowercased, pluralized version of the type
-/// name.
+/// in the `AS` clause to identify the table alias. When this requirement is omitted, it will
+/// default to a lowercased, pluralized version of the type name, similar to how the `@Table` macro
+/// generates a default table name.
 ///
 /// ```swift
 /// enum Referrer: AliasName {}
@@ -32,7 +32,7 @@ extension Table {
   ///
   /// This is useful for building queries where a table is joined multiple times. For example, a
   /// "users" table may have an optional `referrerID` column that points to another row in the
-  /// table, and you may want to join on this constraint:
+  /// table:
   ///
   /// ```swift
   /// @Table
@@ -43,7 +43,10 @@ extension Table {
   /// }
   /// ```
   ///
-  /// To do so, define an ``AliasName`` for referrers and then build the appropriate query:
+  /// …and you may want to join on this constraint.
+  ///
+  /// To do so, define an ``AliasName`` for referrers and then build the appropriate query using
+  /// `as`:
   ///
   /// ```swift
   /// enum Referrer: AliasName {}
