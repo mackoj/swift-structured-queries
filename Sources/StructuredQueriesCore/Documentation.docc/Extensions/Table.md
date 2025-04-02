@@ -4,7 +4,7 @@
 
 ### Query building
 
-- ``all()``
+- ``all``
 - ``distinct(_:)``
 - ``select(_:)->Select<(C1.QueryValue,C2.QueryValue,(C3).QueryValue),Self,()>``
 - ``join(_:on:)-6kvjn``
