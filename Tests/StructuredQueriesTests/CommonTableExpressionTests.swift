@@ -377,12 +377,6 @@ private struct IncompleteReminder {
   let title: String
 }
 
-// TODO: How to support, e.g., '.select { $0.remindersList.name }'
-// @Table @Selection
-// private struct RemindersListWithRemindersCount {
-//   let remindersList: RemindersList
-//   let remindersCount: Int
-// }
 
 @Table @Selection
 private struct Count {
@@ -431,3 +425,10 @@ struct EmployeeReport {
     count = queryOutput
   }
 }
+
+// TODO: Possible to support? For example '.select { $0.remindersList.name }'?
+// @Table @Selection
+// private struct RemindersListWithRemindersCount {
+//   let remindersList: RemindersList
+//   let remindersCount: Int
+// }

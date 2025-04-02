@@ -10,7 +10,7 @@ extension QueryExpression where QueryValue == Bool {
   /// ```
   ///
   /// - Parameter probability: A probability hint for the given expression.
-  /// - Returns: A Boolean expression of the given likelihood.
+  /// - Returns: A predicate expression of the given likelihood.
   public func likelihood(
     _ probability: some QueryExpression<some FloatingPoint>
   ) -> some QueryExpression<QueryValue> {
@@ -25,7 +25,7 @@ extension QueryExpression where QueryValue == Bool {
   /// // WHERE likely("reminders"."probability" = 3)
   /// ```
   ///
-  /// - Returns: A likely Boolean expression.
+  /// - Returns: A likely predicate expression.
   public func likely() -> some QueryExpression<QueryValue> {
     QueryFunction("likely", self)
   }
@@ -38,7 +38,7 @@ extension QueryExpression where QueryValue == Bool {
   /// // WHERE unlikely("reminders"."probability" = 3)
   /// ```
   ///
-  /// - Returns: An unlikely Boolean expression.
+  /// - Returns: An unlikely predicate expression.
   public func unlikely() -> some QueryExpression<QueryValue> {
     QueryFunction("unlikely", self)
   }
