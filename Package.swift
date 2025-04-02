@@ -21,6 +21,10 @@ let package = Package(
       targets: ["StructuredQueriesCore"]
     ),
     .library(
+      name: "StructuredQueriesTestSupport",
+      targets: ["StructuredQueriesTestSupport"]
+    ),
+    .library(
       name: "_StructuredQueriesSQLite",
       targets: ["StructuredQueriesSQLite"]
     ),
@@ -62,6 +66,14 @@ let package = Package(
         "StructuredQueries"
       ]
     ),
+    .target(
+      name: "StructuredQueriesTestSupport",
+      dependencies: [
+        "StructuredQueriesCore",
+        .product(name: "CustomDump", package: "swift-custom-dump"),
+        .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
+      ]
+    ),
     .testTarget(
       name: "StructuredQueriesMacrosTests",
       dependencies: [
@@ -76,6 +88,7 @@ let package = Package(
       dependencies: [
         "StructuredQueries",
         "StructuredQueriesSQLite",
+        "StructuredQueriesTestSupport",
         .product(name: "CustomDump", package: "swift-custom-dump"),
         .product(name: "Dependencies", package: "swift-dependencies"),
         .product(name: "DependenciesTestSupport", package: "swift-dependencies"),

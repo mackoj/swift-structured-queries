@@ -1,6 +1,26 @@
+/// A collection of updates used in an update clause.
+///
+/// A mutable value of this type is passed to the `updates` closure of `Table.update`.
+///
+/// To learn more, see <doc:Updates>.
 @dynamicMemberLookup
-public struct Record<Base: Table> {
-  var updates: [(String, QueryFragment)] = []
+public struct Updates<Base: Table> {
+  private var updates: [(String, QueryFragment)] = []
+
+  init(_ body: (inout Self) -> Void) {
+    body(&self)
+  }
+
+  var isEmpty: Bool {
+    updates.isEmpty
+  }
+
+  mutating func set(
+    _ column: some TableColumnExpression,
+    _ value: QueryFragment
+  ) {
+    updates.append((column.name, value))
+  }
 
   public subscript<Value>(
     dynamicMember keyPath: KeyPath<Base.TableColumns, TableColumn<Base, Value>>
@@ -31,7 +51,7 @@ public struct Record<Base: Table> {
   }
 }
 
-extension Record: QueryExpression {
+extension Updates: QueryExpression {
   public typealias QueryValue = Void
 
   public var queryFragment: QueryFragment {

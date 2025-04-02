@@ -14,11 +14,9 @@ extension Table {
   /// - Returns: An update statement.
   public static func update(
     or conflictResolution: ConflictResolution? = nil,
-    set updates: (inout Record<Self>) -> Void
+    set updates: (inout Updates<Self>) -> Void
   ) -> Update<Self, ()> {
-    var record = Record<Self>()
-    updates(&record)
-    return Update(conflictResolution: conflictResolution, record: record)
+    Update(conflictResolution: conflictResolution, updates: Updates(updates))
   }
 }
 
@@ -44,14 +42,12 @@ extension PrimaryKeyedTable {
     or conflictResolution: ConflictResolution? = nil,
     _ row: Self
   ) -> Update<Self, ()> {
-    update(or: conflictResolution) { record in
+    update(or: conflictResolution) { updates in
       for column in TableColumns.allColumns where column.name != columns.primaryKey.name {
         func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) {
-          record.updates.append(
-            (
-              column.name,
-              Value(queryOutput: (row as! Root)[keyPath: column.keyPath]).queryFragment
-            )
+          updates.set(
+            column,
+            Value(queryOutput: (row as! Root)[keyPath: column.keyPath]).queryFragment
           )
         }
         open(column)
@@ -71,7 +67,7 @@ extension PrimaryKeyedTable {
 /// To learn more, see <doc:Updates>.
 public struct Update<From: Table, Returning> {
   var conflictResolution: ConflictResolution?
-  var record: Record<From>
+  var updates: Updates<From>
   var `where`: [QueryFragment] = []
   var returning: [QueryFragment] = []
 
@@ -111,7 +107,7 @@ public struct Update<From: Table, Returning> {
     }
     return Update<From, From>(
       conflictResolution: conflictResolution,
-      record: record,
+      updates: updates,
       where: `where`,
       returning: returning
     )
@@ -132,7 +128,7 @@ public struct Update<From: Table, Returning> {
     }
     return Update<From, (repeat (each QueryValue).QueryOutput)>(
       conflictResolution: conflictResolution,
-      record: record,
+      updates: updates,
       where: `where`,
       returning: returning
     )
@@ -153,7 +149,7 @@ extension Update: Statement {
     if let tableAlias = From.tableAlias {
       query.append(" AS \(quote: tableAlias)")
     }
-    query.append("\(.newlineOrSpace)\(record)")
+    query.append("\(.newlineOrSpace)\(updates)")
     if !`where`.isEmpty {
       query.append("\(.newlineOrSpace)WHERE \(`where`.joined(separator: " AND "))")
     }

@@ -268,7 +268,7 @@ extension QueryExpression where QueryValue == Bool {
   }
 }
 
-// NB: This overload is required due to an overload resolution bug of 'Record[dynamicMember:]'.
+// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
 @_documentation(visibility: private)
 public prefix func ! (
   expression: any QueryExpression<Bool>
@@ -319,7 +319,7 @@ extension QueryExpression where QueryValue: Numeric {
   }
 }
 
-// NB: This overload is required due to an overload resolution bug of 'Record[dynamicMember:]'.
+// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
 @_documentation(visibility: private)
 public prefix func - <QueryValue: Numeric>(
   expression: any QueryExpression<QueryValue>
@@ -330,7 +330,7 @@ public prefix func - <QueryValue: Numeric>(
   return open(expression)
 }
 
-// NB: This overload is required due to an overload resolution bug of 'Record[dynamicMember:]'.
+// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
 @_documentation(visibility: private)
 public prefix func + <QueryValue: Numeric>(
   expression: any QueryExpression<QueryValue>
@@ -399,7 +399,7 @@ extension QueryExpression where QueryValue: BinaryInteger {
   }
 }
 
-// NB: This overload is required due to an overload resolution bug of 'Record[dynamicMember:]'.
+// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
 @_documentation(visibility: private)
 public prefix func ~ <QueryValue: BinaryInteger>(
   expression: any QueryExpression<QueryValue>

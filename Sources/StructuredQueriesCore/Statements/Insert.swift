@@ -12,7 +12,7 @@ extension Table {
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ row: Self,
-    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+    onConflict updates: ((inout Updates<Self>) -> Void)? = nil
   ) -> Insert<Self, ()> {
     insert(or: conflictResolution, [row], onConflict: updates)
   }
@@ -48,13 +48,13 @@ extension Table {
   /// - Parameters:
   ///   - conflictResolution: A conflict resolution algorithm.
   ///   - rows: Rows to insert. An empty array will return an empty query.
-  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
   ///     existing row.
   /// - Returns: An insert statement.
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ rows: [Self],
-    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
   ) -> Insert<Self, ()> {
     insert(
       or: conflictResolution,
@@ -63,7 +63,7 @@ extension Table {
           row
         }
       },
-      onConflict: updates
+      onConflict: doUpdate
     )
   }
 
@@ -74,7 +74,7 @@ extension Table {
     _ columns: (TableColumns) -> (TableColumns) = { $0 },
     @InsertValuesBuilder<Self>
     values rows: () -> [Self],
-    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
   ) -> Insert<Self, ()> {
     var columnNames: [String] = []
     for column in Self.TableColumns.allColumns {
@@ -91,16 +91,11 @@ extension Table {
       }
       values.append(value)
     }
-    let record = updates.map { updates in
-      var record = Record<Self>()
-      updates(&record)
-      return record
-    }
     return Insert(
       conflictResolution: conflictResolution,
       columnNames: columnNames,
       values: .values(values),
-      record: record,
+      updates: doUpdate.map(Updates.init),
       returning: []
     )
   }
@@ -134,13 +129,13 @@ extension Table {
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     @InsertValuesBuilder<(V1.QueryOutput, repeat (each V2).QueryOutput)>
     values rows: () -> [(V1.QueryOutput, repeat (each V2).QueryOutput)],
-    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
   ) -> Insert<Self, ()> {
     _insert(
       or: conflictResolution,
       columns,
       values: rows,
-      onConflict: updates
+      onConflict: doUpdate
     )
   }
 
@@ -149,7 +144,7 @@ extension Table {
     _ columns: (TableColumns) -> (repeat TableColumn<Self, each Value>),
     @InsertValuesBuilder<(repeat (each Value).QueryOutput)>
     values rows: () -> [(repeat (each Value).QueryOutput)],
-    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
   ) -> Insert<Self, ()> {
     var columnNames: [String] = []
     for column in repeat each columns(Self.columns) {
@@ -163,16 +158,11 @@ extension Table {
       }
       values.append(value)
     }
-    let record = updates.map { updates in
-      var record = Record<Self>()
-      updates(&record)
-      return record
-    }
     return Insert(
       conflictResolution: conflictResolution,
       columnNames: columnNames,
       values: .values(values),
-      record: record,
+      updates: doUpdate.map(Updates.init),
       returning: []
     )
   }
@@ -200,7 +190,7 @@ extension Table {
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     select selection: () -> Select<(C1, repeat each C2), From, Joins>,
-    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+    onConflict updates: ((inout Updates<Self>) -> Void)? = nil
   ) -> Insert<Self, ()>
   where (repeat (each C2).QueryValue) == (repeat each V2) {
     _insert(
@@ -220,23 +210,18 @@ extension Table {
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (repeat TableColumn<Self, each Value>),
     select selection: () -> Select<(repeat each ResultColumn), From, Joins>,
-    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
   ) -> Insert<Self, ()>
   where (repeat (each ResultColumn).QueryValue) == (repeat each Value) {
     var columnNames: [String] = []
     for column in repeat each columns(Self.columns) {
       columnNames.append(column.name)
     }
-    let record = updates.map { updates in
-      var record = Record<Self>()
-      updates(&record)
-      return record
-    }
     return Insert(
       conflictResolution: conflictResolution,
       columnNames: columnNames,
       values: .select(selection().query),
-      record: record,
+      updates: doUpdate.map(Updates.init),
       returning: []
     )
   }
@@ -257,18 +242,13 @@ extension Table {
   /// - Returns: An insert statement.
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
-    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
   ) -> Insert<Self, ()> {
-    let record = updates.map { updates in
-      var record = Record<Self>()
-      updates(&record)
-      return record
-    }
-    return Insert(
+    Insert(
       conflictResolution: conflictResolution,
       columnNames: [],
       values: .default,
-      record: record,
+      updates: doUpdate.map(Updates.init),
       returning: []
     )
   }
@@ -286,7 +266,7 @@ extension PrimaryKeyedTable {
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ row: Draft,
-    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+    onConflict updates: ((inout Updates<Self>) -> Void)? = nil
   ) -> Insert<Self, ()> {
     Self.insert(
       or: conflictResolution,
@@ -306,7 +286,7 @@ extension PrimaryKeyedTable {
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ rows: [Draft],
-    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+    onConflict updates: ((inout Updates<Self>) -> Void)? = nil
   ) -> Insert<Self, ()> {
     Self.insert(
       or: conflictResolution,
@@ -326,7 +306,7 @@ extension PrimaryKeyedTable {
     _ columns: (Draft.TableColumns) -> (Draft.TableColumns) = { $0 },
     @InsertValuesBuilder<Draft>
     values rows: () -> [Draft],
-    onConflict updates: ((inout Record<Self>) -> Void)? = nil
+    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
   ) -> Insert<Self, ()> {
     var columnNames: [String] = []
     for column in Draft.TableColumns.allColumns {
@@ -343,16 +323,11 @@ extension PrimaryKeyedTable {
       }
       values.append(value)
     }
-    let record = updates.map { updates in
-      var record = Record<Self>()
-      updates(&record)
-      return record
-    }
     return Insert(
       conflictResolution: conflictResolution,
       columnNames: columnNames,
       values: .values(values),
-      record: record,
+      updates: doUpdate.map(Updates.init),
       returning: []
     )
   }
@@ -374,7 +349,7 @@ public struct Insert<Into: Table, Returning> {
   var conflictResolution: ConflictResolution?
   var columnNames: [String] = []
   fileprivate var values: InsertValues
-  var record: Record<Into>?
+  var updates: Updates<Into>?
   var returning: [QueryFragment] = []
 
   /// Adds a returning clause to an insert statement.
@@ -392,7 +367,7 @@ public struct Insert<Into: Table, Returning> {
       conflictResolution: conflictResolution,
       columnNames: columnNames,
       values: values,
-      record: record,
+      updates: updates,
       returning: returning
     )
   }
@@ -414,7 +389,7 @@ public struct Insert<Into: Table, Returning> {
       conflictResolution: conflictResolution,
       columnNames: columnNames,
       values: values,
-      record: record,
+      updates: updates,
       returning: returning
     )
   }
@@ -457,9 +432,9 @@ extension Insert: Statement {
       query.append(values.joined(separator: ", "))
     }
 
-    if let record {
+    if let updates {
       query.append("\(.newlineOrSpace)ON CONFLICT DO ")
-      query.append(record.updates.isEmpty ? "NOTHING" : "UPDATE \(bind: record)")
+      query.append(updates.isEmpty ? "NOTHING" : "UPDATE \(bind: updates)")
     }
     if !returning.isEmpty {
       query.append("\(.newlineOrSpace)RETURNING \(returning.joined(separator: ", "))")

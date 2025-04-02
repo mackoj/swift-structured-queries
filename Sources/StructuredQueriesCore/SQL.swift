@@ -9,14 +9,28 @@ public struct SQLQueryExpression<QueryValue>: Statement {
 
   public var query: QueryFragment { queryFragment }
 
-  public init(_ queryFragment: QueryFragment, as output: QueryValue.Type = QueryValue.self) {
+  /// Creates a query expression from a raw SQL fragment.
+  ///
+  /// - Parameters:
+  ///   - queryFragment: A query fragment.
+  ///   - queryValueType: A type representing the query expression.
+  public init(
+    _ queryFragment: QueryFragment,
+    as queryValueType: QueryValue.Type = QueryValue.self
+  ) {
     self.queryFragment = queryFragment
   }
 
+  /// Creates a query expression from a raw SQL fragment.
+  ///
+  /// - Parameter queryFragment: A query fragment.
   public init(_ queryFragment: QueryFragment) where QueryValue == () {
     self.queryFragment = queryFragment
   }
 
+  /// Creates a type erased query expression from another query expression.
+  ///
+  /// - Parameter expression: A query expression.
   @_disfavoredOverload
   public init(_ expression: some QueryExpression<QueryValue>) {
     self.queryFragment = expression.queryFragment

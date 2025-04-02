@@ -349,11 +349,13 @@ extension Where: SelectStatement {
   /// - Returns: An update statement.
   public func update(
     or conflictResolution: ConflictResolution? = nil,
-    set updates: (inout Record<From>) -> Void
+    set updates: (inout Updates<From>) -> Void
   ) -> UpdateOf<From> {
-    var record = Record<From>()
-    updates(&record)
-    return Update(conflictResolution: conflictResolution, record: record, where: predicates)
+    Update(
+      conflictResolution: conflictResolution,
+      updates: Updates(updates),
+      where: predicates
+    )
   }
 
   public var query: QueryFragment {

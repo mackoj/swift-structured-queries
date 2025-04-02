@@ -1,3 +1,4 @@
+/// A type representing a value that can be bound to a parameter of a SQL statement.
 public protocol QueryBindable: QueryRepresentable, QueryExpression where QueryValue: QueryBindable {
   associatedtype QueryValue = Self
   var queryBinding: QueryBinding { get }

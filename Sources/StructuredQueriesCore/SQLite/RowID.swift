@@ -1,4 +1,4 @@
-extension Schema {
+extension TableDefinition {
   /// An expression representing the table's rowid.
   ///
   /// > Note: The associated table must be a [rowid table](https://sqlite.org/rowidtable.html) or
