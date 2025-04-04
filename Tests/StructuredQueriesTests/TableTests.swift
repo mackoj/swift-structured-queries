@@ -49,6 +49,26 @@ extension SnapshotTests {
           └─────────────────────────────────────────────┘
           """
         }
+        assertQuery(Row.unscoped) {
+          """
+          SELECT "rows"."id", "rows"."isDeleted"
+          FROM "rows"
+          """
+        } results: {
+          """
+          ┌─────────────────────────────────────────────┐
+          │ SnapshotTests.TableTests.DefaultSelect.Row( │
+          │   id: 1,                                    │
+          │   isDeleted: false                          │
+          │ )                                           │
+          ├─────────────────────────────────────────────┤
+          │ SnapshotTests.TableTests.DefaultSelect.Row( │
+          │   id: 2,                                    │
+          │   isDeleted: true                           │
+          │ )                                           │
+          └─────────────────────────────────────────────┘
+          """
+        }
       }
     }
 
@@ -91,6 +111,26 @@ extension SnapshotTests {
           │ SnapshotTests.TableTests.DefaultWhere.Row( │
           │   id: 1,                                   │
           │   isDeleted: false                         │
+          │ )                                          │
+          └────────────────────────────────────────────┘
+          """
+        }
+        assertQuery(Row.unscoped) {
+          """
+          SELECT "rows"."id", "rows"."isDeleted"
+          FROM "rows"
+          """
+        } results: {
+          """
+          ┌────────────────────────────────────────────┐
+          │ SnapshotTests.TableTests.DefaultWhere.Row( │
+          │   id: 1,                                   │
+          │   isDeleted: false                         │
+          │ )                                          │
+          ├────────────────────────────────────────────┤
+          │ SnapshotTests.TableTests.DefaultWhere.Row( │
+          │   id: 2,                                   │
+          │   isDeleted: true                          │
           │ )                                          │
           └────────────────────────────────────────────┘
           """
