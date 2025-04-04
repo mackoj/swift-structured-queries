@@ -62,7 +62,7 @@ extension Table {
   /// // SELECT "reminders"."id" FROM "reminders"
   /// ```
   public static var unscoped: Where<Self> {
-    Where()
+    Where(unscoped: true)
   }
 
   public static var tableAlias: String? {

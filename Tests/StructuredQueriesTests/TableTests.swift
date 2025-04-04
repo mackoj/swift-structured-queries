@@ -176,7 +176,7 @@ extension SnapshotTests {
         ) {
           """
           DELETE FROM "rows"
-          WHERE NOT ("rows"."isDeleted") AND NOT ("rows"."isDeleted") AND ("rows"."id" > 0)
+          WHERE NOT ("rows"."isDeleted") AND ("rows"."id" > 0)
           RETURNING "id", "isDeleted"
           """
         } results: {
@@ -199,8 +199,71 @@ extension SnapshotTests {
         ) {
           """
           DELETE FROM "rows"
-          WHERE NOT ("rows"."isDeleted") AND NOT ("rows"."isDeleted") AND ("rows"."id" > 0)
+          WHERE ("rows"."id" > 0)
           RETURNING "id", "isDeleted"
+          """
+        } results: {
+          """
+          ┌────────────────────────────────────────────┐
+          │ SnapshotTests.TableTests.DefaultWhere.Row( │
+          │   id: 2,                                   │
+          │   isDeleted: true                          │
+          │ )                                          │
+          └────────────────────────────────────────────┘
+          """
+        }
+      }
+
+      @Test func update() throws {
+        assertQuery(
+          Row
+            .where { $0.id > 0 }
+            .update { $0.isDeleted.toggle() }
+            .returning(\.self)
+        ) {
+          """
+          UPDATE "rows"
+          SET "isDeleted" = NOT ("rows"."isDeleted")
+          WHERE NOT ("rows"."isDeleted") AND ("rows"."id" > 0)
+          RETURNING "id", "isDeleted"
+          """
+        } results: {
+          """
+          ┌────────────────────────────────────────────┐
+          │ SnapshotTests.TableTests.DefaultWhere.Row( │
+          │   id: 1,                                   │
+          │   isDeleted: true                          │
+          │ )                                          │
+          └────────────────────────────────────────────┘
+          """
+        }
+
+        assertQuery(
+          Row
+            .unscoped
+            .where { $0.id > 0 }
+            .update { $0.isDeleted.toggle() }
+            .returning(\.self)
+        ) {
+          """
+          UPDATE "rows"
+          SET "isDeleted" = NOT ("rows"."isDeleted")
+          WHERE ("rows"."id" > 0)
+          RETURNING "id", "isDeleted"
+          """
+        } results: {
+          """
+          ┌────────────────────────────────────────────┐
+          │ SnapshotTests.TableTests.DefaultWhere.Row( │
+          │   id: 1,                                   │
+          │   isDeleted: false                         │
+          │ )                                          │
+          ├────────────────────────────────────────────┤
+          │ SnapshotTests.TableTests.DefaultWhere.Row( │
+          │   id: 2,                                   │
+          │   isDeleted: false                         │
+          │ )                                          │
+          └────────────────────────────────────────────┘
           """
         }
       }

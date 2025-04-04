@@ -38,6 +38,7 @@ public struct Where<From: Table> {
   }
 
   var predicates: [QueryFragment] = []
+  var unscoped = false
 
   #if compiler(>=6.1)
     public subscript<each C: QueryRepresentable, each J: Table>(
@@ -56,8 +57,8 @@ extension Where: SelectStatement {
   public typealias QueryValue = ()
 
   public func asSelect() -> Select<(), From, ()> {
-    let select = Select<(), From, ()>(clauses: From.all._selectClauses)
-    return select.where(self)
+    (unscoped ? Select() : Select(clauses: From.all._selectClauses))
+      .where(self)
   }
 
   public var _selectClauses: _SelectClauses {
@@ -342,7 +343,7 @@ extension Where: SelectStatement {
 
   /// A delete statement for the filtered table.
   public func delete() -> DeleteOf<From> {
-    Delete(where: predicates)
+    Delete(where: unscoped ? predicates : From.all._selectClauses.where + predicates)
   }
 
   /// An update statement for the filtered table.
@@ -358,7 +359,7 @@ extension Where: SelectStatement {
     Update(
       conflictResolution: conflictResolution,
       updates: Updates(updates),
-      where: predicates
+      where: unscoped ? predicates : From.all._selectClauses.where + predicates
     )
   }
 
