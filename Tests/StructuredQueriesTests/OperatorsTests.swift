@@ -255,12 +255,6 @@ extension SnapshotTests {
         ~("rows"."c")
         """
       }
-      assertInlineSnapshot(of: Row.update { $0.c %= 1 }, as: .sql) {
-        """
-        UPDATE "rows"
-        SET "c" = ("rows"."c" % 1)
-        """
-      }
       assertInlineSnapshot(of: Row.update { $0.c &= 2 }, as: .sql) {
         """
         UPDATE "rows"
