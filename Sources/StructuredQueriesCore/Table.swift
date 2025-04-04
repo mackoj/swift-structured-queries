@@ -33,9 +33,10 @@ extension Table where DefaultScope == SelectOf<Self> {
 extension Table {
   /// A select statement on the table with no constraints.
   ///
-  /// A ``Table``'s ``Table/all`` method can be overridden so that it provides a default set of constraints
-  /// to fetch data from the table. For example, a reminder with an `isDeleted` field may want to define
-  /// its `all` as adding the where-clause to select reminders that are not deleted:
+  /// A ``Table``'s ``Table/all`` method can be overridden so that it provides a default set of
+  /// constraints to fetch data from the table. For example, a reminder with an `isDeleted` field
+  /// may want to define its `all` as adding the `WHERE` clause to select reminders that are not
+  /// deleted:
   ///
   /// ```swift
   /// @Table
@@ -50,8 +51,8 @@ extension Table {
   /// Reminder.all  // SELECT * FROM reminders WHERE NOT isDeleted
   /// ```
   ///
-  /// If you want to remove this default scope in order to select absolutely all reminders, you can use the
-  /// ``Table/unscoped`` property:
+  /// If you want to remove this default scope in order to select absolutely all reminders, you can
+  /// use the ``Table/unscoped`` property:
   ///
   /// ```swift
   /// Reminder.unscoped  // SELECT * FROM reminders
