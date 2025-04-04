@@ -56,7 +56,11 @@ extension Where: SelectStatement {
   public typealias QueryValue = ()
 
   public func asSelect() -> Select<(), From, ()> {
-    Select(clauses: From.all._selectClauses).where(self)
+    let select = Select<(), From, ()>(clauses: From.all._selectClauses)
+    guard select.clauses.where == predicates else {
+      return select.where(self)
+    }
+    return select
   }
 
   public var _selectClauses: _SelectClauses {
