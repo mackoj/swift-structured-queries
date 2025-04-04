@@ -40,12 +40,11 @@ extension Table {
   /// ```swift
   /// @Table
   /// struct Reminder {
+  ///   static let all = Self.where { !$0.isDeleted }
+  ///
   ///   let id: Int
   ///   var title = ""
   ///   var isDeleted = false
-  ///   static var all: SelectOf<Self> {
-  ///     Self.where { !$0.isDeleted }
-  ///   }
   /// }
   ///
   /// Reminder.all  // SELECT * FROM reminders WHERE NOT isDeleted

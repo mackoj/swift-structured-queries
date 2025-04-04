@@ -31,6 +31,10 @@ extension SelectStatement {
     Select(clauses: _selectClauses)
   }
 
+  var _selectClauses: _SelectClauses {
+    asSelect().clauses
+  }
+
   /// Explicitly selects all columns and tables from this statement.
   ///
   /// - Returns: A select statement.
