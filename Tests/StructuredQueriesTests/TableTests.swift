@@ -128,11 +128,12 @@ extension SnapshotTests {
           └────────────────────────────────────────────┘
           """
         }
+        // TODO: Can we de-dupe this 'where' condition?
         assertQuery(Row.select(\.id)) {
           """
           SELECT "rows"."id"
           FROM "rows"
-          WHERE NOT ("rows"."isDeleted")
+          WHERE NOT ("rows"."isDeleted") AND NOT ("rows"."isDeleted")
           """
         } results: {
           """

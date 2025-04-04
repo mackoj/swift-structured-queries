@@ -56,12 +56,8 @@ extension Where: SelectStatement {
   public typealias QueryValue = ()
 
   public func asSelect() -> Select<(), From, ()> {
-    // TODO: Is there a better way of de-duping these clauses?
     let select = Select<(), From, ()>(clauses: From.all._selectClauses)
-    guard select.clauses.where == predicates else {
-      return select.where(self)
-    }
-    return select
+    return select.where(self)
   }
 
   public var _selectClauses: _SelectClauses {
