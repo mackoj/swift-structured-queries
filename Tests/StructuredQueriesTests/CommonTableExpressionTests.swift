@@ -377,7 +377,6 @@ private struct IncompleteReminder {
   let title: String
 }
 
-
 @Table @Selection
 private struct Count {
   let value: Int

@@ -49,6 +49,19 @@ extension SnapshotTests {
           └─────────────────────────────────────────────┘
           """
         }
+        assertQuery(Row.select(\.id)) {
+          """
+          SELECT "rows"."id"
+          FROM "rows"
+          WHERE NOT ("rows"."isDeleted")
+          """
+        } results: {
+          """
+          ┌───┐
+          │ 1 │
+          └───┘
+          """
+        }
         assertQuery(Row.unscoped) {
           """
           SELECT "rows"."id", "rows"."isDeleted"
@@ -113,6 +126,19 @@ extension SnapshotTests {
           │   isDeleted: false                         │
           │ )                                          │
           └────────────────────────────────────────────┘
+          """
+        }
+        assertQuery(Row.select(\.id)) {
+          """
+          SELECT "rows"."id"
+          FROM "rows"
+          WHERE NOT ("rows"."isDeleted") AND NOT ("rows"."isDeleted")
+          """
+        } results: {
+          """
+          ┌───┐
+          │ 1 │
+          └───┘
           """
         }
         assertQuery(Row.unscoped) {

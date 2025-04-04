@@ -24,11 +24,13 @@ public protocol Table: QueryRepresentable where TableColumns.QueryValue == Self 
   static var all: DefaultScope { get }
 }
 
-extension Table {
-  public static var all: SelectOf<Self> {
+extension Table where DefaultScope == SelectOf<Self> {
+  public static var all: DefaultScope {
     Select()
   }
+}
 
+extension Table {
   /// A select statement on the table with no constraints.
   ///
   /// A ``Table``'s ``Table/all`` method can be overridden so that it provides a default set of constraints

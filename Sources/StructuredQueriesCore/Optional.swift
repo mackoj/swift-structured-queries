@@ -106,7 +106,8 @@ extension Optional: PrimaryKeyedTable where Wrapped: PrimaryKeyedTable {
   public typealias Draft = Wrapped.Draft?
 }
 
-extension Optional.TableColumns: PrimaryKeyedTableDefinition where Wrapped.TableColumns: PrimaryKeyedTableDefinition {
+extension Optional.TableColumns: PrimaryKeyedTableDefinition
+where Wrapped.TableColumns: PrimaryKeyedTableDefinition {
   public typealias PrimaryKey = Wrapped.TableColumns.PrimaryKey?
 
   public var primaryKey: TableColumn<Optional, Wrapped.TableColumns.PrimaryKey.QueryValue?> {

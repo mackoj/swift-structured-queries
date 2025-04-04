@@ -126,7 +126,8 @@ extension TableAlias: PrimaryKeyedTable where Base: PrimaryKeyedTable {
   public typealias Draft = TableAlias<Base.Draft, Name>
 }
 
-extension TableAlias.TableColumns: PrimaryKeyedTableDefinition where Base.TableColumns: PrimaryKeyedTableDefinition {
+extension TableAlias.TableColumns: PrimaryKeyedTableDefinition
+where Base.TableColumns: PrimaryKeyedTableDefinition {
   public typealias PrimaryKey = Base.TableColumns.PrimaryKey
 
   public var primaryKey: TableColumn<TableAlias, Base.TableColumns.PrimaryKey.QueryValue> {

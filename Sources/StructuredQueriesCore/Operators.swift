@@ -590,7 +590,7 @@ extension QueryExpression where QueryValue: BinaryInteger {
   }
 
   /// Returns the inverse expression of the bits set in the argument.
-  /// 
+  ///
   /// - Parameter expression: An integer expression.
   /// - Returns: An expression representing the inverse bits of the given expression.
   public static prefix func ~ (expression: Self) -> some QueryExpression<QueryValue> {

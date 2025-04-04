@@ -7,7 +7,7 @@ extension Table {
     _ selection: KeyPath<TableColumns, ResultColumn>
   ) -> Select<ResultColumn.QueryValue, Self, ()>
   where ResultColumn.QueryValue: QueryRepresentable {
-    all.select(selection)
+    all.asSelect().select(selection)
   }
 
   /// A select statement for a column of this table.
@@ -18,7 +18,7 @@ extension Table {
     _ selection: (TableColumns) -> ResultColumn
   ) -> Select<ResultColumn.QueryValue, Self, ()>
   where ResultColumn.QueryValue: QueryRepresentable {
-    all.select(selection)
+    all.asSelect().select(selection)
   }
 
   /// A select statement for columns of this table.
@@ -37,7 +37,7 @@ extension Table {
     C2.QueryValue: QueryRepresentable,
     repeat (each C3).QueryValue: QueryRepresentable
   {
-    all.select(selection)
+    all.asSelect().select(selection)
   }
 
   /// A distinct select statement for this table.
@@ -45,7 +45,7 @@ extension Table {
   /// - Parameter isDistinct: Whether or not to `SELECT DISTINCT`.
   /// - Returns: A select statement with a `DISTINCT` clause determined by `isDistinct`.
   public static func distinct(_ isDistinct: Bool = true) -> Select<(), Self, ()> {
-    all.distinct(isDistinct)
+    all.asSelect().distinct(isDistinct)
   }
 
   /// A select statement for this table joined to another table.
@@ -64,7 +64,7 @@ extension Table {
       (TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C), Self, (F, repeat each J)> {
-    all.join(other, on: constraint)
+    all.asSelect().join(other, on: constraint)
   }
 
   // NB: Optimization
@@ -81,7 +81,7 @@ extension Table {
       (TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C), Self, F> {
-    all.join(other, on: constraint)
+    all.asSelect().join(other, on: constraint)
   }
 
   /// A select statement for this table left-joined to another table.
@@ -104,7 +104,7 @@ extension Table {
     Self,
     (F._Optionalized, repeat (each J)._Optionalized)
   > {
-    let select = all.leftJoin(other, on: constraint)
+    let select = all.asSelect().leftJoin(other, on: constraint)
     return select
   }
 
@@ -122,7 +122,7 @@ extension Table {
       (TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat (each C)._Optionalized), Self, F._Optionalized> {
-    let select = all.leftJoin(other, on: constraint)
+    let select = all.asSelect().leftJoin(other, on: constraint)
     return select
   }
 
@@ -142,7 +142,7 @@ extension Table {
       (TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C), Self._Optionalized, (F, repeat each J)> {
-    let select = all.rightJoin(other, on: constraint)
+    let select = all.asSelect().rightJoin(other, on: constraint)
     return select
   }
 
@@ -160,7 +160,7 @@ extension Table {
       (TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C), Self._Optionalized, F> {
-    let select = all.rightJoin(other, on: constraint)
+    let select = all.asSelect().rightJoin(other, on: constraint)
     return select
   }
 
@@ -184,7 +184,7 @@ extension Table {
     Self._Optionalized,
     (F._Optionalized, repeat (each J)._Optionalized)
   > {
-    let select = all.fullJoin(other, on: constraint)
+    let select = all.asSelect().fullJoin(other, on: constraint)
     return select
   }
 
@@ -202,7 +202,7 @@ extension Table {
       (TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat (each C)._Optionalized), Self._Optionalized, F._Optionalized> {
-    let select = all.fullJoin(other, on: constraint)
+    let select = all.asSelect().fullJoin(other, on: constraint)
     return select
   }
 
@@ -213,7 +213,7 @@ extension Table {
   public static func group<C: QueryExpression>(
     by grouping: (TableColumns) -> C
   ) -> Select<(), Self, ()> where C.QueryValue: QueryDecodable {
-    all.group(by: grouping)
+    all.asSelect().group(by: grouping)
   }
 
   /// A select statement for this table grouped by the given columns.
@@ -232,7 +232,7 @@ extension Table {
     C2.QueryValue: QueryDecodable,
     repeat (each C3).QueryValue: QueryDecodable
   {
-    all.group(by: grouping)
+    all.asSelect().group(by: grouping)
   }
 
   /// A select statement for this table with the given `HAVING` clause.
@@ -243,7 +243,7 @@ extension Table {
   public static func having(
     _ predicate: (TableColumns) -> some QueryExpression<Bool>
   ) -> Select<(), Self, ()> {
-    all.having(predicate)
+    all.asSelect().having(predicate)
   }
 
   /// A select statement for this table ordered by the given column.
@@ -253,7 +253,7 @@ extension Table {
   public static func order(
     by ordering: KeyPath<TableColumns, some QueryExpression>
   ) -> Select<(), Self, ()> {
-    all.order(by: ordering)
+    all.asSelect().order(by: ordering)
   }
 
   /// A select statement for this table ordered by the given columns.
@@ -264,7 +264,7 @@ extension Table {
     @QueryFragmentBuilder
     by ordering: (TableColumns) -> [QueryFragment]
   ) -> Select<(), Self, ()> {
-    all.order(by: ordering)
+    all.asSelect().order(by: ordering)
   }
 
   /// A select statement for this table with a limit and optional offset.
@@ -277,7 +277,7 @@ extension Table {
     _ maxLength: (TableColumns) -> some QueryExpression<Int>,
     offset: ((TableColumns) -> some QueryExpression<Int>)? = nil
   ) -> Select<(), Self, ()> {
-    all.limit(maxLength, offset: offset)
+    all.asSelect().limit(maxLength, offset: offset)
   }
 
   /// A select statement for this table with a limit and optional offset.
@@ -287,7 +287,7 @@ extension Table {
   ///   - offset: An optional integer offset of the select's `OFFSET` clause.
   /// - Returns: A select statement with a limit and optional offset.
   public static func limit(_ maxLength: Int, offset: Int? = nil) -> Select<(), Self, ()> {
-    all.limit(maxLength, offset: offset)
+    all.asSelect().limit(maxLength, offset: offset)
   }
 
   /// A select statement for this table's row count.
@@ -297,7 +297,7 @@ extension Table {
   public static func count(
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> Select<Int, Self, ()> {
-    all.count(filter: filter)
+    all.asSelect().count(filter: filter)
   }
 }
 
@@ -596,7 +596,7 @@ extension Select {
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C1, repeat each C2), From, (repeat each J1, F, repeat each J2)>
   where Columns == (repeat each C1), Joins == (repeat each J1) {
-    let other = other.all
+    let other = other.asSelect()
     let join = _JoinClause(
       operator: nil,
       table: F.self,
@@ -635,7 +635,7 @@ extension Select {
     ) -> some QueryExpression<Bool>
   ) -> Select<(repeat each C1, repeat each C2), From, (repeat each J, F)>
   where Columns == (repeat each C1), Joins == (repeat each J) {
-    let other = other.all
+    let other = other.asSelect()
     let join = _JoinClause(
       operator: nil,
       table: F.self,
@@ -670,7 +670,7 @@ extension Select {
       (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<QueryValue, From, (F, repeat each J)> where QueryValue: QueryRepresentable {
-    let other = other.all
+    let other = other.asSelect()
     let join = _JoinClause(
       operator: nil,
       table: F.self,
@@ -718,7 +718,7 @@ extension Select {
     (repeat each J1, F._Optionalized, repeat (each J2)._Optionalized)
   >
   where Columns == (repeat each C1), Joins == (repeat each J1) {
-    let other = other.all
+    let other = other.asSelect()
     let join = _JoinClause(
       operator: .left,
       table: F.self,
@@ -765,7 +765,7 @@ extension Select {
     (repeat each J, F._Optionalized)
   >
   where Columns == (repeat each C1), Joins == (repeat each J) {
-    let other = other.all
+    let other = other.asSelect()
     let join = _JoinClause(
       operator: .left,
       table: F.self,
@@ -806,7 +806,7 @@ extension Select {
     ) -> some QueryExpression<Bool>
   ) -> Select<QueryValue, From, (F._Optionalized, repeat (each J)._Optionalized)>
   where QueryValue: QueryRepresentable {
-    let other = other.all
+    let other = other.asSelect()
     let join = _JoinClause(
       operator: .left,
       table: F.self,
@@ -854,7 +854,7 @@ extension Select {
     (repeat (each J1)._Optionalized, F, repeat each J2)
   >
   where Columns == (repeat each C1), Joins == (repeat each J1) {
-    let other = other.all
+    let other = other.asSelect()
     let join = _JoinClause(
       operator: .right,
       table: F.self,
@@ -901,7 +901,7 @@ extension Select {
     (repeat (each J)._Optionalized, F)
   >
   where Columns == (repeat each C1), Joins == (repeat each J) {
-    let other = other.all
+    let other = other.asSelect()
     let join = _JoinClause(
       operator: .right,
       table: F.self,
@@ -942,7 +942,7 @@ extension Select {
     ) -> some QueryExpression<Bool>
   ) -> Select<QueryValue, From._Optionalized, (F, repeat each J)>
   where QueryValue: QueryRepresentable {
-    let other = other.all
+    let other = other.asSelect()
     let join = _JoinClause(
       operator: .right,
       table: F.self,
@@ -990,7 +990,7 @@ extension Select {
     (repeat (each J1)._Optionalized, F._Optionalized, repeat (each J2)._Optionalized)
   >
   where Columns == (repeat each C1), Joins == (repeat each J1) {
-    let other = other.all
+    let other = other.asSelect()
     let join = _JoinClause(
       operator: .full,
       table: F.self,
@@ -1037,7 +1037,7 @@ extension Select {
     (repeat (each J)._Optionalized, F._Optionalized)
   >
   where Columns == (repeat each C1), Joins == (repeat each J) {
-    let other = other.all
+    let other = other.asSelect()
     let join = _JoinClause(
       operator: .full,
       table: F.self,
@@ -1078,7 +1078,7 @@ extension Select {
     ) -> some QueryExpression<Bool>
   ) -> Select<QueryValue, From._Optionalized, (F._Optionalized, repeat (each J)._Optionalized)>
   where QueryValue: QueryRepresentable {
-    let other = other.all
+    let other = other.asSelect()
     let join = _JoinClause(
       operator: .full,
       table: F.self,
@@ -1306,8 +1306,8 @@ public func + <
 ) -> Select<
   (repeat each C1, repeat each C2), From, (repeat each J1, repeat each J2)
 > {
-  let lhs = lhs.all
-  let rhs = rhs.all
+  let lhs = lhs.asSelect()
+  let rhs = rhs.asSelect()
   return Select<
     (repeat each C1, repeat each C2), From, (repeat each J1, repeat each J2)
   >(
@@ -1325,8 +1325,8 @@ public func + <
 extension Select: SelectStatement {
   public typealias QueryValue = Columns
 
-  public var all: Self {
-    self
+  public var _selectClauses: _SelectClauses {
+    clauses
   }
 
   public var query: QueryFragment {
