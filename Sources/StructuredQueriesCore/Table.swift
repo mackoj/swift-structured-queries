@@ -61,8 +61,8 @@ extension Table {
   /// Reminder.unscoped.select(\.id)
   /// // SELECT "reminders"."id" FROM "reminders"
   /// ```
-  public static var unscoped: SelectOf<Self> {
-    Select()
+  public static var unscoped: Where<Self> {
+    Where()
   }
 
   public static var tableAlias: String? {

@@ -39,6 +39,11 @@ public struct Delete<From: Table, Returning> {
   var `where`: [QueryFragment] = []
   var returning: [QueryFragment] = []
 
+  init(where: [QueryFragment] = [], returning: [QueryFragment] = []) {
+    self.where = From.all._selectClauses.where + `where`
+    self.returning = returning
+  }
+
   /// Adds a condition to a delete statement.
   ///
   /// ```swift

@@ -95,7 +95,7 @@ extension SnapshotTests {
         var isDeleted = false
       }
 
-      @Test func basics() throws {
+      init() throws {
         try db.execute(
           #sql(
             """
@@ -112,6 +112,9 @@ extension SnapshotTests {
             Row.Draft(isDeleted: true),
           ])
         )
+      }
+
+      @Test func basics() throws {
         assertQuery(Row.where { $0.id > 0 }) {
           """
           SELECT "rows"."id", "rows"."isDeleted"
@@ -160,6 +163,44 @@ extension SnapshotTests {
           │   isDeleted: true                          │
           │ )                                          │
           └────────────────────────────────────────────┘
+          """
+        }
+      }
+
+      @Test func delete() throws {
+        assertQuery(
+          Row
+            .where { $0.id > 0 }
+            .delete()
+            .returning(\.self)
+        ) {
+          """
+          DELETE FROM "rows"
+          WHERE NOT ("rows"."isDeleted") AND NOT ("rows"."isDeleted") AND ("rows"."id" > 0)
+          RETURNING "id", "isDeleted"
+          """
+        } results: {
+          """
+          ┌────────────────────────────────────────────┐
+          │ SnapshotTests.TableTests.DefaultWhere.Row( │
+          │   id: 1,                                   │
+          │   isDeleted: false                         │
+          │ )                                          │
+          └────────────────────────────────────────────┘
+          """
+        }
+
+        assertQuery(
+          Row
+            .unscoped
+            .where { $0.id > 0 }
+            .delete()
+            .returning(\.self)
+        ) {
+          """
+          DELETE FROM "rows"
+          WHERE NOT ("rows"."isDeleted") AND NOT ("rows"."isDeleted") AND ("rows"."id" > 0)
+          RETURNING "id", "isDeleted"
           """
         }
       }
