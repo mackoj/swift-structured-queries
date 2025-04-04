@@ -31,7 +31,7 @@ extension SelectStatement {
     Select(clauses: _selectClauses)
   }
 
-  var _selectClauses: _SelectClauses {
+  public var _selectClauses: _SelectClauses {
     asSelect().clauses
   }
 
