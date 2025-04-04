@@ -1,3 +1,13 @@
+/*
+
+
+ SelectStatement
+ AnySelectStatement      SELECT 1
+ Statement               SELECT 1 / DELETE / UPDATE / INSERT
+ QueryExpression         1=1
+ */
+
+
 // TODO: Publicize this as 'ReadOnlyStatement'?
 // TODO: Or as 'SelectStatement' renaming the other to 'SelectCoreStatement'?
 

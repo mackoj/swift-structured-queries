@@ -368,7 +368,57 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func fibonacci() throws {
+      assertQuery(
+        With {
+          Fibonacci(n: 1, fib: 0, nextFib: 1)
+            .union(
+              Fibonacci
+                .select { Fibonacci.Columns(n: $0.n + 1, fib: $0.nextFib, nextFib: $0.fib + $0.nextFib) }
+            )
+        } query: {
+          Fibonacci
+            .select(\.fib)
+            .limit(10)
+        }
+      ) {
+        """
+        WITH "fibonaccis" AS (
+          SELECT 1 AS "n", 0 AS "fib", 1 AS "nextFib"
+            UNION
+          SELECT ("fibonaccis"."n" + 1) AS "n", "fibonaccis"."nextFib" AS "fib", ("fibonaccis"."fib" + "fibonaccis"."nextFib") AS "nextFib"
+          FROM "fibonaccis"
+        )
+        SELECT "fibonaccis"."fib"
+        FROM "fibonaccis"
+        LIMIT 10
+        """
+      } results: {
+        """
+        ┌────┐
+        │ 0  │
+        │ 1  │
+        │ 1  │
+        │ 2  │
+        │ 3  │
+        │ 5  │
+        │ 8  │
+        │ 13 │
+        │ 21 │
+        │ 34 │
+        └────┘
+        """
+      }
+    }
   }
+}
+
+@Table @Selection
+private struct Fibonacci {
+  let n: Int
+  let fib: Int
+  let nextFib: Int
 }
 
 @Table @Selection

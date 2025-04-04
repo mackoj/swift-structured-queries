@@ -7,12 +7,12 @@
 - ``all``
 - ``distinct(_:)``
 - ``select(_:)->Select<(C1.QueryValue,C2.QueryValue,(C3).QueryValue),Self,()>``
-- ``join(_:on:)-6kvjn``
-- ``leftJoin(_:on:)-97x2``
-- ``rightJoin(_:on:)-42a9h``
-- ``fullJoin(_:on:)-1kjun``
+- ``join(_:on:)``
+- ``leftJoin(_:on:)``
+- ``rightJoin(_:on:)``
+- ``fullJoin(_:on:)``
 - ``where(_:)``
-- ``group(by:)-((Columns)->(C1,C2,C3))``
+- ``group(by:)-((TableColumns)->(C1,C2,C3))``
 - ``having(_:)``
 - ``limit(_:offset:)-9wzx0``
 - ``count()``
@@ -24,11 +24,11 @@
 
 - ``tableName``
 - ``columns-swift.type.property``
-- ``Columns``
-- ``Column``
-- ``Schema``
+- ``TableColumns``
+- ``TableColumn``
+- ``TableDefinition``
 
 ### Primary keys
 
 - ``PrimaryKeyedTable``
-- ``PrimaryKeyedSchema``
+- ``PrimaryKeyedTableDefinition``

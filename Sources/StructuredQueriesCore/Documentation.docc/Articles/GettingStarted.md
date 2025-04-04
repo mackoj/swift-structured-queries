@@ -6,8 +6,275 @@ Learn how to quickly become familiar with the basic tools of the library.
 
 This library provides a suite of tools that allow you to write type-safe, expressive and composable
 SQL statements using Swift. It can help you catch simple mistakes when writing your queries, 
-such as typos in your columns names, or comparing two different data types. 
+such as typos in your columns names, or comparing two different data types. Learn the basics of writing
+you first "SELECT", "INSERT", "UPDATE" and "DELETE" queries in this article.
 
-### Section header
+> Important: This library does not come with any database drivers for making actual requests and decoding
+data, such as for SQLite, Postgres, MySQL, etc. This library focuses only on building SQL statements and 
+providing the tools that would allow you to integrate with another library that makes the actual database
+requests.
 
-<!--@START_MENU_TOKEN@-->Text<!--@END_MENU_TOKEN@-->
+* [Writing your first query](#Writing-your-first-query)
+* [Insert statements](#Insert-statements)
+* [Update statements](#Update-statements)
+* [Delete statements](#Delete-statements)
+* [Raw SQL](#)
+
+### Writing your first query
+
+Before you can write a query you must have a Swift data type that represents the table in your database.
+For example a table of reminders may have the following Swift struct to represent its values in an app:
+
+```swift
+struct Reminder {
+  let id: Int 
+  var isCompleted = false 
+  var title = ""
+  var priorty: Int?
+}
+```
+
+In order to expose the type information of the fields of this struct to the library, one can simply apply
+the ``Table`` macro:
+
+```swift
+import StructuredQueries
+
+@Table
+struct Reminder {
+  // …
+}
+```
+
+That generates all the code necessary to give you access to a type-safe set of APIs for querying the 
+"reminders" table.
+
+For example, to query for all reminders one can simply use the ``Table/all`` static property available to
+every table:
+
+```swift
+Reminder.all
+// SELECT "id", "isCompleted", "title", "priority" 
+// FROM "reminders""
+```
+
+To filter out certain rows from the selection, like say the completed reminders, one can use the 
+``Table/where(_:)`` method available on all tables:
+
+```swift
+Reminder.where { !$0.isCompleted }
+// SELECT "id", "isCompleted", "title", "priority" 
+// FROM "reminders"
+// WHERE NOT "isCompleted"
+```
+
+The trailing closure of ``Table/where(_:)`` is handed a value that represents the definition of your table,
+including the names and types of its columns. Referencing a column on this value that does not exist is a 
+compiler error:
+
+```swift
+Reminder.where { !$0.completed }  // 🛑 "completed" does not exist 
+```
+
+Further, logical operations performed with this value are automatically translated into the equivalent
+SQL predicate logic. For example, if you want to select only incomplete reminders that are high priority
+(i.e. the "priority" field is 3), then you can do the following:
+
+```swift
+Reminder.where { !$0.isCompleted && $0.priority == 3 }
+// SELECT "id", "isCompleted", "title", "priority" 
+// FROM "reminders"
+// WHERE NOT "isCompleted" AND "priority" = 3
+```
+
+Notice how the Swift `&&` operator translated to SQL's "AND", and Swift's `==` operator translates to "=".  
+
+> Note: Technically the value "3" is not literally interpolated into the final query string. Instead the
+> SQL generated uses "?" to represent bindings and an array of bound value is provided. See 
+> ``QueryFragment`` for more information.
+
+Further, because the library knows about the type information of each column it can prevent you from making
+non-sensical comparisons, such as selecting reminders whose priority is equal to the string "dog":
+
+```swift
+Reminder.where { $0.priority == "dog" }  // 🛑
+```
+
+The library also supports many of the standard SQL operations. For example, to select all reminders that 
+have the substring "Get" somewhere in its title one can use the ``QueryExpression/like(_:escape:)`` method:
+
+```swift
+Reminder.where { $0.title.like("%Get%") }
+// SELECT "id", "isCompleted", "title", "priority" 
+// FROM "reminders"
+// WHERE "name" LIKE '%Get%' 
+```
+
+And to make this a case-insensitive match one can use the ``QueryExpression/collate(_:)``` method too:
+
+```swift
+Reminder.where { $0.title.collate(.nocase).like("%get%") }
+// SELECT "id", "isCompleted", "title", "priority" 
+// FROM "reminders"
+// WHERE "name" COLLATE NOCASE LIKE '%get%' 
+```
+
+The library also supports all of the clauses of a standard SQL "SELECT" statement, including orders, limits, 
+offets, and more. For example, we can chain onto the above query using the ``Table/order(by:)-4jul5`` method:
+
+```swift
+Reminder
+  .where { $0.title.collate(.nocase).like("%get%") }
+  .order { ($0.isCompleted.desc(), $0.priority.desc(), $0.title) }
+// SELECT "id", "isCompleted", "title", "priority" 
+// FROM "reminders"
+// WHERE "name" COLLATE NOCASE LIKE '%get%'
+// ORDER BY "isCompleted" DESC, "priority" DESC, "title" DESC
+```
+
+Notice that you can return any number of orders for the query as a tuple, and you can customize which orders
+are in a descending versus ascending fashion.
+
+And finally, suppose we wanted to further customize the above query by limiting the results to 10 rows and 
+selecting the 2nd page of results. This can be done using the ``Table/limit(_:offset:)`` method:
+
+
+```swift
+Reminder
+  .where { $0.title.collate(.nocase).like("%get%") }
+  .order { ($0.isCompleted.desc(), $0.priority.desc(), $0.title) }
+  .limit(10, offset: 10)
+// SELECT "id", "isCompleted", "title", "priority" 
+// FROM "reminders"
+// WHERE "name" COLLATE NOCASE LIKE '%get%'
+// ORDER BY "isCompleted" DESC, "priority" DESC, "title"
+// LIMIT 10 OFFSET 10
+```
+
+This shows how to build a complex query in a matter of seconds, and you can be sure that you do not make a
+silly mistake, such as refer to a non-existent column or perform an operation on a column that does not have 
+the correct type. And this is only scratching the surface of what the library is capable of. See 
+<doc:Selects> for more examples of select statements, as well as <doc:AdvancedQueries> for more advanced
+topics in writing queries.
+
+### Insert statements
+
+The library provides the tools necessary to construct type-safe insert statements in SQL, including inserting
+an entire value into a table, inserting only a subset of rows, as well as what to do on conflicts. Using
+the `Reminder` data type from above, we can insert data for all of its rows using the 
+``Table/insert(or:_:values:onConflict:)-9g1e3`` method:
+
+```swift
+Reminder.insert {
+  ($0.isCompleted, $0.title, $0.priority) 
+} values: {
+  (false, "Get groceries", 3)
+  (false, "Take a walk", 1)
+  (true, "Get haircut", nil)
+}
+// INSERT INTO "reminders"
+// ("isCompleted", "title", "priority")
+// VALUES
+// (0, 'Get groceries', 3)
+// (0, 'Take a walk', 1)
+// (1, 'Get haircut', NULL) 
+```
+
+The first trailing closure of `insert` is handed the table definition of `Reminder` and you return a tuple
+of the columns that you want to insert data for. Notice that we left of `$0.id` because that column can
+be initialized by the database (using autoincrementing or some other mechanism). The second trailing closure
+is a list of values that you want to insert into the table, and the number of columns and data type of each
+column must match what is specified in the first trailing closure.
+
+You can provide a 3rd trailing closure to ``Table/insert(or:_:values:onConflict:)-9g1e3`` to describe what
+to do in case there is a conflict while inserting data. For example, suppose we had a unique index on the
+"title" column of the reminders table. Then when inserting a value with a repeated title we could resolve
+the conflict by appending the string "(Copy)" to the title:
+
+```swift
+Reminder.insert {
+  ($0.isCompleted, $0.title, $0.priority) 
+} values: {
+  (false, "Get groceries", 3)
+  (false, "Take a walk", 1)
+  (true, "Get haircut", nil)
+} onConflict: {
+  $0.title += " (Copy)"
+}
+// INSERT INTO "reminders"
+// ("isCompleted", "title", "priority")
+// VALUES
+// (0, 'Get groceries', 3)
+// (0, 'Take a walk', 1)
+// (1, 'Get haircut', NULL)
+// ON CONFLICT DO UPDATE SET "title" = ("title" || ' (Copy)')
+```
+
+The `onConflict` trailing closure is handed a definition of the reminders table, but in this closure you are
+allowed to make a certain set of simple mutations to it that will be translated to the equivalent SQL code.
+In this case the `+=` operator on Swift strings is translated to the "||" operator in SQL for concatenating
+text. 
+
+The library also supports the "RETURNING" clause of insert statements by using the 
+``Insert/returning(_:)-4ya33`` method. If you wanted to fetch the ID of each new reminder inserted, you can
+do the following:
+
+```swift
+Reminder.insert {
+  ($0.isCompleted, $0.title, $0.priority) 
+} values: {
+  (false, "Get groceries", 3)
+  (false, "Take a walk", 1)
+  (true, "Get haircut", nil)
+}
+.returning(\.id)
+// INSERT INTO "reminders"
+// ("isCompleted", "title", "priority")
+// VALUES
+// (0, 'Get groceries', 3)
+// (0, 'Take a walk', 1)
+// (1, 'Get haircut', NULL)
+// RETURNING "id"
+```
+
+Or if you want to fetch all columns of the rows just inserted yuo can do the following:
+
+```swift
+Reminder.insert {
+  ($0.isCompleted, $0.title, $0.priority) 
+} values: {
+  (false, "Get groceries", 3)
+  (false, "Take a walk", 1)
+  (true, "Get haircut", nil)
+}
+.returning(\.self)
+// INSERT INTO "reminders"
+// ("isCompleted", "title", "priority")
+// VALUES
+// (0, 'Get groceries', 3)
+// (0, 'Take a walk', 1)
+// (1, 'Get haircut', NULL)
+// RETURNING "id", "isCompleted", "title", "priority"
+```
+
+This shows how one can build complex insert statements in a type-safe manner. And this is only scratching the
+surface of what the library is capable of. See <doc:Inserts> for more examples of select statements, as well
+as <doc:AdvancedQueries> for more advanced topics in writing queries.
+
+### Update statements
+
+<!-- TODO: finish -->
+
+### Delete statements
+
+<!-- TODO: finish -->
+
+### Raw SQL
+
+<!-- short intro -->
+
+> Important: Although `#sql` gives you the ability to write hand-crafted SQL strings, it still protects you
+from SQL injection attacks, and you can still make use of the table definition data available from your
+data type.
+
+<!-- rest of details -->
