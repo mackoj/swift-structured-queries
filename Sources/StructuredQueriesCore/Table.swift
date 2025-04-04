@@ -7,6 +7,7 @@ public protocol Table: QueryRepresentable where TableColumns.QueryValue == Self 
   /// A type that describes this table's columns.
   associatedtype TableColumns: TableDefinition
 
+  /// A type that describes the default results of requesting all rows from the table.
   associatedtype DefaultScope: SelectStatement<(), Self, ()>
 
   /// A value that describes this table's columns.
@@ -48,14 +49,17 @@ extension Table {
   ///   var isDeleted = false
   /// }
   ///
-  /// Reminder.all  // SELECT * FROM reminders WHERE NOT isDeleted
+  /// Reminder.select(\.id)
+  /// // SELECT "reminders"."id" FROM "reminders"
+  /// // WHERE (NOT "reminders"."isDeleted")
   /// ```
   ///
   /// If you want to remove this default scope in order to select absolutely all reminders, you can
   /// use the ``Table/unscoped`` property:
   ///
   /// ```swift
-  /// Reminder.unscoped  // SELECT * FROM reminders
+  /// Reminder.unscoped.select(\.id)
+  /// // SELECT "reminders"."id" FROM "reminders"
   /// ```
   public static var unscoped: SelectOf<Self> {
     Select()
