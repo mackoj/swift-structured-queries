@@ -131,20 +131,6 @@ extension SnapshotTests {
           └────────────────────────────────────────────┘
           """
         }
-        // TODO: Can we de-dupe this 'where' condition?
-        assertQuery(Row.select(\.id)) {
-          """
-          SELECT "rows"."id"
-          FROM "rows"
-          WHERE NOT ("rows"."isDeleted") AND NOT ("rows"."isDeleted")
-          """
-        } results: {
-          """
-          ┌───┐
-          │ 1 │
-          └───┘
-          """
-        }
         assertQuery(Row.unscoped) {
           """
           SELECT "rows"."id", "rows"."isDeleted"
@@ -264,6 +250,63 @@ extension SnapshotTests {
           │   isDeleted: false                         │
           │ )                                          │
           └────────────────────────────────────────────┘
+          """
+        }
+      }
+
+      #if compiler(>=6.1)
+        @Test func rescope() {
+          assertQuery(Row.unscoped.all) {
+            """
+            SELECT "rows"."id", "rows"."isDeleted"
+            FROM "rows"
+            WHERE NOT ("rows"."isDeleted") AND NOT ("rows"."isDeleted")
+            """
+          } results: {
+            """
+            ┌────────────────────────────────────────────┐
+            │ SnapshotTests.TableTests.DefaultWhere.Row( │
+            │   id: 1,                                   │
+            │   isDeleted: false                         │
+            │ )                                          │
+            └────────────────────────────────────────────┘
+            """
+          }
+        }
+
+        @Test func doubleScope() {
+          assertQuery(Row.all.all) {
+            """
+            SELECT "rows"."id", "rows"."isDeleted"
+            FROM "rows"
+            WHERE NOT ("rows"."isDeleted") AND NOT ("rows"."isDeleted") AND NOT ("rows"."isDeleted")
+            """
+          } results: {
+            """
+            ┌────────────────────────────────────────────┐
+            │ SnapshotTests.TableTests.DefaultWhere.Row( │
+            │   id: 1,                                   │
+            │   isDeleted: false                         │
+            │ )                                          │
+            └────────────────────────────────────────────┘
+            """
+          }
+        }
+      #endif
+
+      @Test func doubleConditional() {
+        // TODO: Can we de-dupe this 'where' condition?
+        assertQuery(Row.select(\.id)) {
+          """
+          SELECT "rows"."id"
+          FROM "rows"
+          WHERE NOT ("rows"."isDeleted") AND NOT ("rows"."isDeleted")
+          """
+        } results: {
+          """
+          ┌───┐
+          │ 1 │
+          └───┘
           """
         }
       }
