@@ -7,6 +7,8 @@ public protocol Table: QueryRepresentable where TableColumns.QueryValue == Self 
   /// A type that describes this table's columns.
   associatedtype TableColumns: TableDefinition
 
+  associatedtype DefaultScope: SelectStatement<(), Self, ()>
+
   /// A value that describes this table's columns.
   static var columns: TableColumns { get }
 
@@ -19,7 +21,7 @@ public protocol Table: QueryRepresentable where TableColumns.QueryValue == Self 
   static var tableAlias: String? { get }
 
   /// A select statement for this table.
-  static var all: SelectOf<Self> { get }
+  static var all: DefaultScope { get }
 }
 
 extension Table {

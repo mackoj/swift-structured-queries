@@ -301,6 +301,17 @@ extension Table {
   }
 }
 
+public struct _SelectClauses: Sendable {
+  var distinct = false
+  var columns: [any QueryExpression] = []
+  var joins: [_JoinClause] = []
+  var `where`: [QueryFragment] = []
+  var group: [QueryFragment] = []
+  var having: [QueryFragment] = []
+  var order: [QueryFragment] = []
+  var limit: _LimitClause?
+}
+
 /// A `SELECT` statement.
 ///
 /// This type of statement is constructed from ``Table/all``, ``Where/all``, and static aliases
@@ -312,17 +323,7 @@ extension Table {
 #endif
 public struct Select<Columns, From: Table, Joins> {
   // NB: A parameter pack compiler crash forces us to heap-allocate this storage.
-  private struct Clauses {
-    var distinct = false
-    var columns: [any QueryExpression] = []
-    var joins: [JoinClause] = []
-    var `where`: [QueryFragment] = []
-    var group: [QueryFragment] = []
-    var having: [QueryFragment] = []
-    var order: [QueryFragment] = []
-    var limit: LimitClause?
-  }
-  @CopyOnWrite private var clauses = Clauses()
+  @CopyOnWrite var clauses = _SelectClauses()
 
   fileprivate var distinct: Bool {
     get { clauses.distinct }
@@ -334,7 +335,7 @@ public struct Select<Columns, From: Table, Joins> {
     set { clauses.columns = newValue }
     _modify { yield &clauses.columns }
   }
-  fileprivate var joins: [JoinClause] {
+  fileprivate var joins: [_JoinClause] {
     get { clauses.joins }
     set { clauses.joins = newValue }
     _modify { yield &clauses.joins }
@@ -359,7 +360,7 @@ public struct Select<Columns, From: Table, Joins> {
     set { clauses.order = newValue }
     _modify { yield &clauses.order }
   }
-  fileprivate var limit: LimitClause? {
+  fileprivate var limit: _LimitClause? {
     get { clauses.limit }
     set { clauses.limit = newValue }
     _modify { yield &clauses.limit }
@@ -368,12 +369,12 @@ public struct Select<Columns, From: Table, Joins> {
   fileprivate init(
     distinct: Bool,
     columns: [any QueryExpression],
-    joins: [JoinClause],
+    joins: [_JoinClause],
     where: [QueryFragment],
     group: [QueryFragment],
     having: [QueryFragment],
     order: [QueryFragment],
-    limit: LimitClause?
+    limit: _LimitClause?
   ) {
     self.columns = columns
     self.distinct = distinct
@@ -383,6 +384,10 @@ public struct Select<Columns, From: Table, Joins> {
     self.having = having
     self.order = order
     self.limit = limit
+  }
+
+  init(clauses: _SelectClauses) {
+    self.clauses = clauses
   }
 }
 
@@ -592,7 +597,7 @@ extension Select {
   ) -> Select<(repeat each C1, repeat each C2), From, (repeat each J1, F, repeat each J2)>
   where Columns == (repeat each C1), Joins == (repeat each J1) {
     let other = other.all
-    let join = JoinClause(
+    let join = _JoinClause(
       operator: nil,
       table: F.self,
       constraint: constraint(
@@ -631,7 +636,7 @@ extension Select {
   ) -> Select<(repeat each C1, repeat each C2), From, (repeat each J, F)>
   where Columns == (repeat each C1), Joins == (repeat each J) {
     let other = other.all
-    let join = JoinClause(
+    let join = _JoinClause(
       operator: nil,
       table: F.self,
       constraint: constraint(
@@ -666,7 +671,7 @@ extension Select {
     ) -> some QueryExpression<Bool>
   ) -> Select<QueryValue, From, (F, repeat each J)> where QueryValue: QueryRepresentable {
     let other = other.all
-    let join = JoinClause(
+    let join = _JoinClause(
       operator: nil,
       table: F.self,
       constraint: constraint(
@@ -714,7 +719,7 @@ extension Select {
   >
   where Columns == (repeat each C1), Joins == (repeat each J1) {
     let other = other.all
-    let join = JoinClause(
+    let join = _JoinClause(
       operator: .left,
       table: F.self,
       constraint: constraint(
@@ -761,7 +766,7 @@ extension Select {
   >
   where Columns == (repeat each C1), Joins == (repeat each J) {
     let other = other.all
-    let join = JoinClause(
+    let join = _JoinClause(
       operator: .left,
       table: F.self,
       constraint: constraint(
@@ -802,7 +807,7 @@ extension Select {
   ) -> Select<QueryValue, From, (F._Optionalized, repeat (each J)._Optionalized)>
   where QueryValue: QueryRepresentable {
     let other = other.all
-    let join = JoinClause(
+    let join = _JoinClause(
       operator: .left,
       table: F.self,
       constraint: constraint(
@@ -850,7 +855,7 @@ extension Select {
   >
   where Columns == (repeat each C1), Joins == (repeat each J1) {
     let other = other.all
-    let join = JoinClause(
+    let join = _JoinClause(
       operator: .right,
       table: F.self,
       constraint: constraint(
@@ -897,7 +902,7 @@ extension Select {
   >
   where Columns == (repeat each C1), Joins == (repeat each J) {
     let other = other.all
-    let join = JoinClause(
+    let join = _JoinClause(
       operator: .right,
       table: F.self,
       constraint: constraint(
@@ -938,7 +943,7 @@ extension Select {
   ) -> Select<QueryValue, From._Optionalized, (F, repeat each J)>
   where QueryValue: QueryRepresentable {
     let other = other.all
-    let join = JoinClause(
+    let join = _JoinClause(
       operator: .right,
       table: F.self,
       constraint: constraint(
@@ -986,7 +991,7 @@ extension Select {
   >
   where Columns == (repeat each C1), Joins == (repeat each J1) {
     let other = other.all
-    let join = JoinClause(
+    let join = _JoinClause(
       operator: .full,
       table: F.self,
       constraint: constraint(
@@ -1033,7 +1038,7 @@ extension Select {
   >
   where Columns == (repeat each C1), Joins == (repeat each J) {
     let other = other.all
-    let join = JoinClause(
+    let join = _JoinClause(
       operator: .full,
       table: F.self,
       constraint: constraint(
@@ -1074,7 +1079,7 @@ extension Select {
   ) -> Select<QueryValue, From._Optionalized, (F._Optionalized, repeat (each J)._Optionalized)>
   where QueryValue: QueryRepresentable {
     let other = other.all
-    let join = JoinClause(
+    let join = _JoinClause(
       operator: .full,
       table: F.self,
       constraint: constraint(
@@ -1104,6 +1109,13 @@ extension Select {
   where Joins == (repeat each J) {
     var select = self
     select.where.append(predicate(From.columns, repeat (each J).columns).queryFragment)
+    return select
+  }
+
+  public func `where`<each J: Table>(_ where: Where<From>) -> Self
+  where Joins == (repeat each J) {
+    var select = self
+    select.where.append(contentsOf: `where`.predicates)
     return select
   }
 
@@ -1209,7 +1221,7 @@ extension Select {
   ) -> Self
   where Joins == (repeat each J) {
     var select = self
-    select.limit = LimitClause(
+    select.limit = _LimitClause(
       maxLength: maxLength(From.columns, repeat (each J).columns),
       offset: offset?(From.columns, repeat (each J).columns)
     )
@@ -1225,7 +1237,7 @@ extension Select {
   public func limit<each J: Table>(_ maxLength: Int, offset: Int? = nil) -> Self
   where Joins == (repeat each J) {
     var select = self
-    select.limit = LimitClause(maxLength: maxLength, offset: offset)
+    select.limit = _LimitClause(maxLength: maxLength, offset: offset)
     return select
   }
 
@@ -1356,8 +1368,8 @@ extension Select: SelectStatement {
 public typealias SelectOf<From: Table, each Join: Table> =
   Select<(), From, (repeat each Join)>
 
-private struct JoinClause: QueryExpression {
-  typealias QueryValue = Void
+public struct _JoinClause: QueryExpression {
+  public typealias QueryValue = Void
 
   struct Operator {
     static let full = Self(queryFragment: "FULL")
@@ -1381,7 +1393,7 @@ private struct JoinClause: QueryExpression {
     self.constraint = constraint.queryFragment
   }
 
-  var queryFragment: QueryFragment {
+  public var queryFragment: QueryFragment {
     var query: QueryFragment = ""
     if let `operator` {
       query.append("\(`operator`) ")
@@ -1395,8 +1407,8 @@ private struct JoinClause: QueryExpression {
   }
 }
 
-private struct LimitClause: QueryExpression {
-  typealias QueryValue = Void
+public struct _LimitClause: QueryExpression {
+  public typealias QueryValue = Void
 
   let maxLength: QueryFragment
   let offset: QueryFragment?
@@ -1409,7 +1421,7 @@ private struct LimitClause: QueryExpression {
     self.offset = offset?.queryFragment
   }
 
-  var queryFragment: QueryFragment {
+  public var queryFragment: QueryFragment {
     var query: QueryFragment = "LIMIT \(maxLength)"
     if let offset {
       query.append(" OFFSET \(offset)")

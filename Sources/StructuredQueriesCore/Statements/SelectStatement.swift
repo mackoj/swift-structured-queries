@@ -22,9 +22,15 @@ public protocol SelectStatement<QueryValue, From, Joins>: _SelectStatement {
   ///
   /// - Returns: A select statement.
   var all: Select<QueryValue, From, Joins> { get }
+
+  var _clauses: _SelectClauses { get }
 }
 
 extension SelectStatement {
+  public var _clauses: _SelectClauses {
+    all.clauses
+  }
+
   /// Explicitly selects all columns and tables from this statement.
   ///
   /// - Returns: A select statement.

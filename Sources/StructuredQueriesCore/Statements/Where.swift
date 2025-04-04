@@ -57,7 +57,11 @@ extension Where: SelectStatement {
 
   /// A select statement filtered by this where clause.
   public var all: Select<(), From, ()> {
-    Select(where: predicates)
+    Select(clauses: From.all._clauses).where(self)
+  }
+
+  public var _clauses: _SelectClauses {
+    _SelectClauses(where: predicates)
   }
 
   /// A select statement for a column of the filtered table.
