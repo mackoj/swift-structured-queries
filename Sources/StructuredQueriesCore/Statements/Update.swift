@@ -15,7 +15,7 @@ extension Table {
   public static func update(
     or conflictResolution: ConflictResolution? = nil,
     set updates: (inout Updates<Self>) -> Void
-  ) -> Update<Self, ()> {
+  ) -> UpdateOf<Self> {
     Update(conflictResolution: conflictResolution, updates: Updates(updates))
   }
 }
@@ -41,7 +41,7 @@ extension PrimaryKeyedTable {
   public static func update(
     or conflictResolution: ConflictResolution? = nil,
     _ row: Self
-  ) -> Update<Self, ()> {
+  ) -> UpdateOf<Self> {
     update(or: conflictResolution) { updates in
       for column in TableColumns.allColumns where column.name != columns.primaryKey.name {
         func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) {

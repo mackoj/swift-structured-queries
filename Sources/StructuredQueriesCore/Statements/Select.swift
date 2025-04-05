@@ -44,7 +44,7 @@ extension Table {
   ///
   /// - Parameter isDistinct: Whether or not to `SELECT DISTINCT`.
   /// - Returns: A select statement with a `DISTINCT` clause determined by `isDistinct`.
-  public static func distinct(_ isDistinct: Bool = true) -> Select<(), Self, ()> {
+  public static func distinct(_ isDistinct: Bool = true) -> SelectOf<Self> {
     all.asSelect().distinct(isDistinct)
   }
 
@@ -212,7 +212,7 @@ extension Table {
   /// - Returns: A select statement that groups by the given column.
   public static func group<C: QueryExpression>(
     by grouping: (TableColumns) -> C
-  ) -> Select<(), Self, ()> where C.QueryValue: QueryDecodable {
+  ) -> SelectOf<Self> where C.QueryValue: QueryDecodable {
     all.asSelect().group(by: grouping)
   }
 
@@ -226,7 +226,7 @@ extension Table {
     each C3: QueryExpression
   >(
     by grouping: (TableColumns) -> (C1, C2, repeat each C3)
-  ) -> Select<(), Self, ()>
+  ) -> SelectOf<Self>
   where
     C1.QueryValue: QueryDecodable,
     C2.QueryValue: QueryDecodable,
@@ -242,7 +242,7 @@ extension Table {
   /// - Returns: A select statement that is filtered by the given predicate.
   public static func having(
     _ predicate: (TableColumns) -> some QueryExpression<Bool>
-  ) -> Select<(), Self, ()> {
+  ) -> SelectOf<Self> {
     all.asSelect().having(predicate)
   }
 
@@ -252,7 +252,7 @@ extension Table {
   /// - Returns: A select statement that is ordered by the given column.
   public static func order(
     by ordering: KeyPath<TableColumns, some QueryExpression>
-  ) -> Select<(), Self, ()> {
+  ) -> SelectOf<Self> {
     all.asSelect().order(by: ordering)
   }
 
@@ -263,7 +263,7 @@ extension Table {
   public static func order(
     @QueryFragmentBuilder
     by ordering: (TableColumns) -> [QueryFragment]
-  ) -> Select<(), Self, ()> {
+  ) -> SelectOf<Self> {
     all.asSelect().order(by: ordering)
   }
 
@@ -276,7 +276,7 @@ extension Table {
   public static func limit(
     _ maxLength: (TableColumns) -> some QueryExpression<Int>,
     offset: ((TableColumns) -> some QueryExpression<Int>)? = nil
-  ) -> Select<(), Self, ()> {
+  ) -> SelectOf<Self> {
     all.asSelect().limit(maxLength, offset: offset)
   }
 
@@ -286,7 +286,7 @@ extension Table {
   ///   - maxLength: An integer limit for the select's `LIMIT` clause.
   ///   - offset: An optional integer offset of the select's `OFFSET` clause.
   /// - Returns: A select statement with a limit and optional offset.
-  public static func limit(_ maxLength: Int, offset: Int? = nil) -> Select<(), Self, ()> {
+  public static func limit(_ maxLength: Int, offset: Int? = nil) -> SelectOf<Self> {
     all.asSelect().limit(maxLength, offset: offset)
   }
 

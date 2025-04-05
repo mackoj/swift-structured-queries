@@ -13,7 +13,7 @@ extension Table {
     or conflictResolution: ConflictResolution? = nil,
     _ row: Self,
     onConflict updates: ((inout Updates<Self>) -> Void)? = nil
-  ) -> Insert<Self, ()> {
+  ) -> InsertOf<Self> {
     insert(or: conflictResolution, [row], onConflict: updates)
   }
 
@@ -55,7 +55,7 @@ extension Table {
     or conflictResolution: ConflictResolution? = nil,
     _ rows: [Self],
     onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
-  ) -> Insert<Self, ()> {
+  ) -> InsertOf<Self> {
     insert(
       or: conflictResolution,
       values: {
@@ -75,7 +75,7 @@ extension Table {
     @InsertValuesBuilder<Self>
     values rows: () -> [Self],
     onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
-  ) -> Insert<Self, ()> {
+  ) -> InsertOf<Self> {
     var columnNames: [String] = []
     for column in Self.TableColumns.allColumns {
       columnNames.append(column.name)
@@ -130,7 +130,7 @@ extension Table {
     @InsertValuesBuilder<(V1.QueryOutput, repeat (each V2).QueryOutput)>
     values rows: () -> [(V1.QueryOutput, repeat (each V2).QueryOutput)],
     onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
-  ) -> Insert<Self, ()> {
+  ) -> InsertOf<Self> {
     _insert(
       or: conflictResolution,
       columns,
@@ -145,7 +145,7 @@ extension Table {
     @InsertValuesBuilder<(repeat (each Value).QueryOutput)>
     values rows: () -> [(repeat (each Value).QueryOutput)],
     onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
-  ) -> Insert<Self, ()> {
+  ) -> InsertOf<Self> {
     var columnNames: [String] = []
     for column in repeat each columns(Self.columns) {
       columnNames.append(column.name)
@@ -191,7 +191,7 @@ extension Table {
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     select selection: () -> Select<(C1, repeat each C2), From, Joins>,
     onConflict updates: ((inout Updates<Self>) -> Void)? = nil
-  ) -> Insert<Self, ()>
+  ) -> InsertOf<Self>
   where (repeat (each C2).QueryValue) == (repeat each V2) {
     _insert(
       or: conflictResolution,
@@ -211,7 +211,7 @@ extension Table {
     _ columns: (TableColumns) -> (repeat TableColumn<Self, each Value>),
     select selection: () -> Select<(repeat each ResultColumn), From, Joins>,
     onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
-  ) -> Insert<Self, ()>
+  ) -> InsertOf<Self>
   where (repeat (each ResultColumn).QueryValue) == (repeat each Value) {
     var columnNames: [String] = []
     for column in repeat each columns(Self.columns) {
@@ -243,7 +243,7 @@ extension Table {
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
-  ) -> Insert<Self, ()> {
+  ) -> InsertOf<Self> {
     Insert(
       conflictResolution: conflictResolution,
       columnNames: [],
@@ -267,7 +267,7 @@ extension PrimaryKeyedTable {
     or conflictResolution: ConflictResolution? = nil,
     _ row: Draft,
     onConflict updates: ((inout Updates<Self>) -> Void)? = nil
-  ) -> Insert<Self, ()> {
+  ) -> InsertOf<Self> {
     Self.insert(
       or: conflictResolution,
       [row],
@@ -287,7 +287,7 @@ extension PrimaryKeyedTable {
     or conflictResolution: ConflictResolution? = nil,
     _ rows: [Draft],
     onConflict updates: ((inout Updates<Self>) -> Void)? = nil
-  ) -> Insert<Self, ()> {
+  ) -> InsertOf<Self> {
     Self.insert(
       or: conflictResolution,
       values: {
@@ -307,7 +307,7 @@ extension PrimaryKeyedTable {
     @InsertValuesBuilder<Draft>
     values rows: () -> [Draft],
     onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
-  ) -> Insert<Self, ()> {
+  ) -> InsertOf<Self> {
     var columnNames: [String] = []
     for column in Draft.TableColumns.allColumns {
       columnNames.append(column.name)

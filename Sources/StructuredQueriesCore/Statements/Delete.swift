@@ -7,7 +7,7 @@ extension Table {
   /// ```
   ///
   /// - Returns: A delete statement.
-  public static func delete() -> Delete<Self, Void> {
+  public static func delete() -> DeleteOf<Self> {
     Delete()
   }
 }
@@ -22,7 +22,7 @@ extension PrimaryKeyedTable {
   ///
   /// - Parameter row: A row to delete.
   /// - Returns: A delete statement.
-  public static func delete(_ row: Self) -> Delete<Self, Void> {
+  public static func delete(_ row: Self) -> DeleteOf<Self> {
     Delete()
       .where {
         $0.primaryKey.eq(TableColumns.PrimaryKey(queryOutput: row[keyPath: $0.primaryKey.keyPath]))

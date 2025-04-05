@@ -1,5 +1,4 @@
 import CustomDump
-import Dependencies
 import InlineSnapshotTesting
 import StructuredQueriesCore
 

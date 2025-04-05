@@ -15,7 +15,7 @@ extension PrimaryKeyedTable {
   /// - Returns: An insert statement with an upsert clause.
   public static func upsert(
     _ row: Draft
-  ) -> Insert<Self, ()> {
+  ) -> InsertOf<Self> {
     insert(
       row,
       onConflict: { updates in
