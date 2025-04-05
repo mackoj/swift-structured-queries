@@ -87,6 +87,31 @@ public struct Database {
   }
 
   @inlinable
+  public func execute<QueryValue>(
+    _ query: some SelectStatementOf<QueryValue>
+  ) throws -> [QueryValue.QueryOutput] {
+    let query = query.query
+    guard !query.isEmpty else { return [] }
+    return try withStatement(query) { statement in
+      var results: [QueryValue.QueryOutput] = []
+      var decoder = SQLiteQueryDecoder(database: storage.handle, statement: statement)
+      loop: while true {
+        let code = sqlite3_step(statement)
+        switch code {
+        case SQLITE_ROW:
+          try results.append(QueryValue(decoder: &decoder).queryOutput)
+          decoder.next()
+        case SQLITE_DONE:
+          break loop
+        default:
+          throw SQLiteError(db: storage.handle)
+        }
+      }
+      return results
+    }
+  }
+
+  @inlinable
   public func execute<S: SelectStatement, each J: Table>(
     _ query: S
   ) throws -> [(S.From.QueryOutput, repeat (each J).QueryOutput)]

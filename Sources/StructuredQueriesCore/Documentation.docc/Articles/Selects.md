@@ -6,9 +6,9 @@ Learn how to build queries that read data from a database.
 
 ### Selecting columns
 
-The ``Select/select(_:)-2i9ot`` function is used to specify the result columns of a query. It uses
-a given closure to specify any number of result columns as a variadic tuple from the table columns
-passed to the closure:
+The `select` function is used to specify the result columns of a query. It uses a given closure to
+specify any number of result columns as a variadic tuple from the table columns passed to the
+closure:
 
 ```swift
 @Table
@@ -36,7 +36,7 @@ These selected columns become the row data type that will be decoded from a data
 ```swift
 let query = Reminder.select { ($0.id, $0.title, $0.isCompleted) }
 
-for (id, title, isCompleted) in try await db.execute(query) {
+for (id, title, isCompleted) in /* execute query */ {
   _: Int = id
   _: String = title
   _: Bool = isCompleted
@@ -84,7 +84,7 @@ let query = Reminder
   .select(\.title)
   .select(\.isCompleted)
 
-query.map { _, title, isCompleted in
+_: some Statement<ReminderResult> = query.map { _, title, isCompleted in
   ReminderResult.Columns(
     title: $0.title,
     isCompleted: $0.isCompleted
@@ -95,6 +95,16 @@ query.map { _, title, isCompleted in
 ```
 
 ### Joining tables
+
+The `join`, `leftJoin`, `rightJoin`, and `fullJoin` functions are used to specify the various
+flavors of joins in a query. Each take a query on the join table, as well as trailing closure that
+is given the columns of each table so that it can describe the join constraint:
+
+```swift
+RemindersList.join(Reminder.all) { $0.id == $1.remindersListID }
+// SELECT "remindersLists".…, "reminders".… FROM "remindersLists"
+// JOIN "reminders" ON "remindersLists"."id" = "reminders"."remindersListID"
+```
 
 ### Filtering results
 
