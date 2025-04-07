@@ -58,7 +58,7 @@ extension Where: SelectStatement {
 
   public func asSelect() -> SelectOf<From> {
     (unscoped ? Select() : Select(clauses: From.all._selectClauses))
-      .where(self)
+      .and(self)
   }
 
   public var _selectClauses: _SelectClauses {

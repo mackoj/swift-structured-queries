@@ -1112,10 +1112,25 @@ extension Select {
     return select
   }
 
-  public func `where`<each J: Table>(_ where: Where<From>) -> Self
-  where Joins == (repeat each J) {
+  public func and(_ where: Where<From>) -> Self {
     var select = self
     select.where.append(contentsOf: `where`.predicates)
+    return select
+  }
+
+  public func or(_ where: Where<From>) -> Self {
+    var select = self
+    if select.where.isEmpty {
+      select.where = `where`.predicates
+    } else {
+      select.where = [
+        """
+        (\(select.where.joined(separator: " AND "))) \
+        OR \
+        (\(`where`.predicates.joined(separator: " AND ")))
+        """
+      ]
+    }
     return select
   }
 
