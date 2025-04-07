@@ -106,7 +106,29 @@ RemindersList.join(Reminder.all) { $0.id == $1.remindersListID }
 // JOIN "reminders" ON "remindersLists"."id" = "reminders"."remindersListID"
 ```
 
+#### Self-joins
+
+<!-- TODO: Table aliases -->
+
 ### Filtering results
+
+<!-- TODO: WHERE -->
+
+### Grouping results
+
+<!-- TODO: GROUP BY -->
+
+### Filtering by aggregates
+
+<!-- TODO: HAVING -->
+
+### Sorting results
+
+<!-- TODO: ORDER BY -->
+
+### Paginating results
+
+<!-- TODO: LIMIT OFFSET  -->
 
 ## Topics
 
