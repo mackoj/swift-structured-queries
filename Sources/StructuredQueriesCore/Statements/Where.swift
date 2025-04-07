@@ -41,6 +41,10 @@ public struct Where<From: Table> {
   var unscoped = false
 
   #if compiler(>=6.1)
+    public static subscript(dynamicMember keyPath: KeyPath<From.Type, Self>) -> Self {
+      From.self[keyPath: keyPath]
+    }
+
     public subscript<each C: QueryRepresentable, each J: Table>(
       dynamicMember keyPath: KeyPath<From.Type, Select<(repeat each C), From, (repeat each J)>>
     ) -> Select<(repeat each C), From, (repeat each J)> {
@@ -257,6 +261,24 @@ extension Where: SelectStatement {
   public func `where`(_ predicate: (From.TableColumns) -> some QueryExpression<Bool>) -> Self {
     var `where` = self
     `where`.predicates.append(predicate(From.columns).queryFragment)
+    return `where`
+  }
+
+  public func and(_ other: Self) -> Self {
+    var `where` = self
+    `where`.predicates.append(contentsOf: other.predicates)
+    return `where`
+  }
+
+  public func or(_ other: Self) -> Self {
+    var `where` = self
+    `where`.predicates = [
+      """
+      (\(`where`.predicates.joined(separator: " AND "))) \
+      OR \
+      (\(other.predicates.joined(separator: " AND ")))
+      """
+    ]
     return `where`
   }
 

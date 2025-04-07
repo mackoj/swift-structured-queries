@@ -523,6 +523,44 @@ extension SnapshotTests {
       }
     }
 
+    @Test func whereAnd() {
+      assertQuery(
+        Reminder.where(\.isCompleted).and(.where(\.isFlagged))
+          .count()
+      ) {
+        """
+        SELECT count(*)
+        FROM "reminders"
+        WHERE "reminders"."isCompleted" AND "reminders"."isFlagged"
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 0 │
+        └───┘
+        """
+      }
+    }
+
+    @Test func whereOr() {
+      assertQuery(
+        Reminder.where(\.isCompleted).or(.where(\.isFlagged))
+          .count()
+      ) {
+        """
+        SELECT count(*)
+        FROM "reminders"
+        WHERE ("reminders"."isCompleted") OR ("reminders"."isFlagged")
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 5 │
+        └───┘
+        """
+      }
+    }
+    
     @Test func group() {
       assertQuery(
         Reminder.select { ($0.isCompleted, $0.id.count()) }.group(by: \.isCompleted)

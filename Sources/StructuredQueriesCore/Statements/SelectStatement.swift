@@ -57,3 +57,12 @@ extension SelectStatement {
 
 public typealias SelectStatementOf<From: Table, each Join: Table> =
   SelectStatement<(), From, (repeat each Join)>
+
+extension SelectStatement {
+  public static func `where`<From>(
+    _ predicate: (From.TableColumns) -> some QueryExpression<Bool>
+  ) -> Self
+  where Self == Where<From> {
+    Self(predicates: [predicate(From.columns).queryFragment])
+  }
+}
