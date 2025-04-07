@@ -22,15 +22,24 @@ requests. See <doc:Integration> for information on how to integrate this library
 ### Essentials
 
 - <doc:GettingStarted>
+- <doc:PrimaryKeyedTables>
+<!-- rename: query cookbook -->
 - <doc:AdvancedQueries>
-- <doc:Integration>
 - <doc:CompilerPerformance>
 
-### Query building
+### Statements
 
-- <doc:Statements>
+- <doc:Selects>
+- <doc:Inserts>
+- <doc:Updates>
+- <doc:Deletes>
+- <doc:WhereClauses>
 - <doc:CommonTableExpressions>
 
 ### Schema definition
 
 - ``Table``
+
+### Advanced 
+
+- <doc:Integration>

@@ -9,6 +9,12 @@ and decoding into custom data types.
 
 ### Reusable queries
 
+<!--
+* static let helpers
+* extensions on Table.Columns
+
+-->
+
 ### Default scopes
 
 ### Custom selections
