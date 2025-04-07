@@ -10,7 +10,7 @@ extension SnapshotTests {
       assertQuery(
         #sql(
           """
-          SELECT \(Reminder.columns) 
+          SELECT \(Reminder.columns)
           FROM \(Reminder.self)
           ORDER BY \(Reminder.id)
           LIMIT 1
@@ -19,12 +19,12 @@ extension SnapshotTests {
         )
       ) {
         """
-        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" 
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
         FROM "reminders"
         ORDER BY "reminders"."id"
         LIMIT 1
         """
-      } results: {
+      }results: {
         """
         ┌─────────────────────────────────────────┐
         │ Reminder(                               │
@@ -125,6 +125,52 @@ extension SnapshotTests {
         │   )                                       │
         │ )                                         │
         └───────────────────────────────────────────┘
+        """
+      }
+    }
+
+    @Test func customDecoding() {
+      struct ReminderResult: QueryRepresentable {
+        let title: String
+        let isCompleted: Bool
+        init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+          guard let title = try decoder.decode(String.self)
+          else  { throw QueryDecodingError.missingRequiredColumn }
+          guard let isCompleted = try decoder.decode(Bool.self)
+          else { throw QueryDecodingError.missingRequiredColumn }
+          self.isCompleted = isCompleted
+          self.title = title
+        }
+      }
+      assertQuery(
+        #sql(#"SELECT "title", "isCompleted" FROM "reminders" LIMIT 4"#, as: ReminderResult.self)
+      ) {
+        """
+        SELECT "title", "isCompleted" FROM "reminders" LIMIT 4
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────────────┐
+        │ SnapshotTests.SQLMacroTests.ReminderResult( │
+        │   title: "Groceries",                       │
+        │   isCompleted: false                        │
+        │ )                                           │
+        ├─────────────────────────────────────────────┤
+        │ SnapshotTests.SQLMacroTests.ReminderResult( │
+        │   title: "Haircut",                         │
+        │   isCompleted: false                        │
+        │ )                                           │
+        ├─────────────────────────────────────────────┤
+        │ SnapshotTests.SQLMacroTests.ReminderResult( │
+        │   title: "Doctor appointment",              │
+        │   isCompleted: false                        │
+        │ )                                           │
+        ├─────────────────────────────────────────────┤
+        │ SnapshotTests.SQLMacroTests.ReminderResult( │
+        │   title: "Take a walk",                     │
+        │   isCompleted: true                         │
+        │ )                                           │
+        └─────────────────────────────────────────────┘
         """
       }
     }

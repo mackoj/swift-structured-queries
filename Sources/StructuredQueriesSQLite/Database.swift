@@ -43,7 +43,7 @@ public struct Database {
     guard !query.isEmpty else { return [] }
     return try withStatement(query) { statement in
       var results: [QueryValue.QueryOutput] = []
-      var decoder = SQLiteQueryDecoder(database: storage.handle, statement: statement)
+      var decoder = SQLiteQueryDecoder(statement: statement)
       loop: while true {
         let code = sqlite3_step(statement)
         switch code {
@@ -69,7 +69,7 @@ public struct Database {
     return try withStatement(query) { statement in
       // TODO: Cursor and async sequence-based interfaces for 'reserveCapacity' optimizations?
       var results: [(repeat (each V).QueryOutput)] = []
-      var decoder = SQLiteQueryDecoder(database: storage.handle, statement: statement)
+      var decoder = SQLiteQueryDecoder(statement: statement)
       loop: while true {
         let code = sqlite3_step(statement)
         switch code {

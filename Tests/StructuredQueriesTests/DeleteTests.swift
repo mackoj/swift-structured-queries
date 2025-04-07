@@ -126,5 +126,18 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func noPrimaryKey() {
+      assertInlineSnapshot(of: Item.delete(), as: .sql) {
+        """
+        DELETE FROM "items"
+        """
+      }
+    }
   }
+}
+
+@Table private struct Item {
+  var title = ""
+  var quantity = 0
 }

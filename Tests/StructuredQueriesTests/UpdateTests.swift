@@ -228,5 +228,25 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func noPrimaryKey() {
+      assertInlineSnapshot(
+        of: Item.update {
+          $0.title = "Dog"
+        },
+        as: .sql
+      ) {
+        """
+        UPDATE "items"
+        SET "title" = 'Dog'
+        """
+      }
+
+    }
   }
+}
+
+@Table private struct Item {
+  var title = ""
+  var quantity = 0
 }

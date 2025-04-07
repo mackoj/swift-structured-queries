@@ -454,5 +454,24 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func noPrimaryKey() {
+      assertInlineSnapshot(
+        of: Item.insert(Item()),
+        as: .sql
+      ) {
+        """
+        INSERT INTO "items"
+        ("title", "quantity")
+        VALUES
+        ('', 0)
+        """
+      }
+    }
   }
+}
+
+@Table private struct Item {
+  var title = ""
+  var quantity = 0
 }

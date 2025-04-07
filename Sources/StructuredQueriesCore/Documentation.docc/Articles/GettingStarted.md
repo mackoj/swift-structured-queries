@@ -7,18 +7,18 @@ Learn how to quickly become familiar with the basic tools of the library.
 This library provides a suite of tools that allow you to write type-safe, expressive and composable
 SQL statements using Swift. It can help you catch simple mistakes when writing your queries, 
 such as typos in your columns names, or comparing two different data types. Learn the basics of writing
-you first "SELECT", "INSERT", "UPDATE" and "DELETE" queries in this article.
+you first "SELECT", "INSERT", "UPDATE" and "DELETE" queries, as well as writing safe SQL strings directly.
 
 > Important: This library does not come with any database drivers for making actual requests and decoding
 data, such as for SQLite, Postgres, MySQL, etc. This library focuses only on building SQL statements and 
 providing the tools that would allow you to integrate with another library that makes the actual database
-requests.
+requests. See <doc:Integration> for information on how to integrate this library with a database library.
 
 * [Writing your first query](#Writing-your-first-query)
 * [Insert statements](#Insert-statements)
 * [Update statements](#Update-statements)
 * [Delete statements](#Delete-statements)
-* [Raw SQL](#)
+* [Safe SQL strings](#Safe-SQL-strings)
 
 ### Writing your first query
 
@@ -269,12 +269,119 @@ as <doc:AdvancedQueries> for more advanced topics in writing queries.
 
 <!-- TODO: finish -->
 
-### Raw SQL
+### Safe SQL strings
 
-<!-- short intro -->
+The library comes with a `#sql` macro that allows you to write SQL strings directly, but in a safe manner. 
+This can be useful for writing complex queries that may not be possible or easy to write with the query
+builder of this library.
 
 > Important: Although `#sql` gives you the ability to write hand-crafted SQL strings, it still protects you
-from SQL injection attacks, and you can still make use of the table definition data available from your
+from SQL injection, and you can still make use of the table definition data available from your
 data type.
 
-<!-- rest of details -->
+As a simple example, one can select the titles from all reminders like so:
+
+```swift
+#sql(#"SELECT "title" FROM "reminders""#, as: String.self)
+```
+
+It is important to note that if the underlying ``QueryExpression/QueryValue`` for the expression cannot be
+inferred from context you must provide it explicitly using the `as` argument. If you were to select multiple
+fields you would need to specify a tuple of types:
+
+```swift
+#sql(#"SELECT "title", "isCompleted" FROM "reminders""#, as: (String, Bool).self)
+```
+
+It is also possible to retain some schema-safety while writing SQL as a string. You can use
+string interpolation along with the static column properties that are defined on your table as well as the
+type of the table itself:
+
+```swift
+#sql(
+  """
+  SELECT \(Reminder.title), \(Reminder.isCompleted) 
+  FROM \(Reminder.self)
+  """, 
+  as: (String, Bool).self
+)
+```
+
+> Important: The `Reminder.title` syntax only works in Swift 6.1 and later. In earlier versions of Swift you 
+> will need to specify the full `Reminder.columns.title`.
+
+This generates the same query as before, but now you have more safety in referring to the column names and
+table names of your types.
+
+You can even select all columns from the reminders table by using the ``Table/columns`` static property:
+
+```swift
+#sql(
+  "SELECT \(Reminder.columns) FROM \(Reminder.self)", 
+  as: Reminder.self
+)
+// SELECT "reminders"."id", "reminders"."title", "reminders."isCompleted" 
+// FROM "reminders"
+```
+
+Notice that this allows you to now decode the result into the full `Reminder` type instead of a tuple of 
+values.
+
+Even though it seems that `#sql` allows you to construct any kind of SQL statement from a string, there are
+still protections in place to make sure you do not accidentally allow for SQL injection. If you interpolate
+a value into `#sql` it will treat it as a binding rather than inserting its contents directly into the query:
+
+```swift
+let minimumPriority = 2
+
+#sql(
+  """
+  SELECT \(Reminder.columns) 
+  FROM \(Reminder.self)
+  WHERE \(Reminder.priority) >= \(minimumPriority)
+  """, 
+  as: Reminder.self
+)
+// SELECT "reminders"."id", "reminders"."title", "reminders."isCompleted" 
+// FROM "reminders"
+// WHERE "reminders"."priority" >= ?
+// [2]
+```
+
+It is also possible to select a subset of columns from your table and decode the row data into a custom
+data type. To do so you need to conform your custom data type to the ``QueryRepresentable`` protocol,
+which requires implementing ``QueryRepresentable/init(queryOutput:)``, but once that is done you can
+provide the type to the `as` argument:
+
+```swift
+struct ReminderResult: QueryRepresentable {
+  let title: String
+  let isCompleted: Bool
+  init(decoder: inout some QueryDecoder) throws { /* … */ }
+}
+#sql(
+  """
+  SELECT \(Reminder.title), \(Reminder.isCompleted) 
+  FROM \(Reminder.self)
+  """, 
+  as: ReminderResult.self
+)
+```
+
+There is also a way to streamline providing the ``QueryRepresentable`` conformance. You can apply the 
+`@Selection` macro to your type to generate that conformance for you automatically:
+
+```swift
+@Selection
+struct ReminderResult {
+  let title: String
+  let isCompleted: Bool
+}
+#sql(
+  """
+  SELECT \(Reminder.title), \(Reminder.isCompleted) 
+  FROM \(Reminder.self)
+  """, 
+  as: ReminderResult.self
+)
+```

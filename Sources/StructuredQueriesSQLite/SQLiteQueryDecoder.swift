@@ -3,8 +3,6 @@ import StructuredQueries
 
 @usableFromInline
 struct SQLiteQueryDecoder: QueryDecoder {
-  private let database: OpaquePointer?
-
   @usableFromInline
   let statement: OpaquePointer
 
@@ -12,8 +10,7 @@ struct SQLiteQueryDecoder: QueryDecoder {
   var currentIndex: Int32 = 0
 
   @usableFromInline
-  init(database: OpaquePointer?, statement: OpaquePointer) {
-    self.database = database
+  init(statement: OpaquePointer) {
     self.statement = statement
   }
 

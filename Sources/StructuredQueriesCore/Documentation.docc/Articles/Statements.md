@@ -1,6 +1,6 @@
 # Statements
 
-Learn how SQL's core statements (select, insert, update, delete) are modeled in this library.
+Learn how SQL's core statements (SELECT, INSERT, UPDATE, DELETE) are modeled in this library.
 
 ## Overview
 
@@ -12,6 +12,17 @@ table:
 ```swift
 let statement: some Statement = Reminder.all
 ```
+
+As well as insert, update and delete queries:
+
+```swift
+_: some Statement = Reminder.insert { $0.title } values: { "Get groceries" }
+_: some Statement = Reminder.update { $0.title = "Get groceries" }
+_: some Statement = Reminder.delete()
+```
+
+
+
 
 Further, the ``Statement`` protocol has a primary associated type, ``QueryExpression/QueryValue``, which
 represents the type of data that is ultimately decoded from the database after the statement is run. For 
@@ -33,3 +44,4 @@ let statement: some Statement<(String, Bool)> = Reminder.select { ($0.title, $0.
 - <doc:Inserts>
 - <doc:Updates>
 - <doc:Deletes>
+- <doc:WhereClauses>

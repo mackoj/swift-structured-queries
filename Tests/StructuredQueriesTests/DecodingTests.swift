@@ -192,3 +192,9 @@ extension SnapshotTests {
     }
   }
 }
+
+// NB: This is a compile time test for decoding with `decode()` method.
+@Table
+private struct Row {
+  var data = Int(42)
+}

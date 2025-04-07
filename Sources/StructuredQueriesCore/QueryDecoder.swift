@@ -68,8 +68,6 @@ extension QueryDecoder {
     try (repeat (each T)(decoder: &self).queryOutput)
   }
 
-  // TODO: Is this needed? Write a test for a '@Table' that generates a 'decode()' without a type?
-
   @inlinable
   @inline(__always)
   public mutating func decode<T: QueryRepresentable<T>>(

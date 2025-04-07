@@ -37,18 +37,6 @@ struct Reminder: Equatable, Identifiable {
   }
 }
 
-func foo() {
-  let statement: some Statement<()> = Reminder.all
-
-  let s1: some Statement<(Int, String, Bool)> = Reminder
-    .select(\.id)
-    .select(\.title)
-    .select(\.isCompleted)
-
-}
-
-
-
 @Table
 struct User: Equatable, Identifiable {
   let id: Int
