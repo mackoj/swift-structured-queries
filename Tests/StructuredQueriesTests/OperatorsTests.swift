@@ -123,6 +123,11 @@ extension SnapshotTests {
         ("rows"."c" >= "rows"."c")
         """
       }
+      assertInlineSnapshot(of: Row.columns.bool < Row.columns.bool, as: .sql) {
+        """
+        ("rows"."bool" < "rows"."bool")
+        """
+      }
     }
 
     @Test func logic() {

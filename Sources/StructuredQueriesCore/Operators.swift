@@ -205,7 +205,7 @@ extension _Null: ExpressibleByNilLiteral {
   public init(nilLiteral: ()) {}
 }
 
-extension QueryExpression where QueryValue: QueryBindable & Comparable {
+extension QueryExpression where QueryValue: QueryBindable {
   /// Returns a predicate expression indicating whether the value of the first expression is less
   /// than that of the second expression.
   ///
