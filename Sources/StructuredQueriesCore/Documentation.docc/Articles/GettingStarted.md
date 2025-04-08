@@ -5,20 +5,22 @@ Learn how to quickly become familiar with the basic tools of the library.
 ## Overview
 
 This library provides a suite of tools that allow you to write type-safe, expressive and composable
-SQL statements using Swift. It can help you catch simple mistakes when writing your queries, 
-such as typos in your columns names, or comparing two different data types. Learn the basics of writing
-you first "SELECT", "INSERT", "UPDATE" and "DELETE" queries, as well as writing safe SQL strings directly.
+SQL statements using Swift. It can help you catch simple mistakes when writing your queries, such as
+typos in your columns names, or comparing two different data types. Learn the basics of writing your
+first `SELECT`, `INSERT`, `UPDATE`, and `DELETE` queries, as well as writing safe SQL strings
+directly.
 
-> Important: This library does not come with any database drivers for making actual requests and decoding
-data, such as for SQLite, Postgres, MySQL, etc. This library focuses only on building SQL statements and 
-providing the tools that would allow you to integrate with another library that makes the actual database
-requests. See <doc:Integration> for information on how to integrate this library with a database library.
+> Important: This library does not come with any database drivers for making actual database
+> requests, _e.g._ to, SQLite, Postgres, MySQL. This library focuses only on building SQL statements
+> and providing the tools that would allow you to integrate with another library that makes the
+> actual database requests. See <doc:Integration> for information on how to integrate this library
+> with a database library.
 
-* [Writing your first query](#Writing-your-first-query)
-* [Insert statements](#Insert-statements)
-* [Update statements](#Update-statements)
-* [Delete statements](#Delete-statements)
-* [Safe SQL strings](#Safe-SQL-strings)
+  * [Writing your first query](#Writing-your-first-query)
+  * [Insert statements](#Insert-statements)
+  * [Update statements](#Update-statements)
+  * [Delete statements](#Delete-statements)
+  * [Safe SQL strings](#Safe-SQL-strings)
 
 ### Writing your first query
 
@@ -30,7 +32,7 @@ struct Reminder {
   let id: Int 
   var isCompleted = false 
   var title = ""
-  var priorty: Int?
+  var priority: Int?
 }
 ```
 

@@ -2,24 +2,6 @@
 
 ## Topics
 
-### Query building
-
-- ``all``
-- ``distinct(_:)``
-- ``select(_:)->Select<(C1.QueryValue,C2.QueryValue,(C3).QueryValue),Self,()>``
-- ``join(_:on:)``
-- ``leftJoin(_:on:)``
-- ``rightJoin(_:on:)``
-- ``fullJoin(_:on:)``
-- ``where(_:)``
-- ``group(by:)-((TableColumns)->(C1,C2,C3))``
-- ``having(_:)``
-- ``limit(_:offset:)-9wzx0``
-- ``count()``
-- ``insert(or:_:values:onConflict:)-83cf5``
-- ``update(or:set:)``
-- ``delete()``
-
 ### Schema definition
 
 - ``tableName``
@@ -27,6 +9,25 @@
 - ``TableColumns``
 - ``TableColumn``
 - ``TableDefinition``
+
+### Query building
+
+- ``all``
+- ``distinct(_:)``
+- ``select(_:)``
+- ``join(_:on:)``
+- ``leftJoin(_:on:)``
+- ``rightJoin(_:on:)``
+- ``fullJoin(_:on:)``
+- ``where(_:)``
+- ``group(by:)``
+- ``having(_:)``
+- ``order(by:)``
+- ``limit(_:offset:)``
+- ``count()``
+- ``insert(or:_:values:onConflict:)``
+- ``update(or:set:)``
+- ``delete()``
 
 ### Primary keys
 

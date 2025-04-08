@@ -22,12 +22,33 @@ public protocol Table: QueryRepresentable where TableColumns.QueryValue == Self 
   static var tableAlias: String? { get }
 
   /// A select statement for this table.
+  ///
+  /// The default implementation of this property returns a fully unscoped query for the table
+  /// (_i.e._ ``unscoped``). To override the default scope of all queries, provide your own
+  /// implementation of `all`. For example, if you only perform "soft" deletion of table rows, you
+  /// can provide a custom implementation that filters out these deleted rows by default:
+  ///
+  /// ```swift
+  /// @Table
+  /// struct Item {
+  ///   static let all = Self.where(\.isDeleted)
+  ///
+  ///   let id: Int
+  ///   var name = ""
+  ///   var isDeleted = false
+  /// }
+  ///
+  /// Item.where { name.contains("red") }
+  /// // SELECT … FROM "items"
+  /// // WHERE "items"."isDeleted"  -- Automatically applied from 'all'
+  /// // AND ("items"."name" LIKE '%red%')
+  /// ```
   static var all: DefaultScope { get }
 }
 
-extension Table where DefaultScope == SelectOf<Self> {
+extension Table where DefaultScope == Where<Self> {
   public static var all: DefaultScope {
-    Select()
+    Where()
   }
 }
 

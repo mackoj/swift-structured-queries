@@ -59,7 +59,7 @@ extension Table {
     F: Table,
     each J: Table
   >(
-    _ other: Select<(repeat each C), F, (repeat each J)>,
+    _ other: some SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
       (TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
@@ -76,7 +76,7 @@ extension Table {
   /// - Returns: A select statement that joins the given table.
   @_documentation(visibility: private)
   public static func join<each C: QueryRepresentable, F: Table>(
-    _ other: Select<(repeat each C), F, ()>,
+    _ other: some SelectStatement<(repeat each C), F, ()>,
     on constraint: (
       (TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
@@ -95,7 +95,7 @@ extension Table {
     F: Table,
     each J: Table
   >(
-    _ other: Select<(repeat each C), F, (repeat each J)>,
+    _ other: some SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
       (TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
@@ -117,7 +117,7 @@ extension Table {
   /// - Returns: A select statement that left-joins the given table.
   @_documentation(visibility: private)
   public static func leftJoin<each C: QueryRepresentable, F: Table>(
-    _ other: Select<(repeat each C), F, ()>,
+    _ other: some SelectStatement<(repeat each C), F, ()>,
     on constraint: (
       (TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
@@ -137,7 +137,7 @@ extension Table {
     F: Table,
     each J: Table
   >(
-    _ other: Select<(repeat each C), F, (repeat each J)>,
+    _ other: some SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
       (TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
@@ -155,7 +155,7 @@ extension Table {
   /// - Returns: A select statement that right-joins the given table.
   @_documentation(visibility: private)
   public static func rightJoin<each C: QueryRepresentable, F: Table>(
-    _ other: Select<(repeat each C), F, ()>,
+    _ other: some SelectStatement<(repeat each C), F, ()>,
     on constraint: (
       (TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
@@ -175,7 +175,7 @@ extension Table {
     F: Table,
     each J: Table
   >(
-    _ other: Select<(repeat each C), F, (repeat each J)>,
+    _ other: some SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
       (TableColumns, F.TableColumns, repeat (each J).TableColumns)
     ) -> some QueryExpression<Bool>
@@ -197,7 +197,7 @@ extension Table {
   /// - Returns: A select statement that full-joins the given table.
   @_documentation(visibility: private)
   public static func fullJoin<each C: QueryRepresentable, F: Table>(
-    _ other: Select<(repeat each C), F, ()>,
+    _ other: some SelectStatement<(repeat each C), F, ()>,
     on constraint: (
       (TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>

@@ -45,29 +45,14 @@ public macro Column(
     type: "ColumnMacro"
   )
 
+/// Tells Structured Queries not to consider the annotated property a column of the table
+///
+/// Like SwiftData's `@Transient` macro, but for SQL.
 @attached(accessor, names: named(willSet))
 public macro Ephemeral() =
   #externalMacro(
     module: "StructuredQueriesMacros",
     type: "EphemeralMacro"
-  )
-
-@attached(
-  memberAttribute
-)
-@attached(
-  extension,
-  conformances: Table,
-  names: named(TableColumns),
-  named(columns),
-  named(init(_:)),
-  named(init(decoder:)),
-  named(tableName)
-)
-public macro _Draft<T: Table>(_: T.Type) =
-  #externalMacro(
-    module: "StructuredQueriesMacros",
-    type: "TableMacro"
   )
 
 /// Defines the ability for a type to be selected from a query.
@@ -97,6 +82,9 @@ public macro _Draft<T: Table>(_: T.Type) =
 ///   .select { ListWithCount.Columns(list: $0, count: $1.count()) }
 /// // [RemindersListWithReminderCount]
 /// ```
+///
+/// The ``Table(_:)`` and `@Selection` macros can be composed together to describe a virtual table
+/// or common table expression.
 @attached(
   extension,
   conformances: QueryRepresentable,
@@ -128,7 +116,7 @@ public macro bind<QueryValue: QueryBindable>(
 ) -> BindQueryExpression<QueryValue> =
   #externalMacro(module: "StructuredQueriesMacros", type: "BindMacro")
 
-/// Introduces a raw SQL fragment to a query.
+/// Introduces a safe SQL fragment to a query.
 ///
 /// The `#sql` macro also performs rudimentary parsing to detect invalid and partial query
 /// fragments, _e.g._ unmatched parentheses and quotations. To opt out of this validation, use
@@ -143,3 +131,22 @@ public macro sql<QueryValue>(
   as queryValueType: QueryValue.Type = QueryValue.self
 ) -> SQLQueryExpression<QueryValue> =
   #externalMacro(module: "StructuredQueriesMacros", type: "SQLMacro")
+
+// NB: Due to a bug in Swift, this macro is expanded internally by the '@Table' macro.
+// @attached(
+//   memberAttribute
+// )
+// @attached(
+//   extension,
+//   conformances: Table,
+//   names: named(TableColumns),
+//   named(columns),
+//   named(init(_:)),
+//   named(init(decoder:)),
+//   named(tableName)
+// )
+// public macro _Draft<T: Table>(_: T.Type) =
+//   #externalMacro(
+//     module: "StructuredQueriesMacros",
+//     type: "TableMacro"
+//   )
