@@ -183,15 +183,46 @@ extension SnapshotTests {
     }
 
     @Test func rawBind() {
-      assertInlineSnapshot(
-        of: Reminder.update {
-          $0.date = #sql("CURRENT_TIMESTAMP")
-        },
-        as: .sql
+      assertQuery(
+        Reminder
+          .update { $0.date = #sql("CURRENT_TIMESTAMP") }
+          .where { $0.id.eq(1) }
+          .returning(\.title)
       ) {
         """
         UPDATE "reminders"
         SET "date" = CURRENT_TIMESTAMP
+        WHERE ("reminders"."id" = 1)
+        RETURNING "title"
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ "Groceries" │
+        └─────────────┘
+        """
+      }
+    }
+
+    @Test func updateWhereKeyPath() {
+      assertQuery(
+        Reminder
+          .update { $0.isFlagged.toggle() }
+          .where(\.isFlagged)
+          .returning(\.title)
+      ) {
+        """
+        UPDATE "reminders"
+        SET "isFlagged" = NOT ("reminders"."isFlagged")
+        WHERE "reminders"."isFlagged"
+        RETURNING "title"
+        """
+      } results: {
+        """
+        ┌────────────────────────────┐
+        │ "Haircut"                  │
+        │ "Pick up kids from school" │
+        └────────────────────────────┘
         """
       }
     }

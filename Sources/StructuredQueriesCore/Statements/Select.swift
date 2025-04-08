@@ -1100,6 +1100,19 @@ extension Select {
 
   /// Creates a new select statement from this one by appending a predicate to its `WHERE` clause.
   ///
+  /// - Parameter keyPath: A key path from this select's table to a Boolean expression to filter by.
+  /// - Returns: A new select statement that appends the given predicate to its `WHERE` clause.
+  public func `where`(
+    _ keyPath: KeyPath<From.TableColumns, some QueryExpression<Bool>>
+  ) -> Self
+  where Joins == () {
+    var select = self
+    select.where.append(From.columns[keyPath: keyPath].queryFragment)
+    return select
+  }
+
+  /// Creates a new select statement from this one by appending a predicate to its `WHERE` clause.
+  ///
   /// - Parameter predicate: A closure that produces a Boolean query expression from this select's
   ///   tables.
   /// - Returns: A new select statement that appends the given predicate to its `WHERE` clause.
@@ -1255,6 +1268,17 @@ extension Select {
     var select = self
     select.limit = _LimitClause(maxLength: maxLength, offset: offset)
     return select
+  }
+
+  /// Creates a new select statement from this one by appending `count(*)` to its selection.
+  ///
+  /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: A new select statement that selects `count(*)`.
+  public func count<each J: Table>(
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> Select<Int, From, (repeat each J)>
+  where Columns == (), Joins == (repeat each J) {
+    select { _ in .count(filter: filter) }
   }
 
   /// Creates a new select statement from this one by appending `count(*)` to its selection.

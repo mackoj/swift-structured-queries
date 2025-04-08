@@ -101,6 +101,29 @@ extension SnapshotTests {
       }
     }
 
+    @Test func deleteWhereKeyPath() {
+      assertQuery(
+        Reminder
+          .delete()
+          .where(\.isCompleted)
+          .returning(\.title)
+      ) {
+        """
+        DELETE FROM "reminders"
+        WHERE "reminders"."isCompleted"
+        RETURNING "reminders"."title"
+        """
+      } results: {
+        """
+        ┌──────────────────────┐
+        │ "Take a walk"        │
+        │ "Get laundry"        │
+        │ "Send weekly emails" │
+        └──────────────────────┘
+        """
+      }
+    }
+
     @Test func aliasName() {
       enum R: AliasName {}
       assertQuery(
