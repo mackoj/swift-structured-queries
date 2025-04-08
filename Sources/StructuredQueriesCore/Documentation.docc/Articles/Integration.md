@@ -16,6 +16,13 @@ there, please feel free to [open a discussion][sq-discussions] on the repository
 
 [sq-discussions]: http://github.com/pointfreeco/swift-structured-queries/discussions
 
+
+@Comment {
+    TODO: Rewrite as a case study of SQLite and GRDB that simply links to the directories on the repo
+}
+
+
+
 ### Case Study: SQLite
 
 Let's provide a rough outline of how one could integrate StructuredQueries with any SQLite library out there,
