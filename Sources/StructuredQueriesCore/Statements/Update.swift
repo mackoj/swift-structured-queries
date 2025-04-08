@@ -92,7 +92,7 @@ public struct Update<From: Table, Returning> {
   ///   by.
   /// - Returns: A statement with the added predicate.
   public func `where`(
-    @QueryFragmentBuilder<_WhereClause> _ predicate: (From.TableColumns) -> [QueryFragment]
+    @QueryFragmentBuilder<Bool> _ predicate: (From.TableColumns) -> [QueryFragment]
   ) -> Self {
     var update = self
     update.where.append(contentsOf: predicate(From.columns))

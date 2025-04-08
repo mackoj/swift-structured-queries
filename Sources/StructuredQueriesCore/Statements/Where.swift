@@ -32,7 +32,7 @@ extension Table {
   /// - Parameter predicate: A predicate used to generate the `WHERE` clause.
   /// - Returns: A `WHERE` clause.
   public static func `where`(
-    @QueryFragmentBuilder<_WhereClause> _ predicate: (TableColumns) -> [QueryFragment]
+    @QueryFragmentBuilder<Bool> _ predicate: (TableColumns) -> [QueryFragment]
   ) -> Where<Self> {
     Where(predicates: predicate(columns))
   }
@@ -283,7 +283,7 @@ extension Where: SelectStatement {
   /// - Parameter predicate: A predicate to add.
   /// - Returns: A where clause with the added predicate.
   public func `where`(
-    @QueryFragmentBuilder<_WhereClause> _ predicate: (From.TableColumns) -> [QueryFragment]
+    @QueryFragmentBuilder<Bool> _ predicate: (From.TableColumns) -> [QueryFragment]
   ) -> Self {
     var `where` = self
     `where`.predicates.append(contentsOf: predicate(From.columns))
@@ -350,7 +350,7 @@ extension Where: SelectStatement {
   /// - Parameter ordering: A result builder closure that returns columns to order by.
   /// - Returns: A select statement that is ordered by the given columns.
   public func order(
-    @QueryFragmentBuilder<_OrderClause>
+    @QueryFragmentBuilder<()>
     by ordering: (From.TableColumns) -> [QueryFragment]
   ) -> SelectOf<From> {
     asSelect().order(by: ordering)

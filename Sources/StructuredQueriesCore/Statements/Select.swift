@@ -261,7 +261,7 @@ extension Table {
   /// - Parameter ordering: A result builder closure that returns columns to order by.
   /// - Returns: A select statement that is ordered by the given columns.
   public static func order(
-    @QueryFragmentBuilder<_OrderClause>
+    @QueryFragmentBuilder<()>
     by ordering: (TableColumns) -> [QueryFragment]
   ) -> SelectOf<Self> {
     all.asSelect().order(by: ordering)
@@ -1117,7 +1117,7 @@ extension Select {
   ///   tables.
   /// - Returns: A new select statement that appends the given predicate to its `WHERE` clause.
   public func `where`<each J: Table>(
-    @QueryFragmentBuilder<_WhereClause>
+    @QueryFragmentBuilder<Bool>
     _ predicate: (From.TableColumns, repeat (each J).TableColumns) -> [QueryFragment]
   ) -> Self
   where Joins == (repeat each J) {
@@ -1229,7 +1229,7 @@ extension Select {
   /// - Parameter ordering: A result builder closure that returns columns to order by.
   /// - Returns: A new select statement that appends the returned columns to its `ORDER BY` clause.
   public func order<each J: Table>(
-    @QueryFragmentBuilder<_OrderClause>
+    @QueryFragmentBuilder<()>
     by ordering: (From.TableColumns, repeat (each J).TableColumns) -> [QueryFragment]
   ) -> Self
   where Joins == (repeat each J) {

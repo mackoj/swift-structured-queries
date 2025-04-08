@@ -17,15 +17,7 @@ public enum QueryFragmentBuilder<Clause> {
   }
 }
 
-extension QueryFragmentBuilder<_OrderClause> {
-  public static func buildExpression<each C: QueryExpression>(
-    _ expression: (repeat each C)
-  ) -> [QueryFragment] {
-    Array(repeat each expression)
-  }
-}
-
-extension QueryFragmentBuilder<_WhereClause> {
+extension QueryFragmentBuilder<Bool> {
   public static func buildExpression(
     _ expression: some QueryExpression<Bool>
   ) -> [QueryFragment] {
@@ -33,6 +25,10 @@ extension QueryFragmentBuilder<_WhereClause> {
   }
 }
 
-// TODO: Rename to something else?
-public enum _WhereClause {}
-public enum _OrderClause {}
+extension QueryFragmentBuilder<()> {
+  public static func buildExpression<each C: QueryExpression>(
+    _ expression: (repeat each C)
+  ) -> [QueryFragment] {
+    Array(repeat each expression)
+  }
+}
