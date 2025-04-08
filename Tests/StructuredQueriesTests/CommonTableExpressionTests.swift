@@ -375,7 +375,9 @@ extension SnapshotTests {
           Fibonacci(n: 1, fib: 0, nextFib: 1)
             .union(
               Fibonacci
-                .select { Fibonacci.Columns(n: $0.n + 1, fib: $0.nextFib, nextFib: $0.fib + $0.nextFib) }
+                .select {
+                  Fibonacci.Columns(n: $0.n + 1, fib: $0.nextFib, nextFib: $0.fib + $0.nextFib)
+                }
             )
         } query: {
           Fibonacci

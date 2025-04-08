@@ -560,7 +560,7 @@ extension SnapshotTests {
         """
       }
     }
-    
+
     @Test func group() {
       assertQuery(
         Reminder.select { ($0.isCompleted, $0.id.count()) }.group(by: \.isCompleted)

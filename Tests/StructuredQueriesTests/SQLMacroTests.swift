@@ -24,7 +24,7 @@ extension SnapshotTests {
         ORDER BY "reminders"."id"
         LIMIT 1
         """
-      }results: {
+      } results: {
         """
         ┌─────────────────────────────────────────┐
         │ Reminder(                               │
@@ -135,7 +135,7 @@ extension SnapshotTests {
         let isCompleted: Bool
         init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
           guard let title = try decoder.decode(String.self)
-          else  { throw QueryDecodingError.missingRequiredColumn }
+          else { throw QueryDecodingError.missingRequiredColumn }
           guard let isCompleted = try decoder.decode(Bool.self)
           else { throw QueryDecodingError.missingRequiredColumn }
           self.isCompleted = isCompleted
