@@ -11,12 +11,12 @@ extension SnapshotTests {
 
       @Table
       struct Row {
-        static let all = unscoped.where { !$0.isDeleted }
+        static let all = unscoped.where { !$0.isDeleted }.order { $0.id.desc() }
         let id: Int
         var isDeleted = false
       }
 
-      @Test func basics() throws {
+      init() throws {
         try db.execute(
           #sql(
             """
@@ -33,11 +33,15 @@ extension SnapshotTests {
             Row.Draft(isDeleted: true),
           ])
         )
+      }
+
+      @Test func basics() throws {
         assertQuery(Row.where { $0.id > 0 }) {
           """
           SELECT "rows"."id", "rows"."isDeleted"
           FROM "rows"
           WHERE NOT ("rows"."isDeleted") AND ("rows"."id" > 0)
+          ORDER BY "rows"."id" DESC
           """
         } results: {
           """
@@ -54,6 +58,7 @@ extension SnapshotTests {
           SELECT "rows"."id"
           FROM "rows"
           WHERE NOT ("rows"."isDeleted")
+          ORDER BY "rows"."id" DESC
           """
         } results: {
           """
@@ -80,6 +85,167 @@ extension SnapshotTests {
           │   isDeleted: true                           │
           │ )                                           │
           └─────────────────────────────────────────────┘
+          """
+        }
+      }
+
+      @Test func delete() throws {
+        assertQuery(
+          Row
+            .where { $0.id > 0 }
+            .delete()
+            .returning(\.self)
+        ) {
+          """
+          DELETE FROM "rows"
+          WHERE NOT ("rows"."isDeleted") AND ("rows"."id" > 0)
+          RETURNING "id", "isDeleted"
+          """
+        } results: {
+          """
+          ┌─────────────────────────────────────────────┐
+          │ SnapshotTests.TableTests.DefaultSelect.Row( │
+          │   id: 1,                                    │
+          │   isDeleted: false                          │
+          │ )                                           │
+          └─────────────────────────────────────────────┘
+          """
+        }
+
+        assertQuery(
+          Row
+            .unscoped
+            .where { $0.id > 0 }
+            .delete()
+            .returning(\.self)
+        ) {
+          """
+          DELETE FROM "rows"
+          WHERE ("rows"."id" > 0)
+          RETURNING "id", "isDeleted"
+          """
+        } results: {
+          """
+          ┌─────────────────────────────────────────────┐
+          │ SnapshotTests.TableTests.DefaultSelect.Row( │
+          │   id: 2,                                    │
+          │   isDeleted: true                           │
+          │ )                                           │
+          └─────────────────────────────────────────────┘
+          """
+        }
+      }
+
+      @Test func update() throws {
+        assertQuery(
+          Row
+            .where { $0.id > 0 }
+            .update { $0.isDeleted.toggle() }
+            .returning(\.self)
+        ) {
+          """
+          UPDATE "rows"
+          SET "isDeleted" = NOT ("rows"."isDeleted")
+          WHERE NOT ("rows"."isDeleted") AND ("rows"."id" > 0)
+          RETURNING "id", "isDeleted"
+          """
+        } results: {
+          """
+          ┌─────────────────────────────────────────────┐
+          │ SnapshotTests.TableTests.DefaultSelect.Row( │
+          │   id: 1,                                    │
+          │   isDeleted: true                           │
+          │ )                                           │
+          └─────────────────────────────────────────────┘
+          """
+        }
+
+        assertQuery(
+          Row
+            .unscoped
+            .where { $0.id > 0 }
+            .update { $0.isDeleted.toggle() }
+            .returning(\.self)
+        ) {
+          """
+          UPDATE "rows"
+          SET "isDeleted" = NOT ("rows"."isDeleted")
+          WHERE ("rows"."id" > 0)
+          RETURNING "id", "isDeleted"
+          """
+        } results: {
+          """
+          ┌─────────────────────────────────────────────┐
+          │ SnapshotTests.TableTests.DefaultSelect.Row( │
+          │   id: 1,                                    │
+          │   isDeleted: false                          │
+          │ )                                           │
+          ├─────────────────────────────────────────────┤
+          │ SnapshotTests.TableTests.DefaultSelect.Row( │
+          │   id: 2,                                    │
+          │   isDeleted: false                          │
+          │ )                                           │
+          └─────────────────────────────────────────────┘
+          """
+        }
+      }
+
+      #if compiler(>=6.1)
+        @Test func rescope() {
+          assertQuery(Row.unscoped.all) {
+            """
+            SELECT "rows"."id", "rows"."isDeleted"
+            FROM "rows"
+            WHERE NOT ("rows"."isDeleted")
+            ORDER BY "rows"."id" DESC
+            """
+          } results: {
+            """
+            ┌─────────────────────────────────────────────┐
+            │ SnapshotTests.TableTests.DefaultSelect.Row( │
+            │   id: 1,                                    │
+            │   isDeleted: false                          │
+            │ )                                           │
+            └─────────────────────────────────────────────┘
+            """
+          }
+        }
+
+        @Test func doubleScope() {
+          assertQuery(Row.all.all) {
+            """
+            SELECT "rows"."id", "rows"."isDeleted"
+            FROM "rows"
+            WHERE NOT ("rows"."isDeleted") AND NOT ("rows"."isDeleted")
+            ORDER BY "rows"."id" DESC, "rows"."id" DESC
+            """
+          } results: {
+            """
+            ┌─────────────────────────────────────────────┐
+            │ SnapshotTests.TableTests.DefaultSelect.Row( │
+            │   id: 1,                                    │
+            │   isDeleted: false                          │
+            │ )                                           │
+            └─────────────────────────────────────────────┘
+            """
+          }
+        }
+      #endif
+
+      @Test func doubleConditional() {
+        // TODO: Can we de-dupe this 'where' condition?
+        assertQuery(Row.select(\.id)) {
+          """
+          SELECT "rows"."id"
+          FROM "rows"
+          WHERE NOT ("rows"."isDeleted")
+          ORDER BY "rows"."id" DESC
+          """
+        } results: {
+          """
+          ┌───┐
+          │ 1 │
+          └───┘
           """
         }
       }

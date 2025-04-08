@@ -31,7 +31,7 @@ public protocol Table: QueryRepresentable where TableColumns.QueryValue == Self 
   /// ```swift
   /// @Table
   /// struct Item {
-  ///   static let all = Self.where(\.isDeleted)
+  ///   static let all = Self.where { !$0.isDeleted }
   ///
   ///   let id: Int
   ///   var name = ""
@@ -40,7 +40,7 @@ public protocol Table: QueryRepresentable where TableColumns.QueryValue == Self 
   ///
   /// Item.where { name.contains("red") }
   /// // SELECT … FROM "items"
-  /// // WHERE "items"."isDeleted"  -- Automatically applied from 'all'
+  /// // WHERE (NOT "items"."isDeleted")    -- Automatically applied from 'all'
   /// // AND ("items"."name" LIKE '%red%')
   /// ```
   static var all: DefaultScope { get }
