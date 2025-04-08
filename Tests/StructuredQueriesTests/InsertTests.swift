@@ -56,7 +56,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func testSingleColumn() {
+    @Test func singleColumn() {
       assertQuery(
         Reminder
           .insert(\.remindersListID) { 1 }
