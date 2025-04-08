@@ -10,9 +10,8 @@ Learn how to build queries that insert data into a database.
 
 ### Inserting values
 
-- ``Table/insert(or:_:values:onConflict:)-6zwu9``
-- ``Table/insert(or:_:onConflict:)-7u2mc``
-- ``Table/insert(or:_:onConflict:)-82l41``
+- ``Table/insert(or:_:values:onConflict:)``
+- ``Table/insert(or:_:onConflict:)``
 - ``Table/insert(or:onConflict:)``
 
 ### Inserting from a select
@@ -21,8 +20,7 @@ Learn how to build queries that insert data into a database.
 
 ### Inserting drafts
 
-- ``PrimaryKeyedTable/insert(or:_:onConflict:)-8gr5x``
-- ``PrimaryKeyedTable/insert(or:_:onConflict:)-krl2``
+- ``PrimaryKeyedTable/insert(or:_:onConflict:)``
 
 ### Statement types
 

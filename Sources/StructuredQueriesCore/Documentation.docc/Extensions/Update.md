@@ -2,9 +2,9 @@
 
 ## Topics
 
+- ``Table/update(or:set:)``
+
 ### Query building
 
 - ``where(_:)``
 - ``returning(_:)``
-
-### 

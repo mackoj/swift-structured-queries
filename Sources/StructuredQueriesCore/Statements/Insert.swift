@@ -1,7 +1,7 @@
 extension Table {
   /// An insert statement for a table row.
   ///
-  /// A convenience overload of ``insert(or:_:onConflict:)-7u2mc`` that takes a single row.
+  /// A convenience overload that takes a single row.
   ///
   /// - Parameters:
   ///   - conflictResolution: A conflict resolution algorithm.
@@ -43,7 +43,7 @@ extension Table {
   /// ```
   ///
   /// To create an insert statement from column values instead of a full record, see
-  /// ``insert(or:_:values:onConflict:)-6zwu9``.
+  /// ``insert(or:_:values:onConflict:)``.
   ///
   /// - Parameters:
   ///   - conflictResolution: A conflict resolution algorithm.
@@ -341,8 +341,8 @@ private enum InsertValues {
 
 /// An `INSERT` statement.
 ///
-/// This type of statement is returned from ``Table/insert(or:_:values:onConflict:)-6zwu9`` and
-/// related functions.
+/// This type of statement is returned from ``Table/insert(or:_:values:onConflict:)`` and related
+/// functions.
 ///
 /// To learn more, see <doc:Inserts>.
 public struct Insert<Into: Table, Returning> {
@@ -447,8 +447,8 @@ public typealias InsertOf<Into: Table> = Insert<Into, ()>
 
 /// A builder of insert statement values.
 ///
-/// This result builder is used by ``Table/insert(or:_:values:onConflict:)-6zwu9`` to insert any
-/// number of rows into a table.
+/// This result builder is used by ``Table/insert(or:_:values:onConflict:)`` to insert any number of
+/// rows into a table.
 @resultBuilder
 public enum InsertValuesBuilder<Value> {
   public static func buildArray(_ components: [[Value]]) -> [Value] {
