@@ -1,6 +1,11 @@
 /// A type representing a value that can be bound to a parameter of a SQL statement.
 public protocol QueryBindable: QueryRepresentable, QueryExpression where QueryValue: QueryBindable {
+  /// The Swift data type representation of the expression's SQL bindable data type.
+  ///
+  /// For example, a `TEXT` expression may be represented as a `String` query value.
   associatedtype QueryValue = Self
+
+  /// A value that can be bound to a parameter of a SQL statement.
   var queryBinding: QueryBinding { get }
 }
 

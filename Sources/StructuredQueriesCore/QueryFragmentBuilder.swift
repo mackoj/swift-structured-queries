@@ -1,3 +1,7 @@
+/// A builder of query fragments.
+///
+/// This result builder is used by various query building methods, like ``Select/order(by:)`` and
+/// ``Select/where(_:)-5pthx``, to conditionally introduce query fragments to a query.
 @resultBuilder
 public enum QueryFragmentBuilder<Clause> {
   public static func buildBlock(_ component: [QueryFragment]) -> [QueryFragment] {

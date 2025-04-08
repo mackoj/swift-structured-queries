@@ -1,4 +1,4 @@
-/// A type representing a database table
+/// A type representing a database table.
 ///
 /// Don't conform to this protocol directly. Instead, use the `@Table` and `@Column` macros to
 /// generate a conformance.

@@ -46,6 +46,10 @@ public struct CommonTableExpressionClause: QueryExpression {
   }
 }
 
+/// A builder of common table expressions.
+///
+/// This result builder is used by ``With/init(_:query:)`` to insert any number of common table
+/// expressions into a `WITH` statement.
 @resultBuilder
 public enum CommonTableExpressionBuilder {
   public static func buildExpression<CTETable: Table>(

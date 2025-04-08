@@ -531,7 +531,7 @@ extension SnapshotTests {
         """
         SELECT count(*)
         FROM "reminders"
-        WHERE "reminders"."isCompleted" AND "reminders"."isFlagged"
+        WHERE ("reminders"."isCompleted") AND ("reminders"."isFlagged")
         """
       } results: {
         """

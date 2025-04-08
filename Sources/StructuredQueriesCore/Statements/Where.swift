@@ -292,7 +292,13 @@ extension Where: SelectStatement {
 
   public func and(_ other: Self) -> Self {
     var `where` = self
-    `where`.predicates.append(contentsOf: other.predicates)
+    `where`.predicates = [
+      """
+      (\(`where`.predicates.joined(separator: " AND "))) \
+      AND \
+      (\(other.predicates.joined(separator: " AND ")))
+      """
+    ]
     return `where`
   }
 

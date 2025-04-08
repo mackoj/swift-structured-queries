@@ -1,6 +1,7 @@
 /// A collection of updates used in an update clause.
 ///
-/// A mutable value of this type is passed to the `updates` closure of `Table.update`.
+/// A mutable value of this type is passed to the `updates` closure of `Table.update`, as well as
+/// the `doUpdate` closure of `Table.insert`.
 ///
 /// To learn more, see <doc:Updates>.
 @dynamicMemberLookup

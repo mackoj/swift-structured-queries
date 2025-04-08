@@ -1,6 +1,7 @@
 /// A type representing a table column.
 ///
-/// You should not conform to this protocol directly.
+/// This protocol has a single conformance, ``TableColumn``, and simply provides type erasure over
+/// a table's columns. You should not conform to this protocol directly.
 public protocol TableColumnExpression<Root, Value>: QueryExpression where Value == QueryValue {
   associatedtype Root: Table
   associatedtype Value: QueryRepresentable & QueryBindable
@@ -16,6 +17,10 @@ public protocol TableColumnExpression<Root, Value>: QueryExpression where Value 
   ) -> any TableColumnExpression<TableAlias<Root, Name>, Value>
 }
 
+/// A type representing a table column.
+///
+/// Don't create instances of this value directly. Instead, use the `@Table` and `@Column` macros to
+/// generate values of this type.
 public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
   TableColumnExpression,
   Sendable

@@ -1139,9 +1139,9 @@ extension Select {
     } else {
       select.where = [
         """
-        (\(select.where.joined(separator: " AND "))) \
+        (\(select.where.joined(separator: " AND ")) \
         OR \
-        (\(other.predicates.joined(separator: " AND ")))
+        \(other.predicates.joined(separator: " AND ")))
         """
       ]
     }

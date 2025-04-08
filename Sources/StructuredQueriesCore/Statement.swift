@@ -6,6 +6,7 @@ public protocol Statement<QueryValue>: QueryExpression, Hashable {
   /// A type representing tables joined to the ``From`` table.
   associatedtype Joins = ()
 
+  /// A fragment representing the full query of this statement.
   var query: QueryFragment { get }
 }
 
