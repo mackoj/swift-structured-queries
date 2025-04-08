@@ -261,7 +261,7 @@ extension Table {
   /// - Parameter ordering: A result builder closure that returns columns to order by.
   /// - Returns: A select statement that is ordered by the given columns.
   public static func order(
-    @QueryFragmentBuilder
+    @QueryFragmentBuilder<_OrderClause>
     by ordering: (TableColumns) -> [QueryFragment]
   ) -> SelectOf<Self> {
     all.asSelect().order(by: ordering)
@@ -1104,11 +1104,12 @@ extension Select {
   ///   tables.
   /// - Returns: A new select statement that appends the given predicate to its `WHERE` clause.
   public func `where`<each J: Table>(
-    _ predicate: (From.TableColumns, repeat (each J).TableColumns) -> some QueryExpression<Bool>
+    @QueryFragmentBuilder<_WhereClause>
+    _ predicate: (From.TableColumns, repeat (each J).TableColumns) -> [QueryFragment]
   ) -> Self
   where Joins == (repeat each J) {
     var select = self
-    select.where.append(predicate(From.columns, repeat (each J).columns).queryFragment)
+    select.where.append(contentsOf: predicate(From.columns, repeat (each J).columns))
     return select
   }
 
@@ -1215,7 +1216,7 @@ extension Select {
   /// - Parameter ordering: A result builder closure that returns columns to order by.
   /// - Returns: A new select statement that appends the returned columns to its `ORDER BY` clause.
   public func order<each J: Table>(
-    @QueryFragmentBuilder
+    @QueryFragmentBuilder<_OrderClause>
     by ordering: (From.TableColumns, repeat (each J).TableColumns) -> [QueryFragment]
   ) -> Self
   where Joins == (repeat each J) {

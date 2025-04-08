@@ -20,9 +20,15 @@ extension Table {
   /// - Parameter predicate: A predicate used to generate the `WHERE` clause.
   /// - Returns: A `WHERE` clause.
   public static func `where`(
-    _ predicate: (TableColumns) -> some QueryExpression<Bool>
+    @QueryFragmentBuilder<_WhereClause> _ predicate: (TableColumns) -> [QueryFragment]
   ) -> Where<Self> {
-    Where(predicates: [predicate(columns).queryFragment])
+    Where(predicates: predicate(columns))
+  }
+
+  public static func `where`(
+    _ keyPath: KeyPath<TableColumns, some QueryExpression<Bool>>
+  ) -> Where<Self> {
+    Where(predicates: [columns[keyPath: keyPath].queryFragment])
   }
 }
 
@@ -258,9 +264,19 @@ extension Where: SelectStatement {
   ///
   /// - Parameter predicate: A predicate to add.
   /// - Returns: A where clause with the added predicate.
-  public func `where`(_ predicate: (From.TableColumns) -> some QueryExpression<Bool>) -> Self {
+  public func `where`(
+    @QueryFragmentBuilder<_WhereClause> _ predicate: (From.TableColumns) -> [QueryFragment]
+  ) -> Self {
     var `where` = self
-    `where`.predicates.append(predicate(From.columns).queryFragment)
+    `where`.predicates.append(contentsOf: predicate(From.columns))
+    return `where`
+  }
+
+  public func `where`(
+    _ keyPath: KeyPath<From.TableColumns, some QueryExpression<Bool>>
+  ) -> Self {
+    var `where` = self
+    `where`.predicates.append(From.columns[keyPath: keyPath].queryFragment)
     return `where`
   }
 
@@ -324,7 +340,7 @@ extension Where: SelectStatement {
   /// - Parameter ordering: A result builder closure that returns columns to order by.
   /// - Returns: A select statement that is ordered by the given columns.
   public func order(
-    @QueryFragmentBuilder
+    @QueryFragmentBuilder<_OrderClause>
     by ordering: (From.TableColumns) -> [QueryFragment]
   ) -> SelectOf<From> {
     asSelect().order(by: ordering)

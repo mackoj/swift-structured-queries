@@ -48,9 +48,17 @@ public struct Delete<From: Table, Returning> {
   ///
   /// - Parameter predicate: A predicate to add.
   /// - Returns: A statement with the added predicate.
-  public func `where`(_ predicate: (From.TableColumns) -> some QueryExpression<Bool>) -> Self {
+  public func `where`(_ keyPath: KeyPath<From.TableColumns, some QueryExpression<Bool>>) -> Self {
     var update = self
-    update.where.append(predicate(From.columns).queryFragment)
+    update.where.append(From.columns[keyPath: keyPath].queryFragment)
+    return update
+  }
+
+  public func `where`(
+    @QueryFragmentBuilder<_WhereClause> _ predicate: (From.TableColumns) -> [QueryFragment]
+  ) -> Self {
+    var update = self
+    update.where.append(contentsOf: predicate(From.columns))
     return update
   }
 
