@@ -59,18 +59,13 @@ extension SnapshotTests {
     }
 
     @Test func queryJSON() throws {
-      try db.execute(
-        Reminder.delete()
-      )
+      try db.execute(Reminder.delete())
       try db.execute(
         Reminder.insert(
           [
             Reminder.Draft(
               notes: #"""
-                [
-                  {"body": "* Milk\n* Eggs"},
-                  {"body": "* Eggs"},
-                ]
+                [{"body": "* Milk\n* Eggs"},{"body": "* Eggs"},]
                 """#,
               remindersListID: 1,
               title: "Get groceries"
