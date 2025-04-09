@@ -290,8 +290,17 @@ extension Where: SelectStatement {
     return `where`
   }
 
-  // TODO: Should we have '&&' and '||'?
-  // TODO: Should we have 'static func not' and '!'?
+  public static func && (lhs: Self, rhs: Self) -> Self {
+    lhs.and(rhs)
+  }
+
+  public static func || (lhs: Self, rhs: Self) -> Self {
+    lhs.or(rhs)
+  }
+
+  public static prefix func ! (where: Self) -> Self {
+    `where`.not()
+  }
 
   public func and(_ other: Self) -> Self {
     var `where` = self
@@ -314,6 +323,12 @@ extension Where: SelectStatement {
       (\(other.predicates.joined(separator: " AND ")))
       """
     ]
+    return `where`
+  }
+
+  public func not() -> Self {
+    var `where` = self
+    `where`.predicates = ["NOT (\(`where`.predicates.joined(separator: " AND ")))"]
     return `where`
   }
 
