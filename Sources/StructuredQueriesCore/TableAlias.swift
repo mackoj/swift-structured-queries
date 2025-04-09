@@ -86,6 +86,22 @@ public struct TableAlias<
     Name.aliasName
   }
 
+  public static var all: SelectOf<Self> {
+    var select = unsafeBitCast(Base.all.asSelect(), to: SelectOf<Self>.self)
+    select.clauses.columns = select.clauses.columns.map {
+      SQLQueryExpression($0.queryFragment.replacingOccurrences(of: Base.self, with: Name.self))
+    }
+    select.clauses.where = select.clauses.where
+      .map { $0.replacingOccurrences(of: Base.self, with: Name.self) }
+    select.clauses.group = select.clauses.group
+      .map { $0.replacingOccurrences(of: Base.self, with: Name.self) }
+    select.clauses.having = select.clauses.having
+      .map { $0.replacingOccurrences(of: Base.self, with: Name.self) }
+    select.clauses.order = select.clauses.order
+      .map { $0.replacingOccurrences(of: Base.self, with: Name.self) }
+    return select
+  }
+
   let base: Base
 
   subscript<Member: QueryRepresentable>(
@@ -168,3 +184,14 @@ extension TableAlias: QueryRepresentable where Base: QueryRepresentable {
 }
 
 extension TableAlias: Sendable where Base: Sendable {}
+
+extension QueryFragment {
+  fileprivate func replacingOccurrences<T: Table, A: AliasName>(
+    of _: T.Type, with _: A.Type
+  ) -> QueryFragment {
+    var query = self
+    query.string = query.string
+      .replacingOccurrences(of: T.tableName.quoted(), with: A.aliasName.quoted())
+    return query
+  }
+}

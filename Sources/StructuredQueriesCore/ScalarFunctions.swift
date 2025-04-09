@@ -212,7 +212,7 @@ extension QueryExpression {
 
 // TODO: Worth aliasing Swift methods like 'contains', 'lowercased', 'trimming', 'replacing'...?
 extension QueryExpression where QueryValue == String {
-  /// Wraps this optional query expression with the `ifnull` function.
+  /// Wraps this optional query expression with the `instr` function.
   ///
   /// - Returns: An integer expression of the `instr` function wrapping this expression.
   public func instr(_ occurrence: some QueryExpression<QueryValue>) -> some QueryExpression<Int> {

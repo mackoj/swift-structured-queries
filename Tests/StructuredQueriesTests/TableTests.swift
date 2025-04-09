@@ -249,6 +249,37 @@ extension SnapshotTests {
           """
         }
       }
+
+      @Test func tableAliases() {
+        enum R: AliasName {}
+        assertQuery(Row.as(R.self).select(\.id)) {
+          """
+          SELECT "rs"."id"
+          FROM "rows" AS "rs"
+          WHERE NOT ("rs"."isDeleted")
+          ORDER BY "rs"."id" DESC
+          """
+        } results: {
+          """
+          ┌───┐
+          │ 1 │
+          └───┘
+          """
+        }
+        assertQuery(Row.as(R.self).unscoped.select(\.id)) {
+          """
+          SELECT "rs"."id"
+          FROM "rows" AS "rs"
+          """
+        } results: {
+          """
+          ┌───┐
+          │ 1 │
+          │ 2 │
+          └───┘
+          """
+        }
+      }
     }
 
     struct DefaultWhere {
@@ -473,6 +504,56 @@ extension SnapshotTests {
           ┌───┐
           │ 1 │
           └───┘
+          """
+        }
+      }
+    }
+
+    struct InvalidDefaultScope {
+      @Dependency(\.defaultDatabase) var db
+
+      @Table
+      struct Row {
+        static let all =
+          unscoped
+          .where {
+            #sql(
+              """
+              CAST(\($0.id) AS TEXT) = '"rows"'
+              """
+            )
+          }
+        let id: Int
+        var isDeleted = false
+      }
+
+      init() throws {
+        try db.execute(
+          #sql(
+            """
+            CREATE TABLE \(Row.self) (
+              \(quote: Row.id.name) INTEGER PRIMARY KEY AUTOINCREMENT,
+              \(quote: Row.isDeleted.name) BOOLEAN NOT NULL DEFAULT 0
+            )
+            """
+          )
+        )
+        try db.execute(
+          Row.insert([
+            Row.Draft(isDeleted: false),
+            Row.Draft(isDeleted: true),
+          ])
+        )
+      }
+
+      // NB: Ideally this shouldn't rewrite the text containing the table name
+      @Test func invalidDefaultScope() {
+        enum R: AliasName {}
+        assertQuery(Row.as(R.self).select(\.id)) {
+          """
+          SELECT "rs"."id"
+          FROM "rows" AS "rs"
+          WHERE CAST("rs"."id" AS TEXT) = '"rs"'
           """
         }
       }
