@@ -2,15 +2,6 @@
 
 ## Topics
 
-### Schema definition
-
-- ``tableName``
-- ``columns-swift.type.property``
-- ``TableColumns``
-- ``TableColumn``
-- ``TableColumnExpression``
-- ``TableDefinition``
-
 ### Query building
 
 - ``all``
@@ -30,7 +21,11 @@
 - ``update(or:set:)``
 - ``delete()``
 
-### Primary keys
+### Schema definition
 
-- ``PrimaryKeyedTable``
-- ``PrimaryKeyedTableDefinition``
+- ``tableName``
+- ``columns-swift.type.property``
+- ``TableColumns``
+- ``TableColumn``
+- ``TableColumnExpression``
+- ``TableDefinition``

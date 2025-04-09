@@ -22,12 +22,11 @@ directly.
 ### Essentials
 
 - <doc:GettingStarted>
-- ``Table``
-- <doc:PrimaryKeyedTables>
+- <doc:DefiningYourSchema>
 <!-- rename: query cookbook -->
 - <doc:AdvancedQueries>
-- <doc:BindingAndDecoding>
 - <doc:CompilerPerformance>
+<!-- TODO: Safe SQL strings? -->
 
 ### Statements
 
@@ -41,6 +40,7 @@ directly.
 
 ### Expressions
 
+<!-- TODO: if we create a dedicated article on safe sql strings, put QueryFragment under it -->
 - ``QueryFragment``
 - <doc:AggregateFunctions>
 - <doc:Operators>

@@ -1,7 +1,4 @@
 /// A type representing a database table with a primary key.
-///
-/// Don't conform to this protocol directly. Instead, use the `@Table` and `@Column` macros to
-/// generate a conformance. See <doc:PrimaryKeyedTables> for more information.
 public protocol PrimaryKeyedTable: Table where TableColumns: PrimaryKeyedTableDefinition {
   /// A type that represents this type, but with an optional primary key.
   ///

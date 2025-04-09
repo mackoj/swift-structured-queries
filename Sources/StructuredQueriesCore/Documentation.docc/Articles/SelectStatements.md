@@ -365,6 +365,8 @@ Reminder
 
 ## Topics
 
+<!-- TODO: giJoins article -->
+
 ### Statement types
 
 - ``Select``
