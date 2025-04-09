@@ -99,6 +99,33 @@ RemindersList.join(Reminder.all) { $0.id == $1.remindersListID }
 // => (RemindersList, Reminder)
 ```
 
+> Tip: The `==` function is heavily overloaded in Swift and can slow down the compiler. Consider
+> using ``QueryExpression/eq(_:)`` and ``QueryExpression/is(_:)`` instead.
+
+The joined query has access to both tables' columns in subsequent chained builder methods:
+
+```swift
+RemindersList
+  .join(Reminder.all) { $0.id == $1.remindersListID }
+  .select { ($0.title, $1.title) }
+// SELECT "remindersLists"."title", "reminders"."title" FROM "remindersLists"
+// JOIN "reminders" ON "remindersLists"."id" = "reminders"."remindersListID"
+// => (String, String)
+```
+
+Joins are incremental, so multiple chained calls to `join` will result in a statement of all the
+joins:
+
+```swift
+RemindersList
+  .join(Reminder.all) { $0.id == $1.remindersListID }
+  .join(User.all) { $1.assignedUserID == $2.id }
+// SELECT "remindersLists".…, "reminders".…, "users".… FROM "remindersLists"
+// JOIN "reminders" ON "remindersLists"."id" = "reminders"."remindersListID"
+// JOIN "users" ON "reminders"."assignedUserID" = "users"."id"
+// => (RemindersList, Reminder, User)
+```
+
 Joins combine each query together by concatenating their existing clauses together, including
 selected columns, joins, filters, and more.
 
@@ -158,13 +185,69 @@ let usersWithReferrers = User
 // => (String, String?)
 ```
 
-#### Self-joins
-
-<!-- TODO: Table aliases -->
-
 ### Filtering results
 
-<!-- TODO: WHERE -->
+The `where` function is used to filter the results of a query. It passes the table columns to a
+closure that specifies a predicate expression:
+
+```swift
+Reminder.where(\.isCompleted)
+// SELECT … FROM "reminders"
+// WHERE "reminders"."isCompleted"
+
+Reminder.where { !$0.isCompleted && $0.title.like("%groceries%") }
+// SELECT … FROM "reminders"
+// WHERE ("reminders"."isCompleted" AND ("reminders"."title" LIKE '%groceries%'))
+```
+
+Filtering is incremental, so multiple chained calls to `where` will result in a statement that
+returns an `AND` of the combined predicates:
+
+```swift
+Reminder
+  .where(\.isCompleted)
+  .where { $0.title.like("%groceries%") }
+// SELECT … FROM "reminders"
+// WHERE "reminders"."isCompleted" AND ("reminders"."title" LIKE '%groceries%')
+```
+
+The closure is a result builder that can conditionally generate parts of the predicate:
+
+```swift
+var showCompleted = true
+Reminder.where {
+  if !showCompleted {
+    !$0.isCompleted
+  }
+}
+// SELECT … FROM "reminders"
+// WHERE (NOT "reminders"."isCompleted")
+
+showCompleted = false
+Reminder.where {
+  if !showCompleted {
+    !$0.isCompleted
+  }
+}
+// SELECT … FROM "reminders"
+```
+
+Existing `Where` clauses can be added to a query using the `and` and `or` methods:
+
+```swift
+extension Reminder {
+  static let completed = Self.where(\.isCompleted)
+  static let flagged = Self.where(\.isFlagged)
+}
+
+Reminder.completed.and(Reminder.flagged)
+// SELECT … FROM "reminders"
+// WHERE ("reminders"."isCompleted") AND ("reminders"."isFlagged")
+
+Reminder.completed.or(Reminder.flagged)
+// SELECT … FROM "reminders"
+// WHERE ("reminders"."isCompleted") OR ("reminders"."isFlagged")
+```
 
 ### Grouping results
 

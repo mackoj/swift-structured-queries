@@ -290,6 +290,9 @@ extension Where: SelectStatement {
     return `where`
   }
 
+  // TODO: Should we have '&&' and '||'?
+  // TODO: Should we have 'static func not' and '!'?
+
   public func and(_ other: Self) -> Self {
     var `where` = self
     `where`.predicates = [
