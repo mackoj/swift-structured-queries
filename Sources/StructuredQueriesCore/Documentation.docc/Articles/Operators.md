@@ -63,8 +63,9 @@ TODO
 
 ### String
 
-- ``QueryExpression/+(_:_:)->QueryExpression<String>``
+- ``Collation``
 - ``QueryExpression/collate(_:)``
+- ``QueryExpression/+(_:_:)->QueryExpression<String>``
 - ``QueryExpression/like(_:escape:)``
 - ``QueryExpression/glob(_:)``
 - ``QueryExpression/match(_:)``

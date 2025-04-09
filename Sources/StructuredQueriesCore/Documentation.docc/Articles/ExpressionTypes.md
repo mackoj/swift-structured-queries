@@ -11,3 +11,4 @@ TODO
 - ``BindQueryExpression``
 - ``AggregateFunction``
 - ``CoalesceFunction``
+- ``QueryFunction``

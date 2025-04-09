@@ -25,6 +25,7 @@ directly.
 - <doc:PrimaryKeyedTables>
 <!-- rename: query cookbook -->
 - <doc:AdvancedQueries>
+- <doc:BindingAndDecoding>
 - <doc:CompilerPerformance>
 
 ### Schema definition
