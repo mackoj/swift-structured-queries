@@ -1,42 +1,40 @@
 # Integrating with database libraries
 
-Learn how to integrate this library into existing database libraries so that you can build queries in a 
-type-safe manner.
+Learn how to integrate this library into existing database libraries so that you can build queries
+in a  type-safe manner.
 
 ## Overview
 
-Since this library focuses only on the building of type-safe queries, it does not come with a way to actually
-execute the query in a particular database. The library is built with the goal of being able to support
-any database (SQLite, MySQL, Postgres, etc.), but currently is primarily tuned to work with only SQLite. And
-further, it only comes with one official driver for SQLite, which is the [SharingGRDB][sharing-grdb-gh]
-library that uses the popular [GRDB][grdb-gh] library under the hood for interacting with SQLite.
+Since this library focuses only on the building of type-safe queries, it does not come with a way to
+actually execute the query in a particular database. The library is built with the goal of being
+able to support any database (SQLite, MySQL, Postgres, _etc._), but currently is primarily tuned to
+work with SQLite. And further, it only comes with one official driver for SQLite, which is the
+[SharingGRDB][sharing-grdb-gh] library that uses the popular [GRDB][grdb-gh] library under the hood
+for interacting with SQLite.
 
-If you are interested in building an integration of StructureQueries with another database library out
-there, please feel free to [open a discussion][sq-discussions] on the repository.
+If you are interested in building an integration of StructureQueries with another database library
+out there, please feel free to [open a discussion][sq-discussions] on the repository.
 
 [sq-discussions]: http://github.com/pointfreeco/swift-structured-queries/discussions
 
-
 @Comment {
-    TODO: Rewrite as a case study of SQLite and GRDB that simply links to the directories on the repo
+  TODO: Rewrite as a case study of SQLite and GRDB that simply links to the directories on the repo
 }
-
-
 
 ### Case Study: SQLite
 
-Let's provide a rough outline of how one could integrate StructuredQueries with any SQLite library out there,
-including GRDB, SQLite.swift, and more. It begins with defining a type that conforms to the ``QueryDecoder`` 
-protocol, which describes how to decode certain database types into Swift types:
+Let's provide a rough outline of how one could integrate StructuredQueries with any SQLite library
+out there, including GRDB and more. It begins with defining a type that conforms to the
+``QueryDecoder``  protocol, which describes how to decode certain database types into Swift types:
 
 ```swift
 struct SQLiteQueryDecoder: QueryDecoder {
 }
 ```
 
-There are many methods that this type will need to provide, but first we will add some internal state
-that it will need to do its job, such as the SQLite statement being decoded, as well as the current index
-of the column we are decoding:
+There are many methods that this type will need to provide, but first we will add some internal
+state that it will need to do its job, such as the SQLite statement being decoded, as well as the
+current index of the column we are decoding:
 
 ```swift
 struct SQLiteQueryDecoder: QueryDecoder {
@@ -48,7 +46,8 @@ struct SQLiteQueryDecoder: QueryDecoder {
 }
 ```
 
-Next we must implement 6 `decode` methods as a part of the requirement of the ``QueryDecoder`` protocol: 
+Next we must implement 6 `decode` methods as a part of the requirement of the ``QueryDecoder``
+protocol:
 
 ```swift
 mutating func decode(_ columnType: [UInt8].Type) throws -> [UInt8]? {
@@ -71,10 +70,10 @@ mutating func decode(_ columnType: Int.Type) throws -> Int? {
 }
 ```
 
-These methods correspond to the fundamental types that SQLite understands. In each of these methods we 
-will attempt to extract out the corresponding type from the SQLite statement. For example, the method
-for `Double` is implemented by using `sqlite3_column_type` to first check that the value is not NULL in
-SQLite, and if it isn't we use `sqlite3_column_double` to decode the double value:
+These methods correspond to the fundamental types that SQLite understands. In each of these methods
+we  will attempt to extract out the corresponding type from the SQLite statement. For example, the
+method for `Double` is implemented by using `sqlite3_column_type` to first check that the value is
+not NULL in SQLite, and if it isn't we use `sqlite3_column_double` to decode the double value:
 
 ```swift
 mutating func decode(_ columnType: Double.Type) throws -> Double? {
@@ -99,7 +98,7 @@ mutating func decode(_ columnType: String.Type) throws -> String? {
 }
 ```
 
-The `[Unt8]` method requires a bit more work to decode the C bytes into an array of `UInt8`'s:
+The `[UInt8]` method requires a bit more work to decode the C bytes into an array of `UInt8`'s:
 
 ```swift
 mutating func decode(_ columnType: [UInt8].Type) throws -> [UInt8]? {

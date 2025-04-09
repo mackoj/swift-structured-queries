@@ -7,7 +7,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   /// ```
   ///
   /// > Important: Overloaded operators can strain the Swift compiler's type checking ability.
-  /// > Consider using ``eq``, instead.
+  /// > Consider using ``eq(_:)``, instead.
   ///
   /// - Parameters:
   ///   - lhs: An expression to compare.
@@ -27,7 +27,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   /// ```
   ///
   /// > Important: Overloaded operators can strain the Swift compiler's type checking ability.
-  /// > Consider using ``neq``, instead.
+  /// > Consider using ``neq(_:)``, instead.
   ///
   /// - Parameters:
   ///   - lhs: An expression to compare.
@@ -121,52 +121,62 @@ private func isNull<Value>(_ expression: some QueryExpression<Value>) -> Bool {
 }
 
 extension QueryExpression where QueryValue: QueryBindable & _OptionalProtocol {
+  @_documentation(visibility: private)
   public static func == (
     lhs: Self, rhs: some QueryExpression<QueryValue.Wrapped>
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: isNull(lhs) ? "IS" : "=", rhs: rhs)
   }
 
+  @_documentation(visibility: private)
   public static func != (
     lhs: Self, rhs: some QueryExpression<QueryValue.Wrapped>
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: isNull(lhs) ? "IS NOT" : "<>", rhs: rhs)
   }
 
+  @_documentation(visibility: private)
   public static func == (
     lhs: Self, rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: isNull(lhs) || isNull(rhs) ? "IS" : "=", rhs: rhs)
   }
 
+  @_documentation(visibility: private)
   public static func != (
     lhs: Self, rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: lhs, operator: isNull(lhs) || isNull(rhs) ? "IS NOT" : "<>", rhs: rhs)
   }
 
+  @_documentation(visibility: private)
   public func eq(_ other: some QueryExpression<QueryValue.Wrapped>) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: "=", rhs: other)
   }
 
+  @_documentation(visibility: private)
   public func neq(_ other: some QueryExpression<QueryValue.Wrapped>) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: "<>", rhs: other)
   }
 
+  @_documentation(visibility: private)
   public func eq(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: "=", rhs: other)
   }
 
+  @_documentation(visibility: private)
   public func neq(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: "<>", rhs: other)
   }
 
+  @_documentation(visibility: private)
   public func `is`(
     _ other: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: "IS", rhs: other)
   }
 
+  @_documentation(visibility: private)
   public func isNot(
     _ other: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
@@ -175,20 +185,24 @@ extension QueryExpression where QueryValue: QueryBindable & _OptionalProtocol {
 }
 
 extension QueryExpression where QueryValue: QueryBindable {
+  @_documentation(visibility: private)
   public static func == (lhs: Self, rhs: _Null<QueryValue>) -> some QueryExpression<Bool> {
     lhs.is(rhs)
   }
 
+  @_documentation(visibility: private)
   public static func != (lhs: Self, rhs: _Null<QueryValue>) -> some QueryExpression<Bool> {
     lhs.isNot(rhs)
   }
 
+  @_documentation(visibility: private)
   public func `is`(
     _ other: _Null<QueryValue>
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: "IS", rhs: other)
   }
 
+  @_documentation(visibility: private)
   public func isNot(
     _ other: _Null<QueryValue>
   ) -> some QueryExpression<Bool> {
@@ -210,7 +224,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   /// than that of the second expression.
   ///
   /// > Important: Overloaded operators can strain the Swift compiler's type checking ability.
-  /// > Consider using ``lt``, instead.
+  /// > Consider using ``lt(_:)``, instead.
   ///
   /// - Parameters:
   ///   - lhs: An expression to compare.
@@ -226,7 +240,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   /// than that of the second expression.
   ///
   /// > Important: Overloaded operators can strain the Swift compiler's type checking ability.
-  /// > Consider using ``gt``, instead.
+  /// > Consider using ``gt(_:)``, instead.
   ///
   /// - Parameters:
   ///   - lhs: An expression to compare.
@@ -242,7 +256,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   /// than or equal to that of the second expression.
   ///
   /// > Important: Overloaded operators can strain the Swift compiler's type checking ability.
-  /// > Consider using ``lte``, instead.
+  /// > Consider using ``lte(_:)``, instead.
   ///
   /// - Parameters:
   ///   - lhs: An expression to compare.
@@ -258,7 +272,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   /// than or equal to that of the second expression.
   ///
   /// > Important: Overloaded operators can strain the Swift compiler's type checking ability.
-  /// > Consider using ``gte``, instead.
+  /// > Consider using ``gte(_:)``, instead.
   ///
   /// - Parameters:
   ///   - lhs: An expression to compare.
@@ -319,7 +333,7 @@ extension QueryExpression where QueryValue == Bool {
   /// Returns a logical AND operation on two predicate expressions.
   ///
   /// > Important: Overloaded operators can strain the Swift compiler's type checking ability.
-  /// > Consider using ``and``, instead.
+  /// > Consider using ``and(_:)``, instead.
   ///
   /// - Parameters:
   ///   - lhs: The left-hand side of the operation.
@@ -334,7 +348,7 @@ extension QueryExpression where QueryValue == Bool {
   /// Returns a logical OR operation on two predicate expressions.
   ///
   /// > Important: Overloaded operators can strain the Swift compiler's type checking ability.
-  /// > Consider using ``or``, instead.
+  /// > Consider using ``or(_:)``, instead.
   ///
   /// - Parameters:
   ///   - lhs: The left-hand side of the operation.
@@ -674,7 +688,9 @@ extension QueryExpression where QueryValue == String {
   /// // SELECT … FROM "reminders" WHERE ("reminders"."title" LIKE '%get%')
   /// ```
   ///
-  /// - Parameter pattern: A string expression describing the `LIKE` pattern.
+  /// - Parameters
+  ///   - pattern: A string expression describing the `LIKE` pattern.
+  ///   - escape: An optional character for the `ESCAPE` clause.
   /// - Returns: A predicate expression.
   public func like(_ pattern: QueryValue, escape: Character? = nil) -> some QueryExpression<Bool> {
     LikeOperator(string: self, pattern: pattern, escape: escape)
@@ -702,7 +718,7 @@ extension QueryExpression where QueryValue == String {
   /// // SELECT … FROM "reminders" WHERE ("reminders"."title" LIKE 'get%')
   /// ```
   ///
-  /// - Parameter pattern: A string expression describing the prefix.
+  /// - Parameter other: A string expression describing the prefix.
   /// - Returns: A predicate expression.
   public func hasPrefix(_ other: QueryValue) -> some QueryExpression<Bool> {
     like("\(other)%")
@@ -716,7 +732,7 @@ extension QueryExpression where QueryValue == String {
   /// // SELECT … FROM "reminders" WHERE ("reminders"."title" LIKE '%get')
   /// ```
   ///
-  /// - Parameter pattern: A string expression describing the suffix.
+  /// - Parameter other: A string expression describing the suffix.
   /// - Returns: A predicate expression.
   public func hasSuffix(_ other: QueryValue) -> some QueryExpression<Bool> {
     like("%\(other)")
@@ -730,7 +746,7 @@ extension QueryExpression where QueryValue == String {
   /// // SELECT … FROM "reminders" WHERE ("reminders"."title" LIKE '%get%')
   /// ```
   ///
-  /// - Parameter pattern: A string expression describing the infix.
+  /// - Parameter other: A string expression describing the infix.
   /// - Returns: A predicate expression.
   @_disfavoredOverload
   public func contains(_ other: QueryValue) -> some QueryExpression<Bool> {

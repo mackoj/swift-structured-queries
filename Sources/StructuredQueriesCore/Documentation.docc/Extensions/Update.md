@@ -8,3 +8,7 @@
 
 - ``where(_:)``
 - ``returning(_:)``
+
+### Supporting types
+
+- ``UpdateOf``

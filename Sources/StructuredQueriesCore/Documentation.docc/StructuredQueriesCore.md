@@ -27,6 +27,10 @@ directly.
 - <doc:AdvancedQueries>
 - <doc:CompilerPerformance>
 
+### Schema definition
+
+- ``Table``
+
 ### Statements
 
 - <doc:Selects>
@@ -36,9 +40,11 @@ directly.
 - <doc:WhereClauses>
 - <doc:CommonTableExpressions>
 
-### Schema definition
+### Expressions
 
-- ``Table``
+- <doc:AggregateFunctions>
+- <doc:Operators>
+- <doc:ScalarFunctions>
 
 ### Advanced 
 

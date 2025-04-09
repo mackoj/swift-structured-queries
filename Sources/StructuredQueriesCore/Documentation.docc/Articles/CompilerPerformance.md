@@ -15,7 +15,9 @@ your queries.
 
 ### The problem
 
-TODO: finish
+@Comment {
+  TODO: finish
+}
 
 ```swift
 @Table struct Reminder {

@@ -314,8 +314,8 @@ public struct _SelectClauses: Sendable {
 
 /// A `SELECT` statement.
 ///
-/// This type of statement is constructed from ``Table/all``, ``Where/all``, and static aliases
-/// to methods on the `Select` type, like `select`, `join`, `group(by:)`, `order(by:)`, and more.
+/// This type of statement is constructed from ``Table/all`` and static aliases to methods on the
+/// `Select` type, like `select`, `join`, `group(by:)`, `order(by:)`, and more.
 ///
 /// To learn more, see <doc:Selects>.
 #if compiler(>=6.1)

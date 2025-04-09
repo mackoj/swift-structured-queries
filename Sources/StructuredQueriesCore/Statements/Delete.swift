@@ -112,6 +112,7 @@ public struct Delete<From: Table, Returning> {
   }
 }
 
+/// A convenience type alias for a non-`RETURNING ``Delete``.
 public typealias DeleteOf<From: Table> = Delete<From, ()>
 
 extension Delete: Statement {

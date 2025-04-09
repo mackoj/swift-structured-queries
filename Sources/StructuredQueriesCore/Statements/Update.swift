@@ -148,6 +148,7 @@ public struct Update<From: Table, Returning> {
   }
 }
 
+/// A convenience type alias for a non-`RETURNING ``Update``.
 public typealias UpdateOf<Base: Table> = Update<Base, ()>
 
 extension Update: Statement {

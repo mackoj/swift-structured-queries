@@ -6,3 +6,7 @@
 
 - ``where(_:)``
 - ``returning(_:)``
+
+### Supporting types
+
+- ``DeleteOf``

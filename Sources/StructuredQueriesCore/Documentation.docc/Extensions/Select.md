@@ -23,3 +23,7 @@
 
 - ``map(_:)``
 - ``subscript(dynamicMember:)``
+
+### Supporting types
+
+- ``SelectOf``

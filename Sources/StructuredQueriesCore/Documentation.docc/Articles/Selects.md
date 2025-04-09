@@ -137,6 +137,9 @@ RemindersList.join(Reminder.all) { $0.id == $1.remindersListID }
 - ``Select``
 - ``SelectStatement``
 
+### Convenience type aliases
+
+- ``SelectStatementOf``
 
 <!--
 compound selects: union, intersection, etc...

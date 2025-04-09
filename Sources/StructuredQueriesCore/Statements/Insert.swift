@@ -6,15 +6,15 @@ extension Table {
   /// - Parameters:
   ///   - conflictResolution: A conflict resolution algorithm.
   ///   - row: A row to insert.
-  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
   ///     existing row.
   /// - Returns: An insert statement.
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ row: Self,
-    onConflict updates: ((inout Updates<Self>) -> Void)? = nil
+    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
   ) -> InsertOf<Self> {
-    insert(or: conflictResolution, [row], onConflict: updates)
+    insert(or: conflictResolution, [row], onConflict: doUpdate)
   }
 
   /// An insert statement for table rows.
@@ -121,7 +121,7 @@ extension Table {
   ///   - conflictResolution: A conflict resolution algorithm.
   ///   - columns: Columns values to be inserted.
   ///   - rows: A builder of row values for the given columns.
-  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
   ///     existing row.
   /// - Returns: An insert statement.
   public static func insert<V1: QueryBindable, each V2: QueryBindable>(
@@ -176,7 +176,7 @@ extension Table {
   ///   - conflictResolution: A conflict resolution algorithm.
   ///   - columns: Columns values to be inserted.
   ///   - selection: A statement that selects the values to be inserted.
-  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
   ///     existing row.
   /// - Returns: An insert statement.
   public static func insert<
@@ -190,14 +190,14 @@ extension Table {
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     select selection: () -> Select<(C1, repeat each C2), From, Joins>,
-    onConflict updates: ((inout Updates<Self>) -> Void)? = nil
+    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
   ) -> InsertOf<Self>
   where (repeat (each C2).QueryValue) == (repeat each V2) {
     _insert(
       or: conflictResolution,
       columns,
       select: selection,
-      onConflict: updates
+      onConflict: doUpdate
     )
   }
 
@@ -237,7 +237,7 @@ extension Table {
   ///
   /// - Parameters:
   ///   - conflictResolution: A conflict resolution algorithm.
-  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
   ///     existing row.
   /// - Returns: An insert statement.
   public static func insert(
@@ -260,18 +260,18 @@ extension PrimaryKeyedTable {
   /// - Parameters:
   ///   - conflictResolution: A conflict resolution algorithm.
   ///   - row: A draft to insert.
-  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
   ///     existing row.
   /// - Returns: An insert statement.
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ row: Draft,
-    onConflict updates: ((inout Updates<Self>) -> Void)? = nil
+    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
   ) -> InsertOf<Self> {
     Self.insert(
       or: conflictResolution,
       [row],
-      onConflict: updates
+      onConflict: doUpdate
     )
   }
 
@@ -280,13 +280,13 @@ extension PrimaryKeyedTable {
   /// - Parameters:
   ///   - conflictResolution: A conflict resolution algorithm.
   ///   - rows: Rows to insert. An empty array will return an empty query.
-  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
   ///     existing row.
   /// - Returns: An insert statement.
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ rows: [Draft],
-    onConflict updates: ((inout Updates<Self>) -> Void)? = nil
+    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
   ) -> InsertOf<Self> {
     Self.insert(
       or: conflictResolution,
@@ -295,7 +295,7 @@ extension PrimaryKeyedTable {
           row
         }
       },
-      onConflict: updates
+      onConflict: doUpdate
     )
   }
 
@@ -443,6 +443,7 @@ extension Insert: Statement {
   }
 }
 
+/// A convenience type alias for a non-`RETURNING ``Insert``.
 public typealias InsertOf<Into: Table> = Insert<Into, ()>
 
 /// A builder of insert statement values.

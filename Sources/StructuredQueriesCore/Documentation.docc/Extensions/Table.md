@@ -24,7 +24,7 @@
 - ``having(_:)``
 - ``order(by:)``
 - ``limit(_:offset:)``
-- ``count()``
+- ``count(filter:)``
 - ``insert(or:_:values:onConflict:)``
 - ``update(or:set:)``
 - ``delete()``
