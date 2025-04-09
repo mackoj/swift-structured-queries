@@ -37,8 +37,8 @@ struct Reminder {
 }
 ```
 
-In order to expose the type information of the fields of this struct to the library, one can simply
-apply the `@Table` macro:
+In order to generate the code that gives the library access to the schema of this table, one can
+simply apply the `@Table` macro:
 
 ```swift
 import StructuredQueries

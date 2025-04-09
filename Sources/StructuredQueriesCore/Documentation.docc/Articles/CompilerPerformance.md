@@ -13,100 +13,116 @@ The library provides a few tools to help mitigate this problem so that you can c
 benefits of type-safety and expressivity in your queries, while also helping out Swift in compiling
 your queries.
 
-### The problem
-
-@Comment {
-  TODO: finish
-}
-
-```swift
-@Table struct Reminder {
-  let id: Int 
-  var title = ""
-  var isCompleted = false 
-  var priority: Int?
-}
-
-Reminder
-  .where { !$0.isCompleted && $0.priority == 3 }
-```
-
 ### Method operators
 
 By far the easiest way to mitigate compiler performance problems in complex expressions is to use
-the method version of the various operators SQL (and this library) has to offer. For example,
-when joining two tables, rather than checking for equality of a foreign key relationship using
-`==`, you can use the ``QueryExpression/eq(_:)`` function:
+the method version of the various operators SQL has to offer, e.g. using ``QueryExpression/eq(_:)``
+instead of ``QueryExpression/==(_:_:)``. Consider a database schema that has a "reminders" table, a
+"tags" table, as well as a many-to-many join table that can associated any number of tags to any
+number of reminders:
 
-```diff
- ReminderList
-   .join(Reminder.all) {
--    $0.id == $0.reminderListID
-+    $0.id.eq($0.reminderListID)
-   }
+```swift
+@Table struct Reminder: Identifiable {
+  let id: Int 
+  var title = ""
+  var isCompleted = false 
+}
+@Table struct Tag: Identifiable {
+  let id: Int 
+  var title = ""
+}
+@Table struct ReminderTag {
+  let reminderID: Reminder.ID 
+  let tagID: Tag.ID
+}
 ```
 
-The overload space for `eq` is much, _much_ smaller than `==`, and using it is only a single 
-character more than using `==`.
+With this schema it is possible to write a query that selects all reminders' titles, along with a 
+comma-separated string of every tag associated with each reminder:
 
-The same goes for any mathematical operator supported by SQL, such as `&&`, `||`, `!`, etc. You can
-start out using those operators, but if you notice a compiler slowdown, your first instinct should
-be to convert a few of those operators to their method variant, ``QueryExpression/and(_:)``,
-``QueryExpression/or(_:)``, ``QueryExpression/not()``.
+```swift
+Reminder
+  .group(by: \.id)
+  .join(ReminderTag.all) { $0.id == $1.reminderID }
+  .join(Tag.all) { $1.tagID == $2.id }
+  .select { ($0.title, $2.title.groupConcat()) }
+// SELECT "reminders"."title", group_concat("tags"."title")
+// FROM "reminders"
+// JOIN "reminderTags" ON "reminders"."id" = "reminderTags"."reminderID"
+// JOIN "tags" ON "reminderTags"."tagID" = "tags"."id"
+// GROUP BY "reminders"."id"
+```
 
-@Row {
-  @Column {
-    ```
-    lhs == rhs
-    
-    
-    lhs != rhs
-    
-    
-    lhs && rhs
-    lhs || rhs
-    !value
-    
-    lhs < rhs
-    lhs > rhs
-    lhs <= rhs
-    lhs >= rhs
-    ```
-  }
-  @Column {
-    ```
-    lhs.eq(rhs)
-    lhs.is(rhs)
-    
-    lhs.neq(rhs)
-    lhs.isNot(rhs)
-    
-    lhs.and(rhs)
-    lhs.or(rhs)
-    value.not()
-    
-    lhs.lt(rhs)
-    lhs.gt(rhs)
-    lhs.lte(rhs)
-    lhs.gte(rhs)
-    ```
-  }
-}
+While this is a moderately complex query, it is definitely something that should compile quite 
+quickly, but unfortunately Swift currently cannot type-check it quickly enough (as of Swift 6.1).
+The problem is that the overload space of `==` is so large that Swift has too many possibilities 
+to choose from when compiling this expression.
+
+The easiest fix is to use the dedicated ``QueryExpression/eq(_:)`` methods that have a much 
+smaller overload space:
+
+```diff
+ Reminder
+   .group(by: \.id)
+-  .join(ReminderTag.all) { $0.id == $1.reminderID }
++  .join(ReminderTag.all) { $0.id.eq($1.reminderID) }
+-  .join(Tag.all) { $1.tagID == $2.id }
++  .join(Tag.all) { $1.tagID.eq($2.id) }
+   .select { ($0.title, $2.title.groupConcat()) }
+```
+
+With that one change the expression now compiles immediately. We find that the equality operator
+is by far the worst when it comes to compilation speed, and so we always recommend using 
+``QueryExpression/eq(_:)`` over ``QueryExpression/==(_:_:)``, but other operators can benefit 
+from this too if you notice problems, such as ``QueryExpression/neq(_:)`` over 
+``QueryExpression/!=(_:_:)``, ``QueryExpression/gt(_:)`` over ``QueryExpression/>(_:_:)``, and so 
+on. Here is a table of method equivalents of the most common operators:
+
+```
+Operator      Method
+---------------------------
+lhs == rhs     lhs.eq(rhs)
+               lhs.is(rhs)
+                
+lhs != rhs     lhs.neq(rhs)
+               lhs.isNot(rhs
+                
+lhs && rhs     lhs.and(rhs)
+lhs || rhs     lhs.or(rhs)
+!value         value.not()
+                
+lhs < rhs      lhs.lt(rhs)
+lhs > rhs      lhs.gt(rhs)
+lhs <= rhs     lhs.lte(rhs)
+lhs >= rhs     lhs.gte(rhs)
+```
 
 Often one does not need to convert _every_ operator to the method style. You can usually do it for
 just a few operators to get a big boost, and we recommend starting with `==`.
 
 ### The #sql macro
 
-The library ships with an "escape hatch" into a SQL string via the `#sql` macro. Importantly, this
-is not an unsafe escape hatch. You can still use your data type's structure to refer to its columns,
-and any value interpolated into the string will be properly prepared and will not be a vector
-for SQL injection.
+The library ships with a tool that allows one to write safe SQL strings via the `#sql` macro. Usage
+of the `#sql` macro does not affect the safetly of your queries from SQL injection attacks, nor
+does it prevent you making use of your table's schema in the query. The primary downside to using
+`#sql` is that it can complicate decoding query results into custom types, but when used for small
+fragments of a query one typically avoids such complications.
 
-However, because only a simple string is involved, much of the overload resolution and type checking
-is avoided by the compiler. This allows you to construct complex statements with no compilation
-costs, such as querying for reminders whose date is earlier than the current date or whose 
-date is `NULL`
+And because `#sql` works on a simple string, it is capable of being compiled much faster than the
+equivalent version using the builder syntax with operators. Consider the following query that
+selects all reminders with no due date, or whose due date is in the past:
+
+```sql
+SELECT *
+FROM "reminders"
+WHERE
+  coalesce("reminders"."date", date('now')) <= date('now')
+```
+
+One can theoretically write the `coalesce` SQL fragment using the query building tools of this 
+library, but doing so can be overhanded and obscure what the query is trying to do. For this 
+very specific, complex logic it can be beneficial to use the `#sql` macro to write the fragment
+directly as SQL:
 
 ```swift
 Reminder
@@ -115,5 +131,8 @@ Reminder
   }
 ```
 
-Note that interpolating `$0.date` allows you to statically reference the column for the table 
-instead of using a literal string in the SQl.
+This generates the same query but we use the `#sql` tool for just the small fragment of SQL that 
+we do not want to recreate in the builder. We are still protected from SQL injection attacks
+with this tool, and we are even able to use the the statically defined columns of our type via
+interpolation, but it should compile immediately compared to trying to piece together the complex
+expression with the tools of the builder.

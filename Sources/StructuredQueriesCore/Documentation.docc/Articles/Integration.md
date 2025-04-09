@@ -39,21 +39,14 @@ or even integrate Structured Queries into a 3rd party SQLite library.
 
 ### Case Study: GRDB
 
+We provide one first-party library that integrates Structured Queries into SQLite, and that is in
+our [SharingGRDB][sharing-grdb-gh] library, which is a lightweight replacement for SwiftData and 
+the Query macro. It brings a suite of tools allow you to fetch and observe data from a database
+in your feature code, and views automatically update when data in the database changes.
 
+The integration of Structured Queries into SharingGRDB works in the manner outlined above, in
+<doc:Integration#Case-Study-SQLite>. The code can be found [here][sq-sharing-grdb], and there
+you will find a ``QueryDecoder`` conformance, as well as some helper methods for fetching data
+using Structured Queries and GRDB.
 
-https://github.com/pointfreeco/sharing-grdb/tree/main/Sources/StructuredQueriesGRDBCore
-
-<!--@START_MENU_TOKEN@-->Text<!--@END_MENU_TOKEN@-->
-
-<!--
-
-TODO:
-
-StructuredQueries built to support any DB, but currently SharingGRDB is the only 
-available adapter. If you run into limitations using this library with your own
-database open a discussion.
-
--->
-
-[sharing-grdb-gh]: http://github.com/pointfreeco/sharing-grdb
-[grdb-gh]: http://github.com/groue/grdb.swift
+[sq-sharing-grdb]: https://github.com/pointfreeco/sharing-grdb/tree/main/Sources/StructuredQueriesGRDBCore
