@@ -207,6 +207,9 @@ Reminder.where { !$0.isCompleted && $0.title.like("%groceries%") }
 // WHERE ("reminders"."isCompleted" AND ("reminders"."title" LIKE '%groceries%'))
 ```
 
+> Tip: ``Table/where(_:)`` returns a ``Where`` clause, which builds into a ``Select``, ``Update``,
+> or ``Delete`` depending on the method chaining. See <doc:WhereClauses> for more.
+
 Filtering is incremental, so multiple chained calls to `where` will result in a statement that
 returns an `AND` of the combined predicates:
 
