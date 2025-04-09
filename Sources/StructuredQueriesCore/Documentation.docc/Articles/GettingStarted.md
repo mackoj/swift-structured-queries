@@ -195,7 +195,7 @@ Reminder
 This shows how to build a complex query in a matter of seconds, and you can be sure that you do not
 make a silly mistake, such as refer to a non-existent column or perform an operation on a column
 that does not have the correct type. And this is only scratching the surface of what the library is
-capable of. See <doc:Selects> for more examples of select statements, as well as
+capable of. See <doc:SelectStatements> for more examples of select statements, as well as
 <doc:AdvancedQueries> for more advanced topics in writing queries.
 
 ### Insert statements
@@ -300,8 +300,9 @@ Reminder.insert {
 ```
 
 This shows how one can build complex insert statements in a type-safe manner. And this is only
-scratching the surface of what the library is capable of. See <doc:Inserts> for more examples of
-select statements, as well as <doc:AdvancedQueries> for more advanced topics in writing queries.
+scratching the surface of what the library is capable of. See <doc:InsertStatements> for more
+examples of select statements, as well as <doc:AdvancedQueries> for more advanced topics in writing
+queries.
 
 ### Update statements
 

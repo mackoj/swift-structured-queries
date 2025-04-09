@@ -12,3 +12,5 @@
 ### Supporting types
 
 - ``UpdateOf``
+- ``Updates``
+- ``ConflictResolution``

@@ -64,7 +64,7 @@ extension PrimaryKeyedTable {
 /// This type of statement is constructed from ``Table/update(or:set:)`` and
 /// ``Where/update(or:set:)``.
 ///
-/// To learn more, see <doc:Updates>.
+/// To learn more, see <doc:UpdateStatements>.
 public struct Update<From: Table, Returning> {
   var conflictResolution: ConflictResolution?
   var updates: Updates<From>

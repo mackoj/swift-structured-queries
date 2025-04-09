@@ -8,6 +8,7 @@
 - ``columns-swift.type.property``
 - ``TableColumns``
 - ``TableColumn``
+- ``TableColumnExpression``
 - ``TableDefinition``
 
 ### Query building

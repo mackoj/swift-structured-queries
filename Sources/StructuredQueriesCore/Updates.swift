@@ -3,7 +3,7 @@
 /// A mutable value of this type is passed to the `updates` closure of `Table.update`, as well as
 /// the `doUpdate` closure of `Table.insert`.
 ///
-/// To learn more, see <doc:Updates>.
+/// To learn more, see <doc:UpdateStatements>.
 @dynamicMemberLookup
 public struct Updates<Base: Table> {
   private var updates: [(String, QueryFragment)] = []

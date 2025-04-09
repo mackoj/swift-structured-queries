@@ -344,7 +344,7 @@ private enum InsertValues {
 /// This type of statement is returned from ``Table/insert(or:_:values:onConflict:)`` and related
 /// functions.
 ///
-/// To learn more, see <doc:Inserts>.
+/// To learn more, see <doc:InsertStatements>.
 public struct Insert<Into: Table, Returning> {
   var conflictResolution: ConflictResolution?
   var columnNames: [String] = []

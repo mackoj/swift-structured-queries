@@ -34,7 +34,7 @@ extension PrimaryKeyedTable {
 ///
 /// This type of statement is constructed from ``Table/delete()`` and ``Where/delete()``.
 ///
-/// To learn more, see <doc:Deletes>.
+/// To learn more, see <doc:DeleteStatements>.
 public struct Delete<From: Table, Returning> {
   var `where`: [QueryFragment] = []
   var returning: [QueryFragment] = []

@@ -317,7 +317,7 @@ public struct _SelectClauses: Sendable {
 /// This type of statement is constructed from ``Table/all`` and static aliases to methods on the
 /// `Select` type, like `select`, `join`, `group(by:)`, `order(by:)`, and more.
 ///
-/// To learn more, see <doc:Selects>.
+/// To learn more, see <doc:SelectStatements>.
 #if compiler(>=6.1)
   @dynamicMemberLookup
 #endif

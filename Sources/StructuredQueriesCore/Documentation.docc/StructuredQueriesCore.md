@@ -33,10 +33,10 @@ directly.
 
 ### Statements
 
-- <doc:Selects>
-- <doc:Inserts>
-- <doc:Updates>
-- <doc:Deletes>
+- <doc:SelectStatements>
+- <doc:InsertStatements>
+- <doc:UpdateStatements>
+- <doc:DeleteStatements>
 - <doc:WhereClauses>
 - <doc:CommonTableExpressions>
 
@@ -45,6 +45,7 @@ directly.
 - <doc:AggregateFunctions>
 - <doc:Operators>
 - <doc:ScalarFunctions>
+- <doc:ExpressionTypes>
 
 ### Advanced 
 

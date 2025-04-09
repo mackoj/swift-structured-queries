@@ -9,3 +9,5 @@
 ### Supporting types
 
 - ``InsertOf``
+- ``InsertValuesBuilder``
+- ``ConflictResolution``

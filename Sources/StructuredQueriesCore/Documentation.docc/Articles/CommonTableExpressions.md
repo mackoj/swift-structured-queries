@@ -12,3 +12,8 @@ or recursive queries of trees and graphs.
 ### Statements
 
 - ``With``
+
+### Supporting types
+
+- ``CommonTableExpressionBuilder``
+- ``CommonTableExpressionClause``
