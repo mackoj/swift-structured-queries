@@ -319,7 +319,7 @@ direction.
 ```swift
 Reminder.order { ($0.priority.desc(nulls: .first), $0.title.asc()) }
 // SELECT … FROM "reminders"
-// ORDER BY "reminders".priority" DESC NULLS FIRST, reminders"."title" ASC
+// ORDER BY "reminders"."priority" DESC NULLS FIRST, "reminders"."title" ASC
 ```
 
 Multiple chained calls to `order` will accumulate each term:
@@ -329,12 +329,32 @@ Reminder
   .order { $0.priority.desc() }
   .order(by: \.title)
 // SELECT … FROM "reminders"
-// ORDER BY "reminders".priority" DESC, reminders"."title"
+// ORDER BY "reminders"."priority" DESC, "reminders"."title"
 ```
 
-@Comment {
-  TODO: Add result builder closure example
+The closure is a result builder that can conditionally generate ordering terms:
+
+```swift
+enum Ordering {
+  case dueDate
+  case priority
+  case title
 }
+
+var ordering: Ordering = .dueDate
+Reminder.order {
+  switch ordering {
+  case .dueDate:
+    ($0.isCompleted, $0.date)
+  case .priority:
+    ($0.isCompleted, $0.priority.desc(), $0.isFlagged.desc())
+  case .title:
+    ($0.isCompleted, $0.title)
+  }
+}
+// SELECT … FROM "reminders"
+// ORDER BY "reminders"."isCompleted", "reminders"."date"
+```
 
 ### Paginating results
 
