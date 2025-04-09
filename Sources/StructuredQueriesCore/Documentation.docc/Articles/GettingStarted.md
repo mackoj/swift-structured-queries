@@ -302,7 +302,7 @@ Reminder.insert {
 
 This shows how one can build complex insert statements in a type-safe manner. And this is only
 scratching the surface of what the library is capable of. See <doc:InsertStatements> for more
-examples of select statements, as well as <doc:AdvancedQueries> for more advanced topics in writing
+examples of insert statements, as well as <doc:AdvancedQueries> for more advanced topics in writing
 queries.
 
 ### Update statements
