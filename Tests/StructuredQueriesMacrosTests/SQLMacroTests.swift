@@ -348,5 +348,31 @@ extension SnapshotTests {
         """#
       }
     }
+
+    @Test func dollarSign() {
+      assertMacro {
+        """
+        #sql("json_extract(notes, '$.body')")
+        """
+      } expansion: {
+        """
+        StructuredQueries.SQLQueryExpression("json_extract(notes, '$.body')")
+        """
+      }
+    }
+
+    @Test func badDollarSign() {
+      assertMacro {
+        """
+        #sql("json_extract(notes, $.body)")
+        """
+      } diagnostics: {
+        """
+        #sql("json_extract(notes, $.body)")
+             ─────────────────────┬───────
+                                  ╰─ 🛑 Invalid bind parameter in literal; use interpolation to bind values into SQL
+        """
+      } 
+    }
   }
 }

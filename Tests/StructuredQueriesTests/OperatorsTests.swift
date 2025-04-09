@@ -478,6 +478,30 @@ extension SnapshotTests {
       }
     }
 
+    @Test func moduloZero() {
+      assertQuery(Reminder.select { $0.id % 0 }) {
+        """
+        SELECT ("reminders"."id" % 0)
+        FROM "reminders"
+        """
+      } results: {
+        """
+        ┌─────┐
+        │ nil │
+        │ nil │
+        │ nil │
+        │ nil │
+        │ nil │
+        │ nil │
+        │ nil │
+        │ nil │
+        │ nil │
+        │ nil │
+        └─────┘
+        """
+      }
+    }
+
     @Table
     struct Row {
       var a: Int?

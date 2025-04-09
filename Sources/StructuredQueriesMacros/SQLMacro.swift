@@ -9,7 +9,7 @@ public enum SQLMacro: ExpressionMacro {
   ) -> ExprSyntax {
     guard let argument = node.arguments.first?.expression else { fatalError() }
     let binds = [
-      UInt8(ascii: "?"), UInt8(ascii: ":"), UInt8(ascii: "@"), UInt8(ascii: "$"),
+      UInt8(ascii: "?"), UInt8(ascii: ":"), UInt8(ascii: "@"), UInt8(ascii: "$"), 
     ]
     let delimiters: [UInt8: UInt8] = [
       UInt8(ascii: #"""#): UInt8(ascii: #"""#),

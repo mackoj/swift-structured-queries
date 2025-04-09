@@ -78,24 +78,19 @@ from this too if you notice problems, such as ``QueryExpression/neq(_:)`` over
 ``QueryExpression/!=(_:_:)``, ``QueryExpression/gt(_:)`` over ``QueryExpression/>(_:_:)``, and so 
 on. Here is a table of method equivalents of the most common operators:
 
-```
-Operator      Method
----------------------------
-lhs == rhs     lhs.eq(rhs)
-               lhs.is(rhs)
-                
-lhs != rhs     lhs.neq(rhs)
-               lhs.isNot(rhs
-                
-lhs && rhs     lhs.and(rhs)
-lhs || rhs     lhs.or(rhs)
-!value         value.not()
-                
-lhs < rhs      lhs.lt(rhs)
-lhs > rhs      lhs.gt(rhs)
-lhs <= rhs     lhs.lte(rhs)
-lhs >= rhs     lhs.gte(rhs)
-```
+| Method          | Operator      |
+| --------------- | ------------- |
+| `lhs == rhs`       | `lhs.eq(rhs)`     |
+|                    | `lhs.is(rhs)`     |
+| `lhs != rhs`       |    `lhs.neq(rhs)` |
+|                    | `lhs.isNot(rhs)`  |
+| `lhs && rhs`       | `lhs.and(rhs)`    |
+| `lhs \|\| rhs`     |  `lhs.or(rhs)`    |
+| `!value`           |  `value.not()`    |
+| `lhs < rhs`        |  `lhs.lt(rhs)`    |
+| `lhs > rhs`        |  `lhs.gt(rhs)`    |
+| `lhs <= rhs`       |  `lhs.lte(rhs)`   |
+| `lhs >= rhs`       |  `lhs.gte(rhs)`   |
 
 Often one does not need to convert _every_ operator to the method style. You can usually do it for
 just a few operators to get a big boost, and we recommend starting with `==`.

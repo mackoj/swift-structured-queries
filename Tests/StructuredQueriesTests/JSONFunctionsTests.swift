@@ -1,3 +1,4 @@
+import Dependencies
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
@@ -6,6 +7,8 @@ import Testing
 extension SnapshotTests {
   @MainActor
   @Suite struct JSONFunctionsTests {
+    @Dependency(\.defaultDatabase) var db
+
     @Test func jsonGroupArray() {
       assertQuery(
         Reminder.select {
@@ -51,6 +54,55 @@ extension SnapshotTests {
         ┌────┐
         │ 10 │
         └────┘
+        """
+      }
+    }
+
+    @Test func queryJSON() throws {
+      try db.execute(
+        Reminder.delete()
+      )
+      try db.execute(
+        Reminder.insert(
+          [
+            Reminder.Draft(
+              notes: #"""
+                [
+                  {"body": "* Milk\n* Eggs"},
+                  {"body": "* Eggs"},
+                ]
+                """#,
+              remindersListID: 1,
+              title: "Get groceries"
+            ),
+            Reminder.Draft(
+              notes: "[]",
+              remindersListID: 1,
+              title: "Call accountant"
+            ),
+          ]
+        )
+      )
+
+      assertQuery(
+        Reminder
+          .select {
+            (
+              $0.title,
+              #sql("\($0.notes) ->> '$[#-1].body'", as: String?.self)
+            )
+          }
+      ) {
+        """
+        SELECT "reminders"."title", "reminders"."notes" ->> '$[#-1].body'
+        FROM "reminders"
+        """
+      }results: {
+        """
+        ┌───────────────────┬──────────┐
+        │ "Get groceries"   │ "* Eggs" │
+        │ "Call accountant" │ nil      │
+        └───────────────────┴──────────┘
         """
       }
     }

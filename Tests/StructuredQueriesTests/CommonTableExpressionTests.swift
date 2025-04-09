@@ -372,11 +372,11 @@ extension SnapshotTests {
     @Test func fibonacci() throws {
       assertQuery(
         With {
-          Fibonacci(n: 1, fib: 0, nextFib: 1)
+          Fibonacci(n: 1, prevFib: 0, fib: 1)
             .union(
               Fibonacci
                 .select {
-                  Fibonacci.Columns(n: $0.n + 1, fib: $0.nextFib, nextFib: $0.fib + $0.nextFib)
+                  Fibonacci.Columns(n: $0.n + 1, prevFib: $0.fib, fib: $0.prevFib + $0.fib)
                 }
             )
         } query: {
@@ -387,19 +387,18 @@ extension SnapshotTests {
       ) {
         """
         WITH "fibonaccis" AS (
-          SELECT 1 AS "n", 0 AS "fib", 1 AS "nextFib"
+          SELECT 1 AS "n", 0 AS "prevFib", 1 AS "fib"
             UNION
-          SELECT ("fibonaccis"."n" + 1) AS "n", "fibonaccis"."nextFib" AS "fib", ("fibonaccis"."fib" + "fibonaccis"."nextFib") AS "nextFib"
+          SELECT ("fibonaccis"."n" + 1) AS "n", "fibonaccis"."fib" AS "prevFib", ("fibonaccis"."prevFib" + "fibonaccis"."fib") AS "fib"
           FROM "fibonaccis"
         )
         SELECT "fibonaccis"."fib"
         FROM "fibonaccis"
         LIMIT 10
         """
-      } results: {
+      }results: {
         """
         ┌────┐
-        │ 0  │
         │ 1  │
         │ 1  │
         │ 2  │
@@ -409,6 +408,7 @@ extension SnapshotTests {
         │ 13 │
         │ 21 │
         │ 34 │
+        │ 55 │
         └────┘
         """
       }
@@ -419,8 +419,8 @@ extension SnapshotTests {
 @Table @Selection
 private struct Fibonacci {
   let n: Int
+  let prevFib: Int
   let fib: Int
-  let nextFib: Int
 }
 
 @Table @Selection

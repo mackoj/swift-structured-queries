@@ -36,7 +36,7 @@ Then to define a Swift data type that represents this table, one can use the `@T
 }
 ```
 
-> Note: that the struct's field names match the column tables of the table exactly. In order to
+Note that the struct's field names match the column tables of the table exactly. In order to
 support property names that differ from the columns names, you can use the `@Column` macro. See the
 section below, <doc:DefiningYourSchema#Customizing-a-table>,  for more information on how to
 customize your data type.
@@ -71,29 +71,21 @@ inflection logic to come up with mostly reasonable results:
 @Table struct Status {}
 @Table struct ReminderList {}
 
-Reminder.tableName  // "reminders"
-Category.tableName  // "categories"
-Status.tableName    // "statuses"
-Status.tableName    // "reminderLists"
+Reminder.tableName      // "reminders"
+Category.tableName      // "categories"
+Status.tableName        // "statuses"
+ReminderList.tableName  // "reminderLists"
 ```
 
 However, many people prefer for their table names to be the _singular_ form of the noun, or they
-prefer to use snakecase instead of camelcase. In such cases you can provide the ``Table/tableName``
-requirement manually for each of your table types:
+prefer to use snakecase instead of camelcase. In such cases you can provide the `@Table` with a
+string for the name of the table in the database:
 
 ```swift
-@Table struct Reminder {
-  static let tableName = "reminder"
-}
-@Table struct Category {
-  static let tableName = "category"
-}
-@Table struct Status {
-  static let tableName = "status"
-}
-@Table struct ReminderList {
-  static let tableName = "reminder_list"
-}
+@Table("reminder") struct Reminder {}
+@Table("category") struct Category {}
+@Table("status") struct Status {}
+@Table("reminder_list") struct ReminderList {}
 
 Reminder.tableName  // "reminder"
 Category.tableName  // "category"
@@ -127,8 +119,15 @@ generated when writing queries will correctly use `"is_completed"`.
 
 ### Custom data types
 
-There are many data types that do not have native support in SQLite, such as `Date`. There are 3 
-ways to represent dates in SQLite:
+There are many data types that do not have native support in SQLite. For these data types
+you must define a conformance to ``QueryRepresentable`` and ``QueryBindable`` in order to 
+translate values to a format that SQLite does understand. The library comes with conformances
+to aid in representing dates, UUIDs and JSON, and you can define your own conformances for your
+own custom data types.
+
+#### Dates
+
+SQLite does not have a native data type, and instead has 3 different ways to represent dates:
 
 * Text column interpreted as ISO-8601 formatted string.
 * Int column interpreted as number of seconds since Unix epoch.
@@ -140,7 +139,7 @@ data type like this:
 ```swift
 @Table struct Reminder {
   let id: Int 
-  var date: Date
+  var date: Date  // 🛑 'Date' column requires a query representation
 }
 ```
 
@@ -161,10 +160,17 @@ Any of these representations can be used like so:
 }
 ```
 
-One can also define their own custom representations for any data type by conforming to the 
-``QueryRepresentable`` protocol. 
+#### UUID
 
-<!-- TODO: See <doc:ABC> for more information on custom data types. -->
+<!-- TODO: finish -->
+
+#### JSON
+
+<!-- TODO: finish -->
+
+#### RawRepresentable
+
+<!-- TODO: finish -->
 
 #### Primary key
 
