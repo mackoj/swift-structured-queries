@@ -145,6 +145,11 @@ RemindersList.join(Reminder.all) { $0.id == $1.remindersListID }
 
 - ``NullOrdering``
 
+### Self-joins
+
+- ``TableAlias``
+- ``AliasName``
+
 <!--
 compound selects: union, intersection, etc...
 -->

@@ -129,7 +129,7 @@ Reminder.where { $0.title.like("%Get%") }
 //   "reminders"."title",
 //   "reminders"."priority" 
 // FROM "reminders"
-// WHERE ("reminders"."title" LIKE '%Get%' )
+// WHERE ("reminders"."title" LIKE '%Get%')
 ```
 
 And to make this a case-insensitive match one can use the ``QueryExpression/collate(_:)`` method:
@@ -142,7 +142,7 @@ Reminder.where { $0.title.collate(.nocase).like("%get%") }
 //   "reminders"."title",
 //   "reminders"."priority" 
 // FROM "reminders"
-// WHERE ("reminders"."title" COLLATE NOCASE LIKE '%get%' )
+// WHERE ("reminders"."title" COLLATE NOCASE LIKE '%get%')
 ```
 
 The library also supports all of the clauses of a standard SQL "SELECT" statement, including orders,
@@ -159,7 +159,7 @@ Reminder
 //   "reminders"."title",
 //   "reminders"."priority" 
 // FROM "reminders"
-// WHERE ("reminders"."title" COLLATE NOCASE LIKE '%get%' )
+// WHERE ("reminders"."title" COLLATE NOCASE LIKE '%get%')
 // ORDER BY
 //   "reminders"."isCompleted" DESC,
 //   "reminders"."priority" DESC,
@@ -184,7 +184,7 @@ Reminder
 //   "reminders"."title",
 //   "reminders"."priority" 
 // FROM "reminders"
-// WHERE ("reminders"."title" COLLATE NOCASE LIKE '%get%' )
+// WHERE ("reminders"."title" COLLATE NOCASE LIKE '%get%')
 // ORDER BY
 //   "reminders"."isCompleted" DESC,
 //   "reminders"."priority" DESC,
@@ -249,7 +249,8 @@ Reminder.insert {
 //   (0, 'Get groceries', 3),
 //   (0, 'Take a walk', 1),
 //   (1, 'Get haircut', NULL)
-// ON CONFLICT DO UPDATE SET "title" = ("title" || ' (Copy)')
+// ON CONFLICT DO UPDATE SET
+//   "title" = ("reminders"."title" || ' (Copy)')
 ```
 
 The `onConflict` trailing closure is handed a definition of the reminders table, but in this closure

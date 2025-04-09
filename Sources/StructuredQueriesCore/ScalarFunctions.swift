@@ -352,6 +352,7 @@ extension QueryExpression where QueryValue == [UInt8] {
   }
 }
 
+/// A query expression of a generalized query function.
 public struct QueryFunction<QueryValue>: QueryExpression {
   let name: QueryFragment
   let arguments: [QueryFragment]
@@ -366,6 +367,7 @@ public struct QueryFunction<QueryValue>: QueryExpression {
   }
 }
 
+/// A query expression of a coalesce function.
 public struct CoalesceFunction<QueryValue>: QueryExpression {
   private let arguments: [QueryFragment]
 

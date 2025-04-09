@@ -188,6 +188,7 @@ extension QueryExpression where Self == AggregateFunction<Int> {
   }
 }
 
+/// A query expression of an aggregate function.
 public struct AggregateFunction<QueryValue>: QueryExpression {
   var name: QueryFragment
   var isDistinct: Bool

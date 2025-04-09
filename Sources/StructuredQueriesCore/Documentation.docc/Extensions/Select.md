@@ -23,6 +23,7 @@
 
 - ``map(_:)``
 - ``subscript(dynamicMember:)``
+- ``StructuredQueriesCore/+(_:_:)``
 
 ### Supporting types
 

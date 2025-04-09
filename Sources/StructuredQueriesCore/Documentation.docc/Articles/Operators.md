@@ -82,3 +82,9 @@ TODO
 - ``Statement/contains(_:)``
 - ``Swift/Array``
 - ``Swift/ClosedRange``
+
+### Casting
+
+- ``QueryExpression/cast(as:)``
+- ``SQLiteType``
+- ``SQLiteTypeAffinity``

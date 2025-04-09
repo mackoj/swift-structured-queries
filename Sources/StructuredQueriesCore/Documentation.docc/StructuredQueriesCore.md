@@ -22,15 +22,12 @@ directly.
 ### Essentials
 
 - <doc:GettingStarted>
+- ``Table``
 - <doc:PrimaryKeyedTables>
 <!-- rename: query cookbook -->
 - <doc:AdvancedQueries>
 - <doc:BindingAndDecoding>
 - <doc:CompilerPerformance>
-
-### Schema definition
-
-- ``Table``
 
 ### Statements
 
@@ -40,9 +37,11 @@ directly.
 - <doc:DeleteStatements>
 - <doc:WhereClauses>
 - <doc:CommonTableExpressions>
+- <doc:StatementTypes>
 
 ### Expressions
 
+- ``QueryFragment``
 - <doc:AggregateFunctions>
 - <doc:Operators>
 - <doc:ScalarFunctions>
