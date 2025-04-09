@@ -54,8 +54,9 @@ let draft = Reminder.Draft(title: "Get groceries")
 ```
 
 The `id` is not necessary to provide because it is optional. This allows you to insert rows into
-your database without specifying the id. The library comes with many APIs that specifically work
-with drafts from primary keyed tables:
+your database without specifying the id. The library comes with a special 
+``PrimaryKeyedTable/insert(or:_:onConflict:)`` method that allows you to insert a row
+into the database by providing only a draft:
 
 ```swift
 Reminder.insert(Reminder.Draft(title: "Get groceries"))
@@ -69,9 +70,58 @@ Since the "id" column is not specified in this query it allows the database to i
 This `Draft` type is appropriate to use in any features that needs to build up a value without
 specifying an ID.
 
+Further, using the ``Insert/returning(_:)`` method you can get back the ID of the newly inserted 
+row:
+
+```swift
+Reminder
+  .insert(Reminder.Draft(title: "Get groceries"))
+  .returning(\.id)
+// INSERT INTO "reminders"
+//   ("title")
+// VALUES
+//   ('Get groceries')
+// RETURNING 
+//   "id"
+```
+
+Or even get back the entire newly inserted row:
+
+```swift
+Reminder
+  .insert(Reminder.Draft(title: "Get groceries"))
+  .returning(\.self)
+// INSERT INTO "reminders"
+//   ("title")
+// VALUES
+//   ('Get groceries')
+// RETURNING
+//   "id", "title", "isCompleted"
+```
+
 ### Updates and deletions
 
-Primary keyed tables 
+Primary keyed tables are also given special APIs for updating and deleting existing rows in the 
+table based on their primary key. For example, the ``PrimaryKeyedTable/update(or:_:)`` method 
+allows one to update all the fields of a row with the corresponding primary key:
+
+```swift
+let reminder = Reminder(id: 1, title: "Get groceries", isCompleted: false)
+Reminder.update(reminder)
+// UPDATE "reminders"
+// SET "title" = 'Get groceries', "isCompleted" = 0
+// WHERE "id" = 1
+```
+
+Similarly, the ``PrimaryKeyedTable/delete(_:)`` method allows one to delete a row by its primary 
+key:
+
+```swift
+let reminder = Reminder(id: 1, title: "Get groceries", isCompleted: false)
+Reminder.delete(reminder)
+// DELETE "reminders"
+// WHERE "id" = 1
+```
 
 ## Topics
 

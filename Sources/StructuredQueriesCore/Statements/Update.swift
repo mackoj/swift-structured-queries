@@ -1,12 +1,33 @@
 extension Table {
   /// An update statement.
   ///
+  /// The trailing closure of this method allows you to set any field on the table. For example,
+  /// constructing an update statement that sets the title of the reminder with "id" equal to 1:
+  ///
   /// ```swift
   /// Reminder.update {
   ///   $0.title = "Get haircut"
   /// }
-  /// // UPDATE "reminders" SET "title" = 'Get haircut'
+  /// .where { $0.id.eq(1) }
+  /// // UPDATE "reminders"
+  /// // SET "title" = 'Get haircut'
+  /// // WHERE "id" = 1
   /// ```
+  ///
+  /// There is also a subset of mutations you can make to the argument of the trailing closure that
+  /// is translated into the equivalent SQL. For example, to append "!" to the title of every row,
+  /// one can do this:
+  ///
+  /// ```swift
+  /// Reminder.update {
+  ///   $0.title += "!"
+  /// }
+  /// // UPDATE "reminders"
+  /// // SET "title" = "title" || 'Get haircut'
+  /// ```
+  ///
+  /// The syntax `$0.title += "!"` is translated into the equivalent SQL of
+  /// `"title" = "title" || 'Get haircut'`
   ///
   /// - Parameters:
   ///   - conflictResolution: A conflict resolution algorithm.
@@ -22,6 +43,10 @@ extension Table {
 
 extension PrimaryKeyedTable {
   /// An update statement for the values of a given record.
+  ///
+  /// This method is defined only on ``PrimaryKeyedTable`` conformances (see
+  /// <doc:PrimaryKeyedTables> for more info), and it constructs an update statement that sets
+  /// every field of the row whose ID matches the "id" of the model:
   ///
   /// ```swift
   /// @Table
