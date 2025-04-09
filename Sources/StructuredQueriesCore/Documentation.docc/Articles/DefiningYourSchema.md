@@ -184,23 +184,6 @@ struct Book {
 
 See <doc:PrimaryKeyedTable> for more information on tables with primary keys.
 
-<!---->
-<!--#### Ephemeral columns-->
-<!---->
-<!--It is possible to store properties in a Swift data type that has no corresponding column in your SQL-->
-<!--database. Such properties must have a default value, and can be specified using the `@Ephemeral`-->
-<!--macro:-->
-<!---->
-<!--```swift-->
-<!--struct Book {-->
-<!--  @Column(primaryKey: true)-->
-<!--  let isbn: String -->
-<!--  var title = ""-->
-<!--}-->
-<!--```-->
-
-
-
 ## Topics
 
 ### Schema

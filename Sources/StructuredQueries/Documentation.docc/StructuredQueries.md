@@ -17,7 +17,6 @@ See [`StructuredQueriesCore`](structuredqueriescore) for general library usage.
 
 - ``Table(_:)``
 - ``Column(_:as:primaryKey:)``
-- ``Ephemeral()``
 - ``Selection()`
 - ``sql(_:as:)``
 - ``bind(_:as:)``

@@ -752,44 +752,6 @@ extension SnapshotTests {
       }
     }
 
-    @Test func ephemeralField() {
-      assertMacro {
-        """
-        @Table struct SyncUp {
-          var name: String
-          @Ephemeral
-          var computed: Int
-        }
-        """
-      } expansion: {
-        #"""
-        struct SyncUp {
-          var name: String
-          var computed: Int
-        }
-
-        extension SyncUp: StructuredQueries.Table {
-          public struct TableColumns: StructuredQueries.TableDefinition {
-            public typealias QueryValue = SyncUp
-            public let name = StructuredQueries.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
-            public static var allColumns: [any StructuredQueries.TableColumnExpression] {
-              [QueryValue.columns.name]
-            }
-          }
-          public static let columns = TableColumns()
-          public static let tableName = "syncUps"
-          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
-            let name = try decoder.decode(String.self)
-            guard let name else {
-              throw QueryDecodingError.missingRequiredColumn
-            }
-            self.name = name
-          }
-        }
-        """#
-      }
-    }
-
     @Test func noType() {
       assertMacro {
         """

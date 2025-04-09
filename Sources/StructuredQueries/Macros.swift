@@ -45,16 +45,6 @@ public macro Column(
     type: "ColumnMacro"
   )
 
-/// Tells Structured Queries not to consider the annotated property a column of the table
-///
-/// Like SwiftData's `@Transient` macro, but for SQL.
-@attached(accessor, names: named(willSet))
-public macro Ephemeral() =
-  #externalMacro(
-    module: "StructuredQueriesMacros",
-    type: "EphemeralMacro"
-  )
-
 /// Defines the ability for a type to be selected from a query.
 ///
 /// When selecting tables and fields from a query, this data is bundled up into a tuple:
