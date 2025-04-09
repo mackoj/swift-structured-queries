@@ -35,7 +35,7 @@ These selected columns become the row data type that will be decoded from a data
 
 ```swift
 Reminder.select { ($0.id, $0.title, $0.isCompleted) }
-// Statement<(Int, String, Bool)>
+// => (Int, String, Bool)
 ```
 
 Selection is incremental, so multiple chained calls to `select` will result in a statement that
@@ -45,6 +45,13 @@ returns a tuple of the combined columns:
 let q1 = Reminder.select(\.id)     // => Int
 let q2 = q1.select(\.title)        // => (Int, String)
 let q3 = q2.select(\.isCompleted)  // => (Int, String, Bool)
+```
+
+To add (or remove) a `DISTINCT` clause from a selection, use ``Select/distinct(_:)``:
+
+```swift
+Reminder.distinct().select(\.title)
+// SELECT DISTINCT "reminders"."title" FROM "reminders"
 ```
 
 To bundle selected columns up into a custom data type, you can annotate a struct of decoded results
@@ -251,19 +258,110 @@ Reminder.completed.or(Reminder.flagged)
 
 ### Grouping results
 
-<!-- TODO: GROUP BY -->
+The `group(by:)` function is used to add a grouping to a query.
+
+```swift
+Reminder.group(by: \.priority)
+// SELECT … FROM "reminders"
+// GROUP BY "reminders"."priority"
+
+Reminder.group { ($0.isCompleted, $0.priority) }
+// SELECT … FROM "reminders"
+// GROUP BY "reminders"."isCompleted", "reminders"."priority"
+```
+
+Grouping is incremental, so multiple chained calls to `group(by:)` will result in a statement that
+combines them:
+
+```swift
+Reminder
+  .group(by: \.isCompleted)
+  .group(by: \.priority)
+// SELECT … FROM "reminders"
+// GROUP BY "reminders"."isCompleted", "reminders"."priority"
+```
 
 ### Filtering by aggregates
 
-<!-- TODO: HAVING -->
+The `having` function is used to add a predicate to a query's `HAVING` clause.
+
+```swift
+Reminder
+  .group(by: \.priority)
+  .having { $0.id.count() > 1 }
+  .select { ($0.priority, $0.id.count()) }
+// SELECT "reminders"."priority", count("reminders"."id")
+// GROUP BY "reminders"."priority"
+// HAVING count("reminders"."id") > 1
+// => (Int?, Int)
+```
+
+Like `where`, `having` is incremental, and multiple chained calls will `AND` their predicates
+together.
 
 ### Sorting results
 
-<!-- TODO: ORDER BY -->
+The `order(by:)` function is used to add an ordering term to a query's `ORDER BY` clause.
+
+```swift
+Reminder.order(by: \.title)
+// SELECT … FROM "reminders"
+// ORDER BY "reminders"."title"
+```
+
+Any number of ordering terms can be specified in a call to `order`, and
+``QueryExpression/asc(nulls:)`` and ``QueryExpression/desc(nulls:)`` can be used to specify the
+direction.
+
+```swift
+Reminder.order { ($0.priority.desc(nulls: .first), $0.title.asc()) }
+// SELECT … FROM "reminders"
+// ORDER BY "reminders".priority" DESC NULLS FIRST, reminders"."title" ASC
+```
+
+Multiple chained calls to `order` will accumulate each term:
+
+```swift
+Reminder
+  .order { $0.priority.desc() }
+  .order(by: \.title)
+// SELECT … FROM "reminders"
+// ORDER BY "reminders".priority" DESC, reminders"."title"
+```
+
+@Comment {
+  TODO: Add result builder closure example
+}
 
 ### Paginating results
 
-<!-- TODO: LIMIT OFFSET  -->
+The `limit(_:offset:)` function is used to change a query's `LIMIT` and `OFFSET` clauses.
+
+```swift
+Reminder.limit(10)
+// SELECT … FROM "reminders"
+// LIMIT 10
+
+Reminder.limit(10, offset: 10)
+// SELECT … FROM "reminders"
+// LIMIT 10 OFFSET 10
+```
+
+Multiple chained calls to `limit` will override the limit and offset to the last call:
+
+```swift
+Reminder
+  .limit(10, offset: 10)
+  .limit(20)
+// SELECT … FROM "reminders"
+// LIMIT 20
+
+Reminder
+  .limit(10)
+  .limit(20, offset: 20)
+// SELECT … FROM "reminders"
+// LIMIT 20 OFFSET 20
+```
 
 ## Topics
 
