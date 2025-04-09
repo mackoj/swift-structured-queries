@@ -248,13 +248,13 @@ extension SnapshotTests {
         @Table
         struct Foo {
           @Column(as: Date.ISO8601Representation.self)
-          var bar: Int
+          var bar: Date
         }
         """
       } expansion: {
         #"""
         struct Foo {
-          var bar: Int
+          var bar: Date
         }
 
         extension Foo: StructuredQueries.Table {
