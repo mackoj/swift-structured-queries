@@ -234,6 +234,7 @@ And a query that selects into this type can be defined like so:
 
 ```swift
 RemindersList
+  .group(by: \.id)
   .join(Reminder.all) { $0.id.eq($1.remindersListID) }
   .select {
     RemindersListWithCount.Columns(
@@ -241,9 +242,11 @@ RemindersList
       count: $1.count()
     )
   }
-// SELECT "remindersLists".*, count("reminders"."id")
+// SELECT "remindersLists".…, count("reminders"."id")
 // FROM "remindersLists"
-// JOIN "reminders" ON "remindersLists"."id" = "reminders"."remindersListID"
+// JOIN "reminders"
+//   ON "remindersLists"."id" = "reminders"."remindersListID"
+// GROUP BY "remindersLists"."id"
 // => RemindersListWithCount
 ```
 

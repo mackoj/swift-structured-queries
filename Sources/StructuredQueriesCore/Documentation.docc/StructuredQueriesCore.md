@@ -25,10 +25,10 @@ safe SQL strings directly.
 - <doc:DefiningYourSchema>
 <!-- TODO: Move into 'Defining your schema'? -->
 - <doc:PrimaryKeyedTables>
+- <doc:SafeSQLStrings>
 <!-- TODO: Rename to 'Query cookbook'? -->
 - <doc:AdvancedQueries>
 - <doc:CompilerPerformance>
-- <doc:SafeSQLStrings>
 
 ### Statements
 
