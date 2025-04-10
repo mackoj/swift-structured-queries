@@ -137,8 +137,8 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     /// Append a quoted fragment to the interpolation.
     ///
     /// ```swift
-    /// #sql("SELECT * FROM \(quote: "reminders")", as: Reminder.self)
-    /// // SELECT * FROM "reminders"
+    /// #sql("SELECT \(quote: "id") FROM \(quote: "reminders")", as: Reminder.self)
+    /// // SELECT "id" FROM "reminders"
     ///
     /// #sql("CREATE TABLE t (c TEXT DEFAULT \(quote: "Blob's world", delimiter: .text))")
     /// // SELECT TABLE t (c TEXT DEFAULT 'Blob''s world')

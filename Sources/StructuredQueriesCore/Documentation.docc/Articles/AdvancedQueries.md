@@ -18,14 +18,14 @@ could be restored for a certain amount of time. These tables can be represented 
 ```swift
 @Table
 struct RemindersList: Identifiable {
-  let id: Int 
+  let id: Int
   var title = ""
   @Column(as: Date.ISO8601Representation.self)
   var deletedAt: Date?
 }
 @Table
 struct Reminder: Identifiable {
-  let id: Int 
+  let id: Int
   var title = ""
   var isCompleted = false
   @Column(as: Date.ISO8601Representation.self)
@@ -48,8 +48,8 @@ extension Reminder {
 }
 ```
 
-Then these helpers can be used when composing together a larger, more complex query. For example, 
-we can select all non-deleted lists with the count of all non-deleted reminders in each list like 
+Then these helpers can be used when composing together a larger, more complex query. For example,
+we can select all non-deleted lists with the count of all non-deleted reminders in each list like
 so:
 
 ```swift
@@ -80,6 +80,18 @@ RemindersList
 This produces the same query even though the `notDeleted` static helper is chained after the
 `group(by:)` clause.
 
+> Tip: If you are familiar with Ruby on Rails, this feature is similar to Active Record
+> [scopes](https://guides.rubyonrails.org/active_record_querying.html#scopes):
+>
+> ```ruby
+> class Reminder < ApplicationRecord
+>   scope :not_deleted, -> { where(deleted_at: nil) }
+> end
+>
+> Reminder.not_deleted
+> Reminder.group(:id).not_deleted
+> ```
+
 ### Reusable column queries
 
 It is also possible to define helpers on the ``Table/TableColumns`` type inside each table that
@@ -101,16 +113,16 @@ extension Reminder.TableColumns {
 }
 ```
 
-Then you can use these helpers when building a query. For example, you can use 
-``PrimaryKeyedTableDefinition/count(filter:)`` to count the number of past due, current and 
+Then you can use these helpers when building a query. For example, you can use
+``PrimaryKeyedTableDefinition/count(filter:)`` to count the number of past due, current and
 scheduled reminders in one single query like so:
 
 ```swift
 Reminder
   .select {
     (
-      $0.count(filter: $0.isPastDue), 
-      $0.count(filter: $0.isToday), 
+      $0.count(filter: $0.isPastDue),
+      $0.count(filter: $0.isToday),
       $0.count(filter: $0.isScheduled)
     )
   }
@@ -119,27 +131,27 @@ Reminder
 //   count("id" FILTER (WHERE NOT "isCompleted" AND date("dueAt") = date('now'))),
 //   count("id" FILTER (WHERE NOT "isCompleted" AND date("dueAt") > date('now')))
 // FROM "reminders"
-// => (Int, Int, Int) 
+// => (Int, Int, Int)
 ```
 
 ### Default scopes
 
-By default, every ``Table`` conformance comes with an ``Table/all`` property that represents 
+By default, every ``Table`` conformance comes with an ``Table/all`` property that represents
 selecting all rows from the table:
 
 ```swift
 Reminder.all
-// SELECT * FROM "reminders"
+// SELECT … FROM "reminders"
 ```
 
 It is possible to provide an alternative implementation to ``Table/all`` for your tables so that
-certain SQL clauses are automatically applied. For example, if the `Reminder` table has a 
+certain SQL clauses are automatically applied. For example, if the `Reminder` table has a
 `deletedAt` column to represent when the record was deleted without actually deleting it from
 the database, then you can default `Reminder.all` to query for only non-deleted records:
 
 ```swift
 struct Reminder {
-  let id: Int 
+  let id: Int
   var title = ""
   var isCompleted = false
   @Column(as: Date.ISO8601Representation.self)
@@ -149,14 +161,14 @@ struct Reminder {
 }
 ```
 
-Now when `Reminder.all` is used it will automatically filter out deleted reminders. This also 
-includes when using ``Table/where(_:)``, ``Table/select(_:)``, ``Table/order(by:)``, and 
+Now when `Reminder.all` is used it will automatically filter out deleted reminders. This also
+includes when using ``Table/where(_:)``, ``Table/select(_:)``, ``Table/order(by:)``, and
 other query entry points:
 
 ```swift
 Reminder
   .where { !$0.isCompleted }
-// SELECT *
+// SELECT …
 // FROM "reminders"
 // WHERE "deletedAt" IS NOT NULL AND NOT "isCompleted"
 ```
@@ -166,15 +178,26 @@ you can use the ``Table/unscoped`` property:
 
 ```swift
 Reminder.unscoped
-// SELECT * FROM "reminders"
+// SELECT … FROM "reminders"
 ```
+
+> Tip: If you are familiar with Ruby on Rails, this feature is similar to Active Record's [default scopes](https://guides.rubyonrails.org/active_record_querying.html#applying-a-default-scope).
+>
+> ```ruby
+> class Reminder < ApplicationRecord
+>   default_scope { where(deleted_at: nil) }
+> end
+>
+> Reminder.all      # all undeleted reminders
+> Reminder.unscope  # all reminders
+> ```
 
 ### Custom selections
 
 It will often be the case that you want to select very specific data from your database and then
-decode that data into a custom Swift data type. For example, if you are displaying a list of 
+decode that data into a custom Swift data type. For example, if you are displaying a list of
 reminders and only need their titles for the list, it would be wasteful to decode an array of
-all reminder data. The `@Selection` macro allows you to define a custom data type of only the 
+all reminder data. The `@Selection` macro allows you to define a custom data type of only the
 fields you want to decode:
 
 ```swift
@@ -212,7 +235,7 @@ And a query that selects into this type can be defined like so:
 ```swift
 RemindersList
   .join(Reminder.all) { $0.id.eq($1.remindersListID) }
-  .select { 
+  .select {
     RemindersListWithCount.Columns(
       remindersList: $0,
       count: $1.count()
