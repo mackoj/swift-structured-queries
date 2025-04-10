@@ -64,7 +64,8 @@ could be written as a single invocation of the macro:
 ```swift
 #sql(
   """
-  SELECT \(Reminder.columns) FROM \(Reminder.self)
+  SELECT \(Reminder.columns) 
+  FROM \(Reminder.self)
   WHERE \(Reminder.dueDate) < date()
   """,
   as: Reminder.self
@@ -95,6 +96,105 @@ expect any data to be returned from the statement, _e.g._ during a schema migrat
   """
 )
 ```
+
+### SQL bindings
+
+Values can be interpolated into `#sql` strings to produce dynamic queries:
+
+```swift
+let isCompleted = false
+#sql(
+  """
+  SELECT \(Reminder.columns) 
+  FROM \(Reminder.self)
+  WHERE \(Reminder.isCompleted) = \(isCompleted)
+  """,
+  as: Reminder.self
+)
+// SELECT *
+// FROM "reminders"
+// WHERE "isCompleted" = ?
+// [0]
+```
+
+Note that although it seems the literal value is being interpolated directly into the string, that
+is not what is happening. The interpolated value is captured as a separate statement binding in 
+order to protect against SQL injection.
+
+String bindings are handled in a special fashion to make it clear what the intended usage is. If
+you interpolate a string into a `#sql` string, you will get a deprecation warning:
+
+```swift
+let searchText = "get"
+#sql(
+  """
+  SELECT \(Reminder.columns) 
+  FROM \(Reminder.self)
+  WHERE \(Reminder.title) COLLATE NOCASE LIKE \(searchText)
+  """,
+  as: Reminder.self
+)
+// ⚠️ 'appendInterpolation' is deprecated: String interpolation produces a bind for a string value; 
+//     did you mean to make this explicit? To append raw SQL, use "\(raw: sqlString)".
+```
+
+If you mean to bind the string as a value, you can update the interpolation to use 
+``QueryFragment/StringInterpolation/appendInterpolation(bind:)``:
+
+```swift
+let searchText = "get"
+#sql(
+  """
+  SELECT \(Reminder.columns) 
+  FROM \(Reminder.self)
+  WHERE \(Reminder.title) COLLATE NOCASE LIKE \(bind: searchText)
+  """,
+  as: Reminder.self
+)
+// SELECT *
+// FROM "reminders"
+// WHERE "title" COLLATE NOCASE LIKE ?
+// ["get"]
+```
+
+If you mean to interpolate the string directly into the SQL you can use
+``QueryFragment/StringInterpolation/appendInterpolation(raw:)``:
+
+```swift
+let searchText = "get"
+#sql(
+  """
+  SELECT \(Reminder.columns) 
+  FROM \(Reminder.self)
+  WHERE \(Reminder.title) COLLATE NOCASE LIKE '%\(raw: searchText)%'
+  """,
+  as: Reminder.self
+)
+// SELECT *
+// FROM "reminders"
+// WHERE "title" COLLATE NOCASE LIKE '%get%'
+```
+
+> Warning: It is dangerous to use raw SQL interpolation as it makes your queries susceptible to
+> SQL injection attacks:
+> 
+> ```swift
+> let searchText = "' OR 1=1 OR '"
+> #sql(
+>   """
+>   SELECT \(Reminder.columns) 
+>   FROM \(Reminder.self)
+>   WHERE \(Reminder.title) COLLATE NOCASE LIKE '%\(raw: searchText)%'
+>   """,
+>   as: Reminder.self
+> )
+> // SELECT *
+> // FROM "reminders"
+> // WHERE "title" COLLATE NOCASE LIKE '%' OR 1=1 OR '%'
+> ```
+>
+> This has caused _all_ reminders to be returned, which may be a security risk. Avoid raw SQL
+> interpolation at all costs.
 
 ### SQL linting
 

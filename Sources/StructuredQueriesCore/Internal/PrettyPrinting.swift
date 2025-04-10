@@ -22,8 +22,9 @@ extension QueryFragment {
     #endif
   }
 
-  @inlinable
-  @inline(__always)
+  // TODO: bring back
+//  @inlinable
+//  @inline(__always)
   func indented() -> Self {
     #if DEBUG
       guard isTesting else { return self }
