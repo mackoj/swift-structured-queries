@@ -23,10 +23,12 @@ safe SQL strings directly.
 
 - <doc:GettingStarted>
 - <doc:DefiningYourSchema>
-<!-- rename: query cookbook -->
+<!-- TODO: Move into 'Defining your schema'? -->
+- <doc:PrimaryKeyedTables>
+<!-- TODO: Rename to 'Query cookbook'? -->
 - <doc:AdvancedQueries>
 - <doc:CompilerPerformance>
-<!-- TODO: Safe SQL strings? -->
+- <doc:SafeSQLStrings>
 
 ### Statements
 

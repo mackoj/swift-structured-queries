@@ -96,8 +96,8 @@ just a few operators to get a big boost, and we recommend starting with `==` and
 
 ### The #sql macro
 
-The library ships with a tool that allows one to write safe SQL strings via the `#sql` macro. Usage
-of the `#sql` macro does not affect the safety of your queries from SQL injection attacks, nor
+The library ships with a tool that allows one to write safe SQL strings _via_ the `#sql` macro.
+Usage of the `#sql` macro does not affect the safety of your queries from SQL injection attacks, nor
 does it prevent you making use of your table's schema in the query. The primary downside to using
 `#sql` is that it can complicate decoding query results into custom types, but when used for small
 fragments of a query one typically avoids such complications.

@@ -428,3 +428,5 @@ struct ReminderResult {
   as: ReminderResult.self
 )
 ```
+
+See <doc:SafeSQLStrings> for more information about the `#sql` macro.
