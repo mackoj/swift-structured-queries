@@ -1,6 +1,6 @@
 # Expression types
 
-TODO
+Learn about the various `QueryExpression` conformances that come with the library.
 
 ## Topics
 

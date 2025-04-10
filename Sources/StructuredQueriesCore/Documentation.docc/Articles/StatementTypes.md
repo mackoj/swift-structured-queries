@@ -1,6 +1,6 @@
 # Statement types
 
-TODO
+Learn about the various `Statement` conformances that come with the library.
 
 ## Topics
 

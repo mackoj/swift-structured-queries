@@ -1,5 +1,7 @@
 # Scalar functions
 
+Apply SQL functions to SQL expressions.
+
 ## Overview
 
 TODO
