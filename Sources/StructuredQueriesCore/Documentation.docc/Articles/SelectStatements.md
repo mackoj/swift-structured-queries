@@ -417,6 +417,7 @@ RemindersList.select(\.title)
 
 - ``Select``
 - ``SelectStatement``
+- ``Values``
 
 ### Convenience type aliases
 

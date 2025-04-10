@@ -34,6 +34,7 @@ extension QueryExpression where QueryValue: SQLiteType {
 }
 
 // TODO: Can we make automatically conforming to this easier? See 'UUID.LowercasedRepresentation'.
+
 public protocol SQLiteType: QueryBindable {
   static var typeAffinity: SQLiteTypeAffinity { get }
 }
