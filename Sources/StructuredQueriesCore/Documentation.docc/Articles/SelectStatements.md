@@ -101,8 +101,10 @@ is given the columns of each table so that it can describe the join constraint:
 
 ```swift
 RemindersList.join(Reminder.all) { $0.id == $1.remindersListID }
-// SELECT "remindersLists".…, "reminders".… FROM "remindersLists"
-// JOIN "reminders" ON "remindersLists"."id" = "reminders"."remindersListID"
+// SELECT "remindersLists".…, "reminders".…
+//   FROM "remindersLists"
+// JOIN "reminders"
+//   ON "remindersLists"."id" = "reminders"."remindersListID"
 // => (RemindersList, Reminder)
 ```
 
@@ -115,8 +117,10 @@ The joined query has access to both tables' columns in subsequent chained builde
 RemindersList
   .join(Reminder.all) { $0.id == $1.remindersListID }
   .select { ($0.title, $1.title) }
-// SELECT "remindersLists"."title", "reminders"."title" FROM "remindersLists"
-// JOIN "reminders" ON "remindersLists"."id" = "reminders"."remindersListID"
+// SELECT "remindersLists"."title", "reminders"."title"
+//   FROM "remindersLists"
+// JOIN "reminders"
+//   ON "remindersLists"."id" = "reminders"."remindersListID"
 // => (String, String)
 ```
 
@@ -127,9 +131,12 @@ joins:
 RemindersList
   .join(Reminder.all) { $0.id == $1.remindersListID }
   .join(User.all) { $1.assignedUserID == $2.id }
-// SELECT "remindersLists".…, "reminders".…, "users".… FROM "remindersLists"
-// JOIN "reminders" ON "remindersLists"."id" = "reminders"."remindersListID"
-// JOIN "users" ON "reminders"."assignedUserID" = "users"."id"
+// SELECT "remindersLists".…, "reminders".…, "users".…
+//   FROM "remindersLists"
+// JOIN "reminders"
+//   ON "remindersLists"."id" = "reminders"."remindersListID"
+// JOIN "users"
+//   ON "reminders"."assignedUserID" = "users"."id"
 // => (RemindersList, Reminder, User)
 ```
 
@@ -140,15 +147,19 @@ selected columns, joins, filters, and more.
 RemindersList
   .select(\.title)
   .join(Reminder.select(\.title) { /* ... */ }
-// SELECT "remindersLists"."title", "reminders"."title" FROM "remindersLists"
-// JOIN "reminders" ON "remindersLists"."id" = "reminders"."remindersListID"
+// SELECT "remindersLists"."title", "reminders"."title"
+//   FROM "remindersLists"
+// JOIN "reminders"
+//   ON "remindersLists"."id" = "reminders"."remindersListID"
 // => (String, String)
 
 RemindersList
   .where { $0.id == 1 }
   .join(Reminder.where(\.isFlagged) { /* ... */ }
-// SELECT "remindersLists".…, "reminders".… FROM "remindersLists"
-// JOIN "reminders" ON "remindersLists"."id" = "reminders"."remindersListID"
+// SELECT "remindersLists".…, "reminders".…
+//   FROM "remindersLists"
+// JOIN "reminders"
+//   ON "remindersLists"."id" = "reminders"."remindersListID"
 // WHERE ("remindersLists"."id" = 1) AND "reminders"."isFlagged"
 // => (RemindersList, Reminder)
 ```
@@ -186,9 +197,9 @@ let usersWithReferrers = User
   .leftJoin(User.as(Referrer.self).all) { $0.referrerID == $1.id }
   .select { ($0.name, $1.name) }
 // SELECT "users"."name", "referrers.name"
-// FROM "users"
+//   FROM "users"
 // JOIN "users" AS "referrers"
-// ON "users"."referrerID" = "referrers"."id"
+//   ON "users"."referrerID" = "referrers"."id"
 // => (String, String?)
 ```
 
@@ -204,7 +215,8 @@ Reminder.where(\.isCompleted)
 
 Reminder.where { !$0.isCompleted && $0.title.like("%groceries%") }
 // SELECT … FROM "reminders"
-// WHERE ("reminders"."isCompleted" AND ("reminders"."title" LIKE '%groceries%'))
+// WHERE "reminders"."isCompleted"
+//   AND ("reminders"."title" LIKE '%groceries%')
 ```
 
 > Tip: ``Table/where(_:)`` returns a ``Where`` clause, which builds into a ``Select``, ``Update``,
@@ -218,7 +230,8 @@ Reminder
   .where(\.isCompleted)
   .where { $0.title.like("%groceries%") }
 // SELECT … FROM "reminders"
-// WHERE "reminders"."isCompleted" AND ("reminders"."title" LIKE '%groceries%')
+// WHERE "reminders"."isCompleted"
+// AND ("reminders"."title" LIKE '%groceries%')
 ```
 
 The closure is a result builder that can conditionally generate parts of the predicate:
@@ -319,7 +332,9 @@ direction.
 ```swift
 Reminder.order { ($0.priority.desc(nulls: .first), $0.title.asc()) }
 // SELECT … FROM "reminders"
-// ORDER BY "reminders"."priority" DESC NULLS FIRST, "reminders"."title" ASC
+// ORDER BY
+//   "reminders"."priority" DESC NULLS FIRST,
+//   "reminders"."title" ASC
 ```
 
 Multiple chained calls to `order` will accumulate each term:
