@@ -125,9 +125,9 @@ generated when writing queries will correctly use `"is_completed"`.
 ### Custom data types
 
 There are many data types that do not have native support in SQLite. For these data types you must
-define a conformance to ``QueryRepresentable`` and ``QueryBindable`` in order to translate values to
-a format that SQLite does understand. The library comes with conformances to aid in representing
-dates, UUIDs, and JSON, and you can define your own conformances for your own custom data types.
+define a conformance to ``QueryBindable`` in order to translate values to a format that SQLite does
+understand. The library comes with conformances to aid in representing dates, UUIDs, and JSON, and 
+you can define your own conformances for your own custom data types.
 
 #### Dates
 
@@ -166,7 +166,38 @@ Any of these representations can be used like so:
 
 #### UUID
 
-<!-- TODO: finish -->
+SQLite also does not have native support for UUIDs. If you try to use a UUID in your tables you 
+will get an error:
+
+```swift
+@Table struct Reminder {
+  let id: UUID  // 🛑 'UUID' column requires a query representation
+  var title = ""
+}
+```
+
+To use such identifiers in your table you can store the column as a data blob, and then you can
+use the ``Foundation/UUID/BytesRepresentation`` column representation:
+
+```swift
+@Table struct Reminder {
+  @Column(as: UUID.BytesRepresentation.self)
+  let id: UUID
+  var title = ""
+}
+```
+
+Alternatively you can store the column as text and use either 
+``Foundation/UUID/LowercasedRepresentation`` or ``Foundation/UUID/UppercasedRepresentation`` to
+translate the UUID to text:
+
+```swift
+@Table struct Reminder {
+  @Column(as: UUID.LowercasedRepresentation.self)
+  let id: UUID
+  var title = ""
+}
+```
 
 #### JSON
 
@@ -176,7 +207,7 @@ Any of these representations can be used like so:
 
 <!-- TODO: finish -->
 
-#### Primary key
+### Primary key
 
 It is possible to tell let the `@Table` macro know which property of your data type is the primary
 key for the table in the database, and doing so unlocks new APIs for inserting, updating, and

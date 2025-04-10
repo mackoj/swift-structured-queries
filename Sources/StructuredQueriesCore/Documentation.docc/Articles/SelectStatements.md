@@ -391,7 +391,7 @@ Reminder
 It is possible to combine multiple selects together using the `union`, `intersect`, and `except`
 functions, which apply the appropriate SQL operator between each statement.
 
-```sql
+```swift
 RemindersList.select(\.title)
   .union(Reminder.select(\.title))
 // SELECT "remindersLists"."title" FROM "remindersLists"

@@ -92,7 +92,6 @@ let remindersTags = [
   RemindersTag(reminderID: 2, tagID: 4),
 ]
 RemindersTag.insert(remindersTags)
-RemindersTag.insert(remindersTag)
 // INSERT INTO "remindersTags"
 //   ("reminderID", "tagID")
 // VALUES
