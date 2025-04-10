@@ -78,6 +78,7 @@ extension PrimaryKeyedTable {
         open(column)
       }
     }
+    // TODO: Should this also test the value's current properties and fail if they no longer match?
     .where {
       $0.primaryKey.eq(TableColumns.PrimaryKey(queryOutput: row[keyPath: $0.primaryKey.keyPath]))
     }
