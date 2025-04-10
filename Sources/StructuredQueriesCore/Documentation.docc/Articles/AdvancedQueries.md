@@ -6,7 +6,7 @@ scopes and decoding into custom data types.
 ## Overview
 
 The library comes with a variety of tools that allow you to define helpers for composing together
-large and complex queries. 
+large and complex queries.
 
 ### Reusable queries
 
@@ -16,7 +16,8 @@ tables had a `deletedAt` column that represents when the record was deleted so t
 could be restored for a certain amount of time. These tables can be represented like so:
 
 ```swift
-@Table RemindersList: Identifiable {
+@Table
+struct RemindersList: Identifiable {
   let id: Int 
   var title = ""
   @Column(as: Date.ISO8601Representation.self)
@@ -48,7 +49,7 @@ extension Reminder {
 ```
 
 Then these helpers can be used when composing together a larger, more complex query. For example, 
-we can select all lists with the count of reminders in each list like so: 
+we can select all lists with the count of reminders in each list like so:
 
 ```swift
 RemindersList
@@ -79,7 +80,7 @@ This produces the same query even though the `notDeleted` static helper is chain
 `group(by:)` clause.
 
 It is also possible to define helpers on the ``Table/TableColumns`` type inside each table that
-make it easier to share column logic amongst many queries. For example, 
+make it easier to share column logic amongst many queries. For example,
 
 <!-- TODO: Finish -->
 
