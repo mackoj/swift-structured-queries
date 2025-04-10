@@ -157,6 +157,11 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
 
   /// Applies each side of the operator to the `coalesce` function
   ///
+  /// ```swift
+  /// Reminder.select { $0.date ?? #sql("date()") }
+  /// // SELECT coalesce("reminders"."date", date()) FROM "reminders"
+  /// ```
+  ///
   /// - Parameters:
   ///   - lhs: An optional query expression.
   ///   - rhs: A non-optional query expression
@@ -170,6 +175,11 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
 
   /// Applies each side of the operator to the `coalesce` function
   ///
+  /// ```swift
+  /// Reminder.select { $0.date ?? #sql("date()") }
+  /// // SELECT coalesce("reminders"."date", date()) FROM "reminders"
+  /// ```
+  ///
   /// - Parameters:
   ///   - lhs: An optional query expression.
   ///   - rhs: Another optional query expression
@@ -181,6 +191,7 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
     CoalesceFunction([lhs.queryFragment, rhs.queryFragment])
   }
 
+  @_documentation(visibility: private)
   @available(
     *,
     deprecated,
@@ -196,6 +207,7 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
 }
 
 extension QueryExpression {
+  @_documentation(visibility: private)
   @available(
     *,
     deprecated,

@@ -28,6 +28,8 @@ Reminder.select {
 // FROM "reminders"
 ```
 
+Explore the full list below.
+
 ## Topics
 
 ### Aggregating values
@@ -35,6 +37,7 @@ Reminder.select {
 - ``QueryExpression/avg(distinct:filter:)``
 - ``AggregateFunction/count(filter:)``
 - ``QueryExpression/count(distinct:filter:)``
+- ``QueryExpression/groupConcat(_:order:filter:)``
 - ``QueryExpression/groupConcat(distinct:order:filter:)``
 - ``QueryExpression/max(filter:)``
 - ``QueryExpression/min(filter:)``

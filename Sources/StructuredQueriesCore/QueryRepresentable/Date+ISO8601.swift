@@ -1,7 +1,5 @@
 import Foundation
 
-// TODO: iOS <15 support
-
 extension Date {
   /// A query expression representing a date as an ISO-8601-formatted string (in RFC 3339 format).
   ///
@@ -15,7 +13,6 @@ extension Date {
   /// Item.insert { $0.date } values: { Date() }
   /// // INSERT INTO "items" ("date") VALUES ('2018-01-29 00:08:00.000')
   /// ```
-  @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
   public struct ISO8601Representation: QueryRepresentable {
     public var queryOutput: Date
 
@@ -25,36 +22,75 @@ extension Date {
   }
 }
 
-@available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
 extension Date.ISO8601Representation: QueryBindable {
   public var queryBinding: QueryBinding {
-    .text(queryOutput.formatted(.iso8601.currentTimestamp(includingFractionalSeconds: true)))
+    .text(queryOutput.iso8601String)
   }
 }
 
-@available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
 extension Date.ISO8601Representation: QueryDecodable {
   public init(decoder: inout some QueryDecoder) throws {
-    let queryOutput = try String(decoder: &decoder)
-    do {
-      self.init(
-        queryOutput: try Date(
-          queryOutput,
-          strategy: .iso8601.currentTimestamp(includingFractionalSeconds: true)
-        )
-      )
-    } catch {
-      self.init(
-        queryOutput: try Date(
-          queryOutput,
-          strategy: .iso8601.currentTimestamp(includingFractionalSeconds: false)
-        )
-      )
+    try self.init(queryOutput: String(decoder: &decoder).date)
+  }
+}
+
+private extension Date {
+  var iso8601String: String {
+    if #available(iOS 15, macOS 12, tvOS 15, watchOS 8, *) {
+      return formatted(.iso8601.currentTimestamp(includingFractionalSeconds: true))
+    } else {
+      return DateFormatter.iso8601(includingFractionalSeconds: true).string(from: self)
     }
   }
 }
 
-@available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
+private extension DateFormatter {
+  static func iso8601(includingFractionalSeconds: Bool) -> DateFormatter {
+    includingFractionalSeconds ? iso8601Fractional : iso8601Whole
+  }
+
+  static let iso8601Fractional: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
+    return formatter
+  }()
+
+  static let iso8601Whole: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+    return formatter
+  }()
+}
+
+private extension String {
+  var date: Date {
+    get throws {
+      if #available(iOS 15, macOS 12, tvOS 15, watchOS 8, *) {
+        do {
+          return try Date(
+            queryOutput,
+            strategy: .iso8601.currentTimestamp(includingFractionalSeconds: true)
+          )
+        } catch {
+          return try Date(
+            queryOutput,
+            strategy: .iso8601.currentTimestamp(includingFractionalSeconds: false)
+          )
+        }
+      } else {
+        guard
+          let date = DateFormatter.iso8601(includingFractionalSeconds: true).date(from: self)
+            ?? DateFormatter.iso8601(includingFractionalSeconds: false).date(from: self)
+        else {
+          struct InvalidDate: Error { let string: String }
+          throw InvalidDate(string: self)
+        }
+        return date
+      }
+    }
+  }
+}
+
 extension Date.ISO8601Representation: SQLiteType {
   public static var typeAffinity: SQLiteTypeAffinity {
     String.typeAffinity

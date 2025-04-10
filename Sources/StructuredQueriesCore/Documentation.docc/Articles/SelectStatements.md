@@ -386,9 +386,32 @@ Reminder
 // LIMIT 20 OFFSET 20
 ```
 
-## Topics
+### Compound selects
 
-<!-- TODO: giJoins article -->
+It is possible to combine multiple selects together using the `union`, `intersect`, and `except`
+functions, which apply the appropriate SQL operator between each statement.
+
+```sql
+RemindersList.select(\.title)
+  .union(Reminder.select(\.title))
+// SELECT "remindersLists"."title" FROM "remindersLists"
+//   UNION
+// SELECT "reminders"."title" FROM "reminders"
+
+RemindersList.select(\.title)
+  .intersect(Reminder.select(\.title))
+// SELECT "remindersLists"."title" FROM "remindersLists"
+//   INTERSECT
+// SELECT "reminders"."title" FROM "reminders"
+
+RemindersList.select(\.title)
+  .intersect(Reminder.select(\.title))
+// SELECT "remindersLists"."title" FROM "remindersLists"
+//   EXCEPT
+// SELECT "reminders"."title" FROM "reminders"
+```
+
+## Topics
 
 ### Statement types
 
@@ -408,6 +431,4 @@ Reminder
 - ``TableAlias``
 - ``AliasName``
 
-<!--
-compound selects: union, intersection, etc...
--->
+<!--### Compound selects-->
