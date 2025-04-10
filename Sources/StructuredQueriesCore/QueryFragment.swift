@@ -6,8 +6,8 @@ import StructuredQueriesSupport
 /// directly interpolated into the string. This most commonly occurs when using the `#sql` macro,
 /// which takes values of this type.
 public struct QueryFragment: Hashable, Sendable, CustomDebugStringConvertible {
-  public var string: String
-  public var bindings: [QueryBinding]
+  public internal(set) var string: String
+  public internal(set) var bindings: [QueryBinding]
 
   init(_ string: String = "", _ bindings: [QueryBinding] = []) {
     self.string = string

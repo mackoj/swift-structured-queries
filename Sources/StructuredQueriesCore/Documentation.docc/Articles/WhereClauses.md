@@ -27,7 +27,7 @@ completed.update {
   $0.isCompleted = false
 }
 // UPDATE "reminders" SET
-// "isCompleted" = 0
+//   "isCompleted" = 0
 // WHERE "reminders"."isCompleted"
 ```
 
