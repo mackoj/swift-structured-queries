@@ -8,7 +8,7 @@ scopes, and decoding into custom data types.
 The library comes with a variety of tools that allow you to define helpers for composing together
 large and complex queries.
 
-### Reusable queries
+### Reusable table queries
 
 One can define query helpers as statics on their tables in order to facilitate using those
 queries in a variety of situations. For example, suppose that the `Reminder` and `RemindersList`
@@ -49,7 +49,8 @@ extension Reminder {
 ```
 
 Then these helpers can be used when composing together a larger, more complex query. For example, 
-we can select all lists with the count of reminders in each list like so:
+we can select all non-deleted lists with the count of all non-deleted reminders in each list like 
+so:
 
 ```swift
 RemindersList
@@ -79,10 +80,12 @@ RemindersList
 This produces the same query even though the `notDeleted` static helper is chained after the
 `group(by:)` clause.
 
-It is also possible to define helpers on the ``Table/TableColumns`` type inside each table that
-make it easier to share column logic amongst many queries. For example,
+### Reusable column queries
 
-<!-- TODO: Finish -->
+It is also possible to define helpers on the ``Table/TableColumns`` type inside each table that
+make it easier to share column logic amongst many queries. For example, you can define helpers on
+`Reminder.TableColumns` that query for reminders that are "past due", "due today" or "scheduled
+for later":
 
 ```swift
 extension Reminder.TableColumns {
@@ -98,11 +101,126 @@ extension Reminder.TableColumns {
 }
 ```
 
-<!--
-* extensions on Table.Columns
+Then you can use these helpers when building a query. For example, you can use 
+``PrimaryKeyedTableDefinition/count(filter:)`` to count the number of past due, current and 
+scheduled reminders in one single query like so:
 
--->
+```swift
+Reminder
+  .select {
+    (
+      $0.count(filter: $0.isPastDue), 
+      $0.count(filter: $0.isToday), 
+      $0.count(filter: $0.isScheduled)
+    )
+  }
+// SELECT
+//   count("id" FILTER (WHERE NOT "isCompleted" AND date("dueAt") < date('now'))),
+//   count("id" FILTER (WHERE NOT "isCompleted" AND date("dueAt") = date('now'))),
+//   count("id" FILTER (WHERE NOT "isCompleted" AND date("dueAt") > date('now')))
+// FROM "reminders"
+// => (Int, Int, Int) 
+```
 
 ### Default scopes
 
+By default, every ``Table`` conformance comes with an ``Table/all`` property that represents 
+selecting all rows from the table:
+
+```swift
+Reminder.all
+// SELECT * FROM "reminders"
+```
+
+It is possible to provide an alternative implementation to ``Table/all`` for your tables so that
+certain SQL clauses are automatically applied. For example, if the `Reminder` table has a 
+`deletedAt` column to represent when the record was deleted without actually deleting it from
+the database, then you can default `Reminder.all` to query for only non-deleted records:
+
+```swift
+struct Reminder {
+  let id: Int 
+  var title = ""
+  var isCompleted = false
+  @Column(as: Date.ISO8601Representation.self)
+  var deletedAt: Date?
+
+  static let all = Self.where { $0.isDeleted.isNot(nil) }
+}
+```
+
+Now when `Reminder.all` is used it will automatically filter out deleted reminders. This also 
+includes when using ``Table/where(_:)``, ``Table/select(_:)``, ``Table/order(by:)``, and 
+other query entry points:
+
+```swift
+Reminder
+  .where { !$0.isCompleted }
+// SELECT *
+// FROM "reminders"
+// WHERE "deletedAt" IS NOT NULL AND NOT "isCompleted"
+```
+
+If you ever want to reset the default scope back to select all rows with no SQL clauses applied,
+you can use the ``Table/unscoped`` property:
+
+```swift
+Reminder.unscoped
+// SELECT * FROM "reminders"
+```
+
 ### Custom selections
+
+It will often be the case that you want to select very specific data from your database and then
+decode that data into a custom Swift data type. For example, if you are displaying a list of 
+reminders and only need their titles for the list, it would be wasteful to decode an array of
+all reminder data. The `@Selection` macro allows you to define a custom data type of only the 
+fields you want to decode:
+
+```swift
+@Selection
+struct ReminderTitle {
+  let title: String
+}
+```
+
+Then when selecting the columns for your query you can use this data type:
+
+```swift
+Reminder
+  .where { !$0.isCompleted }
+  .select { ReminderTitle.Columns(title: $0.title) }
+// SELECT "title"
+// FROM "reminders"
+// WHERE NOT "isCompleted"
+// => ReminderTitle
+```
+
+As another example, consider the query that selects all reminders lists with the count of reminders
+in each list. A selection data type can be defined like so:
+
+```swift
+@Selection
+struct RemindersListWithCount {
+  let remindersList: RemindersList
+  let count: Int
+}
+```
+
+And a query that selects into this type can be defined like so:
+
+```swift
+RemindersList
+  .join(Reminder.all) { $0.id.eq($1.remindersListID) }
+  .select { 
+    RemindersListWithCount.Columns(
+      remindersList: $0,
+      count: $1.count()
+    )
+  }
+// SELECT "remindersLists".*, count("reminders"."id")
+// FROM "remindersLists"
+// JOIN "reminders" ON "remindersLists"."id" = "reminders"."remindersListID"
+// => RemindersListWithCount
+```
+
