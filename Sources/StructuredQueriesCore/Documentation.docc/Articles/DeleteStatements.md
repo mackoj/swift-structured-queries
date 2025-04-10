@@ -8,7 +8,7 @@ Learn how to build queries that delete data from a database.
 
 You can create a ``Delete`` statement by invoking ``Table/delete()``:
 
-```
+```swift
 Reminder.delete()
 // DELETE FROM "reminders"
 ```

@@ -125,7 +125,7 @@ Tag.update(or: .ignore) {
 .where {
   $0.id == 42
 }
-// UPDATE OR IGNORE "tags"
+// UPDATE OR IGNORE "tags" SET
 //   "name" = 'home'
 // WHERE
 //   ("id" = 42)
