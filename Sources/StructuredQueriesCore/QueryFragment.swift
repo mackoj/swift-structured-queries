@@ -7,10 +7,10 @@ import StructuredQueriesSupport
 /// which takes values of this type.
 public struct QueryFragment: Hashable, Sendable, CustomDebugStringConvertible {
   /// The underlying SQL string.
-  public internal(set) var string: String
+  public var string: String
 
   /// An array of parameterized statement bindings.
-  public internal(set) var bindings: [QueryBinding]
+  public var bindings: [QueryBinding]
 
   init(_ string: String = "", _ bindings: [QueryBinding] = []) {
     self.string = string
