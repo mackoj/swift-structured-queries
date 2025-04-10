@@ -42,8 +42,6 @@ safe SQL strings directly.
 
 ### Expressions
 
-<!-- TODO: if we create a dedicated article on safe sql strings, put QueryFragment under it -->
-- ``QueryFragment``
 - <doc:AggregateFunctions>
 - <doc:Operators>
 - <doc:ScalarFunctions>
