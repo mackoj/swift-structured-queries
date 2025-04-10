@@ -34,9 +34,9 @@ Reminder.update {
 ```
 
 > Important: Updating a table in an unconstrained fashion like this is probably not what you want,
-> 99.99% of the time, as it will update _every single row_ with the given changes. Instead, you
-> should filter the update to a specific row or set of rows that match a certain condition. See
-> <doc:#Filtering-updates>, below.
+> 99.99% of the time, as it will update _every single row_ in the table with the given changes.
+> Instead, you should filter the update to a specific row or set of rows that match a certain
+> condition. See <doc:#Filtering-updates>, below.
 
 ### Filtering updates
 
