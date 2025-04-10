@@ -51,13 +51,19 @@ private extension DateFormatter {
 
   static let iso8601Fractional: DateFormatter = {
     let formatter = DateFormatter()
+    formatter.calendar = Calendar(identifier: .iso8601)
     formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
+    formatter.locale = Locale(identifier: "en_US_POSIX")
+    formatter.timeZone = TimeZone(secondsFromGMT: 0)
     return formatter
   }()
 
   static let iso8601Whole: DateFormatter = {
     let formatter = DateFormatter()
+    formatter.calendar = Calendar(identifier: .iso8601)
     formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+    formatter.locale = Locale(identifier: "en_US_POSIX")
+    formatter.timeZone = TimeZone(secondsFromGMT: 0)
     return formatter
   }()
 }
