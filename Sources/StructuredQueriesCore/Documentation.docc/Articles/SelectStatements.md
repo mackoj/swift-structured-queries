@@ -107,7 +107,7 @@ RemindersList.join(Reminder.all) { $0.id == $1.remindersListID }
 ```
 
 > Tip: The `==` function is heavily overloaded in Swift and can slow down the compiler. Consider
-> using ``QueryExpression/eq(_:)`` and ``QueryExpression/is(_:)`` instead.
+> using ``QueryExpression/eq(_:)`` and ``QueryExpression/is(_:)`` instead. See <doc:CompilerPerformance> for more information.
 
 The joined query has access to both tables' columns in subsequent chained builder methods:
 
