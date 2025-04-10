@@ -192,7 +192,7 @@ To insert a row into a table with the results of a ``Select`` statement, use
 Tag.insert {
   ($0.name)
 } select: {
-  ReminderList.select { $0.title.lower() }
+  RemindersList.select { $0.title.lower() }
 }
 // INSERT INTO "tags"
 //   ("name")
