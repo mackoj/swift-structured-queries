@@ -57,7 +57,7 @@ RemindersList
   .notDeleted
   .group(by: \.id)
   .leftJoin(Reminder.notDeleted) { $0.id.eq($1.remindersListID) }
-  .select { ($0.title, $1.id.count() }
+  .select { ($0.title, $1.id.count()) }
 // SELECT "remindersLists"."title", count("reminders"."id")
 // FROM "remindersLists"
 // LEFT JOIN "reminders" ON "remindersLists"."id" = "reminders"."remindersListID"
@@ -74,7 +74,7 @@ RemindersList
   .group(by: \.id)
   .notDeleted
   .leftJoin(Reminder.notDeleted) { $0.id.eq($1.remindersListID) }
-  .select { ($0.title, $1.id.count() }
+  .select { ($0.title, $1.id.count()) }
 ```
 
 This produces the same query even though the `notDeleted` static helper is chained after the

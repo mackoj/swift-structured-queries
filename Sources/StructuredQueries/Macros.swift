@@ -53,7 +53,7 @@ public macro Column(
 /// RemindersList
 ///   .group(by: \.id)
 ///   .join(Reminder.all) { $0.id == $0.remindersListID }
-///   .select { ($0, $1.count() }
+///   .select { ($0, $1.count()) }
 /// // [(RemindersList, Int)]
 /// ```
 ///
