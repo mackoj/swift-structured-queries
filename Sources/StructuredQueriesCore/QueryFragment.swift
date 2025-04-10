@@ -6,10 +6,19 @@ import StructuredQueriesSupport
 /// directly interpolated into the string. This most commonly occurs when using the `#sql` macro,
 /// which takes values of this type.
 public struct QueryFragment: Hashable, Sendable, CustomDebugStringConvertible {
+
+  // TODO: Should/can we remove the public setters?
+
   /// The underlying SQL string.
+  ///
+  /// > Warning: Mutate this value directly at your own risk. You may introduce unsafe, invalid SQL,
+  /// > or open your users up to SQL injection.
   public var string: String
 
   /// An array of parameterized statement bindings.
+  ///
+  /// > Warning: Mutate this value directly at your own risk. You may introduce unsafe, invalid SQL,
+  /// > or open your users up to SQL injection.
   public var bindings: [QueryBinding]
 
   init(_ string: String = "", _ bindings: [QueryBinding] = []) {
@@ -175,7 +184,7 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     /// ```
     ///
     /// > Warning: Avoid introducing raw SQL and potential injection attacks. Instead, append
-    /// > query fragments that safely bind data via interpolation.
+    /// > query fragments that safely bind data _via_ interpolation.
     ///
     /// - Parameter sql: A raw query string.
     public mutating func appendInterpolation(raw sql: some LosslessStringConvertible) {
