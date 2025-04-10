@@ -108,7 +108,7 @@ extension Table {
   ///
   /// ```swift
   /// Reminder.insert {
-  ///   ($0.reminderListID, $0.title, $0.isFlagged)
+  ///   ($0.remindersListID, $0.title, $0.isFlagged)
   /// } values: {
   ///   (list.id, "Groceries", false)
   ///   (list.id, "Haircut", true)

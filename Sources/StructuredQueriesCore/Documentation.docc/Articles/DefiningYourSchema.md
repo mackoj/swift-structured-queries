@@ -69,12 +69,12 @@ inflection logic to come up with mostly reasonable results:
 @Table struct Reminder {}
 @Table struct Category {}
 @Table struct Status {}
-@Table struct ReminderList {}
+@Table struct RemindersList {}
 
-Reminder.tableName      // "reminders"
-Category.tableName      // "categories"
-Status.tableName        // "statuses"
-ReminderList.tableName  // "reminderLists"
+Reminder.tableName       // "reminders"
+Category.tableName       // "categories"
+Status.tableName         // "statuses"
+RemindersList.tableName  // "remindersLists"
 ```
 
 However, many people prefer for their table names to be the _singular_ form of the noun, or they
@@ -85,12 +85,12 @@ string for the name of the table in the database:
 @Table("reminder") struct Reminder {}
 @Table("category") struct Category {}
 @Table("status") struct Status {}
-@Table("reminder_list") struct ReminderList {}
+@Table("reminders_list") struct RemindersList {}
 
-Reminder.tableName  // "reminder"
-Category.tableName  // "category"
-Status.tableName    // "status"
-Status.tableName    // "reminder_list"
+Reminder.tableName       // "reminder"
+Category.tableName       // "category"
+Status.tableName         // "status"
+RemindersList.tableName  // "reminders_list"
 ```
 
 #### Column names
@@ -129,9 +129,9 @@ own custom data types.
 
 SQLite does not have a native data type, and instead has 3 different ways to represent dates:
 
-* Text column interpreted as ISO-8601 formatted string.
-* Int column interpreted as number of seconds since Unix epoch.
-* Double column interpreted as a julian date (number of seconds since Nov 24, 4713 B.C.).
+  * Text column interpreted as ISO-8601-formatted string.
+  * Int column interpreted as number of seconds since Unix epoch.
+  * Double column interpreted as a Julian day (number of seconds since Nov 24, 4713 B.C.).
 
 Because of this ambiguity, the `@Table` macro does not know what you intend when you define a 
 data type like this:
@@ -177,7 +177,7 @@ Any of these representations can be used like so:
 It is possible to tell let the `@Table` macro know which property of your data type is the primary
 key for the table in the database, and doing so unlocks new APIs for inserting, updating and 
 deleting records. By default the `@Table` macro will assume any property named `id` is the 
-primary key, or you can explictly specify it with the `primaryKey:` argument of the `@Column`
+primary key, or you can explicitly specify it with the `primaryKey:` argument of the `@Column`
 macro:
 
 ```swift
