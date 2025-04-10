@@ -6,9 +6,10 @@ Learn how to build queries that update data in a database.
 
 ### Updating rows
 
-You can create an ``Update`` statement by invoking ``Table/update(or:set:)`` with a closure that is
-given a table definition that you are allowed to make a certain set of simple mutations to, which
-are translated to the equivalent SQL code. For example, you can assign values to certain columns:
+You can create an ``Update`` statement by invoking a table's ``Table/update(or:set:)`` function with
+a closure that is given a table definition that you are allowed to make a certain set of simple
+mutations to, which are translated to the equivalent SQL code. For example, you can assign values to
+certain columns:
 
 ```swift
 Reminder.update {

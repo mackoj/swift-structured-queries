@@ -6,7 +6,7 @@ Learn how to build queries that delete data from a database.
 
 ### Deleting rows
 
-You can create a ``Delete`` statement by invoking ``Table/delete()``:
+You can create a ``Delete`` statement by invoking a table's ``Table/delete()`` function:
 
 ```swift
 Reminder.delete()

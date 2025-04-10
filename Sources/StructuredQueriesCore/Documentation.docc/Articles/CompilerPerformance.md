@@ -1,7 +1,6 @@
 # Compiler performance
 
-Learn how to write complex queries that do not tax the compiler too much in order to keep compile
-times quick.
+Learn how to write complex queries that do not tax the compiler too much.
 
 ## Overview
 
@@ -16,10 +15,10 @@ your queries.
 ### Method operators
 
 By far the easiest way to mitigate compiler performance problems in complex expressions is to use
-the method version of the various operators SQL has to offer, e.g. using ``QueryExpression/eq(_:)``
-instead of ``QueryExpression/==(_:_:)``. Consider a database schema that has a "reminders" table, a
-"tags" table, as well as a many-to-many join table that can associated any number of tags to any
-number of reminders:
+the method version of the various operators SQL has to offer, _e.g._ using
+``QueryExpression/eq(_:)`` instead of ``QueryExpression/==(_:_:)``. Consider a database schema that
+has a "reminders" table, a "tags" table, as well as a many-to-many join table that can associated
+any number of tags to any number of reminders:
 
 ```swift
 @Table struct Reminder: Identifiable {
@@ -58,8 +57,8 @@ quickly, but unfortunately Swift currently cannot type-check it quickly enough (
 The problem is that the overload space of `==` is so large that Swift has too many possibilities 
 to choose from when compiling this expression.
 
-The easiest fix is to use the dedicated ``QueryExpression/eq(_:)`` methods that have a much 
-smaller overload space:
+The easiest fix is to use the dedicated ``QueryExpression/eq(_:)`` methods that have a much smaller
+overload space:
 
 ```diff
  Reminder
@@ -76,7 +75,7 @@ is by far the worst when it comes to compilation speed, and so we always recomme
 ``QueryExpression/eq(_:)`` over ``QueryExpression/==(_:_:)``, but other operators can benefit 
 from this too if you notice problems, such as ``QueryExpression/neq(_:)`` over 
 ``QueryExpression/!=(_:_:)``, ``QueryExpression/gt(_:)`` over ``QueryExpression/>(_:_:)``, and so 
-on. Here is a table of method equivalents of the most common operators:
+on. Here is a table of method equivalents to the most common operators:
 
 | Operator                           | Method           |
 | ---------------------------------- | ---------------- |
@@ -98,7 +97,7 @@ just a few operators to get a big boost, and we recommend starting with `==` and
 ### The #sql macro
 
 The library ships with a tool that allows one to write safe SQL strings via the `#sql` macro. Usage
-of the `#sql` macro does not affect the safetly of your queries from SQL injection attacks, nor
+of the `#sql` macro does not affect the safety of your queries from SQL injection attacks, nor
 does it prevent you making use of your table's schema in the query. The primary downside to using
 `#sql` is that it can complicate decoding query results into custom types, but when used for small
 fragments of a query one typically avoids such complications.
@@ -108,8 +107,7 @@ equivalent version using the builder syntax with operators. Consider the followi
 selects all reminders with no due date, or whose due date is in the past:
 
 ```sql
-SELECT *
-FROM "reminders"
+SELECT * FROM "reminders"
 WHERE
   coalesce("reminders"."date", date('now')) <= date('now')
 ```

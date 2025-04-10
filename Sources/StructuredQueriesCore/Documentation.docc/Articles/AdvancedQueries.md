@@ -1,7 +1,7 @@
 # Advanced queries
 
 Learn advanced techniques in writing queries with this library, including reusing queries, default
-scopes and decoding into custom data types.
+scopes, and decoding into custom data types.
 
 ## Overview
 

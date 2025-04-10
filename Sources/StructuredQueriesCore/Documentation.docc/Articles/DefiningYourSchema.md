@@ -21,7 +21,7 @@ Suppose your database has a table defined with the following create statement:
 ```sql
 CREATE TABLE "reminders" (
   "id" INTEGER PRIMARY KEY AUTOINCREMENT",
-  "title" TEXT NOT NULL,
+  "title" TEXT NOT NULL DEFAULT '',
   "isCompleted" INTEGER DEFAULT 0
 )
 ```
@@ -47,7 +47,11 @@ build queries:
 ```swift
 Reminder
   .where { !$0.isCompleted }
-// SELECT … FROM "reminders"
+// SELECT
+//   "reminders"."id",
+//   "reminders"."title",
+//   "reminders"."isCompleted"
+// FROM "reminders"
 // WHERE (NOT "reminders"."isCompleted")
 ```
 
@@ -108,7 +112,10 @@ to have your Swift data type represent the most pristine version of itself:
 }
 
 Reminder.where { !$0.isCompleted }
-// SELECT … FROM "reminders"
+// SELECT
+//   "reminders"."id",
+//   "reminders"."title",
+//   "reminders"."is_completed"
 // WHERE (NOT "reminders"."is_completed")
 ```
 
