@@ -170,7 +170,7 @@ Reminder
   .where { !$0.isCompleted }
 // SELECT …
 // FROM "reminders"
-// WHERE "deletedAt" IS NOT NULL AND NOT "isCompleted"
+// WHERE ("deletedAt" IS NOT NULL) AND (NOT "isCompleted")
 ```
 
 If you ever want to reset the default scope back to select all rows with no SQL clauses applied,
