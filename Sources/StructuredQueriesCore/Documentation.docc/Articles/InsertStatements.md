@@ -173,14 +173,14 @@ When the draft is ready to be committed back to the database, you can use
 
 ```swift
 Reminder.upsert(draft)
-INSERT INTO "reminders"
-  ("id", "isCompleted", "remindersListID", "title")
-VALUES
-  (1, 0, 1, 'Cash check')
-ON CONFLICT DO UPDATE SET
-  "isCompleted" = "excluded"."isCompleted",
-  "remindersListID" = "excluded"."remindersListID",
-  "title" = "excluded"."title"
+// INSERT INTO "reminders"
+//   ("id", "isCompleted", "remindersListID", "title")
+// VALUES
+//   (1, 0, 1, 'Cash check')
+// ON CONFLICT DO UPDATE SET
+//   "isCompleted" = "excluded"."isCompleted",
+//   "remindersListID" = "excluded"."remindersListID",
+//   "title" = "excluded"."title"
 ```
 
 ### Inserting from a select statement
