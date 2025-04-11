@@ -45,6 +45,7 @@ safe SQL strings directly.
 - <doc:AggregateFunctions>
 - <doc:Operators>
 - <doc:ScalarFunctions>
+- ``Case``
 - <doc:ExpressionTypes>
 
 ### Advanced 

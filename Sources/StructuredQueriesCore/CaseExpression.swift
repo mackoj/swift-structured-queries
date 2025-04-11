@@ -1,14 +1,49 @@
-package struct Case<Base, QueryValue> {
+/// A type that builds SQL `CASE` expressions.
+///
+/// ```swift
+/// RemindersList
+///   .group(by: \.id)
+///   .leftJoin(Reminder.all) { $0.id == $1.remindersListID }
+///   .select {
+///     (
+///       $0.title,
+///       Case()
+///         .when(!$1.isCompleted, then: $1.title)
+///         .groupConcat()
+///     )
+///   }
+/// // SELECT
+/// //   "remindersLists"."title",
+/// //   group_concat(
+/// //     CASE
+/// //       WHEN (NOT "reminders"."isCompleted") THEN "reminders"."title"
+/// //     END
+/// //   )
+/// // FROM "remindersLists"
+/// // LEFT JOIN "reminders" ON "remindersLists"."id" = "reminders"."remindersListID"
+/// // GROUP BY "remindersLists"."id"
+/// ```
+public struct Case<Base, QueryValue: _OptionalPromotable> {
   var base: QueryFragment?
 
+  /// Creates a SQL `CASE` expression builder.
+  ///
+  /// - Parameter base: A "base" expression to test against for each `WHEN`.
   public init(
     _ base: some QueryExpression<Base>,
   ) {
     self.base = base.queryFragment
   }
 
+  /// Creates a SQL `CASE` expression builder.
   public init() where Base == Bool {}
 
+  /// Adds a `WHEN` clause to a `CASE` expression.
+  ///
+  /// - Parameters:
+  ///   - condition: A condition to test.
+  ///   - expression: A return value should the condition pass.
+  /// - Returns: A `CASE` expression builder.
   public func when(
     _ condition: some QueryExpression<Base>,
     then expression: some QueryExpression<QueryValue>
@@ -21,10 +56,16 @@ package struct Case<Base, QueryValue> {
     )
   }
 
+  /// Adds a `WHEN` clause to a `CASE` expression.
+  ///
+  /// - Parameters:
+  ///   - condition: A condition to test.
+  ///   - expression: A return value should the condition pass.
+  /// - Returns: A `CASE` expression builder.
   public func when(
     _ condition: some QueryExpression<Base>,
-    then expression: some QueryExpression<QueryValue?>
-  ) -> Cases<Base, QueryValue?> {
+    then expression: some QueryExpression<QueryValue._Optionalized>
+  ) -> Cases<Base, QueryValue._Optionalized> {
     Cases(
       base: base,
       cases: [
@@ -34,10 +75,17 @@ package struct Case<Base, QueryValue> {
   }
 }
 
+/// A `CASE` expression builder.
 public struct Cases<Base, QueryValue: _OptionalProtocol>: QueryExpression {
   var base: QueryFragment?
   var cases: [QueryFragment]
 
+  /// Adds a `WHEN` clause to a `CASE` expression.
+  ///
+  /// - Parameters:
+  ///   - condition: A condition to test.
+  ///   - expression: A return value should the condition pass.
+  /// - Returns: A `CASE` expression builder.
   public func when(
     _ condition: some QueryExpression<Base>,
     then expression: some QueryExpression<QueryValue>
@@ -49,6 +97,10 @@ public struct Cases<Base, QueryValue: _OptionalProtocol>: QueryExpression {
     return cases
   }
 
+  /// Terminates a `CASE` expression with an `ELSE` clause.
+  ///
+  /// - Parameter expression: A return value should every `WHEN` condition fail.
+  /// - Returns: A `CASE` expression.
   public func `else`(
     _ expression: some QueryExpression<QueryValue.Wrapped>
   ) -> some QueryExpression<QueryValue.Wrapped> {
