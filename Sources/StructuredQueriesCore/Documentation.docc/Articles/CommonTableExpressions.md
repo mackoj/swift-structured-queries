@@ -1,6 +1,6 @@
 # Common table expressions
 
-Learn how to build statements that factor subqueries into temporary table, and create hierarchical
+Learn how to build statements that factor subqueries into temporary tables, and create hierarchical
 or recursive queries of trees and graphs.
 
 ## Overview

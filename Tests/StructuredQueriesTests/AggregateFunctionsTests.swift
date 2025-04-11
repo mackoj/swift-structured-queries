@@ -278,6 +278,50 @@ extension SnapshotTests {
         └────────────────────┘
         """
       }
+      assertQuery(
+        Tag
+          .select { tags in
+            Case {
+              When(tags.name.length() > 5) { tags.name }
+            }
+            .groupConcat()
+          }
+          .order(by: \.name)
+      ) {
+        """
+        SELECT group_concat(CASE WHEN (length("tags"."name") > 5) THEN "tags"."name" END)
+        FROM "tags"
+        ORDER BY "tags"."name"
+        """
+      } results: {
+        """
+        ┌────────────────────┐
+        │ "someday,optional" │
+        └────────────────────┘
+        """
+      }
+      assertQuery(
+        Tag
+          .select { tags in
+            Case(tags.name.length()) {
+              When(7) { tags.name }
+            }
+            .groupConcat()
+          }
+          .order(by: \.name)
+      ) {
+        """
+        SELECT group_concat(CASE length("tags"."name") WHEN 7 THEN "tags"."name" END)
+        FROM "tags"
+        ORDER BY "tags"."name"
+        """
+      } results: {
+        """
+        ┌───────────┐
+        │ "someday" │
+        └───────────┘
+        """
+      }
     }
 
     @Test func aggregateOfExpression() {
