@@ -280,11 +280,10 @@ extension SnapshotTests {
       }
       assertQuery(
         Tag
-          .select { tags in
-            Case {
-              When(tags.name.length() > 5) { tags.name }
-            }
-            .groupConcat()
+          .select {
+            Case()
+              .when($0.name.length() > 5, then: $0.name)
+              .groupConcat()
           }
           .order(by: \.name)
       ) {
@@ -300,13 +299,13 @@ extension SnapshotTests {
         └────────────────────┘
         """
       }
+
       assertQuery(
         Tag
-          .select { tags in
-            Case(tags.name.length()) {
-              When(7) { tags.name }
-            }
-            .groupConcat()
+          .select {
+            Case($0.name.length())
+              .when(7, then: $0.name)
+              .groupConcat()
           }
           .order(by: \.name)
       ) {

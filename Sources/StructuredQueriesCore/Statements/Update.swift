@@ -114,6 +114,19 @@ public struct Update<From: Table, Returning> {
 
   /// Adds a condition to an update statement.
   ///
+  /// - Parameter predicate: A closure that returns a Boolean expression to filter by.
+  /// - Returns: A statement with the added predicate.
+  @_disfavoredOverload
+  public func `where`(
+    _ predicate: (From.TableColumns) -> some QueryExpression<Bool>
+  ) -> Self {
+    var update = self
+    update.where.append(predicate(From.columns).queryFragment)
+    return update
+  }
+
+  /// Adds a condition to an update statement.
+  ///
   /// - Parameter predicate: A result builder closure that returns a Boolean expression to filter
   ///   by.
   /// - Returns: A statement with the added predicate.

@@ -31,6 +31,19 @@ extension Table {
   ///
   /// - Parameter predicate: A predicate used to generate the `WHERE` clause.
   /// - Returns: A `WHERE` clause.
+  @_disfavoredOverload
+  public static func `where`(
+    _ predicate: (TableColumns) -> some QueryExpression<Bool>
+  ) -> Where<Self> {
+    Where(predicates: [predicate(columns).queryFragment])
+  }
+
+  /// Applies a filter to a statement using a `WHERE` clause.
+  ///
+  /// See <doc:WhereClauses> for more.
+  ///
+  /// - Parameter predicate: A predicate used to generate the `WHERE` clause.
+  /// - Returns: A `WHERE` clause.
   public static func `where`(
     @QueryFragmentBuilder<Bool> _ predicate: (TableColumns) -> [QueryFragment]
   ) -> Where<Self> {
@@ -275,6 +288,19 @@ extension Where: SelectStatement {
   ) -> Self {
     var `where` = self
     `where`.predicates.append(From.columns[keyPath: keyPath].queryFragment)
+    return `where`
+  }
+
+  /// Adds a condition to a where clause.
+  ///
+  /// - Parameter predicate: A predicate to add.
+  /// - Returns: A where clause with the added predicate.
+  @_disfavoredOverload
+  public func `where`(
+    _ predicate: (From.TableColumns) -> some QueryExpression<Bool>
+  ) -> Self {
+    var `where` = self
+    `where`.predicates.append(predicate(From.columns).queryFragment)
     return `where`
   }
 

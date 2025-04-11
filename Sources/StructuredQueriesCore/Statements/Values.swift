@@ -15,6 +15,10 @@ public struct Values<QueryValue>: _SelectStatement {
 
   let values: [QueryFragment]
 
+  public init(_ value: QueryValue) where QueryValue: QueryExpression {
+    self.values = [value.queryFragment]
+  }
+
   public init<each Value: QueryExpression>(
     _ values: repeat each Value
   ) where QueryValue == (repeat (each Value).QueryValue) {

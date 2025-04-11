@@ -871,6 +871,26 @@ extension SnapshotTests {
       }
     }
 
+    @Test func `case`() {
+      assertQuery(
+        Values(
+          Case()
+            .when(true, then: "present")
+            .else("unknown")
+        )
+      ) {
+        """
+        SELECT CASE WHEN 1 THEN 'present' ELSE 'unknown' END
+        """
+      } results: {
+        """
+        ┌───────────┐
+        │ "present" │
+        └───────────┘
+        """
+      }
+    }
+
     @Table @Selection
     struct VecExample {
       let rowid: Int
