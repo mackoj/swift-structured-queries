@@ -835,7 +835,7 @@ extension QueryExpression where QueryValue: QueryBindable {
 
 extension Array where Element: QueryBindable {
   /// Returns a predicate expression indicating whether the sequence contains the given expression.
-  /// 
+  ///
   /// An alias for ``QueryExpression/in(_:)``, flipped.
   ///
   /// - Parameter element: An element.
@@ -882,7 +882,7 @@ extension Statement {
   ///
   /// - Returns: A predicate expression indicating whether this subquery contains any element.
   public func exists() -> some QueryExpression<Bool> {
-    UnaryOperator(operator: "EXISTS", base: SQLQueryExpression(query))
+    SQLQueryExpression("EXISTS \(self)")
   }
 }
 

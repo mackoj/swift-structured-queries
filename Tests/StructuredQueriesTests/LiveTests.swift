@@ -152,8 +152,10 @@ extension SnapshotTests {
           .order { $0.priority.desc() }
       ) {
         """
-        SELECT "reminders"."title", "reminders"."priority", (SELECT avg(CAST("reminders"."priority" AS NUMERIC))
-        FROM "reminders")
+        SELECT "reminders"."title", "reminders"."priority", (
+          SELECT avg(CAST("reminders"."priority" AS NUMERIC))
+          FROM "reminders"
+        )
         FROM "reminders"
         WHERE ("reminders"."priority" < (SELECT avg(CAST("reminders"."priority" AS NUMERIC))
         FROM "reminders") OR ("reminders"."priority" IS NULL))

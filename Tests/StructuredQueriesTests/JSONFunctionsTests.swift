@@ -92,7 +92,7 @@ extension SnapshotTests {
         SELECT "reminders"."title", "reminders"."notes" ->> '$[#-1].body'
         FROM "reminders"
         """
-      }results: {
+      } results: {
         """
         ┌───────────────────┬──────────┐
         │ "Get groceries"   │ "* Eggs" │

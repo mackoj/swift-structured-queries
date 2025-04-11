@@ -34,8 +34,8 @@ extension Date.ISO8601Representation: QueryDecodable {
   }
 }
 
-private extension Date {
-  var iso8601String: String {
+extension Date {
+  fileprivate var iso8601String: String {
     if #available(iOS 15, macOS 12, tvOS 15, watchOS 8, *) {
       return formatted(.iso8601.currentTimestamp(includingFractionalSeconds: true))
     } else {
@@ -44,12 +44,12 @@ private extension Date {
   }
 }
 
-private extension DateFormatter {
-  static func iso8601(includingFractionalSeconds: Bool) -> DateFormatter {
+extension DateFormatter {
+  fileprivate static func iso8601(includingFractionalSeconds: Bool) -> DateFormatter {
     includingFractionalSeconds ? iso8601Fractional : iso8601Whole
   }
 
-  static let iso8601Fractional: DateFormatter = {
+  fileprivate static let iso8601Fractional: DateFormatter = {
     let formatter = DateFormatter()
     formatter.calendar = Calendar(identifier: .iso8601)
     formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
@@ -58,7 +58,7 @@ private extension DateFormatter {
     return formatter
   }()
 
-  static let iso8601Whole: DateFormatter = {
+  fileprivate static let iso8601Whole: DateFormatter = {
     let formatter = DateFormatter()
     formatter.calendar = Calendar(identifier: .iso8601)
     formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
@@ -68,8 +68,8 @@ private extension DateFormatter {
   }()
 }
 
-private extension String {
-  var date: Date {
+extension String {
+  fileprivate var date: Date {
     get throws {
       if #available(iOS 15, macOS 12, tvOS 15, watchOS 8, *) {
         do {

@@ -372,7 +372,7 @@ extension SnapshotTests {
              ─────────────────────┬───────
                                   ╰─ 🛑 Invalid bind parameter in literal; use interpolation to bind values into SQL
         """
-      } 
+      }
     }
   }
 }

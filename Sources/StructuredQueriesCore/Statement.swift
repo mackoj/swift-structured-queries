@@ -12,7 +12,7 @@ public protocol Statement<QueryValue>: QueryExpression, Hashable {
 
 extension Statement {
   public var queryFragment: QueryFragment {
-    "(\(query))"
+    "(\(.newline)\(query.indented())\(.newline))"
   }
 }
 

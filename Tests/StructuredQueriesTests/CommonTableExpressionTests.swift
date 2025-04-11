@@ -396,7 +396,7 @@ extension SnapshotTests {
         FROM "fibonaccis"
         LIMIT 10
         """
-      }results: {
+      } results: {
         """
         ┌────┐
         │ 1  │

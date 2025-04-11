@@ -51,7 +51,7 @@ extension SnapshotTests {
         FROM "reminders"
         WHERE ("reminders"."isCompleted") OR ("reminders"."isFlagged")
         """
-      }results: {
+      } results: {
         """
         ┌───┐
         │ 5 │
@@ -67,7 +67,7 @@ extension SnapshotTests {
         FROM "reminders"
         WHERE ("reminders"."isCompleted") OR ("reminders"."isFlagged")
         """
-      }results: {
+      } results: {
         """
         ┌───┐
         │ 5 │
@@ -86,7 +86,7 @@ extension SnapshotTests {
         FROM "reminders"
         WHERE NOT ("reminders"."isCompleted")
         """
-      }results: {
+      } results: {
         """
         ┌───┐
         │ 7 │
@@ -102,7 +102,7 @@ extension SnapshotTests {
         FROM "reminders"
         WHERE NOT ("reminders"."isCompleted")
         """
-      }results: {
+      } results: {
         """
         ┌───┐
         │ 7 │
