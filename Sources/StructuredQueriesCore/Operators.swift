@@ -804,7 +804,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   /// Returns a predicate expression indicating whether the expression is in a subquery.
   ///
   /// - Parameter query: A subquery.
-  /// - Returns: A predicate expression indicating whether this expression is in the given subquery
+  /// - Returns: A predicate expression indicating whether this expression is in the given subquery.
   public func `in`(_ query: some Statement<QueryValue>) -> some QueryExpression<Bool> {
     BinaryOperator(
       lhs: self,
@@ -835,8 +835,11 @@ extension QueryExpression where QueryValue: QueryBindable {
 
 extension Array where Element: QueryBindable {
   /// Returns a predicate expression indicating whether the sequence contains the given expression.
+  /// 
+  /// An alias for ``QueryExpression/in(_:)``, flipped.
   ///
-  /// An alias for ``QueryExpression/in(_:)-7sgst``, flipped.
+  /// - Parameter element: An element.
+  /// - Returns: A predicate expression indicating whether the expression is in this sequence
   public func contains(
     _ element: some QueryExpression<Element.QueryValue>
   ) -> some QueryExpression<Bool> {
@@ -849,6 +852,10 @@ extension ClosedRange where Bound: QueryBindable {
   /// this range.
   ///
   /// An alias for ``QueryExpression/between(_:and:)``, flipped.
+  ///
+  /// - Parameter element: An element.
+  /// - Returns: A predicate expression indicating whether the given element is between this range's
+  ///   bounds.
   public func contains(
     _ element: some QueryExpression<Bound.QueryValue>
   ) -> some QueryExpression<Bool> {
@@ -860,10 +867,22 @@ extension Statement where QueryValue: QueryBindable {
   /// Returns a predicate expression indicating whether this subquery contains the given element.
   ///
   /// An alias for ``QueryExpression/in(_:)``, flipped.
+  ///
+  /// - Parameter element: An element.
+  /// - Returns: A predicate expression indicating whether this expression is in the given subquery.
   public func contains(
     _ element: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
     element.in(self)
+  }
+}
+
+extension Statement {
+  /// Returns a predicate expression indicating whether this subquery contains any element.
+  ///
+  /// - Returns: A predicate expression indicating whether this subquery contains any element.
+  public func exists() -> some QueryExpression<Bool> {
+    UnaryOperator(operator: "EXISTS", base: SQLQueryExpression(query))
   }
 }
 

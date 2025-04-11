@@ -128,6 +128,7 @@ Explore the full list of operators below.
 
 - ``QueryExpression/in(_:)``
 - ``Statement/contains(_:)``
+- ``Statement/exists()``
 - ``Swift/Array``
 - ``Swift/ClosedRange``
 

@@ -502,6 +502,35 @@ extension SnapshotTests {
       }
     }
 
+    @Test func exists() {
+      assertQuery(Values(Reminder.where { $0.id == 1 }.exists())) {
+        """
+        SELECT EXISTS (SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        FROM "reminders"
+        WHERE ("reminders"."id" = 1))
+        """
+      } results: {
+        """
+        ┌──────┐
+        │ true │
+        └──────┘
+        """
+      }
+      assertQuery(Values(Reminder.where { $0.id == 100 }.exists())) {
+        """
+        SELECT EXISTS (SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        FROM "reminders"
+        WHERE ("reminders"."id" = 100))
+        """
+      } results: {
+        """
+        ┌───────┐
+        │ false │
+        └───────┘
+        """
+      }
+    }
+
     @Table
     struct Row {
       var a: Int?
