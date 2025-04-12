@@ -23,7 +23,7 @@ You get instant access to a rich set of query building APIs:
 Reminder.all
 // SELECT
 //   "reminders"."id",
-//   "reminders".isCompleted",
+//   "reminders"."isCompleted",
 //   "reminders"."priority",
 //   "reminders"."title"
 // FROM "reminders"
