@@ -64,7 +64,7 @@ could be written as a single invocation of the macro:
 ```swift
 #sql(
   """
-  SELECT \(Reminder.columns) 
+  SELECT \(Reminder.columns)
   FROM \(Reminder.self)
   WHERE \(Reminder.dueDate) < date()
   """,
@@ -105,7 +105,7 @@ Values can be interpolated into `#sql` strings to produce dynamic queries:
 let isCompleted = false
 #sql(
   """
-  SELECT \(Reminder.columns) 
+  SELECT \(Reminder.columns)
   FROM \(Reminder.self)
   WHERE \(Reminder.isCompleted) = \(isCompleted)
   """,
@@ -128,7 +128,7 @@ you interpolate a string into a `#sql` string, you will get a deprecation warnin
 let searchText = "get"
 #sql(
   """
-  SELECT \(Reminder.columns) 
+  SELECT \(Reminder.columns)
   FROM \(Reminder.self)
   WHERE \(Reminder.title) COLLATE NOCASE LIKE \(searchText)
   """,
@@ -145,13 +145,13 @@ If you mean to bind the string as a value, you can update the interpolation to u
 let searchText = "get"
 #sql(
   """
-  SELECT \(Reminder.columns) 
+  SELECT \(Reminder.columns)
   FROM \(Reminder.self)
   WHERE \(Reminder.title) COLLATE NOCASE LIKE \(bind: searchText)
   """,
   as: Reminder.self
 )
-// SELECT *
+// SELECT …
 // FROM "reminders"
 // WHERE "title" COLLATE NOCASE LIKE ?
 // ["get"]
@@ -164,19 +164,19 @@ If you mean to interpolate the string directly into the SQL you can use
 let searchText = "get"
 #sql(
   """
-  SELECT \(Reminder.columns) 
+  SELECT \(Reminder.columns)
   FROM \(Reminder.self)
   WHERE \(Reminder.title) COLLATE NOCASE LIKE '%\(raw: searchText)%'
   """,
   as: Reminder.self
 )
-// SELECT *
+// SELECT …
 // FROM "reminders"
 // WHERE "title" COLLATE NOCASE LIKE '%get%'
 ```
 
-> Warning: It is dangerous to use raw SQL interpolation as it makes your queries susceptible to
-> SQL injection attacks:
+> Warning: It is dangerous to use raw SQL interpolation as it makes your queries susceptible to SQL
+> injection attacks:
 > 
 > ```swift
 > let searchText = "' OR 1=1 OR '"
@@ -188,7 +188,7 @@ let searchText = "get"
 >   """,
 >   as: Reminder.self
 > )
-> // SELECT *
+> // SELECT …
 > // FROM "reminders"
 > // WHERE "title" COLLATE NOCASE LIKE '%' OR 1=1 OR '%'
 > ```

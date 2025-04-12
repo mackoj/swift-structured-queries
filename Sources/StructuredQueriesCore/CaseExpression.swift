@@ -105,9 +105,7 @@ public struct Cases<Base, QueryValue: _OptionalProtocol>: QueryExpression {
     _ expression: some QueryExpression<QueryValue.Wrapped>
   ) -> some QueryExpression<QueryValue.Wrapped> {
     var cases = self
-    cases.cases.append(
-      "ELSE \(expression)"
-    )
+    cases.cases.append("ELSE \(expression)")
     return SQLQueryExpression(cases.queryFragment)
   }
 

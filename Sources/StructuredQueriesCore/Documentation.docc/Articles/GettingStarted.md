@@ -379,7 +379,7 @@ let minimumPriority = 2
 
 #sql(
   """
-  SELECT \(Reminder.columns) 
+  SELECT \(Reminder.columns)
   FROM \(Reminder.self)
   WHERE \(Reminder.priority) >= \(minimumPriority)
   """, 
