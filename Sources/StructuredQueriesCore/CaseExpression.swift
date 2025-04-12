@@ -30,7 +30,7 @@ public struct Case<Base, QueryValue: _OptionalPromotable> {
   ///
   /// - Parameter base: A "base" expression to test against for each `WHEN`.
   public init(
-    _ base: some QueryExpression<Base>,
+    _ base: some QueryExpression<Base>
   ) {
     self.base = base.queryFragment
   }
