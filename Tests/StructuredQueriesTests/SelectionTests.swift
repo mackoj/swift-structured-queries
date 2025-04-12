@@ -130,7 +130,7 @@ extension SnapshotTests {
         SELECT "reminders"."dueDate" AS "date"
         FROM "reminders"
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────────────────────────────────────┐
         │ ReminderDate(date: Date(2001-01-01T00:00:00.000Z)) │

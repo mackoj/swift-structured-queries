@@ -515,7 +515,7 @@ extension SnapshotTests {
           WHERE ("reminders"."id" = 1)
         )
         """
-      }results: {
+      } results: {
         """
         ┌──────┐
         │ true │
@@ -530,7 +530,7 @@ extension SnapshotTests {
           WHERE ("reminders"."id" = 100)
         )
         """
-      }results: {
+      } results: {
         """
         ┌───────┐
         │ false │

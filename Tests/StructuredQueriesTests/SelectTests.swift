@@ -167,7 +167,7 @@ extension SnapshotTests {
         FROM "reminders"
         JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
         """
-      }results: {
+      } results: {
         #"""
         ┌────────────────────────────────────────────┬────────────────────┐
         │ Reminder(                                  │ RemindersList(     │
@@ -356,7 +356,7 @@ extension SnapshotTests {
         RIGHT JOIN "reminders" ON ("users"."id" IS "reminders"."assignedUserID")
         LIMIT 2
         """
-      }results: {
+      } results: {
         """
         ┌────────────────┬────────────────────────────────────────────┐
         │ User(          │ Reminder(                                  │
@@ -398,7 +398,7 @@ extension SnapshotTests {
         RIGHT JOIN "reminders" ON ("users"."id" IS "reminders"."assignedUserID")
         LIMIT 2
         """
-      }results: {
+      } results: {
         """
         ┌────────────────┬────────────────────────────────────────────┐
         │ User(          │ Reminder(                                  │
@@ -480,7 +480,7 @@ extension SnapshotTests {
         FROM "reminders"
         WHERE "reminders"."isCompleted"
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────────────────────────────┐
         │ Reminder(                                  │
@@ -639,7 +639,7 @@ extension SnapshotTests {
         FROM "reminders"
         ORDER BY "reminders"."isCompleted" ASC, "reminders"."dueDate" DESC
         """
-      }results: {
+      } results: {
         """
         ┌───────┬────────────────────────────────┐
         │ false │ Date(2001-01-05T00:00:00.000Z) │
@@ -673,7 +673,7 @@ extension SnapshotTests {
         FROM "reminders"
         ORDER BY "reminders"."priority" ASC NULLS LAST, "reminders"."dueDate" DESC NULLS FIRST, ("reminders"."title" COLLATE NOCASE) DESC
         """
-      }results: {
+      } results: {
         """
         ┌─────────┬────────────────────────────────┐
         │ .low    │ Date(2000-12-30T00:00:00.000Z) │
@@ -757,7 +757,7 @@ extension SnapshotTests {
         FROM "reminders"
         LIMIT 1
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────────────────────────────┐
         │ Reminder(                                  │
@@ -828,7 +828,7 @@ extension SnapshotTests {
         JOIN "reminders" AS "r2s" ON ("r1s"."id" = "r2s"."id")
         LIMIT 1
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────────────────────────────┬────────────────────────────────────────────┐
         │ Reminder(                                  │ Reminder(                                  │

@@ -4,8 +4,8 @@ A library for building SQL in a safe, expressive, and composable manner.
 
 ## Overview
 
-This library provides a suite of tools that empower you to write safe, expressive, composable SQL
-with Swift. By simply attaching a macro to types that represent your database schema:
+Structured Queries provides a suite of tools that empower you to write safe, expressive, composable
+SQL with Swift. By simply attaching a macro to types that represent your database schema:
 
 ```swift
 @Table
@@ -46,6 +46,30 @@ These APIs help you avoid runtime issues caused by typos and type errors, but st
 what it is. Structured Queries is not an ORM or a new query language you have to learn: its APIs are
 designed to read closely to the SQL it generates, though it is often more succinct, and always
 safer.
+
+And you are never constrained by the query builder. You are free to introduce _safe_ SQL strings at
+the granularity of your choice using the `#sql` macro. From small expressions:
+
+```swift
+TODO
+```
+
+To entire statements:
+
+```swift
+#sql(
+  """
+  SELECT \(Reminder.columns) FROM \(Reminder.self)
+  WHERE \(Reminder.title) LIKE \("%\(searchTerm)%")
+  """,
+  as: Reminder.self
+)
+```
+
+The library supports building everything from `SELECT`, `INSERT`, `UPDATE`, and `DELETE` statements,
+to recursive common table expressions. To learn more about building SQL with Structured Queries,
+check out the
+[documentation](https://swiftpackageindex.com/pointfreeco/swift-structured-queries/~/documentation/structuredqueriescore/).
 
 > [!IMPORTANT]
 > This library does not come with any database drivers for making actual database requests, _e.g._,
@@ -102,14 +126,14 @@ to let us know of any challenges you encounter.
 
 You can add Structured Queries to an Xcode project by adding it to your project as a package.
 
-> https://github.com/pointfreeco/swift-sharing
+> https://github.com/pointfreeco/swift-structured-queries
 
 If you want to use Structured Queries in a [SwiftPM](https://swift.org/package-manager/) project,
 it's as simple as adding it to your `Package.swift`:
 
 ``` swift
 dependencies: [
-  .package(url: "https://github.com/pointfreeco/swift-structured_queries", from: "0.1.0")
+  .package(url: "https://github.com/pointfreeco/swift-structured-queries", from: "0.1.0")
 ]
 ```
 

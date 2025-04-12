@@ -74,7 +74,7 @@ extension SnapshotTests {
         WHERE ("reminders"."id" = 1)
         RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────────────────────────────┐
         │ Reminder(                                  │
@@ -195,7 +195,7 @@ extension SnapshotTests {
         WHERE ("reminders"."id" = 1)
         RETURNING "title"
         """
-      }results: {
+      } results: {
         """
         ┌─────────────┐
         │ "Groceries" │
@@ -241,7 +241,7 @@ extension SnapshotTests {
         WHERE ("rs"."id" = 1)
         RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────────────────────────────┐
         │ Reminder(                                  │

@@ -124,7 +124,7 @@ extension SnapshotTests {
         LIMIT 1
         RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────────┐
         │ Reminder(              │

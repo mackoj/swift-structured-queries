@@ -25,7 +25,7 @@ extension SnapshotTests {
         ON CONFLICT DO UPDATE SET "title" = ("reminders"."title" || ' Copy')
         RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────────────────────────────┐
         │ Reminder(                                  │
@@ -69,7 +69,7 @@ extension SnapshotTests {
         (1)
         RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────────┐
         │ Reminder(              │
@@ -119,7 +119,7 @@ extension SnapshotTests {
         (100, NULL, NULL, 0, 0, '', NULL, 1, 'Check email')
         RETURNING "id"
         """
-      }results: {
+      } results: {
         """
         ┌─────┐
         │ 100 │
@@ -139,7 +139,7 @@ extension SnapshotTests {
         (101, NULL, NULL, 0, 0, '', NULL, 1, 'Check voicemail')
         RETURNING "id"
         """
-      }results: {
+      } results: {
         """
         ┌─────┐
         │ 101 │
@@ -160,7 +160,7 @@ extension SnapshotTests {
         (102, NULL, NULL, 0, 0, '', NULL, 1, 'Check mailbox'), (103, NULL, NULL, 0, 0, '', NULL, 1, 'Check Slack')
         RETURNING "id"
         """
-      }results: {
+      } results: {
         """
         ┌─────┐
         │ 102 │
@@ -181,7 +181,7 @@ extension SnapshotTests {
         (104, NULL, NULL, 0, 0, '', NULL, 1, 'Check pager')
         RETURNING "id"
         """
-      }results: {
+      } results: {
         """
         ┌─────┐
         │ 104 │
@@ -242,7 +242,7 @@ extension SnapshotTests {
         (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check email')
         RETURNING "id"
         """
-      }results: {
+      } results: {
         """
         ┌────┐
         │ 11 │
@@ -263,7 +263,7 @@ extension SnapshotTests {
         (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check voicemail')
         RETURNING "id"
         """
-      }results: {
+      } results: {
         """
         ┌────┐
         │ 12 │
@@ -287,7 +287,7 @@ extension SnapshotTests {
         (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check mailbox'), (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check Slack')
         RETURNING "id"
         """
-      }results: {
+      } results: {
         """
         ┌────┐
         │ 13 │
@@ -304,7 +304,7 @@ extension SnapshotTests {
         FROM "reminders"
         WHERE ("reminders"."id" = 1)
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────────────────────────────┐
         │ Reminder(                                  │
@@ -334,7 +334,7 @@ extension SnapshotTests {
         ON CONFLICT DO UPDATE SET "assignedUserID" = "excluded"."assignedUserID", "dueDate" = "excluded"."dueDate", "isCompleted" = "excluded"."isCompleted", "isFlagged" = "excluded"."isFlagged", "notes" = "excluded"."notes", "priority" = "excluded"."priority", "remindersListID" = "excluded"."remindersListID", "title" = "excluded"."title"
         RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────────┐
         │ Reminder(              │
@@ -378,7 +378,7 @@ extension SnapshotTests {
         ON CONFLICT DO UPDATE SET "assignedUserID" = "excluded"."assignedUserID", "dueDate" = "excluded"."dueDate", "isCompleted" = "excluded"."isCompleted", "isFlagged" = "excluded"."isFlagged", "notes" = "excluded"."notes", "priority" = "excluded"."priority", "remindersListID" = "excluded"."remindersListID", "title" = "excluded"."title"
         RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────────┐
         │ Reminder(              │
