@@ -115,6 +115,34 @@ extension SnapshotTests {
       )
     }
 
+    @Test func optionalDate() throws {
+      #expect(
+        try db.execute(
+          SimpleSelect { #sql("NULL", as: Date.ISO8601Representation?.self) }
+        )
+        .first == .some(.none)
+      )
+    }
+
+    @Test func recordWithOptionalDate() throws {
+      struct Record: Equatable, QueryDecodable, QueryRepresentable {
+        var date: Date?
+        init(date: Date?) { self.date = date }
+        init(decoder: inout some QueryDecoder) throws {
+          date = try decoder.decode(Date.ISO8601Representation.self)
+        }
+      }
+
+      #expect(
+        try db.execute(SimpleSelect { #sql("NULL", as: Record.self) })
+          .first == .some(Record(date: nil))
+      )
+      #expect(
+        try db.execute(SimpleSelect { #sql("'2001-01-01 00:00:00'", as: Record.self) })
+          .first == .some(Record(date: Date(timeIntervalSinceReferenceDate: 0)))
+      )
+    }
+
     @Test func jsonCodable() throws {
       struct User: Codable {
         let id: Int

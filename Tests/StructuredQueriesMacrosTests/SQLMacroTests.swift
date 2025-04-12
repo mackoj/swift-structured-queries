@@ -248,11 +248,11 @@ extension SnapshotTests {
     @Test func complexValidRawBind() {
       assertMacro {
         #"""
-        #sql("\($0.date) < date('now', '-\(raw: monthsAgo) months')")
+        #sql("\($0.dueDate) < date('now', '-\(raw: monthsAgo) months')")
         """#
       } expansion: {
         #"""
-        StructuredQueries.SQLQueryExpression("\($0.date) < date('now', '-\(raw: monthsAgo) months')")
+        StructuredQueries.SQLQueryExpression("\($0.dueDate) < date('now', '-\(raw: monthsAgo) months')")
         """#
       }
     }

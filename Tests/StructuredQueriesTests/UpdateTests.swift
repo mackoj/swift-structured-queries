@@ -70,25 +70,25 @@ extension SnapshotTests {
       ) {
         """
         UPDATE "reminders"
-        SET "assignedUserID" = 1, "date" = '2001-01-01 00:00:00.000', "isCompleted" = 1, "isFlagged" = 0, "notes" = 'Milk, Eggs, Apples', "priority" = NULL, "remindersListID" = 1, "title" = 'Groceries'
+        SET "assignedUserID" = 1, "dueDate" = '2001-01-01 00:00:00.000', "isCompleted" = 1, "isFlagged" = 0, "notes" = 'Milk, Eggs, Apples', "priority" = NULL, "remindersListID" = 1, "title" = 'Groceries'
         WHERE ("reminders"."id" = 1)
-        RETURNING "id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
+        RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
-      } results: {
+      }results: {
         """
-        ┌─────────────────────────────────────────┐
-        │ Reminder(                               │
-        │   id: 1,                                │
-        │   assignedUserID: 1,                    │
-        │   date: Date(2001-01-01T00:00:00.000Z), │
-        │   isCompleted: true,                    │
-        │   isFlagged: false,                     │
-        │   notes: "Milk, Eggs, Apples",          │
-        │   priority: nil,                        │
-        │   remindersListID: 1,                   │
-        │   title: "Groceries"                    │
-        │ )                                       │
-        └─────────────────────────────────────────┘
+        ┌────────────────────────────────────────────┐
+        │ Reminder(                                  │
+        │   id: 1,                                   │
+        │   assignedUserID: 1,                       │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z), │
+        │   isCompleted: true,                       │
+        │   isFlagged: false,                        │
+        │   notes: "Milk, Eggs, Apples",             │
+        │   priority: nil,                           │
+        │   remindersListID: 1,                      │
+        │   title: "Groceries"                       │
+        │ )                                          │
+        └────────────────────────────────────────────┘
         """
       }
     }
@@ -185,17 +185,17 @@ extension SnapshotTests {
     @Test func rawBind() {
       assertQuery(
         Reminder
-          .update { $0.date = #sql("CURRENT_TIMESTAMP") }
+          .update { $0.dueDate = #sql("CURRENT_TIMESTAMP") }
           .where { $0.id.eq(1) }
           .returning(\.title)
       ) {
         """
         UPDATE "reminders"
-        SET "date" = CURRENT_TIMESTAMP
+        SET "dueDate" = CURRENT_TIMESTAMP
         WHERE ("reminders"."id" = 1)
         RETURNING "title"
         """
-      } results: {
+      }results: {
         """
         ┌─────────────┐
         │ "Groceries" │
@@ -239,23 +239,23 @@ extension SnapshotTests {
         UPDATE "reminders" AS "rs"
         SET "title" = ("rs"."title" || ' 2')
         WHERE ("rs"."id" = 1)
-        RETURNING "id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
+        RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
-      } results: {
+      }results: {
         """
-        ┌─────────────────────────────────────────┐
-        │ Reminder(                               │
-        │   id: 1,                                │
-        │   assignedUserID: 1,                    │
-        │   date: Date(2001-01-01T00:00:00.000Z), │
-        │   isCompleted: false,                   │
-        │   isFlagged: false,                     │
-        │   notes: "Milk, Eggs, Apples",          │
-        │   priority: nil,                        │
-        │   remindersListID: 1,                   │
-        │   title: "Groceries 2"                  │
-        │ )                                       │
-        └─────────────────────────────────────────┘
+        ┌────────────────────────────────────────────┐
+        │ Reminder(                                  │
+        │   id: 1,                                   │
+        │   assignedUserID: 1,                       │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z), │
+        │   isCompleted: false,                      │
+        │   isFlagged: false,                        │
+        │   notes: "Milk, Eggs, Apples",             │
+        │   priority: nil,                           │
+        │   remindersListID: 1,                      │
+        │   title: "Groceries 2"                     │
+        │ )                                          │
+        └────────────────────────────────────────────┘
         """
       }
     }

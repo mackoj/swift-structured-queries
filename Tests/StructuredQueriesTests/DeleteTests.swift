@@ -47,23 +47,23 @@ extension SnapshotTests {
         """
         DELETE FROM "reminders"
         WHERE ("reminders"."id" = 1)
-        RETURNING "id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
+        RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
-      } results: {
+      }results: {
         """
-        ┌─────────────────────────────────────────┐
-        │ Reminder(                               │
-        │   id: 1,                                │
-        │   assignedUserID: 1,                    │
-        │   date: Date(2001-01-01T00:00:00.000Z), │
-        │   isCompleted: false,                   │
-        │   isFlagged: false,                     │
-        │   notes: "Milk, Eggs, Apples",          │
-        │   priority: nil,                        │
-        │   remindersListID: 1,                   │
-        │   title: "Groceries"                    │
-        │ )                                       │
-        └─────────────────────────────────────────┘
+        ┌────────────────────────────────────────────┐
+        │ Reminder(                                  │
+        │   id: 1,                                   │
+        │   assignedUserID: 1,                       │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z), │
+        │   isCompleted: false,                      │
+        │   isFlagged: false,                        │
+        │   notes: "Milk, Eggs, Apples",             │
+        │   priority: nil,                           │
+        │   remindersListID: 1,                      │
+        │   title: "Groceries"                       │
+        │ )                                          │
+        └────────────────────────────────────────────┘
         """
       }
       assertQuery(Reminder.count()) {

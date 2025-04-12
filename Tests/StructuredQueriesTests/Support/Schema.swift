@@ -22,7 +22,7 @@ struct Reminder: Equatable, Identifiable {
   let id: Int
   var assignedUserID: User.ID?
   @Column(as: Date.ISO8601Representation?.self)
-  var date: Date?
+  var dueDate: Date?
   var isCompleted = false
   var isFlagged = false
   var notes = ""
@@ -51,7 +51,7 @@ enum Priority: Int, QueryBindable {
 
 extension Reminder.TableColumns {
   var isPastDue: some QueryExpression<Bool> {
-    !isCompleted && #sql("coalesce(\(date), date('now')) < date('now')")
+    !isCompleted && #sql("coalesce(\(dueDate), date('now')) < date('now')")
   }
 }
 
@@ -90,7 +90,7 @@ extension Database {
       CREATE TABLE "\(Reminder.tableName)" (
         "\(Reminder.columns.id.name)" INTEGER PRIMARY KEY AUTOINCREMENT,
         "\(Reminder.columns.assignedUserID.name)" INTEGER,
-        "\(Reminder.columns.date.name)" DATE,
+        "\(Reminder.columns.dueDate.name)" DATE,
         "\(Reminder.columns.isCompleted.name)" BOOLEAN NOT NULL DEFAULT 0,
         "\(Reminder.columns.isFlagged.name)" BOOLEAN NOT NULL DEFAULT 0,
         "\(Reminder.columns.remindersListID.name)" INTEGER NOT NULL
@@ -187,7 +187,7 @@ extension Database {
       Reminder.insert([
         Reminder.Draft(
           assignedUserID: 1,
-          date: now,
+          dueDate: now,
           notes: """
             Milk, Eggs, Apples
             """,
@@ -195,20 +195,20 @@ extension Database {
           title: "Groceries"
         ),
         Reminder.Draft(
-          date: now.addingTimeInterval(-60 * 60 * 24 * 2),
+          dueDate: now.addingTimeInterval(-60 * 60 * 24 * 2),
           isFlagged: true,
           remindersListID: 1,
           title: "Haircut"
         ),
         Reminder.Draft(
-          date: now,
+          dueDate: now,
           notes: "Ask about diet",
           priority: .high,
           remindersListID: 1,
           title: "Doctor appointment"
         ),
         Reminder.Draft(
-          date: now.addingTimeInterval(-60 * 60 * 24 * 190),
+          dueDate: now.addingTimeInterval(-60 * 60 * 24 * 190),
           isCompleted: true,
           remindersListID: 1,
           title: "Take a walk"
@@ -218,28 +218,28 @@ extension Database {
           title: "Buy concert tickets"
         ),
         Reminder.Draft(
-          date: now.addingTimeInterval(60 * 60 * 24 * 2),
+          dueDate: now.addingTimeInterval(60 * 60 * 24 * 2),
           isFlagged: true,
           priority: .high,
           remindersListID: 2,
           title: "Pick up kids from school"
         ),
         Reminder.Draft(
-          date: now.addingTimeInterval(-60 * 60 * 24 * 2),
+          dueDate: now.addingTimeInterval(-60 * 60 * 24 * 2),
           isCompleted: true,
           priority: .low,
           remindersListID: 2,
           title: "Get laundry"
         ),
         Reminder.Draft(
-          date: now.addingTimeInterval(60 * 60 * 24 * 4),
+          dueDate: now.addingTimeInterval(60 * 60 * 24 * 4),
           isCompleted: false,
           priority: .high,
           remindersListID: 2,
           title: "Take out trash"
         ),
         Reminder.Draft(
-          date: now.addingTimeInterval(60 * 60 * 24 * 2),
+          dueDate: now.addingTimeInterval(60 * 60 * 24 * 2),
           notes: """
             Status of tax return
             Expenses for next year
@@ -249,7 +249,7 @@ extension Database {
           title: "Call accountant"
         ),
         Reminder.Draft(
-          date: now.addingTimeInterval(-60 * 60 * 24 * 2),
+          dueDate: now.addingTimeInterval(-60 * 60 * 24 * 2),
           isCompleted: true,
           priority: .medium,
           remindersListID: 3,

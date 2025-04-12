@@ -122,15 +122,15 @@ extension SnapshotTests {
         FROM "incompleteReminders"
         JOIN "reminders" ON ("incompleteReminders"."title" = "reminders"."title")
         LIMIT 1
-        RETURNING "id", "assignedUserID", "date", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
+        RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
-      } results: {
+      }results: {
         """
         ┌────────────────────────┐
         │ Reminder(              │
         │   id: 11,              │
         │   assignedUserID: nil, │
-        │   date: nil,           │
+        │   dueDate: nil,        │
         │   isCompleted: true,   │
         │   isFlagged: true,     │
         │   notes: "",           │

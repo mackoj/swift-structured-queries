@@ -510,12 +510,12 @@ extension SnapshotTests {
       assertQuery(Values(Reminder.where { $0.id == 1 }.exists())) {
         """
         SELECT EXISTS (
-          SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+          SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
           FROM "reminders"
           WHERE ("reminders"."id" = 1)
         )
         """
-      } results: {
+      }results: {
         """
         ┌──────┐
         │ true │
@@ -525,12 +525,12 @@ extension SnapshotTests {
       assertQuery(Values(Reminder.where { $0.id == 100 }.exists())) {
         """
         SELECT EXISTS (
-          SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."date", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+          SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
           FROM "reminders"
           WHERE ("reminders"."id" = 100)
         )
         """
-      } results: {
+      }results: {
         """
         ┌───────┐
         │ false │

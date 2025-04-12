@@ -7,17 +7,18 @@ extension SnapshotTests {
   @Suite struct JoinTests {
     @Test func basics() {
       assertQuery(
-        Reminder.join(RemindersList.all) { $0.remindersListID.eq($1.id) }
-          .order { reminders, _ in reminders.date.desc() }
+        Reminder
+          .order { $0.dueDate.desc() }
+          .join(RemindersList.all) { $0.remindersListID.eq($1.id) }
           .select { ($0.title, $1.name) }
       ) {
         """
         SELECT "reminders"."title", "remindersLists"."name"
         FROM "reminders"
         JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
-        ORDER BY "reminders"."date" DESC
+        ORDER BY "reminders"."dueDate" DESC
         """
-      } results: {
+      }results: {
         """
         ┌────────────────────────────┬────────────┐
         │ "Take out trash"           │ "Family"   │
