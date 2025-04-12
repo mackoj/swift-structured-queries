@@ -16,6 +16,13 @@ always safer.
 > tools to integrate with another library that makes the actual database requests. See
 > [Database drivers](#database-drivers) for more information.
 
+## Documentation
+
+The documentation for the latest unstable and stable releases are available here:
+
+  * [`main`](https://swiftpackageindex.com/pointfreeco/swift-structured-queries/main/documentation/structuredqueriescore/)
+  * [0.1.x](https://swiftpackageindex.com/pointfreeco/swift-structured-queries/~/documentation/structuredqueriescore/)
+
 ## Demos
 
 There are a number of sample applications that demonstrate how to use Structured Queries in the
@@ -37,13 +44,6 @@ including:
 
 [reminders-app-store]: https://apps.apple.com/us/app/reminders/id1108187841
 [scrumdinger]: https://developer.apple.com/tutorials/app-dev-training/getting-started-with-scrumdinger
-
-## Documentation
-
-The documentation `main` as well as the latest release are available here:
-
-  * [`main`](https://swiftpackageindex.com/pointfreeco/swift-structured-queries/main/documentation/structuredqueriescore/)
-  * [0.1.x](https://swiftpackageindex.com/pointfreeco/swift-structured-queries/~/documentation/structuredqueriescore/)
 
 ## Database drivers
 
