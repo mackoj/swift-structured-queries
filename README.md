@@ -10,10 +10,11 @@ SQL for what it is. Structured Queries is not an ORM or a new query language you
 APIs are designed to read closely to the SQL it generates, though it is often more succinct, and
 always safer.
 
-> Important: This library does not come with any database drivers for making actual database
-> requests, _e.g._, to SQLite, Postgres, MySQL. This library focuses only on building SQL statements
-> and providing the tools to integrate with another library that makes the actual database requests.
-> See [Database drivers](#database-drivers) for more information.
+> [!IMPORTANT]
+> This library does not come with any database drivers for making actual database requests, _e.g._,
+> to SQLite, Postgres, MySQL. This library focuses only on building SQL statements and providing the
+> tools to integrate with another library that makes the actual database requests. See
+> [Database drivers](#database-drivers) for more information.
 
 ## Demos
 
