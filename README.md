@@ -5,10 +5,47 @@ A library for building SQL in a safe, expressive, and composable manner.
 ## Overview
 
 This library provides a suite of tools that empower you to write safe, expressive, composable SQL
-with Swift. It helps you avoid runtime issues caused by typos and type errors, but still embraces
-SQL for what it is. Structured Queries is not an ORM or a new query language you have to learn: its
-APIs are designed to read closely to the SQL it generates, though it is often more succinct, and
-always safer.
+with Swift. By simply attaching a macro to types that represent your database schema:
+
+```swift
+@Table
+struct Reminder {
+  let id: Int
+  var isCompleted = false
+  var priority: Int?
+  var title = ""
+}
+```
+
+You get instant access to a rich set of query building APIs:
+
+```swift
+Reminder.all
+// SELECT
+//   "reminders"."id",
+//   "reminders".isCompleted",
+//   "reminders"."priority",
+//   "reminders"."title"
+// FROM "reminders"
+// => Reminder
+
+Reminder
+  .where { !$0.isCompleted }
+  .group(by: \.priority)
+  .order { $0.priority.desc() }
+  .select { ($0.priority, $0.title.groupConcat()) }
+// SELECT "reminders"."priority", group_concat("reminders"."title")
+// FROM "reminders"
+// WHERE (NOT "reminders"."isCompleted")
+// GROUP BY "reminders"."priority"
+// ORDER BY "reminders"."priority" DESC
+// => (Int?, String)
+```
+
+These APIs help you avoid runtime issues caused by typos and type errors, but still embrace SQL for
+what it is. Structured Queries is not an ORM or a new query language you have to learn: its APIs are
+designed to read closely to the SQL it generates, though it is often more succinct, and always
+safer.
 
 > [!IMPORTANT]
 > This library does not come with any database drivers for making actual database requests, _e.g._,
