@@ -101,6 +101,8 @@ expect any data to be returned from the statement, _e.g._ during a schema migrat
 
 Values can be interpolated into `#sql` strings to produce dynamic queries:
 
+<!-- TODO: do more work to explicitly call out that \(isCompleted) is different from other interpolations -->
+
 ```swift
 let isCompleted = false
 #sql(
@@ -111,7 +113,7 @@ let isCompleted = false
   """,
   as: Reminder.self
 )
-// SELECT *
+// SELECT …
 // FROM "reminders"
 // WHERE "isCompleted" = ?
 // [0]

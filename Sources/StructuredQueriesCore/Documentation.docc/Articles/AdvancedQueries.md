@@ -249,4 +249,3 @@ RemindersList
 // GROUP BY "remindersLists"."id"
 // => RemindersListWithCount
 ```
-

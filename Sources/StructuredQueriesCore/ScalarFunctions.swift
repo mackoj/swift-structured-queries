@@ -136,6 +136,7 @@ extension QueryExpression where QueryValue: Numeric {
   }
 }
 
+// TODO: get test on ifnull
 extension QueryExpression where QueryValue: _OptionalProtocol {
   /// Wraps this optional query expression with the `ifnull` function.
   ///
@@ -154,6 +155,8 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
   ) -> some QueryExpression<QueryValue> {
     QueryFunction("ifnull", self, other)
   }
+
+  // TODO: Mention that ?? can tax the compiler and you can use ifnull in its place
 
   /// Applies each side of the operator to the `coalesce` function
   ///
