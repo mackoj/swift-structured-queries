@@ -19,7 +19,7 @@ public enum QueryBinding: Hashable, Sendable {
   case invalid(QueryBindingError)
 
   @_disfavoredOverload
-  static func invalid(_ error: any Error) -> Self {
+  public static func invalid(_ error: any Error) -> Self {
     .invalid(QueryBindingError(underlyingError: error))
   }
 }
