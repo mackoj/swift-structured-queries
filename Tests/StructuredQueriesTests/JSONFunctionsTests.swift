@@ -101,5 +101,35 @@ extension SnapshotTests {
         """
       }
     }
+    
+    @Test func jsonGroupArrayMultiplePrimaryKeys() {
+      assertQuery(
+        Reminder
+          .join(ReminderTag.all) { $0.id.eq($1.reminderID) }
+          .select {
+            ReminderTagList.Columns(
+              reminder: $0,
+              tags: $1.jsonGroupArray()
+            )
+          }
+      ) {
+        """
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" AS "reminder", json_group_array("remindersTags"."reminderID", "remindersTags"."tagID") AS "tags"
+        FROM "reminders"
+        JOIN "remindersTags" ON ("reminders"."id" = "remindersTags"."reminderID")
+        """
+      } results: {
+        """
+        wrong number of arguments to function json_group_array()
+        """
+      }
+    }
   }
+}
+
+@Selection
+struct ReminderTagList {
+  let reminder: Reminder
+  @Column(as: JSONRepresentation<[ReminderTag]>.self)
+  let tags: [ReminderTag]
 }
