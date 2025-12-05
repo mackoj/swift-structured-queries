@@ -236,17 +236,13 @@ support for other libraries:
   * `StructuredQueriesCasePaths`: Adds support for single-table inheritance _via_ "enum" tables by
     leveraging the [CasePaths](https://github.com/pointfreeco/swift-case-paths) library.
 
-  * `StructuredQueriesTagged`: Adds support for type-safe identifiers _via_
-    the [Tagged](https://github.com/pointfreeco/swift-tagged) library.
-
 ```diff
  dependencies: [
    .package(
      url: "https://github.com/pointfreeco/swift-structured-queries",
      from: "0.22.0",
 +    traits: [
-+      "StructuredQueriesCasePaths",
-+      "StructuredQueriesTagged",
++      "StructuredQueriesCasePaths"
 +    ]
    ),
  ]

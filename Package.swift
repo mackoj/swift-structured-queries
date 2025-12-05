@@ -43,11 +43,7 @@ let package = Package(
     .trait(
       name: "StructuredQueriesCasePaths",
       description: "Introduce enum table support to StructuredQueries."
-    ),
-    .trait(
-      name: "StructuredQueriesTagged",
-      description: "Introduce StructuredQueries conformances to the swift-tagged package."
-    ),
+    )
   ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/swift-case-paths", from: "1.0.0"),
@@ -78,8 +74,7 @@ let package = Package(
         ),
         .product(
           name: "Tagged",
-          package: "swift-tagged",
-          condition: .when(traits: ["StructuredQueriesTagged"])
+          package: "swift-tagged"
         ),
       ],
       exclude: ["Symbolic Links/README.md"]
@@ -162,8 +157,7 @@ if ProcessInfo.processInfo.environment["SPI_GENERATE_DOCS"] != nil
   package.traits.insert(
     .default(
       enabledTraits: [
-        "StructuredQueriesCasePaths",
-        "StructuredQueriesTagged",
+        "StructuredQueriesCasePaths"
       ]
     )
   )
