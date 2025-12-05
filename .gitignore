@@ -7,3 +7,9 @@ DerivedData/
 .netrc
 Package.resolved
 *.sqlite
+
+# Tuist
+*.xcodeproj
+*.xcworkspace
+Derived/
+.tuist/
