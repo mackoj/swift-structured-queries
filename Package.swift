@@ -33,13 +33,6 @@ let package = Package(
       targets: ["StructuredQueriesTestSupport"]
     ),
   ],
-  traits: [
-    .trait(
-      name: "StructuredQueriesTagged",
-      description: "Introduce StructuredQueries conformances to the swift-tagged package.",
-      enabledTraits: []
-    )
-  ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.3"),
     .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.8.1"),
@@ -63,8 +56,7 @@ let package = Package(
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
         .product(
           name: "Tagged",
-          package: "swift-tagged",
-          condition: .when(traits: ["StructuredQueriesTagged"])
+          package: "swift-tagged"
         ),
       ],
       exclude: ["Symbolic Links/README.md"]

@@ -105,12 +105,10 @@ extension _CodableJSONRepresentation: SQLiteType {
   }
 }
 
-#if StructuredQueriesTagged
-  import Tagged
+import Tagged
 
-  extension Tagged: SQLiteType where RawValue: SQLiteType {
-    public static var typeAffinity: SQLiteTypeAffinity {
-      RawValue.typeAffinity
-    }
+extension Tagged: SQLiteType where RawValue: SQLiteType {
+  public static var typeAffinity: SQLiteTypeAffinity {
+    RawValue.typeAffinity
   }
-#endif
+}

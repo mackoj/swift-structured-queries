@@ -1,4 +1,4 @@
-#if StructuredQueriesTagged
+#if canImport(Tagged)
   import Tagged
 
   extension Tagged: _OptionalPromotable where RawValue: _OptionalPromotable {}
